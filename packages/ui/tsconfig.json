@@ -1,0 +1,8 @@
+{
+  "extends": "@jf/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
