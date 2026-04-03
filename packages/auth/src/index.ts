@@ -1,2 +1,2 @@
-export { auth } from "./auth.js";
-export type { Session, User } from "./auth.js";
+export { auth } from "./auth";
+export type { Session, User } from "./auth";
