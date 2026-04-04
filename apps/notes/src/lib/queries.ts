@@ -1,5 +1,5 @@
 import { db, folders, notes } from "@jf/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,6 +82,14 @@ export async function getFolderBreadcrumb(
   return crumbs;
 }
 
+export async function getArchivedNotes(userId: string): Promise<Note[]> {
+  return db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.userId, userId), isNotNull(notes.archivedAt)))
+    .orderBy(desc(notes.archivedAt));
+}
+
 export async function getNoteById(
   userId: string,
   noteId: string,
@@ -93,4 +101,20 @@ export async function getNoteById(
     .limit(1);
 
   return note ?? null;
+}
+
+export async function searchNotes(userId: string, query: string): Promise<Note[]> {
+  const tsQuery = sql`plainto_tsquery('english', ${query})`;
+  return db
+    .select()
+    .from(notes)
+    .where(
+      and(
+        eq(notes.userId, userId),
+        isNull(notes.archivedAt),
+        sql`search_vector @@ ${tsQuery}`,
+      ),
+    )
+    .orderBy(desc(sql`ts_rank(search_vector, ${tsQuery})`))
+    .limit(50);
 }

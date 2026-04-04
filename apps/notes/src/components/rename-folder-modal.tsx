@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder } from "@/lib/queries";
 import { renameFolder } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   folder: Folder;
@@ -25,9 +26,12 @@ export function RenameFolderModal({ folder, onClose }: Props) {
     startTransition(async () => {
       try {
         await renameFolder(folder.id, name);
+        toast.success("Folder renamed");
         onClose();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        setError(message);
+        toast.error(message);
       }
     });
   }

@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { useRouter } from "next/navigation";
 import type { Folder, Note } from "@/lib/queries";
 import { createNote, updateNote } from "@/lib/actions";
+import { toast } from "sonner";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import { ColorPicker } from "./color-picker";
 
@@ -44,9 +45,13 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
           setNoteId(id);
           isFirstSaveRef.current = false;
           router.refresh();
+          toast.success("Note created");
         } else {
           await updateNote(noteId, title || null, body || null, color);
+          router.refresh();
         }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to save note");
       } finally {
         setIsSaving(false);
       }

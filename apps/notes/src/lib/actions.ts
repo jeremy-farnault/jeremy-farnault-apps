@@ -2,10 +2,10 @@
 
 import { auth } from "@jf/auth";
 import { db, folders, notes } from "@jf/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { getAllFolders } from "./queries";
+import { getAllFolders, searchNotes, type Note } from "./queries";
 import { getDescendantIds } from "./folder-utils";
 
 async function getAuthUserId(): Promise<string> {
@@ -102,6 +102,59 @@ export async function updateNote(
       updatedAt: new Date(),
     })
     .where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+}
+
+export async function archiveNote(noteId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .update(notes)
+    .set({ archivedAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function restoreNote(noteId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  const [note] = await db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+    .limit(1);
+  if (!note) throw new Error("Note not found");
+
+  let targetFolderId = note.parentFolderId;
+  if (targetFolderId) {
+    const [parent] = await db
+      .select()
+      .from(folders)
+      .where(and(eq(folders.id, targetFolderId), isNull(folders.archivedAt)))
+      .limit(1);
+    if (!parent) targetFolderId = null;
+  }
+
+  await db
+    .update(notes)
+    .set({ archivedAt: null, parentFolderId: targetFolderId, updatedAt: new Date() })
+    .where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteNote(noteId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db.delete(notes).where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteFolder(folderId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db.delete(folders).where(and(eq(folders.id, folderId), eq(folders.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function searchNotesAction(query: string): Promise<Note[]> {
+  if (!query.trim()) return [];
+  const userId = await getAuthUserId();
+  return searchNotes(userId, query.trim());
 }
 
 export async function moveNote(

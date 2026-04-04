@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder, Note } from "@/lib/queries";
 import { moveNote } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   note: Note;
@@ -24,9 +25,12 @@ export function MoveNoteModal({ note, allFolders, onClose }: Props) {
     startTransition(async () => {
       try {
         await moveNote(note.id, newParentFolderId);
+        toast.success("Note moved");
         onClose();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        setError(message);
+        toast.error(message);
       }
     });
   }

@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder, Note } from "@/lib/queries";
+import { archiveNote, deleteNote } from "@/lib/actions";
+import { toast } from "sonner";
+import { ConfirmDialog } from "./confirm-dialog";
 import { MoveNoteModal } from "./move-note-modal";
 
 type Props = {
@@ -12,7 +15,8 @@ type Props = {
 export function NoteActionsMenu({ note, allFolders }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modal, setModal] = useState<"move" | null>(null);
+  const [modal, setModal] = useState<"move" | "delete" | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -25,6 +29,18 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
+  function handleArchive() {
+    setMenuOpen(false);
+    startTransition(async () => {
+      try {
+        await archiveNote(note.id);
+        toast.success("Note archived");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
   return (
     <>
       <div ref={menuRef} style={{ position: "relative" }}>
@@ -35,27 +51,38 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
             setMenuOpen((o) => !o);
           }}
           aria-label="Note actions"
+          disabled={isPending}
         >
           …
         </button>
         {menuOpen && (
           <div>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("move");
-              }}
-            >
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("move"); }}>
               Move
+            </button>
+            <button type="button" onClick={handleArchive}>
+              Archive
+            </button>
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("delete"); }}>
+              Delete
             </button>
           </div>
         )}
       </div>
       {modal === "move" && (
-        <MoveNoteModal
-          note={note}
-          allFolders={allFolders}
+        <MoveNoteModal note={note} allFolders={allFolders} onClose={() => setModal(null)} />
+      )}
+      {modal === "delete" && (
+        <ConfirmDialog
+          message={`Permanently delete "${note.title ?? "Untitled"}"? This cannot be undone.`}
+          onConfirm={async () => {
+            try {
+              await deleteNote(note.id);
+              toast.success("Note deleted");
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : "Something went wrong");
+            }
+          }}
           onClose={() => setModal(null)}
         />
       )}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder } from "@/lib/queries";
 import { getDescendantIds } from "@/lib/folder-utils";
 import { moveFolder } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   folder: Folder;
@@ -28,9 +29,12 @@ export function MoveFolderModal({ folder, allFolders, onClose }: Props) {
     startTransition(async () => {
       try {
         await moveFolder(folder.id, newParentFolderId);
+        toast.success("Folder moved");
         onClose();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        setError(message);
+        toast.error(message);
       }
     });
   }

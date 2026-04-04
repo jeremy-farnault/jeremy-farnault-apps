@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { createFolder } from "@/lib/actions";
+import { toast } from "sonner";
 
 type Props = {
   parentFolderId: string | null;
@@ -29,9 +30,12 @@ export function NewFolderButton({ parentFolderId }: Props) {
     startTransition(async () => {
       try {
         await createFolder(parentFolderId, name);
+        toast.success("Folder created");
         close();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        setError(message);
+        toast.error(message);
       }
     });
   }

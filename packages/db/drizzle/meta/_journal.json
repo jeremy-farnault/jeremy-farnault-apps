@@ -22,6 +22,13 @@
       "when": 1775244562353,
       "tag": "0002_kind_captain_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775280000000,
+      "tag": "0003_notes_search_vector",
+      "breakpoints": true
     }
   ]
 }

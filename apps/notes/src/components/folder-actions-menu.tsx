@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Folder } from "@/lib/queries";
+import { deleteFolder } from "@/lib/actions";
+import { toast } from "sonner";
+import { ConfirmDialog } from "./confirm-dialog";
 import { RenameFolderModal } from "./rename-folder-modal";
 import { MoveFolderModal } from "./move-folder-modal";
 
@@ -13,7 +16,7 @@ type Props = {
 export function FolderActionsMenu({ folder, allFolders }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modal, setModal] = useState<"rename" | "move" | null>(null);
+  const [modal, setModal] = useState<"rename" | "move" | "delete" | null>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -41,23 +44,14 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
         </button>
         {menuOpen && (
           <div>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("rename");
-              }}
-            >
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("rename"); }}>
               Rename
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("move");
-              }}
-            >
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("move"); }}>
               Move
+            </button>
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("delete"); }}>
+              Delete
             </button>
           </div>
         )}
@@ -66,9 +60,19 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
         <RenameFolderModal folder={folder} onClose={() => setModal(null)} />
       )}
       {modal === "move" && (
-        <MoveFolderModal
-          folder={folder}
-          allFolders={allFolders}
+        <MoveFolderModal folder={folder} allFolders={allFolders} onClose={() => setModal(null)} />
+      )}
+      {modal === "delete" && (
+        <ConfirmDialog
+          message={`Delete "${folder.name}" and all its contents? This cannot be undone.`}
+          onConfirm={async () => {
+            try {
+              await deleteFolder(folder.id);
+              toast.success("Folder deleted");
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : "Something went wrong");
+            }
+          }}
           onClose={() => setModal(null)}
         />
       )}
