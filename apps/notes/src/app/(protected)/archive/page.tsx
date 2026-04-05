@@ -1,13 +1,13 @@
-import { auth } from "@jf/auth";
-import { headers } from "next/headers";
-import Link from "next/link";
 import { ArchivedFolderCard } from "@/components/archived-folder-card";
 import { ArchivedNoteCard } from "@/components/archived-note-card";
 import { getArchivedFolders, getArchivedNotes } from "@/lib/queries";
+import { auth } from "@jf/auth";
+import { headers } from "next/headers";
+import Link from "next/link";
 
 export default async function ArchivePage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const userId = session!.user.id;
+  const userId = session?.user.id || "";
 
   const [archivedFolders, archivedNotes] = await Promise.all([
     getArchivedFolders(userId),
