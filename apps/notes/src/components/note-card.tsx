@@ -17,7 +17,7 @@ export function NoteCard({ note, allFolders, onNoteClick }: Props) {
         onClick={() => onNoteClick(note)}
         style={{ flex: 1, textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
       >
-        <p>{note.title ?? "Untitled"}</p>
+        <p>{note.pinned && <span>📌 </span>}{note.title ?? "Untitled"}</p>
         {note.body && <p>{note.body.slice(0, 100)}</p>}
       </button>
       <NoteActionsMenu note={note} allFolders={allFolders} />

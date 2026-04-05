@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder, Note } from "@/lib/queries";
-import { archiveNote, deleteNote } from "@/lib/actions";
+import { archiveNote, deleteNote, toggleNotePin } from "@/lib/actions";
 import { toast } from "sonner";
 import { ConfirmDialog } from "./confirm-dialog";
 import { MoveNoteModal } from "./move-note-modal";
@@ -28,6 +28,26 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
+
+  function handleCopyLink() {
+    setMenuOpen(false);
+    navigator.clipboard
+      .writeText(`${window.location.origin}/note/${note.id}`)
+      .then(() => toast.success("Link copied"))
+      .catch(() => toast.error("Failed to copy link"));
+  }
+
+  function handleTogglePin() {
+    setMenuOpen(false);
+    startTransition(async () => {
+      try {
+        await toggleNotePin(note.id);
+        toast.success(note.pinned ? "Note unpinned" : "Note pinned");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
 
   function handleArchive() {
     setMenuOpen(false);
@@ -57,8 +77,14 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
         </button>
         {menuOpen && (
           <div>
+            <button type="button" onClick={handleCopyLink}>
+              Copy link
+            </button>
             <button type="button" onClick={() => { setMenuOpen(false); setModal("move"); }}>
               Move
+            </button>
+            <button type="button" onClick={handleTogglePin} disabled={isPending}>
+              {note.pinned ? "Unpin" : "Pin"}
             </button>
             <button type="button" onClick={handleArchive}>
               Archive

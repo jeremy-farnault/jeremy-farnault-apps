@@ -82,6 +82,14 @@ export async function getFolderBreadcrumb(
   return crumbs;
 }
 
+export async function getArchivedFolders(userId: string): Promise<Folder[]> {
+  return db
+    .select()
+    .from(folders)
+    .where(and(eq(folders.userId, userId), isNotNull(folders.archivedAt)))
+    .orderBy(desc(folders.archivedAt));
+}
+
 export async function getArchivedNotes(userId: string): Promise<Note[]> {
   return db
     .select()

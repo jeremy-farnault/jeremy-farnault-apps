@@ -84,6 +84,7 @@ export const notes = pgTable("notes", {
   body: text("body"),
   backgroundColor: text("background_color"),
   archivedAt: timestamp("archived_at"),
+  pinned: boolean("pinned").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

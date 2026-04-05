@@ -2,7 +2,7 @@
 
 import { auth } from "@jf/auth";
 import { db, folders, notes } from "@jf/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getAllFolders, searchNotes, type Note } from "./queries";
@@ -59,6 +59,73 @@ export async function moveFolder(
     .update(folders)
     .set({ parentFolderId: newParentFolderId, updatedAt: new Date() })
     .where(and(eq(folders.id, folderId), eq(folders.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function archiveFolder(folderId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  const allFolders = await getAllFolders(userId);
+  const folderIds = getDescendantIds(folderId, allFolders);
+  const now = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(folders)
+      .set({ archivedAt: now, updatedAt: now })
+      .where(and(eq(folders.userId, userId), inArray(folders.id, folderIds)));
+    await tx
+      .update(notes)
+      .set({ archivedAt: now, updatedAt: now })
+      .where(and(eq(notes.userId, userId), inArray(notes.parentFolderId, folderIds)));
+  });
+
+  revalidatePath("/", "layout");
+}
+
+export async function restoreFolder(folderId: string): Promise<void> {
+  const userId = await getAuthUserId();
+
+  const [folder] = await db
+    .select()
+    .from(folders)
+    .where(and(eq(folders.id, folderId), eq(folders.userId, userId)))
+    .limit(1);
+  if (!folder) throw new Error("Folder not found");
+
+  let targetParentId = folder.parentFolderId;
+  if (targetParentId) {
+    const [parent] = await db
+      .select()
+      .from(folders)
+      .where(and(eq(folders.id, targetParentId), isNull(folders.archivedAt)))
+      .limit(1);
+    if (!parent) targetParentId = null;
+  }
+
+  const allUserFolders = await db.select().from(folders).where(eq(folders.userId, userId));
+  const folderIds = getDescendantIds(folderId, allUserFolders);
+  const descendantIds = folderIds.filter((id) => id !== folderId);
+  const now = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(folders)
+      .set({ archivedAt: null, parentFolderId: targetParentId, updatedAt: now })
+      .where(and(eq(folders.id, folderId), eq(folders.userId, userId)));
+
+    if (descendantIds.length > 0) {
+      await tx
+        .update(folders)
+        .set({ archivedAt: null, updatedAt: now })
+        .where(and(eq(folders.userId, userId), inArray(folders.id, descendantIds)));
+    }
+
+    await tx
+      .update(notes)
+      .set({ archivedAt: null, updatedAt: now })
+      .where(and(eq(notes.userId, userId), inArray(notes.parentFolderId, folderIds)));
+  });
+
   revalidatePath("/", "layout");
 }
 
@@ -136,6 +203,23 @@ export async function restoreNote(noteId: string): Promise<void> {
     .update(notes)
     .set({ archivedAt: null, parentFolderId: targetFolderId, updatedAt: new Date() })
     .where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function toggleNotePin(noteId: string): Promise<void> {
+  const userId = await getAuthUserId();
+  const [note] = await db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
+    .limit(1);
+  if (!note) throw new Error("Note not found");
+
+  await db
+    .update(notes)
+    .set({ pinned: !note.pinned, updatedAt: new Date() })
+    .where(and(eq(notes.id, noteId), eq(notes.userId, userId)));
+
   revalidatePath("/", "layout");
 }
 
