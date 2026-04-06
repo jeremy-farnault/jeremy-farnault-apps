@@ -7,5 +7,6 @@ export * from "./components/floating-cta";
 export * from "./components/select";
 export * from "./components/skeleton";
 export * from "./components/switch";
+export * from "./components/text-input";
 export * from "./components/textarea";
 export * from "./lib/utils";

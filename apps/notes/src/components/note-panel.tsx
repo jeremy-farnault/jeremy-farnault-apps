@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { useRouter } from "next/navigation";
+import { ActionModal, TextInput, Textarea } from "@jf/ui";
 import type { Folder, Note } from "@/lib/queries";
 import { createNote, updateNote } from "@/lib/actions";
 import { toast } from "sonner";
@@ -22,17 +22,11 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   const [title, setTitle] = useState(note?.title ?? "");
   const [body, setBody] = useState(note?.body ?? "");
   const [color, setColor] = useState(note?.backgroundColor ?? DEFAULT_COLOR);
-  const [isEditing, setIsEditing] = useState(note === null);
   const [isSaving, setIsSaving] = useState(false);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFirstSaveRef = useRef(note === null);
 
-  // Auto-save with 1s debounce
   useEffect(() => {
-    // Skip on initial render for existing notes
-    if (!isEditing) return;
-    // Don't save if nothing has been typed yet for new notes
     const hasContent = title.trim() || body.trim();
     if (!hasContent && noteId === null) return;
 
@@ -43,7 +37,6 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
         if (noteId === null) {
           const id = await createNote(parentFolderId, title || null, body || null, color);
           setNoteId(id);
-          isFirstSaveRef.current = false;
           router.refresh();
           toast.success("Note created");
         } else {
@@ -60,48 +53,35 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [title, body, color, isEditing]);
+  }, [title, body, color]);
 
-  return (
-    <div style={{ width: 400, borderLeft: "1px solid #e5e7eb", padding: 16, backgroundColor: color }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
-        <span style={{ fontSize: 12, color: "#9ca3af" }}>{isSaving ? "Saving…" : ""}</span>
-        <button type="button" onClick={() => setIsEditing((v) => !v)}>
-          {isEditing ? "Done" : "Edit"}
-        </button>
-      </div>
-
-      {isEditing ? (
-        <>
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            style={{ display: "block", width: "100%", marginBottom: 8, fontSize: 18, fontWeight: "bold" }}
-          />
-          <textarea
-            placeholder="Write something…"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={16}
-            style={{ display: "block", width: "100%", marginBottom: 8, resize: "vertical" }}
-          />
-          <ColorPicker value={color} onChange={setColor} />
-        </>
-      ) : (
-        <>
-          {title && <h2 style={{ marginBottom: 8 }}>{title}</h2>}
-          {body ? (
-            <ReactMarkdown>{body}</ReactMarkdown>
-          ) : (
-            <p style={{ color: "#9ca3af" }}>Empty note</p>
-          )}
-        </>
+  const content = (
+    <div className="flex flex-col gap-4">
+      <TextInput
+        value={title}
+        onChange={setTitle}
+        placeholder="Title"
+        className="text-base font-semibold"
+      />
+      <Textarea
+        value={body}
+        onChange={setBody}
+        placeholder="Write something…"
+        className="min-h-[200px]"
+      />
+      <ColorPicker value={color} onChange={setColor} />
+      {isSaving && (
+        <p className="text-xs text-(--grey-400)">Saving…</p>
       )}
     </div>
+  );
+
+  return (
+    <ActionModal
+      isOpen
+      onClose={onClose}
+      size="large"
+      content={content}
+    />
   );
 }

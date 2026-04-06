@@ -1,5 +1,6 @@
 "use client";
 
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder } from "@/lib/queries";
 import { archiveFolder, deleteFolder } from "@/lib/actions";
@@ -53,7 +54,7 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
           }}
           aria-label="Folder actions"
         >
-          …
+          <DotsThreeVerticalIcon size={16} />
         </button>
         {menuOpen && (
           <div>

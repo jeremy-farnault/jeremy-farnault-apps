@@ -1,12 +1,12 @@
 export const COLOR_PALETTE = [
-  { label: "White", value: "#ffffff" },
-  { label: "Yellow", value: "#fef9c3" },
-  { label: "Green", value: "#dcfce7" },
-  { label: "Teal", value: "#ccfbf1" },
-  { label: "Blue", value: "#dbeafe" },
-  { label: "Purple", value: "#ede9fe" },
-  { label: "Pink", value: "#fce7f3" },
-  { label: "Red", value: "#fee2e2" },
+  { label: "Grey", value: "var(--grey-400)" },
+  { label: "Yellow", value: "var(--yellow-400)" },
+  { label: "Green", value: "var(--green-400)" },
+  { label: "Teal", value: "var(--teal-400)" },
+  { label: "Blue", value: "var(--blue-400)" },
+  { label: "Purple", value: "var(--purple-400)" },
+  { label: "Magenta", value: "var(--magenta-400)" },
+  { label: "Red", value: "var(--red-400)" },
 ] as const;
 
-export const DEFAULT_COLOR = "#ffffff";
+export const DEFAULT_COLOR = "var(--grey-400)";

@@ -2,7 +2,6 @@ import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ItemsGrid } from "@/components/items-grid";
-import { SortControl } from "@/components/sort-control";
 import { getAllFolders, getFolderContents, type SortOption } from "@/lib/queries";
 
 type Props = {
@@ -28,7 +27,7 @@ export default async function RootPage({ searchParams }: Props) {
       notes={notes}
       sort={sort}
       breadcrumb={<Breadcrumb crumbs={[]} />}
-      sortControl={<SortControl current={sort} />}
+
       currentFolderId={null}
       allFolders={allFolders}
     />

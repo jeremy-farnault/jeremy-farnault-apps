@@ -1,5 +1,6 @@
 "use client";
 
+import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder, Note } from "@/lib/queries";
 import { archiveNote, deleteNote, toggleNotePin } from "@/lib/actions";
@@ -73,7 +74,7 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
           aria-label="Note actions"
           disabled={isPending}
         >
-          …
+          <DotsThreeVerticalIcon size={16} />
         </button>
         {menuOpen && (
           <div>

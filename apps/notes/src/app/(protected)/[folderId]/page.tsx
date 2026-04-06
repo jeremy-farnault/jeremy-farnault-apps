@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ItemsGrid } from "@/components/items-grid";
-import { SortControl } from "@/components/sort-control";
 import {
   getAllFolders,
   getFolderBreadcrumb,
@@ -44,7 +43,7 @@ export default async function FolderPage({ params, searchParams }: Props) {
       notes={notes}
       sort={sort}
       breadcrumb={<Breadcrumb crumbs={crumbs} />}
-      sortControl={<SortControl current={sort} />}
+
       currentFolderId={folderId}
       allFolders={allFolders}
     />

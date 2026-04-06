@@ -1,10 +1,10 @@
 "use client";
 
 import { SquaresFourIcon } from "@phosphor-icons/react";
+import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
 import { apps } from "../config/apps";
 import { cn } from "../lib/utils";
-import { ActionModal } from "./action-modal";
 
 interface AppSwitcherProps {
   currentAppId?: string;
@@ -14,49 +14,53 @@ interface AppSwitcherProps {
 export function AppSwitcher({ currentAppId, className }: AppSwitcherProps) {
   const [open, setOpen] = useState(false);
 
-  const grid = (
-    <div className="grid grid-cols-3 gap-2">
-      {apps.map((app) => (
-        <a
-          key={app.id}
-          href={app.href}
-          onClick={() => setOpen(false)}
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger asChild>
+        <button
+          aria-label="Open app switcher"
           className={cn(
-            "flex flex-col items-center gap-2 rounded-[14px] p-3 text-sm text-(--grey-900)",
-            "hover:bg-(--surface-100)",
-            currentAppId === app.id && "bg-(--surface-100) font-semibold"
+            "flex h-10 w-10 items-center justify-center rounded-full",
+            "bg-(--surface-100) text-(--grey-700)",
+            "hover:bg-(--surface-150) hover:text-(--grey-900)",
+            className
+          )}
+          type="button"
+        >
+          <SquaresFourIcon size={20} />
+        </button>
+      </Popover.Trigger>
+
+      <Popover.Portal>
+        <Popover.Content
+          align="end"
+          sideOffset={8}
+          className={cn(
+            "z-50 rounded-[22px] bg-(--card) p-3",
+            "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]",
+            "animate-[overlay-in_0.3s_ease-in-out]",
+            "outline-none"
           )}
         >
-          <app.icon size={24} />
-          {app.name}
-        </a>
-      ))}
-    </div>
-  );
-
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Open app switcher"
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-full",
-          "bg-(--surface-100) text-(--grey-700)",
-          "hover:bg-(--surface-150) hover:text-(--grey-900)",
-          className
-        )}
-        type="button"
-      >
-        <SquaresFourIcon size={20} />
-      </button>
-
-      <ActionModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        size="small"
-        title="Apps"
-        content={grid}
-      />
-    </>
+          <div className="grid grid-cols-3 gap-2">
+            {apps.map((app) => (
+              <a
+                key={app.id}
+                href={app.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex flex-col items-center gap-2 rounded-[14px] p-3 text-sm text-(--grey-900)",
+                  "hover:bg-(--surface-100)",
+                  currentAppId === app.id && "bg-(--surface-100) font-semibold"
+                )}
+              >
+                <app.icon size={24} />
+                {app.name}
+              </a>
+            ))}
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
