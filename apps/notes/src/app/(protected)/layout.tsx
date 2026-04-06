@@ -1,10 +1,10 @@
-import { NavBar } from "@/components/nav-bar";
+import { NotesNav } from "@/components/notes-nav";
+import { AppShell } from "@jf/ui";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <NavBar />
+    <AppShell currentAppId="notes" bottomBarItems={<NotesNav />}>
       {children}
-    </div>
+    </AppShell>
   );
 }

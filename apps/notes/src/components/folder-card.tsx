@@ -1,8 +1,5 @@
-"use client";
-
-import { Folder } from "lucide-react";
-import Link from "next/link";
 import type { Folder as FolderRow } from "@/lib/queries";
+import Link from "next/link";
 import { FolderActionsMenu } from "./folder-actions-menu";
 
 type Props = {
@@ -15,7 +12,6 @@ export function FolderCard({ folder, allFolders }: Props) {
     <div style={{ display: "flex", alignItems: "center" }}>
       <Link href={`/${folder.id}`} style={{ flex: 1 }}>
         <div>
-          <Folder size={20} />
           <span>{folder.name}</span>
         </div>
       </Link>
