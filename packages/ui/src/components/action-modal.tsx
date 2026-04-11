@@ -74,7 +74,7 @@ export function ActionModal({
             <button
               onClick={onClose}
               aria-label="Close dialog"
-              className="absolute top-8 right-8 flex items-center justify-center rounded-full p-1 text-(--grey-500) hover:text-(--grey-900)"
+              className="absolute top-4 right-4 flex items-center justify-center rounded-full p-1 text-(--grey-500) hover:text-(--grey-900)"
               type="button"
             >
               <XIcon size={14} weight="bold" />
@@ -102,7 +102,7 @@ export function ActionModal({
                 )}
                 {primaryButton && (
                   <Button
-                    className="flex-1"
+                    className="flex-1 bg-(--grey-900) text-white hover:bg-(--grey-700)"
                     disabled={primaryButton.loading}
                     onClick={primaryButton.onClick}
                   >

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { ActionModal, TextInput, Textarea } from "@jf/ui";
 import type { Folder, Note } from "@/lib/queries";
 import { createNote, updateNote } from "@/lib/actions";
@@ -71,7 +72,10 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       />
       <ColorPicker value={color} onChange={setColor} />
       {isSaving && (
-        <p className="text-xs text-(--grey-400)">Saving…</p>
+        <CircleNotchIcon
+          size={14}
+          className="absolute bottom-6 right-6 animate-spin text-(--grey-400)"
+        />
       )}
     </div>
   );

@@ -49,7 +49,7 @@ export function AppSwitcher({ currentAppId, className }: AppSwitcherProps) {
                 href={app.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-[14px] p-3 text-sm text-(--grey-900)",
+                  "flex flex-col items-center gap-1 rounded-[14px] p-3 text-[10px] text-(--grey-900)",
                   "hover:bg-(--surface-100)",
                   currentAppId === app.id && "bg-(--surface-100) font-semibold"
                 )}

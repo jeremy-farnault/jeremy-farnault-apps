@@ -77,32 +77,34 @@ export function ItemsGrid({
   }
 
   return (
-    <div className="mx-auto px-4 pt-6 pb-24">
+    <div className="w-full px-4 pt-6 pb-24">
       {breadcrumb}
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
         <TextInput
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Search notes…"
-          className="flex-1"
+          className="min-w-[250px] max-w-[300px]"
         />
-        <Select value={sort} onValueChange={handleSortChange}>
-          <SelectContent>
-            {SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Link
-          href="/archive"
-          title="Archive"
-          className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-100) text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
-        >
-          <ArchiveIcon size={20} />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Select value={sort} onValueChange={handleSortChange} className="w-auto">
+            <SelectContent>
+              {SORT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Link
+            href="/archive"
+            title="Archive"
+            className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-100) text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+          >
+            <ArchiveIcon size={20} />
+          </Link>
+        </div>
       </div>
 
       {searchQuery.trim() ? (

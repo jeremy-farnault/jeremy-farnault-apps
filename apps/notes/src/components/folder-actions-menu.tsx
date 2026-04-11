@@ -1,6 +1,6 @@
 "use client";
 
-import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
+import { ArchiveIcon, DotsThreeVerticalIcon, FolderOpenIcon, PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Folder } from "@/lib/queries";
 import { archiveFolder, deleteFolder } from "@/lib/actions";
@@ -43,6 +43,9 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
+  const iconBtnClass =
+    "flex h-7 w-7 items-center justify-center rounded-lg bg-(--surface-100) hover:bg-(--surface-150) text-(--grey-700)";
+
   return (
     <>
       <div ref={menuRef} style={{ position: "relative" }}>
@@ -57,18 +60,18 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
           <DotsThreeVerticalIcon size={16} />
         </button>
         {menuOpen && (
-          <div>
-            <button type="button" onClick={() => { setMenuOpen(false); setModal("rename"); }}>
-              Rename
+          <div className="absolute right-full top-0 flex flex-row items-center gap-1 pr-1">
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("rename"); }} aria-label="Rename" className={iconBtnClass}>
+              <PencilIcon size={14} />
             </button>
-            <button type="button" onClick={() => { setMenuOpen(false); setModal("move"); }}>
-              Move
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("move"); }} aria-label="Move" className={iconBtnClass}>
+              <FolderOpenIcon size={14} />
             </button>
-            <button type="button" onClick={handleArchive} disabled={isPending}>
-              Archive
+            <button type="button" onClick={handleArchive} disabled={isPending} aria-label="Archive" className={iconBtnClass}>
+              <ArchiveIcon size={14} />
             </button>
-            <button type="button" onClick={() => { setMenuOpen(false); setModal("delete"); }}>
-              Delete
+            <button type="button" onClick={() => { setMenuOpen(false); setModal("delete"); }} aria-label="Delete" className={iconBtnClass}>
+              <TrashIcon size={14} />
             </button>
           </div>
         )}

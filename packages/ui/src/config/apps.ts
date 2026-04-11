@@ -1,5 +1,5 @@
 import type { Icon } from "@phosphor-icons/react";
-import { Article, CheckSquare, NotePencil } from "@phosphor-icons/react";
+import { Article, CheckSquare, NotepadIcon } from "@phosphor-icons/react";
 
 export interface AppDefinition {
   id: string;
@@ -12,7 +12,7 @@ export const apps: AppDefinition[] = [
   {
     id: "notes",
     name: "Notes",
-    icon: NotePencil,
+    icon: NotepadIcon,
     href: process.env.NEXT_PUBLIC_NOTES_URL ?? "#",
   },
   {
