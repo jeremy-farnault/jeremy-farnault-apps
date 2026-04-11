@@ -1,5 +1,7 @@
 @import "tailwindcss";
+
 @source "../../../apps/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
 
 @layer base {
   *,
@@ -33,10 +35,10 @@
 
   @keyframes cta-slide-up {
     from {
-      transform: translateX(-50%) translateY(calc(100% + 32px));
+      transform: translateY(calc(100% + 32px));
     }
     to {
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
   }
 
@@ -184,6 +186,7 @@
     --surface-150: #2222260f;
     --surface-175: #22222610;
     --surface-200: #2222261f;
+    --surface: #222226;
 
     /* Semantic aliases */
     --radius: 0.625rem;
@@ -193,9 +196,9 @@
     --card-foreground: var(--grey-900);
     --popover: var(--moleskine-100);
     --popover-foreground: var(--grey-900);
-    --primary: var(--yellow-400);
+    --primary: var(--magenta-400);
     --primary-foreground: var(--grey-900);
-    --secondary: var(--yellow-600);
+    --secondary: var(--magenta-600);
     --secondary-foreground: var(--grey-100);
     --muted: var(--grey-150);
     --muted-foreground: var(--grey-500);
@@ -204,7 +207,7 @@
     --destructive: var(--red-500);
     --border: var(--grey-200);
     --input: var(--grey-200);
-    --ring: var(--yellow-400);
+    --ring: var(--magenta-400);
   }
 
   .dark {

@@ -82,10 +82,12 @@ export function ActionModal({
 
             <div className="flex flex-col gap-4">
               {icon}
-              {title && (
+              {title ? (
                 <Dialog.Title className="text-base font-semibold text-(--grey-900)">
                   {title}
                 </Dialog.Title>
+              ) : (
+                <Dialog.Title className="sr-only" />
               )}
               {paragraph && <p className="text-sm text-(--grey-600)">{paragraph}</p>}
               {content}

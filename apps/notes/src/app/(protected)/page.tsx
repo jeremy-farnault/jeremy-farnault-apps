@@ -1,8 +1,8 @@
-import { auth } from "@jf/auth";
-import { headers } from "next/headers";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ItemsGrid } from "@/components/items-grid";
-import { getAllFolders, getFolderContents, type SortOption } from "@/lib/queries";
+import { type SortOption, getAllFolders, getFolderContents } from "@/lib/queries";
+import { auth } from "@jf/auth";
+import { headers } from "next/headers";
 
 type Props = {
   searchParams: Promise<{ sort?: string }>;
@@ -23,13 +23,12 @@ export default async function RootPage({ searchParams }: Props) {
 
   return (
     <ItemsGrid
+      allFolders={allFolders}
+      breadcrumb={<Breadcrumb crumbs={[]} />}
+      currentFolderId={null}
       folders={folders}
       notes={notes}
       sort={sort}
-      breadcrumb={<Breadcrumb crumbs={[]} />}
-
-      currentFolderId={null}
-      allFolders={allFolders}
     />
   );
 }

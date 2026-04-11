@@ -28,7 +28,6 @@ export function FloatingCTA({ label, icon, onClick, disabled, loading }: Floatin
           "hover:bg-(--secondary)",
           "disabled:cursor-not-allowed disabled:opacity-50"
         )}
-        style={{ transform: "translateX(-50%)" }}
         type="submit"
       >
         {loading ? <CircleNotchIcon size={20} className="animate-spin" /> : icon}

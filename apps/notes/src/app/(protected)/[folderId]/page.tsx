@@ -1,15 +1,15 @@
-import { auth } from "@jf/auth";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ItemsGrid } from "@/components/items-grid";
 import {
+  type SortOption,
   getAllFolders,
   getFolderBreadcrumb,
   getFolderById,
   getFolderContents,
-  type SortOption,
 } from "@/lib/queries";
+import { auth } from "@jf/auth";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ folderId: string }>;
@@ -43,7 +43,6 @@ export default async function FolderPage({ params, searchParams }: Props) {
       notes={notes}
       sort={sort}
       breadcrumb={<Breadcrumb crumbs={crumbs} />}
-
       currentFolderId={folderId}
       allFolders={allFolders}
     />

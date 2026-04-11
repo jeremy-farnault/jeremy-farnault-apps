@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import { searchNotesAction } from "@/lib/actions";
+import { type SortOption, sortItems } from "@/lib/grid-utils";
+import type { Folder, Note } from "@/lib/queries";
+import { Select, SelectContent, SelectItem, TextInput } from "@jf/ui";
+import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
-import type { Folder, Note } from "@/lib/queries";
-import { type SortOption, sortItems } from "@/lib/grid-utils";
-import { searchNotesAction } from "@/lib/actions";
-import { Select, SelectContent, SelectItem, TextInput } from "@jf/ui";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { EmptyState } from "./empty-state";
 import { FolderCard } from "./folder-card";
-import { NoteCard } from "./note-card";
 import { NewFolderButton } from "./new-folder-button";
+import { NoteCard } from "./note-card";
 import { NotePanel } from "./note-panel";
 import { SearchResults } from "./search-results";
 
@@ -77,7 +77,7 @@ export function ItemsGrid({
   }
 
   return (
-    <div className="max-w-[1024px] mx-auto px-4 pt-6 pb-24">
+    <div className="mx-auto px-4 pt-6 pb-24">
       {breadcrumb}
 
       <div className="flex items-center gap-3 mb-6">
@@ -119,11 +119,7 @@ export function ItemsGrid({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) =>
             item.kind === "folder" ? (
-              <FolderCard
-                key={item.data.id}
-                folder={item.data}
-                allFolders={allFolders}
-              />
+              <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />
             ) : (
               <NoteCard
                 key={item.data.id}
@@ -131,7 +127,7 @@ export function ItemsGrid({
                 allFolders={allFolders}
                 onNoteClick={(note) => setPanel({ mode: "existing", note })}
               />
-            ),
+            )
           )}
         </div>
       )}
@@ -153,7 +149,7 @@ export function ItemsGrid({
           type="button"
           onClick={() => setPanel({ mode: "new" })}
           aria-label="New note"
-          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary)"
+          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
         >
           <PlusSquareIcon size={22} />
         </button>
