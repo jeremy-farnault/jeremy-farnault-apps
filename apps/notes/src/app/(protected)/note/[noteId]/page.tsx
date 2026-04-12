@@ -1,4 +1,4 @@
-import { getNoteById } from "@/lib/queries";
+import { getAllFolders, getFolderBreadcrumb, getNoteById } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -20,5 +20,10 @@ export default async function NotePage({
   const note = await getNoteById(userId, noteId);
   if (!note) notFound();
 
-  return <NotePageClient note={note} />;
+  const [crumbs, allFolders] = await Promise.all([
+    note.parentFolderId ? getFolderBreadcrumb(note.parentFolderId) : Promise.resolve([]),
+    getAllFolders(userId),
+  ]);
+
+  return <NotePageClient note={note} crumbs={crumbs} allFolders={allFolders} />;
 }

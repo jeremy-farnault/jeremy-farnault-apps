@@ -19,9 +19,10 @@ import { MoveNoteModal } from "./move-note-modal";
 type Props = {
   note: Note;
   allFolders: Folder[];
+  alwaysVisible?: boolean;
 };
 
-export function NoteActionsMenu({ note, allFolders }: Props) {
+export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState<"move" | "delete" | "archive" | null>(null);
@@ -87,21 +88,33 @@ export function NoteActionsMenu({ note, allFolders }: Props) {
 
   return (
     <>
-      <div ref={menuRef} className="flex items-center" style={{ position: "relative" }}>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setMenuOpen((o) => !o);
-          }}
-          aria-label="Note actions"
-          disabled={isPending}
-          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
-        >
-          <DotsThreeVerticalIcon size={16} />
-        </button>
-        {menuOpen && (
-          <div className="absolute right-full top-0 flex flex-row items-center gap-1 pr-1">
+      <div
+        ref={menuRef}
+        className="flex items-center"
+        style={alwaysVisible ? undefined : { position: "relative" }}
+      >
+        {!alwaysVisible && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((o) => !o);
+            }}
+            aria-label="Note actions"
+            disabled={isPending}
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
+          >
+            <DotsThreeVerticalIcon size={16} />
+          </button>
+        )}
+        {(alwaysVisible || menuOpen) && (
+          <div
+            className={
+              alwaysVisible
+                ? "flex flex-row items-center gap-1"
+                : "absolute right-full top-0 flex flex-row items-center gap-1 pr-1"
+            }
+          >
             <button
               type="button"
               onClick={handleCopyLink}

@@ -9,4 +9,5 @@ export * from "./components/skeleton";
 export * from "./components/switch";
 export * from "./components/text-input";
 export * from "./components/textarea";
+export * from "./components/user-menu";
 export * from "./lib/utils";

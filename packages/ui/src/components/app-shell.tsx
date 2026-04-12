@@ -6,10 +6,11 @@ interface AppShellProps {
   appName: string;
   children: ReactNode;
   currentAppId?: string;
+  rightSlot?: ReactNode;
   titleHref?: string;
 }
 
-export function AppShell({ children, currentAppId, appName, appIcon, titleHref }: AppShellProps) {
+export function AppShell({ children, currentAppId, appName, appIcon, rightSlot, titleHref }: AppShellProps) {
   return (
     <div className="relative flex flex-col items-center justify-start w-full max-w-[1024px] min-h-screen pb-16 md:pb-0">
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between px-4 w-full pt-3">
@@ -27,7 +28,10 @@ export function AppShell({ children, currentAppId, appName, appIcon, titleHref }
             {appName}
           </div>
         )}
-        <AppSwitcher {...(currentAppId !== undefined && { currentAppId })} />
+        <div className="flex items-center gap-2">
+          <AppSwitcher {...(currentAppId !== undefined && { currentAppId })} />
+          {rightSlot}
+        </div>
       </header>
 
       {children}
