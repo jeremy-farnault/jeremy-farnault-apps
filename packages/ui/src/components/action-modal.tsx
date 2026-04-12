@@ -71,14 +71,16 @@ export function ActionModal({
               "animate-[modal-in_0.3s_ease-in-out]"
             )}
           >
-            <button
-              onClick={onClose}
-              aria-label="Close dialog"
-              className="absolute top-4 right-4 flex items-center justify-center rounded-full p-1 text-(--grey-500) hover:text-(--grey-900)"
-              type="button"
-            >
-              <XIcon size={14} weight="bold" />
-            </button>
+            {!closeOnBackdropClick && (
+              <button
+                onClick={onClose}
+                aria-label="Close dialog"
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
+                type="button"
+              >
+                <XIcon size={16} weight="bold" />
+              </button>
+            )}
 
             <div className="flex flex-col gap-4">
               {icon}

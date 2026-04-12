@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import type { Folder } from "@/lib/queries";
-import { getDescendantIds } from "@/lib/folder-utils";
 import { moveFolder } from "@/lib/actions";
+import { getDescendantIds } from "@/lib/folder-utils";
+import type { Folder } from "@/lib/queries";
+import { ActionModal } from "@jf/ui";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -13,16 +14,11 @@ type Props = {
 };
 
 export function MoveFolderModal({ folder, allFolders, onClose }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const excludedIds = new Set(getDescendantIds(folder.id, allFolders));
   const allowed = allFolders.filter((f) => !excludedIds.has(f.id));
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
 
   function pick(newParentFolderId: string | null) {
     setError("");
@@ -39,31 +35,38 @@ export function MoveFolderModal({ folder, allFolders, onClose }: Props) {
     });
   }
 
-  return (
-    <dialog ref={dialogRef} onClose={onClose}>
-      <p>Move "{folder.name}" to…</p>
-      {error && <p>{error}</p>}
-      <ul>
-        <li>
-          <button type="button" onClick={() => pick(null)} disabled={isPending}>
-            Root
-          </button>
-        </li>
-        {allowed.map((f) => (
-          <li key={f.id}>
-            <button
-              type="button"
-              onClick={() => pick(f.id)}
-              disabled={isPending}
-            >
-              {f.name}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <button type="button" onClick={onClose} disabled={isPending}>
-        Cancel
+  const folderList = (
+    <div className="flex flex-col gap-1 mt-1">
+      {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
+      <button
+        type="button"
+        onClick={() => pick(null)}
+        disabled={isPending}
+        className="w-full rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
+      >
+        Home
       </button>
-    </dialog>
+      {allowed.map((f) => (
+        <button
+          key={f.id}
+          type="button"
+          onClick={() => pick(f.id)}
+          disabled={isPending}
+          className="w-full rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
+        >
+          {f.name}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <ActionModal
+      isOpen={true}
+      onClose={onClose}
+      size="small"
+      title={`Move "${folder.name}" to…`}
+      content={folderList}
+    />
   );
 }

@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
@@ -186,6 +193,7 @@
     --surface-150: #2222260f;
     --surface-175: #22222610;
     --surface-200: #2222261f;
+    --surface-300: #22222633;
     --surface: #222226;
 
     /* Semantic aliases */

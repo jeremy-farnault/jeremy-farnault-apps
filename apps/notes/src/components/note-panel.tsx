@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CircleNotchIcon } from "@phosphor-icons/react";
-import { ActionModal, TextInput, Textarea } from "@jf/ui";
-import type { Folder, Note } from "@/lib/queries";
 import { createNote, updateNote } from "@/lib/actions";
-import { toast } from "sonner";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
+import type { Folder, Note } from "@/lib/queries";
+import { ActionModal, TextInput, Textarea } from "@jf/ui";
+import { CircleNotchIcon } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ColorPicker } from "./color-picker";
 
 type Props = {
@@ -26,22 +26,61 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   const [isSaving, setIsSaving] = useState(false);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref mirrors state so async callbacks always read the latest value without stale closures
+  const noteIdRef = useRef<string | null>(note?.id ?? null);
+  const titleRef = useRef(title);
+  const bodyRef = useRef(body);
+  const colorRef = useRef(color);
+  // Existing notes are already saved; new notes need an immediate first save
+  const hasSavedRef = useRef(note !== null);
+
+  // Keep refs in sync each render (safe: idempotent, not a side-effect)
+  titleRef.current = title;
+  bodyRef.current = body;
+  colorRef.current = color;
 
   useEffect(() => {
-    const hasContent = title.trim() || body.trim();
-    if (!hasContent && noteId === null) return;
+    noteIdRef.current = noteId;
+  }, [noteId]);
 
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
+  // Color change: save immediately (only once note exists)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: router.refresh is stable; titleRef/bodyRef/noteIdRef are refs read at call time to avoid stale closures
+  useEffect(() => {
+    const currentNoteId = noteIdRef.current;
+    if (!currentNoteId) return;
+    updateNote(currentNoteId, titleRef.current || null, bodyRef.current || null, color)
+      .then(() => router.refresh())
+      .catch(() => {});
+  }, [color]);
+
+  // Content change: first change fires immediately, subsequent changes debounce at 500ms
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refs are read at call time; parentFolderId/router.refresh are intentionally excluded — parentFolderId is fixed for the panel's lifetime and must not re-trigger save logic
+  useEffect(() => {
+    const hasContent = title.trim() || body.trim();
+    if (!hasContent && noteIdRef.current === null) return;
+
+    async function save() {
       setIsSaving(true);
       try {
-        if (noteId === null) {
-          const id = await createNote(parentFolderId, title || null, body || null, color);
+        const currentNoteId = noteIdRef.current;
+        if (currentNoteId === null) {
+          const id = await createNote(
+            parentFolderId,
+            titleRef.current || null,
+            bodyRef.current || null,
+            colorRef.current
+          );
           setNoteId(id);
+          noteIdRef.current = id;
           router.refresh();
           toast.success("Note created");
         } else {
-          await updateNote(noteId, title || null, body || null, color);
+          await updateNote(
+            currentNoteId,
+            titleRef.current || null,
+            bodyRef.current || null,
+            colorRef.current
+          );
           router.refresh();
         }
       } catch (err) {
@@ -49,12 +88,21 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       } finally {
         setIsSaving(false);
       }
-    }, 1000);
+    }
 
+    if (!hasSavedRef.current) {
+      // First change on a new note: fire immediately (Promise survives unmount)
+      hasSavedRef.current = true;
+      save();
+      return;
+    }
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(save, 300);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [title, body, color]);
+  }, [title, body]);
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -80,12 +128,5 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
     </div>
   );
 
-  return (
-    <ActionModal
-      isOpen
-      onClose={onClose}
-      size="large"
-      content={content}
-    />
-  );
+  return <ActionModal isOpen onClose={onClose} size="large" content={content} />;
 }

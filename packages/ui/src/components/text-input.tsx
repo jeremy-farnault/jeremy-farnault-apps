@@ -17,7 +17,7 @@ export function TextInput({ value, onChange, placeholder, disabled, className }:
       placeholder={placeholder}
       disabled={disabled}
       className={cn(
-        "h-11 w-full rounded-[10px] bg-(--surface-100) px-3 text-sm",
+        "h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm",
         "border-none outline-none ring-0 focus:outline-none focus:ring-0",
         "placeholder:text-(--grey-400)",
         "disabled:cursor-not-allowed disabled:opacity-50",

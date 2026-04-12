@@ -18,10 +18,7 @@ export async function getAllFolders(userId: string): Promise<Folder[]> {
     .where(and(eq(folders.userId, userId), isNull(folders.archivedAt)));
 }
 
-export async function getFolderById(
-  userId: string,
-  folderId: string,
-): Promise<Folder | null> {
+export async function getFolderById(userId: string, folderId: string): Promise<Folder | null> {
   const [folder] = await db
     .select()
     .from(folders)
@@ -33,7 +30,7 @@ export async function getFolderById(
 
 export async function getFolderContents(
   userId: string,
-  folderId: string | null,
+  folderId: string | null
 ): Promise<{ folders: Folder[]; notes: Note[] }> {
   const folderRows = await db
     .select()
@@ -42,8 +39,8 @@ export async function getFolderContents(
       and(
         eq(folders.userId, userId),
         folderId ? eq(folders.parentFolderId, folderId) : isNull(folders.parentFolderId),
-        isNull(folders.archivedAt),
-      ),
+        isNull(folders.archivedAt)
+      )
     );
 
   const noteRows = await db
@@ -53,25 +50,21 @@ export async function getFolderContents(
       and(
         eq(notes.userId, userId),
         folderId ? eq(notes.parentFolderId, folderId) : isNull(notes.parentFolderId),
-        isNull(notes.archivedAt),
-      ),
+        isNull(notes.archivedAt)
+      )
     );
 
   return { folders: folderRows, notes: noteRows };
 }
 
 export async function getFolderBreadcrumb(
-  folderId: string,
+  folderId: string
 ): Promise<{ id: string; name: string }[]> {
   const crumbs: { id: string; name: string }[] = [];
   let currentId: string | null = folderId;
 
   while (currentId) {
-    const [folder] = await db
-      .select()
-      .from(folders)
-      .where(eq(folders.id, currentId))
-      .limit(1);
+    const [folder] = await db.select().from(folders).where(eq(folders.id, currentId)).limit(1);
 
     if (!folder) break;
 
@@ -98,10 +91,7 @@ export async function getArchivedNotes(userId: string): Promise<Note[]> {
     .orderBy(desc(notes.archivedAt));
 }
 
-export async function getNoteById(
-  userId: string,
-  noteId: string,
-): Promise<Note | null> {
+export async function getNoteById(userId: string, noteId: string): Promise<Note | null> {
   const [note] = await db
     .select()
     .from(notes)
@@ -111,17 +101,25 @@ export async function getNoteById(
   return note ?? null;
 }
 
+function toPrefixTsQuery(raw: string): string {
+  return raw
+    .trim()
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => `${w}:*`)
+    .join(" & ");
+}
+
 export async function searchNotes(userId: string, query: string): Promise<Note[]> {
-  const tsQuery = sql`plainto_tsquery('english', ${query})`;
+  const prefixQuery = toPrefixTsQuery(query);
+  if (!prefixQuery) return [];
+  const tsQuery = sql`to_tsquery('english', ${prefixQuery})`;
   return db
     .select()
     .from(notes)
     .where(
-      and(
-        eq(notes.userId, userId),
-        isNull(notes.archivedAt),
-        sql`search_vector @@ ${tsQuery}`,
-      ),
+      and(eq(notes.userId, userId), isNull(notes.archivedAt), sql`search_vector @@ ${tsQuery}`)
     )
     .orderBy(desc(sql`ts_rank(search_vector, ${tsQuery})`))
     .limit(50);

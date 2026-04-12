@@ -59,8 +59,8 @@ function SelectTrigger({ disabled, icon: Icon, children, className }: SelectTrig
       disabled={disabled}
       className={cn(
         "flex h-11 w-full items-center justify-between rounded-[10px]",
-        "bg-(--surface-100) px-3 text-sm text-(--grey-900)",
-        "hover:bg-(--surface-150) focus:outline-none focus:ring-0",
+        "bg-(--surface-150) px-3 text-sm text-(--grey-900)",
+        "hover:bg-(--surface-200) focus:outline-none focus:ring-0",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "[&>span]:truncate",
         className
@@ -117,7 +117,7 @@ function SelectItem({ value, children, icon: Icon, className }: SelectItemProps)
       className={cn(
         "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5",
         "text-sm text-(--grey-900) outline-none",
-        "hover:bg-(--surface-100) focus:bg-(--surface-100)",
+        "hover:bg-(--surface-150) focus:bg-(--surface-150)",
         "data-[state=checked]:font-medium",
         className
       )}

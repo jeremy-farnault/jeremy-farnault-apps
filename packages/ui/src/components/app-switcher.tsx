@@ -21,8 +21,8 @@ export function AppSwitcher({ currentAppId, className }: AppSwitcherProps) {
           aria-label="Open app switcher"
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-full",
-            "bg-(--surface-100) text-(--grey-700)",
-            "hover:bg-(--surface-150) hover:text-(--grey-900)",
+            "bg-(--surface-150) text-(--grey-700)",
+            "hover:bg-(--surface-200) hover:text-(--grey-900)",
             className
           )}
           type="button"
@@ -50,8 +50,8 @@ export function AppSwitcher({ currentAppId, className }: AppSwitcherProps) {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "flex flex-col items-center gap-1 rounded-[14px] p-3 text-[10px] text-(--grey-900)",
-                  "hover:bg-(--surface-100)",
-                  currentAppId === app.id && "bg-(--surface-100) font-semibold"
+                  "hover:bg-(--surface-150)",
+                  currentAppId === app.id && "bg-(--surface-150) font-semibold"
                 )}
               >
                 <app.icon size={24} />

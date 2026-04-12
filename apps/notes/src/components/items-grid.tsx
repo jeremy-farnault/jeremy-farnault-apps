@@ -3,8 +3,8 @@
 import { searchNotesAction } from "@/lib/actions";
 import { type SortOption, sortItems } from "@/lib/grid-utils";
 import type { Folder, Note } from "@/lib/queries";
-import { Select, SelectContent, SelectItem, TextInput } from "@jf/ui";
-import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { Select, SelectItem, TextInput } from "@jf/ui";
+import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -56,10 +56,11 @@ export function ItemsGrid({
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults(null);
+      setSearchLoading(false);
       return;
     }
+    setSearchLoading(true);
     const timer = setTimeout(async () => {
-      setSearchLoading(true);
       try {
         const results = await searchNotesAction(searchQuery);
         setSearchResults(results);
@@ -81,26 +82,31 @@ export function ItemsGrid({
       {breadcrumb}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
-        <TextInput
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search notes…"
-          className="min-w-[250px] max-w-[300px]"
-        />
+        <div className="relative min-w-[250px] max-w-[300px]">
+          <TextInput value={searchQuery} onChange={setSearchQuery} placeholder="Search notes…" />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-(--grey-400) hover:text-(--grey-700)"
+              aria-label="Clear search"
+            >
+              <XIcon size={14} />
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-2">
-          <Select value={sort} onValueChange={handleSortChange} className="w-auto">
-            <SelectContent>
-              {SORT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
+          <Select value={sort} onValueChange={handleSortChange} className="w-[250px]">
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
           </Select>
           <Link
             href="/archive"
             title="Archive"
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-100) text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+            className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
           >
             <ArchiveIcon size={20} />
           </Link>
@@ -112,13 +118,14 @@ export function ItemsGrid({
           notes={searchResults ?? []}
           allFolders={allFolders}
           onNoteClick={(note) => setPanel({ mode: "existing", note })}
+          onFolderLinkClick={() => setSearchQuery("")}
           isLoading={searchLoading}
           query={searchQuery}
         />
       ) : items.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {items.map((item) =>
             item.kind === "folder" ? (
               <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />
@@ -143,7 +150,7 @@ export function ItemsGrid({
           type="button"
           onClick={() => setFolderModalOpen(true)}
           aria-label="New folder"
-          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-100)"
+          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
         >
           <FolderPlusIcon size={22} />
         </button>

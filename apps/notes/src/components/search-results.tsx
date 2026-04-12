@@ -1,20 +1,32 @@
 "use client";
 
-import Link from "next/link";
 import type { Folder, Note } from "@/lib/queries";
-import { getFolderPath } from "@/lib/folder-utils";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
+import { NoteCard } from "./note-card";
 
 type Props = {
   notes: Note[];
   allFolders: Folder[];
   onNoteClick: (note: Note) => void;
+  onFolderLinkClick: () => void;
   isLoading: boolean;
   query: string;
 };
 
-export function SearchResults({ notes, allFolders, onNoteClick, isLoading, query }: Props) {
+export function SearchResults({
+  notes,
+  allFolders,
+  onNoteClick,
+  onFolderLinkClick,
+  isLoading,
+  query,
+}: Props) {
   if (isLoading) {
-    return <p>Searching…</p>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <SpinnerGapIcon size={32} className="animate-spin text-(--grey-500)" />
+      </div>
+    );
   }
 
   if (notes.length === 0) {
@@ -22,22 +34,18 @@ export function SearchResults({ notes, allFolders, onNoteClick, isLoading, query
   }
 
   return (
-    <div>
-      {notes.map((note) => {
-        const folderPath = getFolderPath(note.parentFolderId, allFolders);
-        const folderHref = note.parentFolderId ? `/${note.parentFolderId}` : "/";
-
-        return (
-          <div key={note.id}>
-            <button type="button" onClick={() => onNoteClick(note)} style={{ display: "block", textAlign: "left", width: "100%" }}>
-              <div>{note.title ?? "Untitled"}</div>
-              {note.body && <div>{note.body.slice(0, 100)}{note.body.length > 100 ? "…" : ""}</div>}
-              <div>{folderPath}</div>
-            </button>
-            <Link href={folderHref}>Go to folder</Link>
-          </div>
-        );
-      })}
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {notes.map((note) => (
+        <NoteCard
+          key={note.id}
+          note={note}
+          allFolders={allFolders}
+          onNoteClick={onNoteClick}
+          onFolderLinkClick={onFolderLinkClick}
+          showFolderLink
+          parentFolderId={note.parentFolderId}
+        />
+      ))}
     </div>
   );
 }

@@ -6,16 +6,27 @@ interface AppShellProps {
   appName: string;
   children: ReactNode;
   currentAppId?: string;
+  titleHref?: string;
 }
 
-export function AppShell({ children, currentAppId, appName, appIcon }: AppShellProps) {
+export function AppShell({ children, currentAppId, appName, appIcon, titleHref }: AppShellProps) {
   return (
     <div className="relative flex flex-col items-center justify-start w-full max-w-[1024px] min-h-screen pb-16 md:pb-0">
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between px-4 w-full pt-3">
-        <div className="flex items-center gap-2 text-l font-semibold text-(--grey-900)">
-          {appIcon}
-          {appName}
-        </div>
+        {titleHref ? (
+          <a
+            href={titleHref}
+            className="flex items-center gap-2 text-l font-semibold text-(--grey-900) hover:opacity-80 transition-opacity"
+          >
+            {appIcon}
+            {appName}
+          </a>
+        ) : (
+          <div className="flex items-center gap-2 text-l font-semibold text-(--grey-900)">
+            {appIcon}
+            {appName}
+          </div>
+        )}
         <AppSwitcher {...(currentAppId !== undefined && { currentAppId })} />
       </header>
 

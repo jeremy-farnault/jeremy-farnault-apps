@@ -1,6 +1,6 @@
 export function getDescendantIds(
   folderId: string,
-  allFolders: { id: string; parentFolderId: string | null }[],
+  allFolders: { id: string; parentFolderId: string | null }[]
 ): string[] {
   const children = allFolders.filter((f) => f.parentFolderId === folderId);
   return [folderId, ...children.flatMap((c) => getDescendantIds(c.id, allFolders))];
@@ -8,9 +8,9 @@ export function getDescendantIds(
 
 export function getFolderPath(
   parentFolderId: string | null,
-  allFolders: { id: string; name: string; parentFolderId: string | null }[],
+  allFolders: { id: string; name: string; parentFolderId: string | null }[]
 ): string {
-  if (!parentFolderId) return "Root";
+  if (!parentFolderId) return "Home";
 
   const segments: string[] = [];
   let currentId: string | null = parentFolderId;
@@ -22,5 +22,5 @@ export function getFolderPath(
     currentId = folder.parentFolderId;
   }
 
-  return segments.length > 0 ? segments.join(" / ") : "Root";
+  return segments.length > 0 ? segments.join(" / ") : "Home";
 }

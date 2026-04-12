@@ -7,6 +7,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       appIcon={<NotepadIcon className="text-(--primary)" size={32} />}
       appName="Noter"
       currentAppId="notes"
+      titleHref="/"
     >
       {children}
     </AppShell>
