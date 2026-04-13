@@ -11,6 +11,10 @@
       "types": "./src/components/*.tsx",
       "import": "./src/components/*.tsx"
     },
+    "./config/apps": {
+      "types": "./src/config/apps.ts",
+      "import": "./src/config/apps.ts"
+    },
     "./globals.css": "./src/globals.css"
   },
   "scripts": {
@@ -38,6 +42,7 @@
     "@radix-ui/react-select": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.6.0"

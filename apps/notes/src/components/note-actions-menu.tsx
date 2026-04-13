@@ -2,17 +2,16 @@
 
 import { archiveNote, deleteNote, toggleNotePin } from "@/lib/actions";
 import type { Folder, Note } from "@/lib/queries";
-import { ActionModal } from "@jf/ui";
+import { ActionModal, Tooltip, cn } from "@jf/ui";
 import {
   ArchiveIcon,
-  DotsThreeVerticalIcon,
   FolderOpenIcon,
   LinkIcon,
   PushPinIcon,
   PushPinSlashIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { MoveNoteModal } from "./move-note-modal";
 
@@ -23,24 +22,10 @@ type Props = {
 };
 
 export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState<"move" | "delete" | "archive" | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (!menuRef.current?.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen]);
-
   function handleCopyLink() {
-    setMenuOpen(false);
     navigator.clipboard
       .writeText(`${window.location.origin}/note/${note.id}`)
       .then(() => toast.success("Link copied"))
@@ -48,7 +33,6 @@ export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
   }
 
   function handleTogglePin() {
-    setMenuOpen(false);
     startTransition(async () => {
       try {
         await toggleNotePin(note.id);
@@ -89,84 +73,67 @@ export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
   return (
     <>
       <div
-        ref={menuRef}
-        className="flex items-center"
-        style={alwaysVisible ? undefined : { position: "relative" }}
+        className={cn(
+          "flex flex-row items-center gap-1 transition-opacity duration-150",
+          alwaysVisible
+            ? "opacity-100"
+            : modal
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
+        )}
+        onClick={(e) => e.stopPropagation()}
       >
-        {!alwaysVisible && (
+        <Tooltip content="Copy link">
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen((o) => !o);
-            }}
-            aria-label="Note actions"
-            disabled={isPending}
-            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
+            onClick={handleCopyLink}
+            aria-label="Copy link"
+            className={iconBtnClass}
           >
-            <DotsThreeVerticalIcon size={16} />
+            <LinkIcon size={14} />
           </button>
-        )}
-        {(alwaysVisible || menuOpen) && (
-          <div
-            className={
-              alwaysVisible
-                ? "flex flex-row items-center gap-1"
-                : "absolute right-full top-0 flex flex-row items-center gap-1 pr-1"
-            }
+        </Tooltip>
+        <Tooltip content="Move">
+          <button
+            type="button"
+            onClick={() => setModal("move")}
+            aria-label="Move"
+            className={iconBtnClass}
           >
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              aria-label="Copy link"
-              className={iconBtnClass}
-            >
-              <LinkIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("move");
-              }}
-              aria-label="Move"
-              className={iconBtnClass}
-            >
-              <FolderOpenIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={handleTogglePin}
-              disabled={isPending}
-              aria-label={note.pinned ? "Unpin" : "Pin"}
-              className={iconBtnClass}
-            >
-              {note.pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("archive");
-              }}
-              aria-label="Archive"
-              className={iconBtnClass}
-            >
-              <ArchiveIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("delete");
-              }}
-              aria-label="Delete"
-              className={iconBtnClass}
-            >
-              <TrashIcon size={14} />
-            </button>
-          </div>
-        )}
+            <FolderOpenIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content={note.pinned ? "Unpin" : "Pin"}>
+          <button
+            type="button"
+            onClick={handleTogglePin}
+            disabled={isPending}
+            aria-label={note.pinned ? "Unpin" : "Pin"}
+            className={iconBtnClass}
+          >
+            {note.pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+          </button>
+        </Tooltip>
+        <Tooltip content="Archive">
+          <button
+            type="button"
+            onClick={() => setModal("archive")}
+            aria-label="Archive"
+            className={iconBtnClass}
+          >
+            <ArchiveIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content="Delete">
+          <button
+            type="button"
+            onClick={() => setModal("delete")}
+            aria-label="Delete"
+            className={iconBtnClass}
+          >
+            <TrashIcon size={14} />
+          </button>
+        </Tooltip>
       </div>
 
       {modal === "move" && (

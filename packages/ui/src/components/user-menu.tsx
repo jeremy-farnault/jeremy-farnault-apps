@@ -6,12 +6,13 @@ import { cn } from "../lib/utils";
 
 interface UserMenuProps {
   email: string;
+  name?: string;
   onLogout: () => void;
 }
 
-export function UserMenu({ email, onLogout }: UserMenuProps) {
+export function UserMenu({ email, name, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false);
-  const letter = email.split("@")[0]?.[0] ?? "?";
+  const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>

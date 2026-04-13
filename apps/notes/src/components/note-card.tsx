@@ -31,19 +31,17 @@ export function NoteCard({
   const borderColor = getBorderColor(bgColor);
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => onNoteClick(note)}
       className={cn(
-        "relative flex h-[150px] flex-col rounded-[22px] border p-4",
+        "group relative flex h-[150px] flex-col rounded-[22px] border p-4 text-left cursor-pointer",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",
         note.pinned ? "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]" : "shadow-sm"
       )}
       style={{ backgroundColor: bgColor, borderColor }}
     >
-      <button
-        type="button"
-        onClick={() => onNoteClick(note)}
-        className="flex-1 text-left overflow-hidden w-full"
-      >
+      <div className="flex-1 flex flex-col justify-start overflow-hidden w-full">
         {note.title && (
           <div className="mb-1 flex items-center gap-1 min-w-0 w-full">
             {note.pinned && <PushPinIcon size={14} className="shrink-0" />}
@@ -53,7 +51,7 @@ export function NoteCard({
         {note.body && (
           <p className="text-sm text-(--grey-700) line-clamp-2 whitespace-pre-line">{note.body}</p>
         )}
-      </button>
+      </div>
 
       <div className="flex items-center justify-end gap-1 mt-2">
         <NoteActionsMenu note={note} allFolders={allFolders} />
@@ -71,6 +69,6 @@ export function NoteCard({
           </Link>
         )}
       </div>
-    </div>
+    </button>
   );
 }

@@ -1,0 +1,33 @@
+{
+  "name": "@jf/auth-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack --port 3003",
+    "build": "next build",
+    "start": "next start --port 3003",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf .next dist"
+  },
+  "dependencies": {
+    "@jf/auth": "workspace:*",
+    "@jf/db": "workspace:*",
+    "@jf/ui": "workspace:*",
+    "@phosphor-icons/react": "^2.1.7",
+    "next": "^15.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sonner": "^2.0.7"
+  },
+  "devDependencies": {
+    "@jf/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}

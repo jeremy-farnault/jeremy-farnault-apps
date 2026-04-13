@@ -2,15 +2,14 @@
 
 import { archiveFolder, deleteFolder } from "@/lib/actions";
 import type { Folder } from "@/lib/queries";
-import { ActionModal } from "@jf/ui";
+import { ActionModal, Tooltip, cn } from "@jf/ui";
 import {
   ArchiveIcon,
-  DotsThreeVerticalIcon,
   FolderOpenIcon,
   PencilIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { MoveFolderModal } from "./move-folder-modal";
 import { RenameFolderModal } from "./rename-folder-modal";
@@ -21,21 +20,8 @@ type Props = {
 };
 
 export function FolderActionsMenu({ folder, allFolders }: Props) {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [modal, setModal] = useState<"rename" | "move" | "delete" | "archive" | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (!menuRef.current?.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen]);
 
   function handleArchiveConfirm() {
     startTransition(async () => {
@@ -66,67 +52,54 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
 
   return (
     <>
-      <div ref={menuRef} className="flex items-center" style={{ position: "relative" }}>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            setMenuOpen((o) => !o);
-          }}
-          aria-label="Folder actions"
-          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
-        >
-          <DotsThreeVerticalIcon size={16} />
-        </button>
-        {menuOpen && (
-          <div className="absolute right-full top-0 flex flex-row items-center gap-1 pr-1">
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("rename");
-              }}
-              aria-label="Rename"
-              className={iconBtnClass}
-            >
-              <PencilIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("move");
-              }}
-              aria-label="Move"
-              className={iconBtnClass}
-            >
-              <FolderOpenIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("archive");
-              }}
-              disabled={isPending}
-              aria-label="Archive"
-              className={iconBtnClass}
-            >
-              <ArchiveIcon size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setModal("delete");
-              }}
-              aria-label="Delete"
-              className={iconBtnClass}
-            >
-              <TrashIcon size={14} />
-            </button>
-          </div>
+      <div
+        className={cn(
+          "flex flex-row items-center gap-1 transition-opacity duration-150",
+          modal ? "opacity-100" : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
         )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Tooltip content="Rename">
+          <button
+            type="button"
+            onClick={() => setModal("rename")}
+            aria-label="Rename"
+            className={iconBtnClass}
+          >
+            <PencilIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content="Move">
+          <button
+            type="button"
+            onClick={() => setModal("move")}
+            aria-label="Move"
+            className={iconBtnClass}
+          >
+            <FolderOpenIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content="Archive">
+          <button
+            type="button"
+            onClick={() => setModal("archive")}
+            disabled={isPending}
+            aria-label="Archive"
+            className={iconBtnClass}
+          >
+            <ArchiveIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content="Delete">
+          <button
+            type="button"
+            onClick={() => setModal("delete")}
+            aria-label="Delete"
+            className={iconBtnClass}
+          >
+            <TrashIcon size={14} />
+          </button>
+        </Tooltip>
       </div>
 
       {modal === "rename" && <RenameFolderModal folder={folder} onClose={() => setModal(null)} />}

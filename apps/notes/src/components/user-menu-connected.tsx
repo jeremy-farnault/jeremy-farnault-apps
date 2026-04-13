@@ -2,19 +2,17 @@
 
 import { signOut, useSession } from "@jf/auth/client";
 import { UserMenu } from "@jf/ui";
-import { useRouter } from "next/navigation";
 
 export function UserMenuConnected() {
   const { data: session } = useSession();
-  const router = useRouter();
 
   if (!session?.user?.email) return null;
 
   async function handleLogout() {
     await signOut();
-    router.push("/login");
-    router.refresh();
+    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
+    window.location.href = `${authUrl}/login`;
   }
 
-  return <UserMenu email={session.user.email} onLogout={handleLogout} />;
+  return <UserMenu email={session.user.email} name={session.user.name ?? undefined} onLogout={handleLogout} />;
 }

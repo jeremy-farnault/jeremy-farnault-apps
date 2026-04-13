@@ -7,7 +7,9 @@ export function middleware(request: NextRequest) {
     request.cookies.get("__Secure-better-auth.session_token");
 
   if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
+    const redirect = request.nextUrl.origin;
+    return NextResponse.redirect(`${authUrl}/login?redirect=${encodeURIComponent(redirect)}`);
   }
 
   return NextResponse.next();
@@ -15,6 +17,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!login|signup|api/auth|_next/static|_next/image|favicon\\.ico).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon\\.ico).*)",
   ],
 };
