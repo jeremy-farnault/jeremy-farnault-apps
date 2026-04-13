@@ -82,6 +82,7 @@ export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
               : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
         )}
         onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <Tooltip content="Copy link">
           <button

@@ -58,11 +58,12 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
           modal ? "opacity-100" : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
         )}
         onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <Tooltip content="Rename">
           <button
             type="button"
-            onClick={() => setModal("rename")}
+            onClick={(e) => { e.stopPropagation(); setModal("rename"); }}
             aria-label="Rename"
             className={iconBtnClass}
           >
@@ -72,7 +73,7 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
         <Tooltip content="Move">
           <button
             type="button"
-            onClick={() => setModal("move")}
+            onClick={(e) => { e.stopPropagation(); setModal("move"); }}
             aria-label="Move"
             className={iconBtnClass}
           >
@@ -82,7 +83,7 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
         <Tooltip content="Archive">
           <button
             type="button"
-            onClick={() => setModal("archive")}
+            onClick={(e) => { e.stopPropagation(); setModal("archive"); }}
             disabled={isPending}
             aria-label="Archive"
             className={iconBtnClass}
@@ -93,7 +94,7 @@ export function FolderActionsMenu({ folder, allFolders }: Props) {
         <Tooltip content="Delete">
           <button
             type="button"
-            onClick={() => setModal("delete")}
+            onClick={(e) => { e.stopPropagation(); setModal("delete"); }}
             aria-label="Delete"
             className={iconBtnClass}
           >

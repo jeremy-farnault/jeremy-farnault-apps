@@ -4,6 +4,7 @@ import type { Folder, Note } from "@/lib/queries";
 import { cn } from "@jf/ui";
 import { FolderIcon, PushPinIcon } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRef } from "react";
 import { NoteActionsMenu } from "./note-actions-menu";
 
 function getBorderColor(color: string): string {
@@ -29,11 +30,17 @@ export function NoteCard({
 }: Props) {
   const bgColor = note.backgroundColor ?? "var(--grey-400)";
   const borderColor = getBorderColor(bgColor);
+  const pointerDownOnCard = useRef(false);
 
   return (
     <button
       type="button"
-      onClick={() => onNoteClick(note)}
+      onPointerDown={() => { pointerDownOnCard.current = true; }}
+      onClick={() => {
+        if (!pointerDownOnCard.current) return;
+        pointerDownOnCard.current = false;
+        onNoteClick(note);
+      }}
       className={cn(
         "group relative flex h-[150px] flex-col rounded-[22px] border p-4 text-left cursor-pointer",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",

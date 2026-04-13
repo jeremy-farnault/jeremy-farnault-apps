@@ -56,7 +56,8 @@ export function ActionModal({
       <Dialog.Portal>
         <Dialog.Overlay
           className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]"
-          onClick={closeOnBackdropClick ? undefined : (e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
         >
           <Dialog.Content
             {...(!closeOnEscapeKeyDown && {
