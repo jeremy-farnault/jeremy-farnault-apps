@@ -1,9 +1,9 @@
 "use client";
 
 import { searchNotesAction } from "@/lib/actions";
-import { type SortOption, sortItems } from "@/lib/grid-utils";
+import { type SortOption, splitItems } from "@/lib/grid-utils";
 import type { Folder, Note } from "@/lib/queries";
-import { Select, SelectItem, TextInput } from "@jf/ui";
+import { Divider, Grid, Select, SelectItem, TextInput } from "@jf/ui";
 import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -51,7 +51,9 @@ export function ItemsGrid({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Note[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
-  const items = sortItems(folders, notes, sort);
+  const { pinnedItems, normalItems } = splitItems(folders, notes, sort);
+  const hasPinned = pinnedItems.length > 0;
+  const isEmpty = pinnedItems.length === 0 && normalItems.length === 0;
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -122,22 +124,43 @@ export function ItemsGrid({
           isLoading={searchLoading}
           query={searchQuery}
         />
-      ) : items.length === 0 ? (
+      ) : isEmpty ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {items.map((item) =>
-            item.kind === "folder" ? (
-              <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />
-            ) : (
-              <NoteCard
-                key={item.data.id}
-                note={item.data}
-                allFolders={allFolders}
-                onNoteClick={(note) => setPanel({ mode: "existing", note })}
-              />
-            )
+        <div className="flex flex-col gap-6">
+          {hasPinned && (
+            <>
+              <Grid>
+                {pinnedItems.map((item) =>
+                  item.kind === "folder" ? (
+                    <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />
+                  ) : (
+                    <NoteCard
+                      key={item.data.id}
+                      note={item.data}
+                      allFolders={allFolders}
+                      onNoteClick={(note) => setPanel({ mode: "existing", note })}
+                    />
+                  )
+                )}
+              </Grid>
+              <Divider />
+            </>
           )}
+          <Grid>
+            {normalItems.map((item) =>
+              item.kind === "folder" ? (
+                <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />
+              ) : (
+                <NoteCard
+                  key={item.data.id}
+                  note={item.data}
+                  allFolders={allFolders}
+                  onNoteClick={(note) => setPanel({ mode: "existing", note })}
+                />
+              )
+            )}
+          </Grid>
         </div>
       )}
 
