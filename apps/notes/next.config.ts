@@ -9,9 +9,6 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db"],
-  watchOptions: {
-    watchedDirectories: ["../../packages"],
-  },
 };
 
 export default withSerwist(nextConfig);
