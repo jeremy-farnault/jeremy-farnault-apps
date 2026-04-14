@@ -19,7 +19,7 @@ export const auth = betterAuth({
       enabled: true,
       // Set to your root domain so the session cookie is shared across all subdomains.
       // Example: if auth is auth.example.com and notes is notes.example.com, set ".example.com"
-      domain: process.env.COOKIE_DOMAIN,
+      ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
     },
   },
   // Uncomment to add OAuth providers:
