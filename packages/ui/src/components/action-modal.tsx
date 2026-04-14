@@ -54,16 +54,18 @@ export function ActionModal({
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]"
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
+        <Dialog.Overlay className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]">
           <Dialog.Content
             {...(!closeOnEscapeKeyDown && {
               onEscapeKeyDown: (e: KeyboardEvent) => e.preventDefault(),
             })}
             {...(!closeOnBackdropClick && { onInteractOutside: (e: Event) => e.preventDefault() })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && primaryButton && !primaryButton.loading) {
+                e.preventDefault();
+                primaryButton.onClick();
+              }
+            }}
             className={cn(
               "relative flex flex-col rounded-[22px] bg-(--card) p-8",
               "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none",
