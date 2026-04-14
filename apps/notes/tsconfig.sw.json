@@ -1,0 +1,8 @@
+{
+  "extends": "@jf/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "lib": ["webworker", "webworker.iterable", "esnext"],
+    "types": []
+  },
+  "include": ["src/sw.ts"]
+}
