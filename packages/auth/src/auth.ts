@@ -14,6 +14,14 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 30, // 30 days
     updateAge: 60 * 60 * 24, // refresh if older than 1 day
   },
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+      // Set to your root domain so the session cookie is shared across all subdomains.
+      // Example: if auth is auth.example.com and notes is notes.example.com, set ".example.com"
+      domain: process.env.COOKIE_DOMAIN,
+    },
+  },
   // Uncomment to add OAuth providers:
   // socialProviders: {
   //   github: {

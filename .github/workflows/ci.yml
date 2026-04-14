@@ -78,4 +78,6 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_CI }}
           BETTER_AUTH_SECRET: "ci-secret-placeholder-32-characters"
+          BETTER_AUTH_URL: "https://placeholder.vercel.app"
           NEXT_PUBLIC_APP_URL: "https://placeholder.vercel.app"
+          NEXT_PUBLIC_AUTH_URL: "https://placeholder.vercel.app"

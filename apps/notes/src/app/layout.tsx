@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: "Notes",
   description: "Personal notes",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icons/icon-192x192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
