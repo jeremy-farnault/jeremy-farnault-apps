@@ -4,7 +4,7 @@ import type { Folder, Note } from "@/lib/queries";
 import { cn } from "@jf/ui";
 import { FolderIcon, PushPinIcon } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NoteActionsMenu } from "./note-actions-menu";
 
 function getBorderColor(color: string): string {
@@ -31,24 +31,38 @@ export function NoteCard({
   const bgColor = note.backgroundColor ?? "var(--grey-400)";
   const borderColor = getBorderColor(bgColor);
   const pointerDownOnCard = useRef(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) setMenuVisible(true);
+  }, []);
 
   return (
-    <button
-      type="button"
-      onPointerDown={() => { pointerDownOnCard.current = true; }}
-      onClick={() => {
-        if (!pointerDownOnCard.current) return;
-        pointerDownOnCard.current = false;
-        onNoteClick(note);
-      }}
+    <div
       className={cn(
-        "group relative flex h-[150px] flex-col rounded-[22px] border p-4 text-left cursor-pointer",
+        "group relative flex h-[150px] flex-col rounded-[22px] border p-4",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",
         note.pinned ? "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]" : "shadow-sm"
       )}
       style={{ backgroundColor: bgColor, borderColor }}
+      onMouseEnter={() => setMenuVisible(true)}
+      onMouseLeave={() => setMenuVisible(false)}
     >
-      <div className="flex-1 flex flex-col justify-start overflow-hidden w-full">
+      <button
+        type="button"
+        aria-label={note.title ?? "Open note"}
+        onPointerDown={() => {
+          pointerDownOnCard.current = true;
+        }}
+        onClick={() => {
+          if (!pointerDownOnCard.current) return;
+          pointerDownOnCard.current = false;
+          onNoteClick(note);
+        }}
+        className="absolute inset-0 rounded-[22px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2"
+      />
+
+      <div className="relative flex-1 flex flex-col justify-start overflow-hidden w-full pointer-events-none">
         {note.title && (
           <div className="mb-1 flex items-center gap-1 min-w-0 w-full">
             {note.pinned && <PushPinIcon size={14} className="shrink-0" />}
@@ -60,8 +74,8 @@ export function NoteCard({
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-1 mt-2">
-        <NoteActionsMenu note={note} allFolders={allFolders} />
+      <div className="relative flex items-center justify-end gap-1 mt-2">
+        <NoteActionsMenu note={note} allFolders={allFolders} menuVisible={menuVisible} />
         {showFolderLink && (
           <Link
             href={parentFolderId ? `/${parentFolderId}` : "/"}
@@ -76,6 +90,6 @@ export function NoteCard({
           </Link>
         )}
       </div>
-    </button>
+    </div>
   );
 }

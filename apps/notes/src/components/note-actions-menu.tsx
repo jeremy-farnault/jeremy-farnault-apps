@@ -19,10 +19,12 @@ type Props = {
   note: Note;
   allFolders: Folder[];
   alwaysVisible?: boolean;
+  menuVisible?: boolean;
 };
 
-export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
+export function NoteActionsMenu({ note, allFolders, alwaysVisible, menuVisible }: Props) {
   const [modal, setModal] = useState<"move" | "delete" | "archive" | null>(null);
+  const shouldMount = alwaysVisible || modal !== null || (menuVisible ?? true);
   const [isPending, startTransition] = useTransition();
 
   function handleCopyLink() {
@@ -72,70 +74,73 @@ export function NoteActionsMenu({ note, allFolders, alwaysVisible }: Props) {
 
   return (
     <>
-      <div
-        className={cn(
-          "flex flex-row items-center gap-1 transition-opacity duration-150",
-          alwaysVisible
-            ? "opacity-100"
-            : modal
+      {shouldMount && (
+        <div
+          className={cn(
+            "flex flex-row items-center gap-1 transition-opacity duration-150",
+            alwaysVisible
               ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
-        )}
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <Tooltip content="Copy link">
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            aria-label="Copy link"
-            className={iconBtnClass}
-          >
-            <LinkIcon size={14} />
-          </button>
-        </Tooltip>
-        <Tooltip content="Move">
-          <button
-            type="button"
-            onClick={() => setModal("move")}
-            aria-label="Move"
-            className={iconBtnClass}
-          >
-            <FolderOpenIcon size={14} />
-          </button>
-        </Tooltip>
-        <Tooltip content={note.pinned ? "Unpin" : "Pin"}>
-          <button
-            type="button"
-            onClick={handleTogglePin}
-            disabled={isPending}
-            aria-label={note.pinned ? "Unpin" : "Pin"}
-            className={iconBtnClass}
-          >
-            {note.pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
-          </button>
-        </Tooltip>
-        <Tooltip content="Archive">
-          <button
-            type="button"
-            onClick={() => setModal("archive")}
-            aria-label="Archive"
-            className={iconBtnClass}
-          >
-            <ArchiveIcon size={14} />
-          </button>
-        </Tooltip>
-        <Tooltip content="Delete">
-          <button
-            type="button"
-            onClick={() => setModal("delete")}
-            aria-label="Delete"
-            className={iconBtnClass}
-          >
-            <TrashIcon size={14} />
-          </button>
-        </Tooltip>
-      </div>
+              : modal
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
+          )}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <Tooltip content="Copy link">
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              aria-label="Copy link"
+              className={iconBtnClass}
+            >
+              <LinkIcon size={14} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Move">
+            <button
+              type="button"
+              onClick={() => setModal("move")}
+              aria-label="Move"
+              className={iconBtnClass}
+            >
+              <FolderOpenIcon size={14} />
+            </button>
+          </Tooltip>
+          <Tooltip content={note.pinned ? "Unpin" : "Pin"}>
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              disabled={isPending}
+              aria-label={note.pinned ? "Unpin" : "Pin"}
+              className={iconBtnClass}
+            >
+              {note.pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+            </button>
+          </Tooltip>
+          <Tooltip content="Archive">
+            <button
+              type="button"
+              onClick={() => setModal("archive")}
+              aria-label="Archive"
+              className={iconBtnClass}
+            >
+              <ArchiveIcon size={14} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Delete">
+            <button
+              type="button"
+              onClick={() => setModal("delete")}
+              aria-label="Delete"
+              className={iconBtnClass}
+            >
+              <TrashIcon size={14} />
+            </button>
+          </Tooltip>
+        </div>
+      )}
 
       {modal === "move" && (
         <MoveNoteModal note={note} allFolders={allFolders} onClose={() => setModal(null)} />
