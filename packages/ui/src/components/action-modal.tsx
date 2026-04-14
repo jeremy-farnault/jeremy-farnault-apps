@@ -107,7 +107,7 @@ export function ActionModal({
                 )}
                 {primaryButton && (
                   <Button
-                    className="flex-1 bg-(--grey-900) text-white hover:bg-(--grey-700)"
+                    className="flex-1"
                     disabled={primaryButton.loading}
                     onClick={primaryButton.onClick}
                   >
