@@ -4,11 +4,10 @@ import { signUp } from "@jf/auth/client";
 import { TextInput } from "@jf/ui";
 import { apps } from "@jf/ui/config/apps";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 function SignUpForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
 
@@ -17,6 +16,7 @@ function SignUpForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,31 +29,31 @@ function SignUpForm() {
       setError(signUpError.message ?? "Sign up failed");
       setLoading(false);
     } else {
-      router.push(redirect ?? "/");
-      router.refresh();
+      setEmailSent(true);
+      setLoading(false);
     }
   }
 
   const loginHref = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login";
 
+  if (emailSent) {
+    return (
+      <div className="flex w-full max-w-sm flex-col gap-3">
+        <h1 className="text-2xl font-semibold text-(--grey-900) mb-1">Check your email</h1>
+        <p className="text-sm text-(--grey-600)">
+          We sent a verification link to <strong>{email}</strong>. Click it to activate your
+          account.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
       <h1 className="text-2xl font-semibold text-(--grey-900) mb-1">Create account</h1>
       {error && <p className="text-sm text-(--red-500)">{error}</p>}
-      <TextInput
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={setName}
-        required
-      />
-      <TextInput
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={setEmail}
-        required
-      />
+      <TextInput type="text" placeholder="Name" value={name} onChange={setName} required />
+      <TextInput type="email" placeholder="Email" value={email} onChange={setEmail} required />
       <TextInput
         type="password"
         placeholder="Password"

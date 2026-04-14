@@ -1,6 +1,9 @@
 import { db } from "@jf/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -8,7 +11,22 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL!,
+        to: user.email,
+        subject: "Verify your email",
+        html: `<p>Click <a href="${url}">here</a> to verify your email address.</p>`,
+      });
+    },
+  },
+  rateLimit: {
+    window: 60,
+    max: 10,
+    customRules: {
+      "/sign-up/email": { window: 3600, max: 5 },
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days
