@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Notes",
+  title: "Noter",
   description: "Personal notes",
   manifest: "/manifest.json",
   icons: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Notes",
+    title: "Noter",
   },
 };
 
