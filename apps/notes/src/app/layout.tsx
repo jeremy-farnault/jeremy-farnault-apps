@@ -1,4 +1,5 @@
 import "@jf/ui/globals.css";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         {children}
         <Toaster toastOptions={{ classNames: { toast: "!w-fit" } }} />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
