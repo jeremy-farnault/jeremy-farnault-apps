@@ -72,11 +72,11 @@ export function NoteCard({
           </div>
         )}
         {note.body && (
-          <p className="text-sm text-(--grey-700) line-clamp-2 whitespace-pre-line">{note.body}</p>
+          <p className="text-sm text-(--grey-700) line-clamp-3 whitespace-pre-line">{note.body}</p>
         )}
       </div>
 
-      <div className="relative flex items-center justify-end gap-1 mt-2">
+      <div className="relative flex items-center justify-end gap-1">
         <NoteActionsMenu note={note} allFolders={allFolders} menuVisible={menuVisible} />
         {showFolderLink && (
           <Link

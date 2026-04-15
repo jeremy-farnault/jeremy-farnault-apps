@@ -63,13 +63,13 @@ export function ArchivedNoteCard({ note }: Props) {
             </div>
           )}
           {note.body && (
-            <p className="text-sm text-(--grey-700) line-clamp-2 whitespace-pre-line">
+            <p className="text-sm text-(--grey-700) line-clamp-3 whitespace-pre-line">
               {note.body}
             </p>
           )}
         </div>
 
-        <div className="flex items-center justify-end mt-2">
+        <div className="flex items-center justify-end">
           <div ref={menuRef} className="flex items-center" style={{ position: "relative" }}>
             <button
               type="button"
