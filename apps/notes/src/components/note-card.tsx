@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_COLOR } from "@/lib/note-utils.ts";
 import type { Folder, Note } from "@/lib/queries";
 import { cn } from "@jf/ui";
 import { FolderIcon, PushPinIcon } from "@phosphor-icons/react";
@@ -8,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { NoteActionsMenu } from "./note-actions-menu";
 
 function getBorderColor(color: string): string {
+  if (color.includes("-200)")) return color.replace("-200)", "-100)");
   return color.replace("-400)", "-600)");
 }
 
@@ -28,7 +30,7 @@ export function NoteCard({
   parentFolderId,
   onFolderLinkClick,
 }: Props) {
-  const bgColor = note.backgroundColor ?? "var(--grey-400)";
+  const bgColor = note.backgroundColor ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
   const pointerDownOnCard = useRef(false);
   const [menuVisible, setMenuVisible] = useState(false);
