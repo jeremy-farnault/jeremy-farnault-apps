@@ -23,7 +23,12 @@ function SignUpForm() {
     setLoading(true);
     setError("");
 
-    const { error: signUpError } = await signUp.email({ name, email, password });
+    const { error: signUpError } = await signUp.email({
+      name,
+      email,
+      password,
+      callbackURL: redirect ?? "/",
+    });
 
     if (signUpError) {
       setError(signUpError.message ?? "Sign up failed");
