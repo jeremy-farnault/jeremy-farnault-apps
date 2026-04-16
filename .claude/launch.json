@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "journaler",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "journaler", "dev"],
+      "port": 3006
+    }
+  ]
+}
