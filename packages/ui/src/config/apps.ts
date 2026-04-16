@@ -6,6 +6,7 @@ export interface AppDefinition {
   name: string;
   icon: Icon;
   href: string;
+  accentColor?: string;
 }
 
 export const apps: AppDefinition[] = [
@@ -14,6 +15,7 @@ export const apps: AppDefinition[] = [
     name: "Notes",
     icon: NotepadIcon,
     href: process.env.NEXT_PUBLIC_NOTES_URL ?? "#",
+    accentColor: "--magenta-400",
   },
   {
     id: "blog",
@@ -32,5 +34,6 @@ export const apps: AppDefinition[] = [
     name: "Journaler",
     icon: StackIcon,
     href: process.env.NEXT_PUBLIC_JOURNALER_URL ?? "#",
+    accentColor: "--teal-400",
   },
 ];

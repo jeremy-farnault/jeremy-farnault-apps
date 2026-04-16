@@ -36,6 +36,13 @@
       "when": 1775290000000,
       "tag": "0004_notes_pinned",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776330030605,
+      "tag": "0005_aromatic_crystal",
+      "breakpoints": true
     }
   ]
 }

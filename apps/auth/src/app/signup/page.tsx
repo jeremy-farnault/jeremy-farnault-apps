@@ -88,11 +88,16 @@ export default function SignUpPage() {
     <main className="flex min-h-screen w-full max-w-[1024px] flex-col items-center px-4">
       <header className="sticky top-0 z-40 flex h-14 w-full items-center pt-3">
         <div className="flex items-center gap-3">
-          {apps.map((app) => (
-            <a key={app.id} href={app.href} aria-label={app.name}>
-              <app.icon size={24} className="text-(--magenta-400)" />
-            </a>
-          ))}
+          {apps
+            .filter((app) => ["notes", "journaler"].includes(app.id))
+            .map((app) => (
+              <a key={app.id} href={app.href} aria-label={app.name}>
+                <app.icon
+                  size={24}
+                  style={{ color: app.accentColor ? `var(${app.accentColor})` : undefined }}
+                />
+              </a>
+            ))}
           <span className="text-l font-semibold text-(--grey-900)">Outils</span>
         </div>
       </header>
