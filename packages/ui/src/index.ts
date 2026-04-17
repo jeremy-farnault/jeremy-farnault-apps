@@ -9,6 +9,7 @@ export * from "./components/grid";
 export * from "./components/select";
 export * from "./components/skeleton";
 export * from "./components/switch";
+export * from "./components/search-input";
 export * from "./components/text-input";
 export * from "./components/textarea";
 export * from "./components/tooltip";

@@ -3,12 +3,12 @@
 import { searchNotesAction } from "@/lib/actions";
 import { type SortOption, splitItems } from "@/lib/grid-utils";
 import type { Folder, Note } from "@/lib/queries";
-import { Divider, Grid, Select, SelectItem, TextInput } from "@jf/ui";
-import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon, XIcon } from "@phosphor-icons/react";
+import { Divider, Grid, SearchInput, Select, SelectItem } from "@jf/ui";
+import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { EmptyState } from "./empty-state";
 import { FolderCard } from "./folder-card";
 import { NewFolderButton } from "./new-folder-button";
@@ -48,6 +48,7 @@ export function ItemsGrid({
 
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [folderModalOpen, setFolderModalOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Note[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -55,23 +56,24 @@ export function ItemsGrid({
   const hasPinned = pinnedItems.length > 0;
   const isEmpty = pinnedItems.length === 0 && normalItems.length === 0;
 
-  useEffect(() => {
-    if (!searchQuery.trim()) {
+  async function handleDebouncedSearch(query: string) {
+    if (!query.trim()) {
+      setIsSearching(false);
+      setSearchQuery("");
       setSearchResults(null);
       setSearchLoading(false);
       return;
     }
+    setIsSearching(true);
+    setSearchQuery(query);
     setSearchLoading(true);
-    const timer = setTimeout(async () => {
-      try {
-        const results = await searchNotesAction(searchQuery);
-        setSearchResults(results);
-      } finally {
-        setSearchLoading(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    try {
+      const results = await searchNotesAction(query);
+      setSearchResults(results);
+    } finally {
+      setSearchLoading(false);
+    }
+  }
 
   function handleSortChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -84,19 +86,11 @@ export function ItemsGrid({
       {breadcrumb}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
-        <div className="relative min-w-[250px] max-w-[300px]">
-          <TextInput value={searchQuery} onChange={setSearchQuery} placeholder="Search notes…" />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-(--grey-400) hover:text-(--grey-700)"
-              aria-label="Clear search"
-            >
-              <XIcon size={14} />
-            </button>
-          )}
-        </div>
+        <SearchInput
+          placeholder="Search notes…"
+          onDebouncedChange={handleDebouncedSearch}
+          className="min-w-[250px] max-w-[300px]"
+        />
         <div className="flex items-center gap-2">
           <Select value={sort} onValueChange={handleSortChange} className="w-[250px]">
             {SORT_OPTIONS.map((opt) => (
@@ -115,12 +109,15 @@ export function ItemsGrid({
         </div>
       </div>
 
-      {searchQuery.trim() ? (
+      {isSearching ? (
         <SearchResults
           notes={searchResults ?? []}
           allFolders={allFolders}
           onNoteClick={(note) => setPanel({ mode: "existing", note })}
-          onFolderLinkClick={() => setSearchQuery("")}
+          onFolderLinkClick={() => {
+            setIsSearching(false);
+            setSearchResults(null);
+          }}
           isLoading={searchLoading}
           query={searchQuery}
         />
