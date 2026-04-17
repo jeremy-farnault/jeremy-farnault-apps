@@ -43,6 +43,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: router.refresh is stable; titleRef/bodyRef/noteIdRef are refs read at call time to avoid stale closures
   useEffect(() => {
+    if (color === (note.backgroundColor ?? DEFAULT_COLOR)) return;
     const currentNoteId = noteIdRef.current;
     if (!currentNoteId) return;
     updateNote(currentNoteId, titleRef.current || null, bodyRef.current || null, color)
@@ -52,6 +53,8 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refs are read at call time; parentFolderId/router.refresh are intentionally excluded
   useEffect(() => {
+    if (title === (note.title ?? "") && body === (note.body ?? "")) return;
+
     const hasContent = title.trim() || body.trim();
     if (!hasContent && noteIdRef.current === null) return;
 
@@ -120,9 +123,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
           <ColorPicker value={color} onChange={setColor} />
           <div className="flex items-center gap-2">
             <NoteActionsMenu note={note} allFolders={allFolders} alwaysVisible />
-            {isSaving && (
-              <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />
-            )}
+            {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
           </div>
         </div>
       </div>

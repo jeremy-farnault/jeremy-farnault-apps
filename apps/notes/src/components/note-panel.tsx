@@ -33,6 +33,8 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   const colorRef = useRef(color);
   // Existing notes are already saved; new notes need an immediate first save
   const hasSavedRef = useRef(note !== null);
+  // Prevent concurrent createNote calls when server action is slow
+  const isCreatingRef = useRef(false);
 
   // Keep refs in sync each render (safe: idempotent, not a side-effect)
   titleRef.current = title;
@@ -46,6 +48,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   // Color change: save immediately (only once note exists)
   // biome-ignore lint/correctness/useExhaustiveDependencies: router.refresh is stable; titleRef/bodyRef/noteIdRef are refs read at call time to avoid stale closures
   useEffect(() => {
+    if (color === (note?.backgroundColor ?? DEFAULT_COLOR)) return;
     const currentNoteId = noteIdRef.current;
     if (!currentNoteId) return;
     updateNote(currentNoteId, titleRef.current || null, bodyRef.current || null, color)
@@ -53,9 +56,11 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       .catch(() => {});
   }, [color]);
 
-  // Content change: first change fires immediately, subsequent changes debounce at 500ms
+  // Content change: first change fires immediately, subsequent changes debounce at 300ms
   // biome-ignore lint/correctness/useExhaustiveDependencies: refs are read at call time; parentFolderId/router.refresh are intentionally excluded — parentFolderId is fixed for the panel's lifetime and must not re-trigger save logic
   useEffect(() => {
+    if (title === (note?.title ?? "") && body === (note?.body ?? "")) return;
+
     const hasContent = title.trim() || body.trim();
     if (!hasContent && noteIdRef.current === null) return;
 
@@ -64,14 +69,28 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       try {
         const currentNoteId = noteIdRef.current;
         if (currentNoteId === null) {
+          if (isCreatingRef.current) return;
+          isCreatingRef.current = true;
+          const sentTitle = titleRef.current;
+          const sentBody = bodyRef.current;
           const id = await createNote(
             parentFolderId,
-            titleRef.current || null,
-            bodyRef.current || null,
+            sentTitle || null,
+            sentBody || null,
             colorRef.current
           );
+          isCreatingRef.current = false;
           setNoteId(id);
           noteIdRef.current = id;
+          // If user typed more while the create was in-flight, save those changes now
+          if (titleRef.current !== sentTitle || bodyRef.current !== sentBody) {
+            await updateNote(
+              id,
+              titleRef.current || null,
+              bodyRef.current || null,
+              colorRef.current
+            );
+          }
           router.refresh();
           toast.success("Note created");
         } else {
@@ -84,6 +103,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
           router.refresh();
         }
       } catch (err) {
+        isCreatingRef.current = false;
         toast.error(err instanceof Error ? err.message : "Failed to save note");
       } finally {
         setIsSaving(false);
