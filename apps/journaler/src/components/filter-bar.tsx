@@ -3,7 +3,8 @@
 import { cn, Select, SelectItem } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { EntryCategory, FilterParams, SortOption } from "@/lib/queries";
+import type { CalendarScope, EntryCategory, FilterParams, SortOption } from "@/lib/queries";
+import { CalendarDrillDown } from "./calendar-drill-down";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "date-desc", label: "Date (newest first)" },
@@ -24,7 +25,7 @@ export function FilterBar({ filters }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function update(changes: Partial<{ sort: SortOption; categories: EntryCategory[]; rating: number | null }>) {
+  function update(changes: Partial<{ sort: SortOption; categories: EntryCategory[]; rating: number | null; calendarScope: CalendarScope | null }>) {
     const params = new URLSearchParams(searchParams.toString());
 
     if (changes.sort !== undefined) {
@@ -42,6 +43,18 @@ export function FilterBar({ filters }: Props) {
       else params.set("rating", String(changes.rating));
     }
 
+    if ("calendarScope" in changes) {
+      params.delete("year");
+      params.delete("month");
+      params.delete("day");
+      const s = changes.calendarScope;
+      if (s !== null && s !== undefined) {
+        params.set("year", String(s.year));
+        if (s.month !== undefined) params.set("month", String(s.month));
+        if (s.day !== undefined) params.set("day", String(s.day));
+      }
+    }
+
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname);
   }
@@ -56,7 +69,8 @@ export function FilterBar({ filters }: Props) {
   const isDefault =
     filters.sort === "date-desc" &&
     filters.categories.length === 0 &&
-    filters.rating === null;
+    filters.rating === null &&
+    filters.calendarScope === null;
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -102,6 +116,12 @@ export function FilterBar({ filters }: Props) {
           </SelectItem>
         ))}
       </Select>
+
+      <CalendarDrillDown
+        scope={filters.calendarScope}
+        onScopeChange={(scope) => update({ calendarScope: scope })}
+        filters={{ categories: filters.categories, rating: filters.rating }}
+      />
 
       {!isDefault && (
         <button

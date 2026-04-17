@@ -1,9 +1,11 @@
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 import { FilterBar } from "@/components/filter-bar";
+import { CalendarBreadcrumb } from "@/components/calendar-breadcrumb";
 import { EntriesGrid } from "@/components/entries-grid";
 import {
   getEntries,
+  type CalendarScope,
   type EntryCategory,
   type FilterParams,
   type SortOption,
@@ -36,7 +38,31 @@ function parseFilters(raw: Record<string, string | string[] | undefined>): Filte
   const rating =
     Number.isInteger(rawRating) && rawRating >= 1 && rawRating <= 10 ? rawRating : null;
 
-  return { sort, categories, rating };
+  const rawYear = typeof raw.year === "string" ? Number(raw.year) : NaN;
+  const year = Number.isInteger(rawYear) && rawYear >= 1900 && rawYear <= 2100 ? rawYear : null;
+
+  let calendarScope: CalendarScope | null = null;
+  if (year !== null) {
+    calendarScope = { year };
+
+    const rawMonth = typeof raw.month === "string" ? Number(raw.month) : NaN;
+    const month =
+      Number.isInteger(rawMonth) && rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
+
+    if (month !== null) {
+      calendarScope = { year, month };
+
+      const rawDay = typeof raw.day === "string" ? Number(raw.day) : NaN;
+      const day =
+        Number.isInteger(rawDay) && rawDay >= 1 && rawDay <= 31 ? rawDay : null;
+
+      if (day !== null) {
+        calendarScope = { year, month, day };
+      }
+    }
+  }
+
+  return { sort, categories, rating, calendarScope };
 }
 
 export default async function JournalerPage({ searchParams }: PageProps) {
@@ -62,11 +88,19 @@ export default async function JournalerPage({ searchParams }: PageProps) {
     filters.sort,
     [...filters.categories].sort().join(","),
     filters.rating ?? "null",
+    filters.calendarScope
+      ? [
+          filters.calendarScope.year,
+          filters.calendarScope.month ?? "x",
+          filters.calendarScope.day ?? "x",
+        ].join("-")
+      : "null",
   ].join("|");
 
   return (
     <main className="p-6">
       <FilterBar filters={filters} />
+      {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
       <EntriesGrid
         key={filtersKey}
         initialEntries={cardEntries}
