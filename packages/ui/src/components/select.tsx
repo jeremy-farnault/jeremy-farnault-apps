@@ -6,7 +6,7 @@ import type { ComponentType, SVGProps } from "react";
 import { cn } from "../lib/utils";
 
 interface SelectProps {
-  value?: string;
+  value?: string | undefined;
   onValueChange?: (value: string) => void;
   defaultValue?: string;
   disabled?: boolean;
@@ -28,7 +28,7 @@ function Select({
 }: SelectProps) {
   return (
     <SelectPrimitive.Root
-      {...(value !== undefined && { value })}
+      {...(value !== undefined && value !== "" && { value })}
       {...(onValueChange !== undefined && { onValueChange })}
       {...(defaultValue !== undefined && { defaultValue })}
     >

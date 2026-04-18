@@ -1,5 +1,6 @@
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 import { FilterBar } from "@/components/filter-bar";
 import { CalendarBreadcrumb } from "@/components/calendar-breadcrumb";
 import { EntriesGrid } from "@/components/entries-grid";
@@ -10,6 +11,7 @@ import {
   type FilterParams,
   type SortOption,
 } from "@/lib/queries";
+import { getPublicImageUrl } from "@/lib/s3-url";
 import type { CardEntry } from "@/components/entry-card";
 
 type PageProps = {
@@ -81,7 +83,8 @@ export default async function JournalerPage({ searchParams }: PageProps) {
     date: e.date,
     comment: e.comment,
     rating: e.rating,
-    imageUrl: null,
+    imageKey: e.imageKey,
+    imageUrl: e.imageKey ? getPublicImageUrl(e.imageKey) : null,
   }));
 
   const filtersKey = [
@@ -99,7 +102,9 @@ export default async function JournalerPage({ searchParams }: PageProps) {
 
   return (
     <main className="p-6">
-      <FilterBar filters={filters} />
+      <Suspense fallback={<div className="h-[52px] mb-6" />}>
+        <FilterBar filters={filters} />
+      </Suspense>
       {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
       <EntriesGrid
         key={filtersKey}

@@ -1,11 +1,13 @@
 "use client";
 
-import { fetchEntriesAction, searchEntriesAction } from "@/lib/actions";
+import { deleteEntryAction, fetchEntriesAction, searchEntriesAction } from "@/lib/actions";
 import type { EntryCursor, FilterParams } from "@/lib/queries";
 import { FloatingCTA, Grid, SearchInput } from "@jf/ui";
 import { PlusIcon } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EntryCard, type CardEntry } from "./entry-card";
+import { EntryFormModal } from "./entry-form-modal";
 
 type Props = {
   initialEntries: CardEntry[];
@@ -13,26 +15,9 @@ type Props = {
   filters: FilterParams;
 };
 
-function toCardEntry(e: {
-  id: string;
-  title: string;
-  category: CardEntry["category"];
-  date: string;
-  comment: string | null;
-  rating: number | null;
-}): CardEntry {
-  return {
-    id: e.id,
-    title: e.title,
-    category: e.category,
-    date: e.date,
-    comment: e.comment,
-    rating: e.rating,
-    imageUrl: null,
-  };
-}
-
 export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Props) {
+  const router = useRouter();
+
   // ── Infinite-scroll state ─────────────────────────────────────────────────
   const [entries, setEntries] = useState<CardEntry[]>(initialEntries);
   const [nextCursor, setNextCursor] = useState<EntryCursor | null>(initialNextCursor);
@@ -42,6 +27,10 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   // ── Search state ──────────────────────────────────────────────────────────
   const [searchResults, setSearchResults] = useState<CardEntry[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // ── Modal state ───────────────────────────────────────────────────────────
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<CardEntry | undefined>(undefined);
 
   const isSearching = searchResults !== null;
 
@@ -56,7 +45,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
           setLoading(true);
           fetchEntriesAction(nextCursor, filters)
             .then(({ entries: newEntries, nextCursor: newCursor }) => {
-              setEntries((prev) => [...prev, ...newEntries.map(toCardEntry)]);
+              setEntries((prev) => [...prev, ...newEntries]);
               setNextCursor(newCursor);
             })
             .finally(() => setLoading(false));
@@ -78,7 +67,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
     setSearchLoading(true);
     try {
       const results = await searchEntriesAction(query, filters);
-      setSearchResults(results.map(toCardEntry));
+      setSearchResults(results);
     } finally {
       setSearchLoading(false);
     }
@@ -106,8 +95,14 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
                 <EntryCard
                   key={entry.id}
                   entry={entry}
-                  onEdit={(e) => console.log("edit", e.id)}
-                  onDelete={(e) => console.log("delete", e.id)}
+                  onEdit={(e) => {
+                    setEditingEntry(e);
+                    setModalOpen(true);
+                  }}
+                  onDelete={async (e) => {
+                    await deleteEntryAction(e.id);
+                    router.refresh();
+                  }}
                 />
               ))}
             </Grid>
@@ -125,7 +120,16 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
       <FloatingCTA
         label="Log entry"
         icon={<PlusIcon size={20} />}
-        onClick={() => console.log("open modal")}
+        onClick={() => {
+          setEditingEntry(undefined);
+          setModalOpen(true);
+        }}
+      />
+
+      <EntryFormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        {...(editingEntry !== undefined && { entry: editingEntry })}
       />
     </>
   );

@@ -105,7 +105,7 @@ export function FilterBar({ filters }: Props) {
       </div>
 
       <Select
-        value={filters.rating !== null ? String(filters.rating) : ""}
+        value={filters.rating !== null ? String(filters.rating) : undefined}
         onValueChange={(v) => update({ rating: v ? Number(v) : null })}
         placeholder="Rating"
         className="w-[140px]"

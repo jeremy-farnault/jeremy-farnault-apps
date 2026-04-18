@@ -13,6 +13,7 @@ export type CardEntry = {
   comment: string | null;
   rating: number | null;
   imageUrl: string | null;
+  imageKey: string | null;
 };
 
 type Props = {

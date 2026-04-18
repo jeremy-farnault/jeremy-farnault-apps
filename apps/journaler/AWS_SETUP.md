@@ -11,6 +11,8 @@ One-time setup required before image uploads work in development or production.
 3. **AWS Region**: `eu-central-1` (Frankfurt) recommended to match the Neon DB region. Note it — this is `AWS_REGION`.
 4. Leave all other defaults → **Create bucket**.
 
+bucket name = jeremy-farnault-applications
+
 ---
 
 ## 2. Allow public read on `journaler/` objects
