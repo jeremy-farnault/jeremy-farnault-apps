@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { cn } from "../lib/utils";
 
 interface FloatingCTAProps {
-  label: string;
+  label?: string;
   icon?: ReactNode;
   onClick: () => void;
   disabled?: boolean;
@@ -22,16 +22,17 @@ export function FloatingCTA({ label, icon, onClick, disabled, loading }: Floatin
         onClick={onClick}
         disabled={disabled ?? loading}
         className={cn(
-          "flex h-14 items-center gap-2 rounded-xl px-7",
-          "bg-(--primary) text-(--primary-foreground) text-sm font-semibold",
+          "flex h-14 items-center rounded-xl",
+          label ? "gap-2 px-7 text-sm font-semibold" : "w-14 justify-center",
+          "bg-(--primary) text-(--primary-foreground)",
           "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]",
           "hover:bg-(--secondary)",
           "disabled:cursor-not-allowed disabled:opacity-50"
         )}
-        type="submit"
+        type="button"
       >
         {loading ? <CircleNotchIcon size={20} className="animate-spin" /> : icon}
-        {label}
+        {label && label}
       </button>
     </div>
   );

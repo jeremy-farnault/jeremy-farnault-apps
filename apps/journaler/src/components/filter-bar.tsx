@@ -1,6 +1,6 @@
 "use client";
 
-import { cn, Select, SelectItem } from "@jf/ui";
+import { cn, SearchInput, Select, SelectItem } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { CalendarScope, EntryCategory, FilterParams, SortOption } from "@/lib/queries";
@@ -18,9 +18,12 @@ const CATEGORY_OPTIONS: EntryCategory[] = ["Movie", "TV Show", "Book", "Game", "
 
 const RATING_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-type Props = { filters: FilterParams };
+type Props = {
+  filters: FilterParams;
+  onSearch?: (query: string) => void;
+};
 
-export function FilterBar({ filters }: Props) {
+export function FilterBar({ filters, onSearch }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,20 +76,54 @@ export function FilterBar({ filters }: Props) {
     filters.calendarScope === null;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-6">
-      <Select
-        value={filters.sort}
-        onValueChange={(v) => update({ sort: v as SortOption })}
-        className="w-[220px]"
-      >
-        {SORT_OPTIONS.map((opt) => (
-          <SelectItem key={opt.value} value={opt.value}>
-            {opt.label}
-          </SelectItem>
-        ))}
-      </Select>
+    <div className="mb-6">
+      {/* Row 1: search + calendar */}
+      <div className="flex items-center gap-3">
+        {onSearch && (
+          <div className="flex-1">
+            <SearchInput
+              placeholder="Search entries…"
+              onDebouncedChange={onSearch}
+            />
+          </div>
+        )}
+        <CalendarDrillDown
+          scope={filters.calendarScope}
+          onScopeChange={(scope) => update({ calendarScope: scope })}
+          filters={{ categories: filters.categories, rating: filters.rating }}
+        />
+      </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Row 2: rating + sort */}
+      <div className="flex items-center gap-3 mt-3">
+        <Select
+          value={filters.rating !== null ? String(filters.rating) : undefined}
+          onValueChange={(v) => update({ rating: v ? Number(v) : null })}
+          placeholder="Rating"
+          className="w-[140px]"
+        >
+          {RATING_OPTIONS.map((r) => (
+            <SelectItem key={r} value={String(r)}>
+              {r}
+            </SelectItem>
+          ))}
+        </Select>
+
+        <Select
+          value={filters.sort}
+          onValueChange={(v) => update({ sort: v as SortOption })}
+          className="w-[220px]"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </Select>
+      </div>
+
+      {/* Row 3: categories + clear */}
+      <div className="flex flex-wrap items-center gap-2 mt-3">
         {CATEGORY_OPTIONS.map((cat) => (
           <button
             key={cat}
@@ -102,37 +139,18 @@ export function FilterBar({ filters }: Props) {
             {cat}
           </button>
         ))}
+
+        {!isDefault && (
+          <button
+            type="button"
+            onClick={() => router.replace(pathname)}
+            className="flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200)"
+          >
+            <XIcon size={14} />
+            Clear filters
+          </button>
+        )}
       </div>
-
-      <Select
-        value={filters.rating !== null ? String(filters.rating) : undefined}
-        onValueChange={(v) => update({ rating: v ? Number(v) : null })}
-        placeholder="Rating"
-        className="w-[140px]"
-      >
-        {RATING_OPTIONS.map((r) => (
-          <SelectItem key={r} value={String(r)}>
-            {r}
-          </SelectItem>
-        ))}
-      </Select>
-
-      <CalendarDrillDown
-        scope={filters.calendarScope}
-        onScopeChange={(scope) => update({ calendarScope: scope })}
-        filters={{ categories: filters.categories, rating: filters.rating }}
-      />
-
-      {!isDefault && (
-        <button
-          type="button"
-          onClick={() => router.replace(pathname)}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200)"
-        >
-          <XIcon size={14} />
-          Clear filters
-        </button>
-      )}
     </div>
   );
 }

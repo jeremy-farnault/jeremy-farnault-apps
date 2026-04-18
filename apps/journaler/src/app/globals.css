@@ -1,0 +1,7 @@
+@import "@jf/ui/globals.css";
+
+:root,
+.dark {
+  --primary: var(--teal-400);
+  --secondary: var(--teal-600);
+}

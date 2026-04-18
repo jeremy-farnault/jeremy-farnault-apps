@@ -26,7 +26,7 @@ export function UserMenu({ email, name, onLogout }: UserMenuProps) {
           )}
           type="button"
         >
-          <span className="text-xl font-semibold uppercase text-(--magenta-400)">
+          <span className="text-xl font-semibold uppercase text-(--primary)">
             {letter}
           </span>
         </button>

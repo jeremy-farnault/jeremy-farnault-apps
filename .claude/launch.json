@@ -5,7 +5,8 @@
       "name": "journaler",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "journaler", "dev"],
-      "port": 3006
+      "port": 3006,
+      "autoPort": false
     },
     {
       "name": "noter",

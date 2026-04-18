@@ -2,12 +2,13 @@
 
 import { deleteEntryAction, fetchEntriesAction, searchEntriesAction } from "@/lib/actions";
 import type { EntryCursor, FilterParams } from "@/lib/queries";
-import { FloatingCTA, Grid, SearchInput } from "@jf/ui";
-import { PlusIcon } from "@phosphor-icons/react";
+import { FloatingCTA, Grid } from "@jf/ui";
+import { PlusSquareIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EntryCard, type CardEntry } from "./entry-card";
 import { EntryFormModal } from "./entry-form-modal";
+import { FilterBar } from "./filter-bar";
 
 type Props = {
   initialEntries: CardEntry[];
@@ -80,9 +81,10 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   return (
     <>
       <div className="pb-24">
-        <div className="mb-6 max-w-[300px]">
-          <SearchInput placeholder="Search entries…" onDebouncedChange={handleDebouncedSearch} />
-        </div>
+        <FilterBar
+          filters={filters}
+          onSearch={handleDebouncedSearch}
+        />
 
         {isEmpty && !searchLoading ? (
           <div className="flex justify-center pt-16">
@@ -118,8 +120,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
       </div>
 
       <FloatingCTA
-        label="Log entry"
-        icon={<PlusIcon size={20} />}
+        icon={<PlusSquareIcon size={22} />}
         onClick={() => {
           setEditingEntry(undefined);
           setModalOpen(true);

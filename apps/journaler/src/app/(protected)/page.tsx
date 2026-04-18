@@ -1,7 +1,6 @@
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 import { Suspense } from "react";
-import { FilterBar } from "@/components/filter-bar";
 import { CalendarBreadcrumb } from "@/components/calendar-breadcrumb";
 import { EntriesGrid } from "@/components/entries-grid";
 import {
@@ -102,16 +101,15 @@ export default async function JournalerPage({ searchParams }: PageProps) {
 
   return (
     <main className="p-6">
-      <Suspense fallback={<div className="h-[52px] mb-6" />}>
-        <FilterBar filters={filters} />
-      </Suspense>
       {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
-      <EntriesGrid
-        key={filtersKey}
-        initialEntries={cardEntries}
-        initialNextCursor={nextCursor}
-        filters={filters}
-      />
+      <Suspense fallback={<div className="h-[52px] mb-6" />}>
+        <EntriesGrid
+          key={filtersKey}
+          initialEntries={cardEntries}
+          initialNextCursor={nextCursor}
+          filters={filters}
+        />
+      </Suspense>
     </main>
   );
 }
