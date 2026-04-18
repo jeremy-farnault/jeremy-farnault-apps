@@ -72,7 +72,7 @@ export function NoteCard({
           </div>
         )}
         {note.body && (
-          <p className="text-sm text-(--grey-700) line-clamp-3 whitespace-pre-line">{note.body}</p>
+          <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">{note.body}</p>
         )}
       </div>
 

@@ -63,7 +63,7 @@ export function ArchivedNoteCard({ note }: Props) {
             </div>
           )}
           {note.body && (
-            <p className="text-sm text-(--grey-700) line-clamp-3 whitespace-pre-line">
+            <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">
               {note.body}
             </p>
           )}
