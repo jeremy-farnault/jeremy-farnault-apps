@@ -1,9 +1,9 @@
 "use client";
 
-import { cn, SearchInput, Select, SelectItem } from "@jf/ui";
+import type { CalendarScope, EntryCategory, FilterParams, SortOption } from "@/lib/queries";
+import { SearchInput, Select, SelectItem, cn } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { CalendarScope, EntryCategory, FilterParams, SortOption } from "@/lib/queries";
 import { CalendarDrillDown } from "./calendar-drill-down";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -28,7 +28,14 @@ export function FilterBar({ filters, onSearch }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function update(changes: Partial<{ sort: SortOption; categories: EntryCategory[]; rating: number | null; calendarScope: CalendarScope | null }>) {
+  function update(
+    changes: Partial<{
+      sort: SortOption;
+      categories: EntryCategory[];
+      rating: number | null;
+      calendarScope: CalendarScope | null;
+    }>
+  ) {
     const params = new URLSearchParams(searchParams.toString());
 
     if (changes.sort !== undefined) {
@@ -78,14 +85,13 @@ export function FilterBar({ filters, onSearch }: Props) {
   return (
     <div className="mb-6">
       {/* Row 1: search + calendar */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
         {onSearch && (
-          <div className="flex-1">
-            <SearchInput
-              placeholder="Search entries…"
-              onDebouncedChange={onSearch}
-            />
-          </div>
+          <SearchInput
+            placeholder="Search entries…"
+            onDebouncedChange={onSearch}
+            className="w-[250px]"
+          />
         )}
         <CalendarDrillDown
           scope={filters.calendarScope}
@@ -95,7 +101,7 @@ export function FilterBar({ filters, onSearch }: Props) {
       </div>
 
       {/* Row 2: rating + sort */}
-      <div className="flex items-center gap-3 mt-3">
+      <div className="flex items-center justify-between mt-3">
         <Select
           value={filters.rating !== null ? String(filters.rating) : undefined}
           onValueChange={(v) => update({ rating: v ? Number(v) : null })}
@@ -133,7 +139,7 @@ export function FilterBar({ filters, onSearch }: Props) {
               "h-9 rounded-full px-4 text-sm font-medium transition-colors",
               filters.categories.includes(cat)
                 ? "bg-(--grey-800) text-white"
-                : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)",
+                : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
             )}
           >
             {cat}

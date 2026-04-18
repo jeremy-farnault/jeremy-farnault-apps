@@ -1,3 +1,4 @@
+import "@jf/ui/globals.css";
 import "@/app/globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import type { Metadata, Viewport } from "next";

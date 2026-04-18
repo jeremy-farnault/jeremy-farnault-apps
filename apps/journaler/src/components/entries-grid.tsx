@@ -6,7 +6,7 @@ import { FloatingCTA, Grid } from "@jf/ui";
 import { PlusSquareIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { EntryCard, type CardEntry } from "./entry-card";
+import { type CardEntry, EntryCard } from "./entry-card";
 import { EntryFormModal } from "./entry-form-modal";
 import { FilterBar } from "./filter-bar";
 
@@ -52,7 +52,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
             .finally(() => setLoading(false));
         }
       },
-      { rootMargin: "200px" },
+      { rootMargin: "200px" }
     );
 
     observer.observe(sentinel);
@@ -80,11 +80,8 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
 
   return (
     <>
-      <div className="pb-24">
-        <FilterBar
-          filters={filters}
-          onSearch={handleDebouncedSearch}
-        />
+      <div>
+        <FilterBar filters={filters} onSearch={handleDebouncedSearch} />
 
         {isEmpty && !searchLoading ? (
           <div className="flex justify-center pt-16">

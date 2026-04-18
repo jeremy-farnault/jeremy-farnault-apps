@@ -1,17 +1,17 @@
-import { auth } from "@jf/auth";
-import { headers } from "next/headers";
-import { Suspense } from "react";
 import { CalendarBreadcrumb } from "@/components/calendar-breadcrumb";
 import { EntriesGrid } from "@/components/entries-grid";
+import type { CardEntry } from "@/components/entry-card";
 import {
-  getEntries,
   type CalendarScope,
   type EntryCategory,
   type FilterParams,
   type SortOption,
+  getEntries,
 } from "@/lib/queries";
 import { getPublicImageUrl } from "@/lib/s3-url";
-import type { CardEntry } from "@/components/entry-card";
+import { auth } from "@jf/auth";
+import { headers } from "next/headers";
+import { Suspense } from "react";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -32,30 +32,28 @@ function parseFilters(raw: Record<string, string | string[] | undefined>): Filte
       ? [raw.category]
       : [];
   const categories = rawCategories.filter((c): c is EntryCategory =>
-    VALID_CATEGORIES.includes(c as EntryCategory),
+    VALID_CATEGORIES.includes(c as EntryCategory)
   );
 
-  const rawRating = typeof raw.rating === "string" ? Number(raw.rating) : NaN;
+  const rawRating = typeof raw.rating === "string" ? Number(raw.rating) : Number.NaN;
   const rating =
     Number.isInteger(rawRating) && rawRating >= 1 && rawRating <= 10 ? rawRating : null;
 
-  const rawYear = typeof raw.year === "string" ? Number(raw.year) : NaN;
+  const rawYear = typeof raw.year === "string" ? Number(raw.year) : Number.NaN;
   const year = Number.isInteger(rawYear) && rawYear >= 1900 && rawYear <= 2100 ? rawYear : null;
 
   let calendarScope: CalendarScope | null = null;
   if (year !== null) {
     calendarScope = { year };
 
-    const rawMonth = typeof raw.month === "string" ? Number(raw.month) : NaN;
-    const month =
-      Number.isInteger(rawMonth) && rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
+    const rawMonth = typeof raw.month === "string" ? Number(raw.month) : Number.NaN;
+    const month = Number.isInteger(rawMonth) && rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
 
     if (month !== null) {
       calendarScope = { year, month };
 
-      const rawDay = typeof raw.day === "string" ? Number(raw.day) : NaN;
-      const day =
-        Number.isInteger(rawDay) && rawDay >= 1 && rawDay <= 31 ? rawDay : null;
+      const rawDay = typeof raw.day === "string" ? Number(raw.day) : Number.NaN;
+      const day = Number.isInteger(rawDay) && rawDay >= 1 && rawDay <= 31 ? rawDay : null;
 
       if (day !== null) {
         calendarScope = { year, month, day };
@@ -100,7 +98,7 @@ export default async function JournalerPage({ searchParams }: PageProps) {
   ].join("|");
 
   return (
-    <main className="p-6">
+    <main className="w-full px-4 pt-6 pb-24">
       {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
       <Suspense fallback={<div className="h-[52px] mb-6" />}>
         <EntriesGrid
