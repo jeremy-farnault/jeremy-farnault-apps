@@ -33,8 +33,8 @@ type FormErrors = {
   date?: string;
 };
 
-const CATEGORIES: EntryCategory[] = ["Movie", "TV Show", "Book", "Game", "Manga"];
-const RATINGS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+const CATEGORIES: EntryCategory[] = ["Book", "Game", "Manga", "Movie", "TV Show"];
+const RATINGS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -253,17 +253,23 @@ export function EntryFormModal({ isOpen, onClose, entry }: Props) {
               {/* Rating */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-(--grey-700)">Rating</label>
-                <Select
-                  value={form.rating}
-                  onValueChange={(v) => setField("rating", v)}
-                  placeholder="No rating"
-                  disabled={submitting}
-                >
-                  <SelectItem value="none">No rating</SelectItem>
+                <div className="flex gap-1">
                   {RATINGS.map((r) => (
-                    <SelectItem key={r} value={r}>{r} / 10</SelectItem>
+                    <button
+                      key={r}
+                      type="button"
+                      disabled={submitting}
+                      onClick={() => setField("rating", form.rating === r ? "none" : r)}
+                      className={`flex flex-1 items-center justify-center rounded-[8px] py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                        form.rating === r
+                          ? "bg-(--grey-900) text-white"
+                          : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+                      }`}
+                    >
+                      {r}
+                    </button>
                   ))}
-                </Select>
+                </div>
               </div>
 
               {/* Comment */}

@@ -1,4 +1,3 @@
-import { CalendarBreadcrumb } from "@/components/calendar-breadcrumb";
 import { EntriesGrid } from "@/components/entries-grid";
 import type { CardEntry } from "@/components/entry-card";
 import {
@@ -99,7 +98,6 @@ export default async function JournalerPage({ searchParams }: PageProps) {
 
   return (
     <main className="w-full px-4 pt-6 pb-24">
-      {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
       <Suspense fallback={<div className="h-[52px] mb-6" />}>
         <EntriesGrid
           key={filtersKey}

@@ -257,7 +257,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
 
       <Popover.Portal>
         <Popover.Content
-          align="start"
+          align="end"
           sideOffset={8}
           className="z-50 min-w-[220px] rounded-[22px] bg-(--card) p-2
                      shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]

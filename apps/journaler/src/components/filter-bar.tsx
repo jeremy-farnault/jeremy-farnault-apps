@@ -4,6 +4,7 @@ import type { CalendarScope, EntryCategory, FilterParams, SortOption } from "@/l
 import { SearchInput, Select, SelectItem, cn } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { CalendarBreadcrumb } from "./calendar-breadcrumb";
 import { CalendarDrillDown } from "./calendar-drill-down";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -84,20 +85,23 @@ export function FilterBar({ filters, onSearch }: Props) {
 
   return (
     <div className="mb-6">
-      {/* Row 1: search + calendar */}
-      <div className="flex items-center justify-between gap-3">
+      {/* Row 1: search + breadcrumb + calendar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {onSearch && (
           <SearchInput
             placeholder="Search entries…"
             onDebouncedChange={onSearch}
-            className="w-[250px]"
+            className="w-full sm:w-[250px]"
           />
         )}
-        <CalendarDrillDown
-          scope={filters.calendarScope}
-          onScopeChange={(scope) => update({ calendarScope: scope })}
-          filters={{ categories: filters.categories, rating: filters.rating }}
-        />
+        <div className="flex items-center gap-3 sm:ml-auto">
+          {filters.calendarScope && <CalendarBreadcrumb scope={filters.calendarScope} />}
+          <CalendarDrillDown
+            scope={filters.calendarScope}
+            onScopeChange={(scope) => update({ calendarScope: scope })}
+            filters={{ categories: filters.categories, rating: filters.rating }}
+          />
+        </div>
       </div>
 
       {/* Row 2: rating + sort */}

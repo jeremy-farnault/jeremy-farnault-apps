@@ -27,7 +27,7 @@ export function CalendarBreadcrumb({ scope }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 mb-4 text-sm text-(--grey-600)">
+    <div className="flex items-center gap-1.5 text-sm text-(--grey-600)">
       <button
         type="button"
         onClick={() => navigateTo({ year: scope.year })}

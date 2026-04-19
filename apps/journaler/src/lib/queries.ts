@@ -49,8 +49,9 @@ function buildFilterConditions(userId: string, filters: FilterParams) {
       conditions.push(eq(journalerEntries.date, `${year}-${m}-${d}`));
     } else if (month !== undefined) {
       const m = String(month).padStart(2, "0");
+      const lastDay = new Date(year, month, 0).getDate();
       conditions.push(gte(journalerEntries.date, `${year}-${m}-01`));
-      conditions.push(lte(journalerEntries.date, `${year}-${m}-31`));
+      conditions.push(lte(journalerEntries.date, `${year}-${m}-${lastDay}`));
     } else {
       conditions.push(gte(journalerEntries.date, `${year}-01-01`));
       conditions.push(lte(journalerEntries.date, `${year}-12-31`));
@@ -194,9 +195,10 @@ export async function getCalendarDays(
 ): Promise<{ day: number; count: number }[]> {
   const dayExpr = sql<number>`EXTRACT(DAY FROM ${journalerEntries.date})::int`;
   const m = String(month).padStart(2, "0");
+  const lastDay = new Date(year, month, 0).getDate();
   const dateConditions = [
     gte(journalerEntries.date, `${year}-${m}-01`),
-    lte(journalerEntries.date, `${year}-${m}-31`),
+    lte(journalerEntries.date, `${year}-${m}-${lastDay}`),
   ];
   const conditions = buildAggregateConditions(userId, filters, dateConditions);
   const rows = await db
