@@ -244,7 +244,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
         <button
           type="button"
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-[10px] transition-colors",
+            "flex h-11 w-11 items-center justify-center rounded-[10px] transition-colors",
             scope
               ? "bg-(--surface-200) text-(--teal-400)"
               : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)",

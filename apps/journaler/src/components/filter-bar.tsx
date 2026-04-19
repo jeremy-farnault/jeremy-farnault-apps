@@ -101,12 +101,12 @@ export function FilterBar({ filters, onSearch }: Props) {
       </div>
 
       {/* Row 2: rating + sort */}
-      <div className="flex items-center justify-between mt-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mt-3">
         <Select
           value={filters.rating !== null ? String(filters.rating) : undefined}
           onValueChange={(v) => update({ rating: v ? Number(v) : null })}
           placeholder="Rating"
-          className="w-[140px]"
+          className="w-full sm:w-[140px]"
         >
           {RATING_OPTIONS.map((r) => (
             <SelectItem key={r} value={String(r)}>
@@ -118,7 +118,7 @@ export function FilterBar({ filters, onSearch }: Props) {
         <Select
           value={filters.sort}
           onValueChange={(v) => update({ sort: v as SortOption })}
-          className="w-[220px]"
+          className="w-full sm:w-[220px]"
         >
           {SORT_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
@@ -129,28 +129,30 @@ export function FilterBar({ filters, onSearch }: Props) {
       </div>
 
       {/* Row 3: categories + clear */}
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {CATEGORY_OPTIONS.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => toggleCategory(cat)}
-            className={cn(
-              "h-9 rounded-full px-4 text-sm font-medium transition-colors",
-              filters.categories.includes(cat)
-                ? "bg-(--grey-800) text-white"
-                : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
-            )}
-          >
-            {cat}
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {CATEGORY_OPTIONS.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => toggleCategory(cat)}
+              className={cn(
+                "h-9 rounded-full px-4 text-sm font-medium transition-colors",
+                filters.categories.includes(cat)
+                  ? "bg-(--grey-800) text-white"
+                  : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
         {!isDefault && (
           <button
             type="button"
             onClick={() => router.replace(pathname)}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200)"
+            className="flex shrink-0 items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200)"
           >
             <XIcon size={14} />
             Clear filters
