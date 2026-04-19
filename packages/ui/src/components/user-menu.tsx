@@ -26,9 +26,7 @@ export function UserMenu({ email, name, onLogout }: UserMenuProps) {
           )}
           type="button"
         >
-          <span className="text-xl font-semibold uppercase text-(--primary)">
-            {letter}
-          </span>
+          <span className="text-xl font-semibold uppercase text-(--primary)">{letter}</span>
         </button>
       </Popover.Trigger>
 

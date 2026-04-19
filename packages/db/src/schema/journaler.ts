@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  check,
-  date,
-  integer,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { check, date, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
 
@@ -39,9 +30,6 @@ export const journalerEntries = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => [
-    check(
-      "journaler_entries_rating_check",
-      sql`${table.rating} >= 1 AND ${table.rating} <= 10`,
-    ),
-  ],
+    check("journaler_entries_rating_check", sql`${table.rating} >= 1 AND ${table.rating} <= 10`),
+  ]
 );

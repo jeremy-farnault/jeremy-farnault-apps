@@ -6,11 +6,13 @@ interface TextareaProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  id?: string;
 }
 
-export function Textarea({ value, onChange, placeholder, disabled, className }: TextareaProps) {
+export function Textarea({ value, onChange, placeholder, disabled, className, id }: TextareaProps) {
   return (
     <textarea
+      id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}

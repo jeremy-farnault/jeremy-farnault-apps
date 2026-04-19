@@ -1,11 +1,21 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { CalendarScope } from "@/lib/queries";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 type Props = { scope: CalendarScope };
@@ -41,7 +51,7 @@ export function CalendarBreadcrumb({ scope }: Props) {
           <span className="text-(--grey-300)">›</span>
           <button
             type="button"
-            onClick={() => navigateTo({ year: scope.year, month: scope.month! })}
+            onClick={() => navigateTo({ year: scope.year, month: scope.month })}
             className="hover:text-(--grey-900) transition-colors"
           >
             {MONTH_NAMES[scope.month - 1]}

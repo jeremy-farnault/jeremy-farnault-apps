@@ -6,26 +6,36 @@
  * Candidate for promotion to @jf/ui.
  */
 
-import * as Popover from "@radix-ui/react-popover";
-import { CalendarIcon, CaretLeftIcon, CaretRightIcon, XIcon } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
 import {
-  getCalendarYearsAction,
-  getCalendarMonthsAction,
   getCalendarDaysAction,
+  getCalendarMonthsAction,
+  getCalendarYearsAction,
 } from "@/lib/actions";
-import { cn } from "@jf/ui";
 import type { CalendarScope, FilterParams } from "@/lib/queries";
+import { cn } from "@jf/ui";
+import { CalendarIcon, CaretLeftIcon, CaretRightIcon, XIcon } from "@phosphor-icons/react";
+import * as Popover from "@radix-ui/react-popover";
+import { useEffect, useRef, useState } from "react";
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-type YearRow  = { year: number; count: number };
+type YearRow = { year: number; count: number };
 type MonthRow = { month: number; count: number };
-type DayRow   = { day: number; count: number };
-type Level    = "years" | "months" | "days";
+type DayRow = { day: number; count: number };
+type Level = "years" | "months" | "days";
 
 type Props = {
   scope: CalendarScope | null;
@@ -34,20 +44,21 @@ type Props = {
 };
 
 export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
-  const [open, setOpen]               = useState(false);
-  const [level, setLevel]             = useState<Level>("years");
-  const [years, setYears]             = useState<YearRow[]>([]);
-  const [months, setMonths]           = useState<MonthRow[]>([]);
-  const [days, setDays]               = useState<DayRow[]>([]);
+  const [open, setOpen] = useState(false);
+  const [level, setLevel] = useState<Level>("years");
+  const [years, setYears] = useState<YearRow[]>([]);
+  const [months, setMonths] = useState<MonthRow[]>([]);
+  const [days, setDays] = useState<DayRow[]>([]);
   const [drilledYear, setDrilledYear] = useState<number | null>(null);
   const [drilledMonth, setDrilledMonth] = useState<number | null>(null);
-  const [loading, setLoading]         = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Track filters in a ref so the open-handler can read latest values.
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
 
-  // Reset loaded data when composing filters change so counts stay accurate.
+  // Reset loaded data when filter changes so counts stay accurate.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: deps are triggers, not values used inside
   useEffect(() => {
     setYears([]);
     setMonths([]);
@@ -160,9 +171,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
 
   function renderRows() {
     if (loading) {
-      return (
-        <p className="px-3 py-4 text-sm text-(--grey-400) text-center">Loading…</p>
-      );
+      return <p className="px-3 py-4 text-sm text-(--grey-400) text-center">Loading…</p>;
     }
 
     if (level === "years") {
@@ -247,7 +256,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
             "flex h-11 w-11 items-center justify-center rounded-[10px] transition-colors",
             scope
               ? "bg-(--surface-200) text-(--teal-400)"
-              : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)",
+              : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
           )}
           aria-label="Filter by date"
         >
@@ -264,14 +273,15 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
                      animate-[overlay-in_0.3s_ease-in-out] outline-none"
         >
           {renderHeader()}
-          <div className="flex flex-col">
-            {renderRows()}
-          </div>
+          <div className="flex flex-col">{renderRows()}</div>
           {scope && (
             <div className="mt-1 pt-1 border-t border-(--surface-150)">
               <button
                 type="button"
-                onClick={() => { onScopeChange(null); setOpen(false); }}
+                onClick={() => {
+                  onScopeChange(null);
+                  setOpen(false);
+                }}
                 className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--grey-500)
                            hover:text-(--grey-800) transition-colors rounded-[14px]
                            hover:bg-(--surface-150)"

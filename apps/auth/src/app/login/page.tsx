@@ -39,13 +39,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
       <h1 className="text-2xl font-semibold text-(--grey-900) mb-1">Sign in</h1>
       {error && <p className="text-sm text-(--red-500)">{error}</p>}
-      <TextInput
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={setEmail}
-        required
-      />
+      <TextInput type="email" placeholder="Email" value={email} onChange={setEmail} required />
       <TextInput
         type="password"
         placeholder="Password"

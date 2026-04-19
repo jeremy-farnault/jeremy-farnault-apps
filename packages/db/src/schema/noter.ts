@@ -10,10 +10,9 @@ export const folders = pgTable("folders", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  parentFolderId: uuid("parent_folder_id").references(
-    (): AnyPgColumn => folders.id,
-    { onDelete: "cascade" },
-  ),
+  parentFolderId: uuid("parent_folder_id").references((): AnyPgColumn => folders.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

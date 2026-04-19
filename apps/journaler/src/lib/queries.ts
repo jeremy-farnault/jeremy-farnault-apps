@@ -65,7 +65,7 @@ export async function getEntries(
   userId: string,
   cursor: EntryCursor | null,
   filters: FilterParams = DEFAULT_FILTERS,
-  limit = 30,
+  limit = 30
 ): Promise<{ entries: JournalerEntry[]; nextCursor: EntryCursor | null }> {
   const baseConditions = buildFilterConditions(userId, filters);
 
@@ -78,11 +78,11 @@ export async function getEntries(
       cursorCondition = isDesc
         ? or(
             lt(journalerEntries.date, cursor.date),
-            and(eq(journalerEntries.date, cursor.date), lt(journalerEntries.id, cursor.id)),
+            and(eq(journalerEntries.date, cursor.date), lt(journalerEntries.id, cursor.id))
           )
         : or(
             gt(journalerEntries.date, cursor.date),
-            and(eq(journalerEntries.date, cursor.date), gt(journalerEntries.id, cursor.id)),
+            and(eq(journalerEntries.date, cursor.date), gt(journalerEntries.id, cursor.id))
           );
     }
 
@@ -92,7 +92,7 @@ export async function getEntries(
       .where(and(...baseConditions, cursorCondition))
       .orderBy(
         isDesc ? desc(journalerEntries.date) : asc(journalerEntries.date),
-        isDesc ? desc(journalerEntries.id) : asc(journalerEntries.id),
+        isDesc ? desc(journalerEntries.id) : asc(journalerEntries.id)
       )
       .limit(limit + 1);
 
@@ -130,7 +130,9 @@ export async function getEntries(
 
   const hasMore = rows.length > limit;
   const entries = hasMore ? rows.slice(0, limit) : rows;
-  const nextCursor: EntryCursor | null = hasMore ? { type: "offset", offset: offset + limit } : null;
+  const nextCursor: EntryCursor | null = hasMore
+    ? { type: "offset", offset: offset + limit }
+    : null;
 
   return { entries, nextCursor };
 }
@@ -140,7 +142,7 @@ type AggregateFilters = Pick<FilterParams, "categories" | "rating">;
 function buildAggregateConditions(
   userId: string,
   filters: AggregateFilters,
-  dateConditions: ReturnType<typeof gte>[] = [],
+  dateConditions: ReturnType<typeof gte>[] = []
 ) {
   const conditions = [eq(journalerEntries.userId, userId), ...dateConditions];
   if (filters.categories.length > 0) {
@@ -154,7 +156,7 @@ function buildAggregateConditions(
 
 export async function getCalendarYears(
   userId: string,
-  filters: AggregateFilters = { categories: [], rating: null },
+  filters: AggregateFilters = { categories: [], rating: null }
 ): Promise<{ year: number; count: number }[]> {
   const yearExpr = sql<number>`EXTRACT(YEAR FROM ${journalerEntries.date})::int`;
   const conditions = buildAggregateConditions(userId, filters);
@@ -170,7 +172,7 @@ export async function getCalendarYears(
 export async function getCalendarMonths(
   userId: string,
   year: number,
-  filters: AggregateFilters = { categories: [], rating: null },
+  filters: AggregateFilters = { categories: [], rating: null }
 ): Promise<{ month: number; count: number }[]> {
   const monthExpr = sql<number>`EXTRACT(MONTH FROM ${journalerEntries.date})::int`;
   const dateConditions = [
@@ -191,7 +193,7 @@ export async function getCalendarDays(
   userId: string,
   year: number,
   month: number,
-  filters: AggregateFilters = { categories: [], rating: null },
+  filters: AggregateFilters = { categories: [], rating: null }
 ): Promise<{ day: number; count: number }[]> {
   const dayExpr = sql<number>`EXTRACT(DAY FROM ${journalerEntries.date})::int`;
   const m = String(month).padStart(2, "0");
@@ -214,7 +216,7 @@ export async function searchEntries(
   userId: string,
   query: string,
   filters: FilterParams = DEFAULT_FILTERS,
-  limit = 50,
+  limit = 50
 ): Promise<JournalerEntry[]> {
   const baseConditions = buildFilterConditions(userId, filters);
 

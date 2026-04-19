@@ -6,9 +6,9 @@ import {
   updateEntryAction,
 } from "@/lib/actions";
 import type { EntryCategory } from "@/lib/queries";
-import { Button, Select, SelectItem, Textarea, TextInput } from "@jf/ui";
-import * as Dialog from "@radix-ui/react-dialog";
+import { Button, Select, SelectItem, TextInput, Textarea } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
 import type { CardEntry } from "./entry-card";
 
@@ -76,7 +76,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
         setImageState(
           entry.imageKey && entry.imageUrl
             ? { status: "existing", key: entry.imageKey, url: entry.imageUrl }
-            : { status: "none" },
+            : { status: "none" }
         );
       } else {
         setForm({ title: "", category: "", date: today(), rating: "none", comment: "" });
@@ -185,9 +185,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
     <Dialog.Root open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out] p-4">
-          <Dialog.Content
-            className="relative flex w-full max-w-[600px] flex-col rounded-[22px] bg-(--card) p-8 shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none animate-[modal-in_0.3s_ease-in-out] max-h-[90vh] overflow-y-auto"
-          >
+          <Dialog.Content className="relative flex w-full max-w-[600px] flex-col rounded-[22px] bg-(--card) p-8 shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none animate-[modal-in_0.3s_ease-in-out] max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={onClose}
@@ -204,22 +202,23 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Title */}
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-(--grey-700)">Title</label>
+                <label htmlFor="entry-title" className="text-sm font-medium text-(--grey-700)">
+                  Title
+                </label>
                 <TextInput
+                  id="entry-title"
                   value={form.title}
                   onChange={(v) => setField("title", v)}
                   placeholder="What did you watch, read, or play?"
                   disabled={submitting}
                 />
-                {errors.title && (
-                  <p className="text-xs text-red-500">{errors.title}</p>
-                )}
+                {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
               </div>
 
               {/* Category + Date row */}
               <div className="flex gap-3">
                 <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-sm font-medium text-(--grey-700)">Category</label>
+                  <p className="text-sm font-medium text-(--grey-700)">Category</p>
                   <Select
                     value={form.category}
                     onValueChange={(v) => setField("category", v as EntryCategory)}
@@ -227,32 +226,33 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                     disabled={submitting}
                   >
                     {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
                     ))}
                   </Select>
-                  {errors.category && (
-                    <p className="text-xs text-red-500">{errors.category}</p>
-                  )}
+                  {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
                 </div>
 
                 <div className="flex flex-1 flex-col gap-1">
-                  <label className="text-sm font-medium text-(--grey-700)">Date</label>
+                  <label htmlFor="entry-date" className="text-sm font-medium text-(--grey-700)">
+                    Date
+                  </label>
                   <input
+                    id="entry-date"
                     type="date"
                     value={form.date}
                     onChange={(e) => setField("date", e.target.value)}
                     disabled={submitting}
                     className="h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm text-(--grey-900) border-none outline-none focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                   />
-                  {errors.date && (
-                    <p className="text-xs text-red-500">{errors.date}</p>
-                  )}
+                  {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
                 </div>
               </div>
 
               {/* Rating */}
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-(--grey-700)">Rating</label>
+                <p className="text-sm font-medium text-(--grey-700)">Rating</p>
                 <div className="flex gap-1">
                   {RATINGS.map((r) => (
                     <button
@@ -274,8 +274,11 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
 
               {/* Comment */}
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-(--grey-700)">Comment</label>
+                <label htmlFor="entry-comment" className="text-sm font-medium text-(--grey-700)">
+                  Comment
+                </label>
                 <Textarea
+                  id="entry-comment"
                   value={form.comment}
                   onChange={(v) => setField("comment", v)}
                   placeholder="Any notes or thoughts…"
@@ -285,7 +288,9 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
 
               {/* Image */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-(--grey-700)">Image</label>
+                <label htmlFor="entry-image" className="text-sm font-medium text-(--grey-700)">
+                  Image
+                </label>
                 {previewUrl ? (
                   <div className="relative w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -307,6 +312,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                 ) : (
                   <input
                     key={fileInputKey}
+                    id="entry-image"
                     type="file"
                     accept="image/*"
                     disabled={submitting}

@@ -14,7 +14,7 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL!,
+        from: process.env.RESEND_FROM_EMAIL ?? "",
         to: user.email,
         subject: "Verify your email",
         html: `<p>Click <a href="${url}">here</a> to verify your email address.</p>`,

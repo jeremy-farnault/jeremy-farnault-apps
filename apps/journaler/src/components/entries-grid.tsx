@@ -36,7 +36,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   function handleEntrySuccess(entry: CardEntry, isEdit: boolean) {
     if (isEdit) {
       setEntries((prev) => prev.map((e) => (e.id === entry.id ? entry : e)));
-      setSearchResults((prev) => prev && prev.map((e) => (e.id === entry.id ? entry : e)));
+      setSearchResults((prev) => prev?.map((e) => (e.id === entry.id ? entry : e)));
     } else {
       setEntries((prev) => [entry, ...prev]);
     }
@@ -44,7 +44,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
 
   function handleEntryDeleted(id: string) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
-    setSearchResults((prev) => prev && prev.filter((e) => e.id !== id));
+    setSearchResults((prev) => prev?.filter((e) => e.id !== id));
   }
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
-  const displayEntries = isSearching ? searchResults! : entries;
+  const displayEntries = searchResults ?? entries;
   const isEmpty = displayEntries.length === 0;
 
   return (

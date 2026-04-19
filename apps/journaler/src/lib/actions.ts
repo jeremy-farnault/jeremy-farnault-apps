@@ -1,23 +1,23 @@
 "use server";
 
+import type { CardEntry } from "@/components/entry-card";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
+import { deleteEntryById, getEntryById, insertEntry, updateEntryById } from "./entry-mutations";
 import {
   DEFAULT_FILTERS,
+  type EntryCategory,
+  type EntryCursor,
+  type FilterParams,
+  type JournalerEntry,
   getCalendarDays,
   getCalendarMonths,
   getCalendarYears,
   getEntries,
   searchEntries,
-  type EntryCursor,
-  type EntryCategory,
-  type FilterParams,
-  type JournalerEntry,
 } from "./queries";
-import { deleteEntryById, getEntryById, insertEntry, updateEntryById } from "./entry-mutations";
 import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
 import { getPublicImageUrl } from "./s3-url";
-import type { CardEntry } from "@/components/entry-card";
 
 async function getUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -42,17 +42,14 @@ function toCardEntry(e: JournalerEntry): CardEntry {
 
 export async function fetchEntriesAction(
   cursor: EntryCursor | null,
-  filters: FilterParams = DEFAULT_FILTERS,
+  filters: FilterParams = DEFAULT_FILTERS
 ) {
   const userId = await getUserId();
   const { entries, nextCursor } = await getEntries(userId, cursor, filters);
   return { entries: entries.map(toCardEntry), nextCursor };
 }
 
-export async function searchEntriesAction(
-  query: string,
-  filters: FilterParams = DEFAULT_FILTERS,
-) {
+export async function searchEntriesAction(query: string, filters: FilterParams = DEFAULT_FILTERS) {
   if (!query.trim()) return [];
   const userId = await getUserId();
   const results = await searchEntries(userId, query.trim(), filters);
@@ -60,7 +57,7 @@ export async function searchEntriesAction(
 }
 
 export async function getCalendarYearsAction(
-  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null },
+  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null }
 ) {
   const userId = await getUserId();
   return getCalendarYears(userId, filters);
@@ -68,7 +65,7 @@ export async function getCalendarYearsAction(
 
 export async function getCalendarMonthsAction(
   year: number,
-  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null },
+  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null }
 ) {
   const userId = await getUserId();
   return getCalendarMonths(userId, year, filters);
@@ -77,7 +74,7 @@ export async function getCalendarMonthsAction(
 export async function getCalendarDaysAction(
   year: number,
   month: number,
-  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null },
+  filters: Pick<FilterParams, "categories" | "rating"> = { categories: [], rating: null }
 ) {
   const userId = await getUserId();
   return getCalendarDays(userId, year, month, filters);
@@ -86,7 +83,7 @@ export async function getCalendarDaysAction(
 // ─── Mutation actions ─────────────────────────────────────────────────────────
 
 export async function generatePresignedUploadUrlAction(
-  filename: string,
+  filename: string
 ): Promise<{ key: string; url: string }> {
   return generatePresignedUploadUrl(filename);
 }

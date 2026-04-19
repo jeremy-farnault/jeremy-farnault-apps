@@ -9,12 +9,24 @@ interface TextInputProps {
   type?: "text" | "email" | "password";
   required?: boolean;
   name?: string;
+  id?: string;
 }
 
-export function TextInput({ value, onChange, placeholder, disabled, className, type = "text", required, name }: TextInputProps) {
+export function TextInput({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className,
+  type = "text",
+  required,
+  name,
+  id,
+}: TextInputProps) {
   return (
     <input
       type={type}
+      id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}

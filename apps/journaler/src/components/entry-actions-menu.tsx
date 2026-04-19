@@ -1,9 +1,9 @@
 "use client";
 
-import type { CardEntry } from "./entry-card";
 import { ActionModal, Tooltip } from "@jf/ui";
 import { TrashIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import type { CardEntry } from "./entry-card";
 
 type Props = {
   entry: CardEntry;
