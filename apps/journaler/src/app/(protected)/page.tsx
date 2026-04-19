@@ -65,7 +65,7 @@ function parseFilters(raw: Record<string, string | string[] | undefined>): Filte
 
 export default async function JournalerPage({ searchParams }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
-  const userId = session?.user.id;
+  const userId = session?.user.id || "";
 
   const raw = await searchParams;
   const filters = parseFilters(raw);

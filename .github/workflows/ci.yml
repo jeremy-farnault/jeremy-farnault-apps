@@ -81,3 +81,5 @@ jobs:
           BETTER_AUTH_URL: "https://placeholder.vercel.app"
           NEXT_PUBLIC_APP_URL: "https://placeholder.vercel.app"
           NEXT_PUBLIC_AUTH_URL: "https://placeholder.vercel.app"
+          AWS_S3_BUCKET_NAME: "placeholder-bucket"
+          AWS_REGION: "eu-central-1"

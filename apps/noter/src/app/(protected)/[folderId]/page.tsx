@@ -21,7 +21,7 @@ export default async function FolderPage({ params, searchParams }: Props) {
   const { sort: sortParam } = await searchParams;
 
   const session = await auth.api.getSession({ headers: await headers() });
-  const userId = session?.user.id;
+  const userId = session?.user.id || "";
 
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(folderId)) notFound();
