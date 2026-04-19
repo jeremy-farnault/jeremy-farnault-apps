@@ -25,7 +25,11 @@ export function CalendarBreadcrumb({ scope }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function navigateTo(partial: { year: number; month?: number; day?: number }) {
+  function navigateTo(partial: {
+    year: number;
+    month?: number | undefined;
+    day?: number | undefined;
+  }) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("year");
     params.delete("month");
