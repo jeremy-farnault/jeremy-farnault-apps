@@ -98,9 +98,19 @@ export async function createEntryAction(input: {
   comment: string | null;
   rating: number | null;
   imageKey: string | null;
-}): Promise<{ id: string }> {
+}): Promise<CardEntry> {
   const userId = await getUserId();
-  return insertEntry(userId, input);
+  const { id } = await insertEntry(userId, input);
+  return {
+    id,
+    title: input.title,
+    category: input.category,
+    date: input.date,
+    comment: input.comment,
+    rating: input.rating,
+    imageKey: input.imageKey,
+    imageUrl: input.imageKey ? getPublicImageUrl(input.imageKey) : null,
+  };
 }
 
 export async function updateEntryAction(input: {
@@ -112,7 +122,7 @@ export async function updateEntryAction(input: {
   rating: number | null;
   imageKey: string | null;
   removeImage: boolean;
-}): Promise<void> {
+}): Promise<CardEntry> {
   const userId = await getUserId();
   const existing = await getEntryById(userId, input.id);
   if (!existing) throw new Error("Entry not found");
@@ -134,6 +144,17 @@ export async function updateEntryAction(input: {
     rating: input.rating,
     imageKey: newImageKey,
   });
+
+  return {
+    id: input.id,
+    title: input.title,
+    category: input.category,
+    date: input.date,
+    comment: input.comment,
+    rating: input.rating,
+    imageKey: newImageKey,
+    imageUrl: newImageKey ? getPublicImageUrl(newImageKey) : null,
+  };
 }
 
 export async function deleteEntryAction(id: string): Promise<void> {

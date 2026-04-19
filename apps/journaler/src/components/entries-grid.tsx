@@ -4,7 +4,6 @@ import { deleteEntryAction, fetchEntriesAction, searchEntriesAction } from "@/li
 import type { EntryCursor, FilterParams } from "@/lib/queries";
 import { FloatingCTA, Grid } from "@jf/ui";
 import { PlusSquareIcon } from "@phosphor-icons/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { type CardEntry, EntryCard } from "./entry-card";
 import { EntryFormModal } from "./entry-form-modal";
@@ -17,8 +16,6 @@ type Props = {
 };
 
 export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Props) {
-  const router = useRouter();
-
   // ── Infinite-scroll state ─────────────────────────────────────────────────
   const [entries, setEntries] = useState<CardEntry[]>(initialEntries);
   const [nextCursor, setNextCursor] = useState<EntryCursor | null>(initialNextCursor);
@@ -34,6 +31,21 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   const [editingEntry, setEditingEntry] = useState<CardEntry | undefined>(undefined);
 
   const isSearching = searchResults !== null;
+
+  // ── Mutation handlers ─────────────────────────────────────────────────────
+  function handleEntrySuccess(entry: CardEntry, isEdit: boolean) {
+    if (isEdit) {
+      setEntries((prev) => prev.map((e) => (e.id === entry.id ? entry : e)));
+      setSearchResults((prev) => prev && prev.map((e) => (e.id === entry.id ? entry : e)));
+    } else {
+      setEntries((prev) => [entry, ...prev]);
+    }
+  }
+
+  function handleEntryDeleted(id: string) {
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+    setSearchResults((prev) => prev && prev.filter((e) => e.id !== id));
+  }
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -100,7 +112,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
                   }}
                   onDelete={async (e) => {
                     await deleteEntryAction(e.id);
-                    router.refresh();
+                    handleEntryDeleted(e.id);
                   }}
                 />
               ))}
@@ -127,6 +139,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
       <EntryFormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        onSuccess={handleEntrySuccess}
         {...(editingEntry !== undefined && { entry: editingEntry })}
       />
     </>

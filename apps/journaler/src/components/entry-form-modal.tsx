@@ -9,7 +9,6 @@ import type { EntryCategory } from "@/lib/queries";
 import { Button, Select, SelectItem, Textarea, TextInput } from "@jf/ui";
 import * as Dialog from "@radix-ui/react-dialog";
 import { XIcon } from "@phosphor-icons/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { CardEntry } from "./entry-card";
 
@@ -43,11 +42,11 @@ function today() {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: (entry: CardEntry, isEdit: boolean) => void;
   entry?: CardEntry;
 };
 
-export function EntryFormModal({ isOpen, onClose, entry }: Props) {
-  const router = useRouter();
+export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
   const isEdit = entry !== undefined;
 
   const [form, setForm] = useState<FormState>({
@@ -157,17 +156,18 @@ export function EntryFormModal({ isOpen, onClose, entry }: Props) {
         imageKey,
       };
 
+      let result: CardEntry;
       if (isEdit) {
-        await updateEntryAction({
+        result = await updateEntryAction({
           id: entry.id,
           ...payload,
           removeImage: imageState.status === "removed",
         });
       } else {
-        await createEntryAction(payload);
+        result = await createEntryAction(payload);
       }
 
-      router.refresh();
+      onSuccess(result, isEdit);
       onClose();
     } finally {
       setSubmitting(false);
