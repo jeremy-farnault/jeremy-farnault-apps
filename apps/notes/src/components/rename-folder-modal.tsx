@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import type { Folder } from "@/lib/queries";
 import { renameFolder } from "@/lib/actions";
+import type { Folder } from "@/lib/queries";
+import { ActionModal, TextInput } from "@jf/ui";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -11,50 +12,40 @@ type Props = {
 };
 
 export function RenameFolderModal({ folder, onClose }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState(folder.name);
-  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
+  function handleConfirm() {
+    if (!name.trim()) return;
     startTransition(async () => {
       try {
         await renameFolder(folder.id, name);
         toast.success("Folder renamed");
         onClose();
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Something went wrong";
-        setError(message);
-        toast.error(message);
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
     });
   }
 
   return (
-    <dialog ref={dialogRef} onClose={onClose}>
-      <form onSubmit={handleSubmit}>
-        <p>Rename folder</p>
-        {error && <p>{error}</p>}
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          autoFocus
-        />
-        <button type="button" onClick={onClose} disabled={isPending}>
-          Cancel
-        </button>
-        <button type="submit" disabled={isPending || !name.trim()}>
-          {isPending ? "Saving…" : "Save"}
-        </button>
-      </form>
-    </dialog>
+    <ActionModal
+      isOpen={true}
+      onClose={onClose}
+      size="small"
+      title="Rename folder"
+      content={<TextInput value={name} onChange={setName} placeholder="Folder name" />}
+      primaryButton={{
+        label: "Save",
+        loading: isPending,
+        onClick: handleConfirm,
+      }}
+      secondaryButton={{
+        label: "Cancel",
+        onClick: onClose,
+      }}
+      closeOnBackdropClick={!isPending}
+      closeOnEscapeKeyDown={!isPending}
+    />
   );
 }

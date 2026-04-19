@@ -33,10 +33,14 @@ export function NoteCard({
   const bgColor = note.backgroundColor ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
   const pointerDownOnCard = useRef(false);
+  const isTouchDevice = useRef(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) setMenuVisible(true);
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      isTouchDevice.current = true;
+      setMenuVisible(true);
+    }
   }, []);
 
   return (
@@ -48,7 +52,9 @@ export function NoteCard({
       )}
       style={{ backgroundColor: bgColor, borderColor }}
       onMouseEnter={() => setMenuVisible(true)}
-      onMouseLeave={() => setMenuVisible(false)}
+      onMouseLeave={() => {
+        if (!isTouchDevice.current) setMenuVisible(false);
+      }}
     >
       <button
         type="button"

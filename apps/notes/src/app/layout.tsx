@@ -44,7 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-300) flex flex-col items-center justify-start`}
       >
         {children}
-        <Toaster toastOptions={{ classNames: { toast: "!w-fit" } }} />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{ classNames: { toast: "!left-auto !right-8 !w-fit" } }}
+        />
         <ServiceWorkerRegister />
       </body>
     </html>

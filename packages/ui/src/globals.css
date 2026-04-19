@@ -49,6 +49,12 @@
     }
   }
 
+  @media (max-width: 600px) {
+    [data-sonner-toaster][data-x-position="right"] [data-sonner-toast] {
+      left: unset;
+    }
+  }
+
   :root {
     /* Yellow (brand) */
     --yellow-100: #fff6eb;
