@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { ActionModal, TextInput } from "@jf/ui";
 import { createFolder } from "@/lib/actions";
+import { ActionModal, TextInput } from "@jf/ui";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -41,13 +41,7 @@ export function NewFolderButton({ parentFolderId, isOpen, onClose }: Props) {
       onClose={handleClose}
       size="small"
       title="New folder"
-      content={
-        <TextInput
-          value={name}
-          onChange={setName}
-          placeholder="Folder name"
-        />
-      }
+      content={<TextInput value={name} onChange={setName} placeholder="Folder name" />}
       primaryButton={{
         label: "Create",
         loading: isPending,

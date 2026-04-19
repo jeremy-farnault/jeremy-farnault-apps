@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@jf/notes",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@jf/noter",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs"

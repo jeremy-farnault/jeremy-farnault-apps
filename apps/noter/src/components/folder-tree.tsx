@@ -14,7 +14,6 @@ type Props = {
 
 type TreeNodeProps = {
   node: FolderNode;
-  children: FolderNode[];
   allFolders: FolderNode[];
   depth: number;
   currentParentFolderId: string | null;
@@ -44,15 +43,12 @@ function TreeNode({
       >
         <ArrowElbowDownRightIcon size={14} className="shrink-0 text-(--grey-400)" />
         <span className="flex-1">{node.name}</span>
-        {isCurrent && (
-          <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--grey-500)" />
-        )}
+        {isCurrent && <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--grey-500)" />}
       </button>
       {children.map((child) => (
         <TreeNode
           key={child.id}
           node={child}
-          children={[]}
           allFolders={allFolders}
           depth={depth + 1}
           currentParentFolderId={currentParentFolderId}
@@ -85,7 +81,6 @@ export function FolderTree({ folders, currentParentFolderId, onPick, isPending }
         <TreeNode
           key={root.id}
           node={root}
-          children={[]}
           allFolders={folders}
           depth={1}
           currentParentFolderId={currentParentFolderId}

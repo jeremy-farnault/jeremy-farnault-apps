@@ -14,5 +14,11 @@ export function UserMenuConnected() {
     window.location.href = `${authUrl}/login`;
   }
 
-  return <UserMenu email={session.user.email} name={session.user.name ?? undefined} onLogout={handleLogout} />;
+  return (
+    <UserMenu
+      email={session.user.email}
+      name={session.user.name ?? undefined}
+      onLogout={handleLogout}
+    />
+  );
 }

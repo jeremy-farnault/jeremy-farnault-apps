@@ -11,7 +11,7 @@
     {
       "name": "noter",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@jf/notes", "dev"],
+      "runtimeArgs": ["--filter", "@jf/noter", "dev"],
       "port": 3005
     }
   ]

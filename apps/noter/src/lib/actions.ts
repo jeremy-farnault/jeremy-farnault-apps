@@ -3,10 +3,10 @@
 import { auth } from "@jf/auth";
 import { db, folders, notes } from "@jf/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { getAllFolders, searchNotes, type Note } from "./queries";
+import { headers } from "next/headers";
 import { getDescendantIds } from "./folder-utils";
+import { type Note, getAllFolders, searchNotes } from "./queries";
 
 async function getAuthUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -16,10 +16,7 @@ async function getAuthUserId(): Promise<string> {
 
 // ─── Folder actions ───────────────────────────────────────────────────────────
 
-export async function createFolder(
-  parentFolderId: string | null,
-  name: string,
-): Promise<void> {
+export async function createFolder(parentFolderId: string | null, name: string): Promise<void> {
   if (!name.trim()) throw new Error("Name is required");
   const userId = await getAuthUserId();
   await db.insert(folders).values({
@@ -30,10 +27,7 @@ export async function createFolder(
   revalidatePath("/", "layout");
 }
 
-export async function renameFolder(
-  folderId: string,
-  name: string,
-): Promise<void> {
+export async function renameFolder(folderId: string, name: string): Promise<void> {
   if (!name.trim()) throw new Error("Name is required");
   const userId = await getAuthUserId();
   await db
@@ -45,7 +39,7 @@ export async function renameFolder(
 
 export async function moveFolder(
   folderId: string,
-  newParentFolderId: string | null,
+  newParentFolderId: string | null
 ): Promise<void> {
   const userId = await getAuthUserId();
   if (newParentFolderId !== null) {
@@ -135,7 +129,7 @@ export async function createNote(
   parentFolderId: string | null,
   title: string | null,
   body: string | null,
-  color: string,
+  color: string
 ): Promise<string> {
   const userId = await getAuthUserId();
   const result = await db
@@ -157,7 +151,7 @@ export async function updateNote(
   noteId: string,
   title: string | null,
   body: string | null,
-  color: string,
+  color: string
 ): Promise<void> {
   const userId = await getAuthUserId();
   await db
@@ -241,10 +235,7 @@ export async function searchNotesAction(query: string): Promise<Note[]> {
   return searchNotes(userId, query.trim());
 }
 
-export async function moveNote(
-  noteId: string,
-  newParentFolderId: string | null,
-): Promise<void> {
+export async function moveNote(noteId: string, newParentFolderId: string | null): Promise<void> {
   const userId = await getAuthUserId();
   await db
     .update(notes)
