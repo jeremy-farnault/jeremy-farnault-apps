@@ -68,12 +68,15 @@ export function EntryCard({ entry, onEdit, onDelete }: Props) {
             <span className="text-sm font-semibold text-(--grey-600) shrink-0">{entry.rating}</span>
           )}
         </div>
-        <span
-          className="text-xs font-medium px-2 py-0.5 rounded-full text-white self-start"
-          style={{ backgroundColor: CATEGORY_COLORS[entry.category] }}
-        >
-          {entry.category}
-        </span>
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
+            style={{ backgroundColor: CATEGORY_COLORS[entry.category] }}
+          >
+            {entry.category}
+          </span>
+          <span className="text-xs text-(--grey-600) shrink-0">{entry.date.slice(0, 10)}</span>
+        </div>
       </div>
 
       {/* Delete button — absolutely positioned, no layout impact */}
