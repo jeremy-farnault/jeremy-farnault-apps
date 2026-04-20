@@ -24,13 +24,13 @@ export function AppShell({
         {titleHref ? (
           <a
             href={titleHref}
-            className="flex items-center gap-2 text-l font-semibold text-(--grey-900) hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 text-l font-semibold text-(--grey-900) hover:opacity-80 transition-opacity bg-(--surface-150) px-4 py-1 rounded-xl"
           >
             {appIcon}
             {appName}
           </a>
         ) : (
-          <div className="flex items-center gap-2 text-l font-semibold text-(--grey-900)">
+          <div className="flex items-center gap-2 text-l font-semibold text-(--grey-900) bg-(--surface-150) px-4 py-1 rounded-xl">
             {appIcon}
             {appName}
           </div>
