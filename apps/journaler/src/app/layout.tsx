@@ -1,7 +1,6 @@
 import "@jf/ui/globals.css";
 import "@/app/globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
-import { SplashScreen } from "@/components/splash-screen";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
@@ -45,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-300) flex flex-col items-center justify-start`}
       >
-        <SplashScreen />
         {children}
         <Toaster toastOptions={{ classNames: { toast: "!w-fit" } }} />
         <ServiceWorkerRegister />
