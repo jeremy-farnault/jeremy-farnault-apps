@@ -13,6 +13,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@jf/noter", "dev"],
       "port": 3005
+    },
+    {
+      "name": "routiner",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@jf/routiner", "dev"],
+      "port": 3007
     }
   ]
 }
