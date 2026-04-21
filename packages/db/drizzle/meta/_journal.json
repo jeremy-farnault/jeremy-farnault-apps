@@ -43,6 +43,13 @@
       "when": 1776330030605,
       "tag": "0005_aromatic_crystal",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776754917263,
+      "tag": "0006_red_the_anarchist",
+      "breakpoints": true
     }
   ]
 }
