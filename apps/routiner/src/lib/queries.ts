@@ -54,6 +54,10 @@ export async function searchHabits(userId: string, query: string): Promise<Habit
     );
 }
 
+export async function getUserHabitLogs(userId: string): Promise<HabitLog[]> {
+  return db.select().from(routinerLogs).where(eq(routinerLogs.userId, userId));
+}
+
 export async function getHabit(userId: string, habitId: string): Promise<Habit | null> {
   const [habit] = await db
     .select()
