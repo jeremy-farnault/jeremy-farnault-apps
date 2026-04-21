@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { HabitCard } from "./habit-card";
 import { HabitFormModal } from "./habit-form-modal";
 import { HabitsFilterBar } from "./habits-filter-bar";
+import { LogHabitModal } from "./log-habit-modal";
 
 type Props = {
   habits: Habit[];
@@ -27,6 +28,9 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
+
+  const [logModalOpen, setLogModalOpen] = useState(false);
+  const [logTarget, setLogTarget] = useState<{ habit: Habit; date: string; existingLog?: HabitLog } | null>(null);
 
   const logsMap = useMemo(() => {
     const map = new Map<string, HabitLog[]>();
@@ -90,7 +94,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
               key={habit.id}
               habit={habit}
               logs={logsMap.get(habit.id) ?? []}
-              onLog={() => {}}
+              onLog={(date, existingLog) => { setLogTarget({ habit, date, ...(existingLog !== undefined ? { existingLog } : {}) }); setLogModalOpen(true); }}
               onEdit={() => { setEditingHabit(habit); setModalOpen(true); }}
               onArchive={handleArchive}
               onDelete={handleDelete}
@@ -106,6 +110,16 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
         onClose={() => setModalOpen(false)}
         {...(editingHabit !== undefined ? { habit: editingHabit } : {})}
       />
+
+      {logTarget && (
+        <LogHabitModal
+          isOpen={logModalOpen}
+          onClose={() => setLogModalOpen(false)}
+          habit={logTarget.habit}
+          targetDate={logTarget.date}
+          {...(logTarget.existingLog !== undefined ? { existingLog: logTarget.existingLog } : {})}
+        />
+      )}
     </div>
   );
 }

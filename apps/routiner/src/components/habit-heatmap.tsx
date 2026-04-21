@@ -158,8 +158,9 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
               if (date === null) return <div key={row} className="size-3" />;
 
               const isBeforeStart = date < startDate;
+              const isFuture = date > today;
               const squareColor = getSquareColor(date);
-              const isInteractive = !isBeforeStart && !!onDayClick;
+              const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
 
               return (
                 <Tooltip key={row} content={getTooltipContent(date)} side="top">

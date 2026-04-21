@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 type Props = {
   habit: Habit;
   logs: HabitLog[];
-  onLog: () => void;
+  onLog: (date: string, existingLog?: HabitLog) => void;
   onEdit: () => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
@@ -20,6 +20,10 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) setActionsVisible(true);
   }, []);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayLog = logs.find((l) => l.date === today);
+  const hasLogToday = !!todayLog;
 
   const heatmapLogs = logs.map((l) => ({ date: l.date, value: l.value }));
 
@@ -36,6 +40,10 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
         startDate={habit.startDate}
         type={habit.type}
         color={habit.color}
+        onDayClick={(date) => {
+          const existingLog = logs.find((l) => l.date === date);
+          onLog(date, existingLog);
+        }}
       />
 
       <div className="flex items-center justify-between gap-2">
@@ -47,11 +55,11 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
         >
           <button
             type="button"
-            onClick={onLog}
-            aria-label="Log habit"
+            onClick={() => onLog(today, todayLog)}
+            aria-label={hasLogToday ? "Edit today's log" : "Log today"}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
           >
-            <CheckCircleIcon size={18} />
+            <CheckCircleIcon size={18} weight={hasLogToday ? "fill" : "regular"} />
           </button>
           <button
             type="button"
