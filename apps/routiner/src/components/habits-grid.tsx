@@ -7,6 +7,7 @@ import { ClipboardIcon, PlusIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { HabitCard } from "./habit-card";
+import { HabitFormModal } from "./habit-form-modal";
 import { HabitsFilterBar } from "./habits-filter-bar";
 
 type Props = {
@@ -23,6 +24,9 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   const [localHabits, setLocalHabits] = useState<Habit[]>(initialHabits);
   const [searchResults, setSearchResults] = useState<Habit[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
 
   const logsMap = useMemo(() => {
     const map = new Map<string, HabitLog[]>();
@@ -87,7 +91,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
               habit={habit}
               logs={logsMap.get(habit.id) ?? []}
               onLog={() => {}}
-              onEdit={() => {}}
+              onEdit={() => { setEditingHabit(habit); setModalOpen(true); }}
               onArchive={handleArchive}
               onDelete={handleDelete}
             />
@@ -95,7 +99,13 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
         </Grid>
       )}
 
-      <FloatingCTA icon={<PlusIcon size={22} />} label="New habit" onClick={() => {}} />
+      <FloatingCTA icon={<PlusIcon size={22} />} label="New habit" onClick={() => { setEditingHabit(undefined); setModalOpen(true); }} />
+
+      <HabitFormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        {...(editingHabit !== undefined ? { habit: editingHabit } : {})}
+      />
     </div>
   );
 }
