@@ -33,12 +33,31 @@ export async function getHabits(userId: string, sort: SortOption = "createdAt"):
   return rows.map((r) => r.habit);
 }
 
-export async function getArchivedHabits(userId: string): Promise<Habit[]> {
-  return db
-    .select()
+export async function getArchivedHabits(
+  userId: string,
+  sort: SortOption = "createdAt"
+): Promise<Habit[]> {
+  const lastLoggedSubq = db
+    .select({ habitId: routinerLogs.habitId, lastLogged: max(routinerLogs.date).as("last_logged") })
+    .from(routinerLogs)
+    .groupBy(routinerLogs.habitId)
+    .as("last_logged_subq");
+
+  const orderBy =
+    sort === "name"
+      ? asc(routinerHabits.name)
+      : sort === "lastLogged"
+        ? sql`${lastLoggedSubq.lastLogged} desc nulls last`
+        : desc(routinerHabits.createdAt);
+
+  const rows = await db
+    .select({ habit: routinerHabits })
     .from(routinerHabits)
+    .leftJoin(lastLoggedSubq, eq(routinerHabits.id, lastLoggedSubq.habitId))
     .where(and(eq(routinerHabits.userId, userId), isNotNull(routinerHabits.archivedAt)))
-    .orderBy(desc(routinerHabits.archivedAt));
+    .orderBy(orderBy);
+
+  return rows.map((r) => r.habit);
 }
 
 export async function searchHabits(userId: string, query: string): Promise<Habit[]> {

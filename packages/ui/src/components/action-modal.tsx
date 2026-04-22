@@ -9,6 +9,7 @@ import { Button } from "./button";
 interface PrimaryButton {
   label: string;
   loading?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
@@ -108,7 +109,7 @@ export function ActionModal({
                 {primaryButton && (
                   <Button
                     className="flex-1"
-                    disabled={primaryButton.loading}
+                    disabled={primaryButton.loading || primaryButton.disabled}
                     onClick={primaryButton.onClick}
                   >
                     {primaryButton.loading && (

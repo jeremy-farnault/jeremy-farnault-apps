@@ -32,9 +32,9 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
 
   useEffect(() => {
     if (!isOpen) return;
-    setValue(existingLog?.value ?? "");
+    setValue(existingLog?.value ?? (habit.type === "boolean" ? "false" : ""));
     setComment(existingLog?.comment ?? "");
-  }, [isOpen, existingLog]);
+  }, [isOpen, existingLog, habit.type]);
 
   function handleSubmit() {
     startTransition(async () => {
@@ -54,6 +54,8 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       }
     });
   }
+
+  const isValueValid = habit.type === "boolean" || value.trim() !== "";
 
   const inputClass = "h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none";
 
@@ -83,11 +85,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
           className={inputClass}
         />
       )}
-      <Textarea
-        placeholder="Comment (optional)"
-        value={comment}
-        onChange={setComment}
-      />
+      <Textarea placeholder="Comment (optional)" value={comment} onChange={setComment} />
     </div>
   );
 
@@ -99,7 +97,12 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       title={existingLog ? "Edit log" : "Log habit"}
       paragraph={formatDate(targetDate)}
       content={content}
-      primaryButton={{ label: existingLog ? "Save" : "Log", loading: isPending, onClick: handleSubmit }}
+      primaryButton={{
+        label: existingLog ? "Save" : "Log",
+        loading: isPending,
+        disabled: !isValueValid,
+        onClick: handleSubmit,
+      }}
       secondaryButton={{ label: "Cancel", onClick: onClose }}
       closeOnBackdropClick={!isPending}
       closeOnEscapeKeyDown={!isPending}

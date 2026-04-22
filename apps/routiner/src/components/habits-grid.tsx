@@ -1,11 +1,12 @@
 "use client";
 
 import { archiveHabitAction, deleteHabitAction, searchHabitsAction } from "@/lib/actions";
-import { type Habit, type HabitLog, type SortOption } from "@/lib/queries";
-import { FloatingCTA, Grid } from "@jf/ui";
+import type { Habit, HabitLog, SortOption } from "@/lib/queries";
+import { ActionModal, FloatingCTA, Grid } from "@jf/ui";
 import { ClipboardIcon, PlusIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { Breadcrumb } from "./breadcrumb";
 import { HabitCard } from "./habit-card";
 import { HabitFormModal } from "./habit-form-modal";
 import { HabitsFilterBar } from "./habits-filter-bar";
@@ -30,7 +31,14 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
 
   const [logModalOpen, setLogModalOpen] = useState(false);
-  const [logTarget, setLogTarget] = useState<{ habit: Habit; date: string; existingLog?: HabitLog } | null>(null);
+  const [logTarget, setLogTarget] = useState<{
+    habit: Habit;
+    date: string;
+    existingLog?: HabitLog;
+  } | null>(null);
+
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const logsMap = useMemo(() => {
     const map = new Map<string, HabitLog[]>();
@@ -52,9 +60,21 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
     await archiveHabitAction(id);
   }
 
-  async function handleDelete(id: string) {
+  function handleDeleteRequest(id: string) {
+    setDeleteTargetId(id);
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
+    const id = deleteTargetId;
     removeHabit(id);
-    await deleteHabitAction(id);
+    try {
+      await deleteHabitAction(id);
+    } finally {
+      setDeleteTargetId(null);
+      setIsDeleting(false);
+    }
   }
 
   async function handleSearch(query: string) {
@@ -78,6 +98,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
 
   return (
     <div className="w-full px-4 pt-6 pb-24">
+      <Breadcrumb crumbs={[]} />
       <HabitsFilterBar sort={sort} onSearch={handleSearch} onSortChange={handleSortChange} />
 
       {displayedHabits.length === 0 ? (
@@ -94,16 +115,33 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
               key={habit.id}
               habit={habit}
               logs={logsMap.get(habit.id) ?? []}
-              onLog={(date, existingLog) => { setLogTarget({ habit, date, ...(existingLog !== undefined ? { existingLog } : {}) }); setLogModalOpen(true); }}
-              onEdit={() => { setEditingHabit(habit); setModalOpen(true); }}
+              onLog={(date, existingLog) => {
+                setLogTarget({
+                  habit,
+                  date,
+                  ...(existingLog !== undefined ? { existingLog } : {}),
+                });
+                setLogModalOpen(true);
+              }}
+              onEdit={() => {
+                setEditingHabit(habit);
+                setModalOpen(true);
+              }}
               onArchive={handleArchive}
-              onDelete={handleDelete}
+              onDelete={handleDeleteRequest}
             />
           ))}
         </Grid>
       )}
 
-      <FloatingCTA icon={<PlusIcon size={22} />} label="New habit" onClick={() => { setEditingHabit(undefined); setModalOpen(true); }} />
+      <FloatingCTA
+        icon={<PlusIcon size={22} />}
+        label="New habit"
+        onClick={() => {
+          setEditingHabit(undefined);
+          setModalOpen(true);
+        }}
+      />
 
       <HabitFormModal
         isOpen={modalOpen}
@@ -120,6 +158,16 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
           {...(logTarget.existingLog !== undefined ? { existingLog: logTarget.existingLog } : {})}
         />
       )}
+
+      <ActionModal
+        isOpen={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        size="small"
+        title="Delete habit?"
+        paragraph="This will permanently delete the habit and all its logs."
+        primaryButton={{ label: "Delete", loading: isDeleting, onClick: handleDeleteConfirm }}
+        secondaryButton={{ label: "Cancel", onClick: () => setDeleteTargetId(null) }}
+      />
     </div>
   );
 }

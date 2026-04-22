@@ -55,8 +55,6 @@ export async function createHabitAction(input: {
 export async function updateHabitAction(input: {
   id: string;
   name: string;
-  type: "boolean" | "numeric" | "time";
-  startDate: string;
   color: string;
   description?: string;
 }): Promise<void> {
@@ -65,8 +63,6 @@ export async function updateHabitAction(input: {
     .update(routinerHabits)
     .set({
       name: input.name,
-      type: input.type,
-      startDate: input.startDate,
       color: input.color,
       description: input.description ?? null,
       updatedAt: new Date(),

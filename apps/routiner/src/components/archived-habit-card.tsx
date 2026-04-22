@@ -2,29 +2,22 @@
 
 import { HabitHeatmap } from "@/components/habit-heatmap";
 import type { Habit, HabitLog } from "@/lib/queries";
-import { ArchiveIcon, CheckCircleIcon, PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
-import Link from "next/link";
+import { ArrowCounterClockwiseIcon, TrashIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 type Props = {
   habit: Habit;
   logs: HabitLog[];
-  onLog: (date: string, existingLog?: HabitLog) => void;
-  onEdit: () => void;
-  onArchive: (id: string) => void;
+  onUnarchive: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: Props) {
+export function ArchivedHabitCard({ habit, logs, onUnarchive, onDelete }: Props) {
   const [actionsVisible, setActionsVisible] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) setActionsVisible(true);
   }, []);
-
-  const today = new Date().toISOString().slice(0, 10);
-  const todayLog = logs.find((l) => l.date === today);
-  const hasLogToday = !!todayLog;
 
   const heatmapLogs = logs.map((l) => ({ date: l.date, value: l.value }));
 
@@ -41,19 +34,10 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
         startDate={habit.startDate}
         type={habit.type}
         color={habit.color}
-        onDayClick={(date) => {
-          const existingLog = logs.find((l) => l.date === date);
-          onLog(date, existingLog);
-        }}
       />
 
       <div className="flex items-center justify-between gap-2">
-        <Link
-          href={`/habit/${habit.id}`}
-          className="text-base font-semibold text-(--grey-900) truncate hover:underline"
-        >
-          {habit.name}
-        </Link>
+        <span className="text-base font-semibold text-(--grey-900) truncate">{habit.name}</span>
 
         <div
           className="flex items-center gap-0.5 shrink-0 transition-opacity duration-150"
@@ -61,27 +45,11 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
         >
           <button
             type="button"
-            onClick={() => onLog(today, todayLog)}
-            aria-label={hasLogToday ? "Edit today's log" : "Log today"}
+            onClick={() => onUnarchive(habit.id)}
+            aria-label="Unarchive habit"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
           >
-            <CheckCircleIcon size={18} weight={hasLogToday ? "fill" : "regular"} />
-          </button>
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label="Edit habit"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-          >
-            <PencilSimpleIcon size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={() => onArchive(habit.id)}
-            aria-label="Archive habit"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-          >
-            <ArchiveIcon size={18} />
+            <ArrowCounterClockwiseIcon size={18} />
           </button>
           <button
             type="button"

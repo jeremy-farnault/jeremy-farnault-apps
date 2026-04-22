@@ -78,8 +78,6 @@ export function HabitFormModal({ isOpen, onClose, habit }: Props) {
           await updateHabitAction({
             id: habit.id,
             name: name.trim(),
-            type: habit.type,
-            startDate: habit.startDate,
             color,
             ...(desc !== undefined ? { description: desc } : {}),
           });
@@ -184,7 +182,11 @@ export function HabitFormModal({ isOpen, onClose, habit }: Props) {
       size="large"
       title={isEditMode ? "Edit habit" : "New habit"}
       content={content}
-      primaryButton={{ label: isEditMode ? "Save" : "Create", loading: isPending, onClick: handleSubmit }}
+      primaryButton={{
+        label: isEditMode ? "Save" : "Create",
+        loading: isPending,
+        onClick: handleSubmit,
+      }}
       secondaryButton={{ label: "Cancel", onClick: onClose }}
       closeOnBackdropClick={!isPending}
       closeOnEscapeKeyDown={!isPending}
