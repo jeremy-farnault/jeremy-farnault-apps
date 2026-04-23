@@ -21,12 +21,12 @@ export function UserMenu({ email, name, onLogout }: UserMenuProps) {
           aria-label="Open user menu"
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-full",
-            "bg-(--surface-150)",
-            "hover:bg-(--surface-200)"
+            "bg-(--primary)",
+            "hover:opacity-90"
           )}
           type="button"
         >
-          <span className="text-xl font-semibold uppercase text-(--primary)">{letter}</span>
+          <span className="text-xl font-semibold uppercase text-(--grey-900)">{letter}</span>
         </button>
       </Popover.Trigger>
 

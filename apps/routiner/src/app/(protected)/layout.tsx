@@ -6,7 +6,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<ChecksIcon className="text-(--primary)" size={32} />}
+        appIcon={<ChecksIcon className="text-white" size={32} />}
         appName="Routiner"
         currentAppId="routiner"
         titleHref="/"
