@@ -11,10 +11,10 @@ export interface AppDefinition {
 
 export const apps: AppDefinition[] = [
   {
-    id: "notes",
+    id: "noter",
     name: "Noter",
     icon: NotepadIcon,
-    href: process.env.NEXT_PUBLIC_NOTES_URL ?? "#",
+    href: process.env.NEXT_PUBLIC_NOTER_URL ?? "#",
     accentColor: "--magenta-400",
   },
   {
