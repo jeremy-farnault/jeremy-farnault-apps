@@ -55,6 +55,10 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
     setSearchResults((prev) => prev?.filter((h) => h.id !== id) ?? null);
   }
 
+  function handleCreated(habit: Habit) {
+    setLocalHabits((prev) => [habit, ...prev]);
+  }
+
   async function handleArchive(id: string) {
     removeHabit(id);
     await archiveHabitAction(id);
@@ -146,6 +150,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
       <HabitFormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        onCreated={handleCreated}
         {...(editingHabit !== undefined ? { habit: editingHabit } : {})}
       />
 

@@ -12,6 +12,7 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   habit?: Habit;
+  onCreated?: (habit: Habit) => void;
 };
 
 type FormErrors = {
@@ -23,7 +24,7 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function HabitFormModal({ isOpen, onClose, habit }: Props) {
+export function HabitFormModal({ isOpen, onClose, habit, onCreated }: Props) {
   const isEditMode = !!habit;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -82,13 +83,14 @@ export function HabitFormModal({ isOpen, onClose, habit }: Props) {
             ...(desc !== undefined ? { description: desc } : {}),
           });
         } else {
-          await createHabitAction({
+          const newHabit = await createHabitAction({
             name: name.trim(),
             type: type as "boolean" | "numeric" | "time",
             startDate,
             color,
             ...(desc !== undefined ? { description: desc } : {}),
           });
+          onCreated?.(newHabit);
         }
         toast.success(isEditMode ? "Habit updated" : "Habit created");
         router.refresh();

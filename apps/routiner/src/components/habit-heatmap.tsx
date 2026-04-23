@@ -1,6 +1,7 @@
 "use client";
 
 import { Tooltip } from "@jf/ui";
+import { useEffect, useRef } from "react";
 
 type HabitLog = { date: string; value: string };
 type HabitType = "boolean" | "numeric" | "time";
@@ -96,11 +97,46 @@ function buildWeekColumns(today: string): (string | null)[][] {
   return weeks;
 }
 
+// ─── Month labels ─────────────────────────────────────────────────────────────
+
+function buildMonthLabels(weeks: (string | null)[][]): (string | null)[] {
+  let lastMonth = -1;
+  return weeks.map((week) => {
+    const firstDate = week.find((d) => d !== null);
+    if (!firstDate) return null;
+    const month = new Date(`${firstDate}T00:00:00Z`).getUTCMonth();
+    if (month !== lastMonth) {
+      lastMonth = month;
+      return new Date(`${firstDate}T00:00:00Z`).toLocaleDateString("en-US", {
+        month: "short",
+        timeZone: "UTC",
+      });
+    }
+    return null;
+  });
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+// Row labels: show Mon / Wed / Fri, leave others empty (Monday-first grid)
+const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
+
+// Height of the month label row in px: text-[9px] leading-none ≈ 9px + 4px gap below
+const MONTH_ROW_OFFSET = 13;
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: HabitHeatmapProps) {
   const today = toDateStr(new Date());
   const colorBase = parseColorBase(color);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to the rightmost (most recent) column on mount
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, []);
 
   const logMap = new Map(logs.map((l) => [l.date, l.value]));
 
@@ -148,34 +184,74 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
   }
 
   const weeks = buildWeekColumns(today);
+  const monthLabels = buildMonthLabels(weeks);
 
   return (
-    <div className="overflow-x-auto">
-      <div className="flex gap-[3px]">
-        {weeks.map((week, col) => (
-          <div key={col} className="flex flex-col gap-[3px]">
-            {week.map((date, row) => {
-              if (date === null) return <div key={row} className="size-3" />;
-
-              const isBeforeStart = date < startDate;
-              const isFuture = date > today;
-              const squareColor = getSquareColor(date);
-              const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
-
-              return (
-                <Tooltip key={row} content={getTooltipContent(date)} side="top">
-                  <button
-                    type="button"
-                    className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
-                    style={{ backgroundColor: squareColor, cursor: isInteractive ? "pointer" : "default" }}
-                    onClick={isInteractive ? () => onDayClick(date) : undefined}
-                    aria-label={getTooltipContent(date)}
-                  />
-                </Tooltip>
-              );
-            })}
+    <div className="flex items-start gap-2">
+      {/* Static day-of-week labels — outside the scroll container */}
+      <div
+        className="flex flex-col shrink-0"
+        style={{ gap: 3, paddingTop: MONTH_ROW_OFFSET }}
+      >
+        {DAY_LABELS.map((label, i) => (
+          <div
+            key={i}
+            className="h-3 flex items-center text-[9px] leading-none text-(--grey-400)"
+          >
+            {label}
           </div>
         ))}
+      </div>
+
+      {/* Scrollable grid */}
+      <div className="overflow-x-auto" ref={scrollRef}>
+        <div className="flex flex-col gap-1">
+          {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
+          <div
+            className="relative h-[9px]"
+            style={{ width: weeks.length * 15 - 3 }}
+          >
+            {monthLabels.map((label, col) =>
+              label ? (
+                <span
+                  key={col}
+                  className="absolute text-[9px] leading-none text-(--grey-400) whitespace-nowrap"
+                  style={{ left: col * 15 }}
+                >
+                  {label}
+                </span>
+              ) : null,
+            )}
+          </div>
+
+          {/* Squares grid */}
+          <div className="flex gap-[3px]">
+            {weeks.map((week, col) => (
+              <div key={col} className="flex flex-col gap-[3px]">
+                {week.map((date, row) => {
+                  if (date === null) return <div key={row} className="size-3" />;
+
+                  const isBeforeStart = date < startDate;
+                  const isFuture = date > today;
+                  const squareColor = getSquareColor(date);
+                  const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
+
+                  return (
+                    <Tooltip key={row} content={getTooltipContent(date)} side="top">
+                      <button
+                        type="button"
+                        className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
+                        style={{ backgroundColor: squareColor, cursor: isInteractive ? "pointer" : "default" }}
+                        onClick={isInteractive ? () => onDayClick(date) : undefined}
+                        aria-label={getTooltipContent(date)}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
