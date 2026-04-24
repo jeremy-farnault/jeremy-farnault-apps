@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip } from "@jf/ui";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type HabitLog = { date: string; value: string };
 type HabitType = "boolean" | "numeric" | "time";
@@ -129,13 +129,17 @@ const MONTH_ROW_OFFSET = 13;
 export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: HabitHeatmapProps) {
   const today = toDateStr(new Date());
   const colorBase = parseColorBase(color);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleWeekCount, setVisibleWeekCount] = useState<number | null>(null);
 
-  // Scroll to the rightmost (most recent) column on mount
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
-    }
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setVisibleWeekCount(Math.floor((entry.contentRect.width + 3) / 15));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const logMap = new Map(logs.map((l) => [l.date, l.value]));
@@ -184,7 +188,8 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
   }
 
   const weeks = buildWeekColumns(today);
-  const monthLabels = buildMonthLabels(weeks);
+  const displayedWeeks = visibleWeekCount !== null ? weeks.slice(-visibleWeekCount) : weeks;
+  const monthLabels = buildMonthLabels(displayedWeeks);
 
   return (
     <div className="flex items-start gap-2">
@@ -203,13 +208,13 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
         ))}
       </div>
 
-      {/* Scrollable grid */}
-      <div className="overflow-x-auto" ref={scrollRef}>
+      {/* Heatmap grid */}
+      <div className="overflow-hidden flex-1 min-w-0" ref={containerRef}>
         <div className="flex flex-col gap-1">
           {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
           <div
             className="relative h-[9px]"
-            style={{ width: weeks.length * 15 - 3 }}
+            style={{ width: displayedWeeks.length * 15 - 3 }}
           >
             {monthLabels.map((label, col) =>
               label ? (
@@ -226,7 +231,7 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
 
           {/* Squares grid */}
           <div className="flex gap-[3px]">
-            {weeks.map((week, col) => (
+            {displayedWeeks.map((week, col) => (
               <div key={col} className="flex flex-col gap-[3px]">
                 {week.map((date, row) => {
                   if (date === null) return <div key={row} className="size-3" />;
