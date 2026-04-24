@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip } from "@jf/ui";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type HabitLog = { date: string; value: string };
 type HabitType = "boolean" | "numeric" | "time";
@@ -132,6 +132,12 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleWeekCount, setVisibleWeekCount] = useState<number | null>(null);
 
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setVisibleWeekCount(Math.floor((el.getBoundingClientRect().width + 3) / 15));
+  }, []);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -209,7 +215,10 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
       </div>
 
       {/* Heatmap grid */}
-      <div className="overflow-hidden flex-1 min-w-0" ref={containerRef}>
+      <div
+        className={`overflow-hidden flex-1 min-w-0 transition-opacity duration-150 ${visibleWeekCount === null ? "opacity-0" : "opacity-100"}`}
+        ref={containerRef}
+      >
         <div className="flex flex-col gap-1">
           {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
           <div
