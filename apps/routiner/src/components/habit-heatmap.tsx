@@ -12,6 +12,7 @@ interface HabitHeatmapProps {
   type: HabitType;
   color: string;
   onDayClick?: (date: string) => void;
+  onMeasured?: () => void;
 }
 
 // ─── Date utilities ───────────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ const MONTH_ROW_OFFSET = 13;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: HabitHeatmapProps) {
+export function HabitHeatmap({ logs, startDate, type, color, onDayClick, onMeasured }: HabitHeatmapProps) {
   const today = toDateStr(new Date());
   const colorBase = parseColorBase(color);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -136,6 +137,7 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
     const el = containerRef.current;
     if (!el) return;
     setVisibleWeekCount(Math.floor((el.getBoundingClientRect().width + 3) / 15));
+    onMeasured?.();
   }, []);
 
   useEffect(() => {
@@ -215,10 +217,8 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
       </div>
 
       {/* Heatmap grid */}
-      <div
-        className={`overflow-hidden flex-1 min-w-0 transition-opacity duration-150 ${visibleWeekCount === null ? "opacity-0" : "opacity-100"}`}
-        ref={containerRef}
-      >
+      <div className="overflow-hidden flex-1 min-w-0" ref={containerRef}>
+        {visibleWeekCount !== null && (
         <div className="flex flex-col gap-1">
           {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
           <div
@@ -266,6 +266,7 @@ export function HabitHeatmap({ logs, startDate, type, color, onDayClick }: Habit
             ))}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
