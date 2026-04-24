@@ -18,7 +18,8 @@
       "name": "routiner",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@jf/routiner", "dev"],
-      "port": 3007
+      "port": 3007,
+      "autoPort": true
     }
   ]
 }

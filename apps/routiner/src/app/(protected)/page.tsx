@@ -16,5 +16,5 @@ export default async function Page({ searchParams }: Props) {
     getUserHabitLogs(userId),
   ]);
 
-  return <HabitsGrid habits={habits} logs={logs} sort={sort} />;
+  return <HabitsGrid key={sort} habits={habits} logs={logs} sort={sort} />;
 }
