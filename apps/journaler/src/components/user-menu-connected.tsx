@@ -18,6 +18,7 @@ export function UserMenuConnected() {
     <UserMenu
       email={session.user.email}
       name={session.user.name ?? undefined}
+      {...(session.user.image ? { image: session.user.image } : {})}
       onLogout={handleLogout}
     />
   );

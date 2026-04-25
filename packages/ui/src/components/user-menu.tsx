@@ -7,10 +7,11 @@ import { cn } from "../lib/utils";
 interface UserMenuProps {
   email: string;
   name?: string;
+  image?: string;
   onLogout: () => void;
 }
 
-export function UserMenu({ email, name, onLogout }: UserMenuProps) {
+export function UserMenu({ email, name, image, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
 
@@ -26,7 +27,16 @@ export function UserMenu({ email, name, onLogout }: UserMenuProps) {
           )}
           type="button"
         >
-          <span className="text-xl font-semibold uppercase text-(--grey-900)">{letter}</span>
+          {image ? (
+            <img
+              src={image}
+              alt={name ?? email}
+              referrerPolicy="no-referrer"
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <span className="text-xl font-semibold uppercase text-(--grey-900)">{letter}</span>
+          )}
         </button>
       </Popover.Trigger>
 
