@@ -40,13 +40,17 @@ export const auth = betterAuth({
       ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
     },
   },
-  // Uncomment to add OAuth providers:
-  // socialProviders: {
-  //   github: {
-  //     clientId: process.env["GITHUB_CLIENT_ID"]!,
-  //     clientSecret: process.env["GITHUB_CLIENT_SECRET"]!,
-  //   },
-  // },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_NOTER_URL ?? "http://localhost:3005",
+    process.env.NEXT_PUBLIC_JOURNALER_URL ?? "http://localhost:3006",
+    process.env.NEXT_PUBLIC_ROUTINER_URL ?? "http://localhost:3007",
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;

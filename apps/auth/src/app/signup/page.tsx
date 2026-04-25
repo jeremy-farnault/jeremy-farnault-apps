@@ -1,8 +1,9 @@
 "use client";
 
-import { signUp } from "@jf/auth/client";
+import { signIn, signUp } from "@jf/auth/client";
 import { TextInput } from "@jf/ui";
 import { apps } from "@jf/ui/config/apps";
+import { GoogleLogoIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -41,6 +42,11 @@ function SignUpForm() {
 
   const loginHref = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login";
 
+  async function handleGoogleSignIn() {
+    setLoading(true);
+    await signIn.social({ provider: "google", callbackURL: redirect ?? "/" });
+  }
+
   if (emailSent) {
     return (
       <div className="flex w-full max-w-sm flex-col gap-3">
@@ -57,6 +63,20 @@ function SignUpForm() {
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
       <h1 className="text-2xl font-semibold text-(--grey-900) mb-1">Create account</h1>
       {error && <p className="text-sm text-(--red-500)">{error}</p>}
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-(--surface-200) px-3 text-sm font-medium text-(--grey-900) shadow-sm disabled:opacity-50"
+      >
+        <GoogleLogoIcon size={18} />
+        Continue with Google
+      </button>
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-(--grey-200)" />
+        <span className="text-xs text-(--grey-400)">or</span>
+        <div className="h-px flex-1 bg-(--grey-200)" />
+      </div>
       <TextInput type="text" placeholder="Name" value={name} onChange={setName} required />
       <TextInput type="email" placeholder="Email" value={email} onChange={setEmail} required />
       <TextInput
