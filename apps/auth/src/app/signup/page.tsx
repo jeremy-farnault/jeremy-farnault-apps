@@ -44,7 +44,15 @@ function SignUpForm() {
 
   async function handleGoogleSignIn() {
     setLoading(true);
-    await signIn.social({ provider: "google", callbackURL: redirect ?? "/" });
+    setError("");
+    const { error: googleError } = await signIn.social({
+      provider: "google",
+      callbackURL: redirect ?? "/",
+    });
+    if (googleError) {
+      setError(googleError.message ?? "Google sign-in failed");
+      setLoading(false);
+    }
   }
 
   if (emailSent) {

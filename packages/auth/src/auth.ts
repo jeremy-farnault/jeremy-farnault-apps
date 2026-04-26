@@ -47,6 +47,9 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [
+    ...(process.env.TRUSTED_ORIGINS
+      ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
+      : []),
     process.env.NEXT_PUBLIC_NOTER_URL ?? "http://localhost:3005",
     process.env.NEXT_PUBLIC_JOURNALER_URL ?? "http://localhost:3006",
     process.env.NEXT_PUBLIC_ROUTINER_URL ?? "http://localhost:3007",
