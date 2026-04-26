@@ -12,7 +12,8 @@
       "name": "noter",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@jf/noter", "dev"],
-      "port": 3005
+      "port": 3005,
+      "autoPort": true
     },
     {
       "name": "routiner",

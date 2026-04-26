@@ -3,10 +3,11 @@
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ColorPicker } from "@/components/color-picker";
 import { NoteActionsMenu } from "@/components/note-actions-menu";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { createNote, updateNote } from "@/lib/actions";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder, Note } from "@/lib/queries";
-import { TextInput, Textarea } from "@jf/ui";
+import { TextInput } from "@jf/ui";
 import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -113,8 +114,8 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
           placeholder="Title"
           className="text-base font-semibold"
         />
-        <Textarea
-          value={body}
+        <RichTextEditor
+          initialContent={note.body}
           onChange={setBody}
           placeholder="Write something…"
           className="min-h-[calc(100dvh-328px)] sm:min-h-[50vh]"

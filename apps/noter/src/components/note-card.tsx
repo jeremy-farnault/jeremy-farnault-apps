@@ -1,5 +1,6 @@
 "use client";
 
+import { extractPlainText } from "@/lib/note-body-utils";
 import { DEFAULT_COLOR } from "@/lib/note-utils.ts";
 import type { Folder, Note } from "@/lib/queries";
 import { cn } from "@jf/ui";
@@ -78,7 +79,9 @@ export function NoteCard({
           </div>
         )}
         {note.body && (
-          <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">{note.body}</p>
+          <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">
+            {extractPlainText(note.body)}
+          </p>
         )}
       </div>
 

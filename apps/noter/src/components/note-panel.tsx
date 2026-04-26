@@ -3,12 +3,13 @@
 import { createNote, updateNote } from "@/lib/actions";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder, Note } from "@/lib/queries";
-import { ActionModal, TextInput, Textarea } from "@jf/ui";
+import { ActionModal, TextInput } from "@jf/ui";
 import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "./color-picker";
+import { RichTextEditor } from "./rich-text-editor";
 
 type Props = {
   note: Note | null;
@@ -132,8 +133,8 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
         placeholder="Title"
         className="text-base font-semibold"
       />
-      <Textarea
-        value={body}
+      <RichTextEditor
+        initialContent={note?.body ?? null}
         onChange={setBody}
         placeholder="Write something…"
         className="min-h-[200px]"
