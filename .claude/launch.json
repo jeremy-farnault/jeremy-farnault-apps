@@ -21,6 +21,13 @@
       "runtimeArgs": ["--filter", "@jf/routiner", "dev"],
       "port": 3007,
       "autoPort": true
+    },
+    {
+      "name": "classer",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "classer", "dev"],
+      "port": 3008,
+      "autoPort": true
     }
   ]
 }
