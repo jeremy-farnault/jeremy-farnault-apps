@@ -7,6 +7,8 @@ import { ClasserActionsMenu } from "./classer-actions-menu";
 export type ClasserCardData = {
   id: string;
   name: string;
+  description: string | null;
+  imageKey: string | null;
   imageUrl: string | null;
   itemCount: number;
 };

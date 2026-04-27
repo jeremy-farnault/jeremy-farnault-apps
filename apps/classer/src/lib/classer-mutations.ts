@@ -36,3 +36,14 @@ export async function updateClasserById(
     .set({ ...data, updatedAt: new Date() })
     .where(and(eq(classers.id, id), eq(classers.userId, userId)));
 }
+
+export async function archiveClasserById(userId: string, id: string): Promise<void> {
+  await db
+    .update(classers)
+    .set({ archivedAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(classers.id, id), eq(classers.userId, userId)));
+}
+
+export async function deleteClasserById(userId: string, id: string): Promise<void> {
+  await db.delete(classers).where(and(eq(classers.id, id), eq(classers.userId, userId)));
+}
