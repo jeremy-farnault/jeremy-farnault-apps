@@ -1,6 +1,7 @@
 import "@jf/ui/globals.css";
 import "@/app/globals.css";
-import type { Metadata } from "next";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
@@ -17,6 +18,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Classer",
   description: "Personal ranked lists",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icons/icon-192x192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Classer",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#84cdb4" },
+    { media: "(prefers-color-scheme: dark)", color: "#84cdb4" },
+  ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         {children}
         <Toaster toastOptions={{ classNames: { toast: "!w-fit" } }} />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

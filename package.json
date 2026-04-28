@@ -9,6 +9,7 @@
   "packageManager": "pnpm@10.7.0",
   "scripts": {
     "build": "turbo run build",
+    "generate:icon": "tsx scripts/generate-app-icon.ts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -21,6 +22,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "sharp": "^0.34.5",
+    "tsx": "^4.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "rimraf": "^6.0.1",
