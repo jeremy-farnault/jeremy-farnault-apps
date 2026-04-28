@@ -2,6 +2,9 @@
 
 import type { ClasserCardData } from "@/components/classer-card";
 import { auth } from "@jf/auth";
+import { classerItems, db } from "@jf/db";
+import { and, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import {
   archiveClasserById,
@@ -10,7 +13,7 @@ import {
   insertClasser,
   updateClasserById,
 } from "./classer-mutations";
-import { getClasserItemById, insertClasserItem, updateClasserItemById } from "./item-mutations";
+import { getClasserItemById, updateClasserItemById } from "./item-mutations";
 import type { ClasserCursor, ClasserRow } from "./queries";
 import { getClassers, searchClassers } from "./queries";
 import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
@@ -149,22 +152,45 @@ export async function createItemAction(input: {
   itemCount: number;
 }): Promise<ItemResult> {
   const userId = await getUserId();
-  // Stub: inserts at end to avoid unique-constraint collision on (classerId, rank).
-  // Ticket 10 replaces this with rank-shift logic that honors input.rank.
-  const safeRank = input.itemCount + 1;
-  const { id } = await insertClasserItem(userId, input.classerId, {
-    name: input.name,
-    description: input.description,
-    imageKey: input.imageKey,
-    rank: safeRank,
+
+  const { id } = await db.transaction(async (tx) => {
+    await tx
+      .update(classerItems)
+      .set({ rank: sql`${classerItems.rank} + 1`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(classerItems.classerId, input.classerId),
+          eq(classerItems.userId, userId),
+          gte(classerItems.rank, input.rank)
+        )
+      );
+
+    const rows = await tx
+      .insert(classerItems)
+      .values({
+        userId,
+        classerId: input.classerId,
+        name: input.name,
+        description: input.description,
+        imageKey: input.imageKey,
+        rank: input.rank,
+      })
+      .returning({ id: classerItems.id });
+
+    const row = rows[0];
+    if (!row) throw new Error("Insert failed to return a row");
+    return row;
   });
+
+  revalidatePath(`/classers/${input.classerId}`);
+
   return {
     id,
     name: input.name,
     description: input.description,
     imageKey: input.imageKey,
     imageUrl: input.imageKey ? getPublicImageUrl(input.imageKey) : null,
-    rank: safeRank,
+    rank: input.rank,
   };
 }
 
@@ -175,6 +201,7 @@ export async function updateItemAction(input: {
   imageKey: string | null;
   removeImage: boolean;
   rank: number;
+  itemCount: number;
 }): Promise<ItemResult> {
   const userId = await getUserId();
   const existing = await getClasserItemById(userId, input.id);
@@ -189,13 +216,83 @@ export async function updateItemAction(input: {
     await deleteS3Object(existing.imageKey);
   }
 
-  // Stub: rank unchanged until ticket 10 implements shift logic.
-  await updateClasserItemById(userId, input.id, {
-    name: input.name,
-    description: input.description,
-    imageKey: newImageKey,
-    rank: existing.rank,
+  if (input.rank === existing.rank) {
+    await updateClasserItemById(userId, input.id, {
+      name: input.name,
+      description: input.description,
+      imageKey: newImageKey,
+      rank: existing.rank,
+    });
+    revalidatePath(`/classers/${existing.classerId}`);
+    return {
+      id: input.id,
+      name: input.name,
+      description: input.description,
+      imageKey: newImageKey,
+      imageUrl: newImageKey ? getPublicImageUrl(newImageKey) : null,
+      rank: existing.rank,
+    };
+  }
+
+  if (input.rank < 1 || input.rank > input.itemCount) {
+    return {
+      id: input.id,
+      name: existing.name,
+      description: existing.description,
+      imageKey: existing.imageKey,
+      imageUrl: existing.imageKey ? getPublicImageUrl(existing.imageKey) : null,
+      rank: existing.rank,
+    };
+  }
+
+  const rankA = existing.rank;
+  const rankB = input.rank;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(classerItems)
+      .set({ rank: -1, updatedAt: new Date() })
+      .where(and(eq(classerItems.id, input.id), eq(classerItems.userId, userId)));
+
+    if (rankB < rankA) {
+      await tx
+        .update(classerItems)
+        .set({ rank: sql`${classerItems.rank} + 1`, updatedAt: new Date() })
+        .where(
+          and(
+            eq(classerItems.classerId, existing.classerId),
+            eq(classerItems.userId, userId),
+            gte(classerItems.rank, rankB),
+            lt(classerItems.rank, rankA)
+          )
+        );
+    } else {
+      await tx
+        .update(classerItems)
+        .set({ rank: sql`${classerItems.rank} - 1`, updatedAt: new Date() })
+        .where(
+          and(
+            eq(classerItems.classerId, existing.classerId),
+            eq(classerItems.userId, userId),
+            gt(classerItems.rank, rankA),
+            lte(classerItems.rank, rankB)
+          )
+        );
+    }
+
+    await tx
+      .update(classerItems)
+      .set({
+        rank: rankB,
+        name: input.name,
+        description: input.description,
+        imageKey: newImageKey,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(classerItems.id, input.id), eq(classerItems.userId, userId)));
   });
+
+  revalidatePath(`/classers/${existing.classerId}`);
 
   return {
     id: input.id,
@@ -203,6 +300,35 @@ export async function updateItemAction(input: {
     description: input.description,
     imageKey: newImageKey,
     imageUrl: newImageKey ? getPublicImageUrl(newImageKey) : null,
-    rank: existing.rank,
+    rank: rankB,
   };
+}
+
+export async function deleteItemAction(input: { id: string; classerId: string }): Promise<void> {
+  const userId = await getUserId();
+  const existing = await getClasserItemById(userId, input.id);
+  if (!existing) throw new Error("Item not found");
+
+  if (existing.imageKey) await deleteS3Object(existing.imageKey);
+
+  const deletedRank = existing.rank;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(classerItems)
+      .where(and(eq(classerItems.id, input.id), eq(classerItems.userId, userId)));
+
+    await tx
+      .update(classerItems)
+      .set({ rank: sql`${classerItems.rank} - 1`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(classerItems.classerId, input.classerId),
+          eq(classerItems.userId, userId),
+          gt(classerItems.rank, deletedRank)
+        )
+      );
+  });
+
+  revalidatePath(`/classers/${input.classerId}`);
 }

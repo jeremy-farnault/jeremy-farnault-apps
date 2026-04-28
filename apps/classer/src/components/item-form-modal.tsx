@@ -135,6 +135,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
           id: item.id,
           ...payload,
           removeImage: imageState.status === "removed",
+          itemCount,
         });
       } else {
         result = await createItemAction({ classerId, ...payload, itemCount });

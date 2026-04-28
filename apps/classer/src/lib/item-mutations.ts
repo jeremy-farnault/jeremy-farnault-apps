@@ -39,3 +39,9 @@ export async function updateClasserItemById(
     .set({ ...data, updatedAt: new Date() })
     .where(and(eq(classerItems.id, id), eq(classerItems.userId, userId)));
 }
+
+export async function deleteClasserItemById(userId: string, id: string): Promise<void> {
+  await db
+    .delete(classerItems)
+    .where(and(eq(classerItems.id, id), eq(classerItems.userId, userId)));
+}
