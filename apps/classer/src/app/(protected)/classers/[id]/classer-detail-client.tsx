@@ -1,17 +1,18 @@
 "use client";
 
 import { Breadcrumb } from "@/components/breadcrumb";
+import { ItemCard } from "@/components/item-card";
+import type { ItemCardData } from "@/components/item-card";
 import { FloatingCTA } from "@jf/ui";
 import { PlusIcon } from "@phosphor-icons/react";
 
-type Item = { id: string; name: string; rank: number };
 type ClasserProps = {
   id: string;
   name: string;
   description: string | null;
   imageUrl: string | null;
 };
-type Props = { classer: ClasserProps; items: Item[] };
+type Props = { classer: ClasserProps; items: ItemCardData[] };
 
 export function ClasserDetailClient({ classer, items }: Props) {
   return (
@@ -39,17 +40,17 @@ export function ClasserDetailClient({ classer, items }: Props) {
             <p className="text-sm text-(--grey-500)">Nothing here yet.</p>
           </div>
         ) : (
-          <ol className="flex flex-col gap-2">
+          <ol className="flex flex-col gap-3">
             {items.map((item) => (
-              <li
+              <ItemCard
                 key={item.id}
-                className="flex items-center gap-3 rounded-[14px] bg-(--surface-150) px-4 py-3"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-(--green-400) text-xs font-bold text-white">
-                  {item.rank}
-                </span>
-                <span className="text-sm font-medium text-(--grey-900)">{item.name}</span>
-              </li>
+                item={item}
+                totalCount={items.length}
+                onUp={() => {}}
+                onDown={() => {}}
+                onEdit={() => {}}
+                onDelete={() => {}}
+              />
             ))}
           </ol>
         )}

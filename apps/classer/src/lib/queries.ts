@@ -61,7 +61,13 @@ export type ClasserDetail = {
   archivedAt: Date | null;
 };
 
-export type ClasserItemRow = { id: string; name: string; rank: number };
+export type ClasserItemRow = {
+  id: string;
+  name: string;
+  rank: number;
+  description: string | null;
+  imageKey: string | null;
+};
 
 export type ClasserDetailResult = { classer: ClasserDetail; items: ClasserItemRow[] };
 
@@ -84,7 +90,13 @@ export async function getClasserDetail(
   if (!row) return null;
 
   const items = await db
-    .select({ id: classerItems.id, name: classerItems.name, rank: classerItems.rank })
+    .select({
+      id: classerItems.id,
+      name: classerItems.name,
+      rank: classerItems.rank,
+      description: classerItems.description,
+      imageKey: classerItems.imageKey,
+    })
     .from(classerItems)
     .where(eq(classerItems.classerId, classerId))
     .orderBy(asc(classerItems.rank));

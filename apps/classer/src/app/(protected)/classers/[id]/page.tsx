@@ -30,7 +30,10 @@ export default async function ClasserDetailPage({
         description: result.classer.description,
         imageUrl: result.classer.imageKey ? getPublicImageUrl(result.classer.imageKey) : null,
       }}
-      items={result.items}
+      items={result.items.map((item) => ({
+        ...item,
+        imageUrl: item.imageKey ? getPublicImageUrl(item.imageKey) : null,
+      }))}
     />
   );
 }
