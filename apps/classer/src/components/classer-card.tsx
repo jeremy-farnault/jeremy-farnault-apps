@@ -35,7 +35,7 @@ export function ClasserCard({ classer, onEdit, onArchive, onDelete }: Props) {
       onMouseLeave={() => setMenuVisible(false)}
     >
       <Link
-        href={`/${classer.id}`}
+        href={`/classers/${classer.id}`}
         aria-label={classer.name}
         className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 rounded-[22px]"
       />

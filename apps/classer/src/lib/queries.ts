@@ -1,5 +1,5 @@
 import { classerItems, classers, db } from "@jf/db";
-import { and, count, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
 
 export type Classer = typeof classers.$inferSelect;
 
@@ -51,6 +51,45 @@ export async function getClassers(
     hasMore && last ? { createdAt: last.createdAt.toISOString(), id: last.id } : null;
 
   return { classers: result, nextCursor };
+}
+
+export type ClasserDetail = {
+  id: string;
+  name: string;
+  description: string | null;
+  imageKey: string | null;
+  archivedAt: Date | null;
+};
+
+export type ClasserItemRow = { id: string; name: string; rank: number };
+
+export type ClasserDetailResult = { classer: ClasserDetail; items: ClasserItemRow[] };
+
+export async function getClasserDetail(
+  userId: string,
+  classerId: string
+): Promise<ClasserDetailResult | null> {
+  const [row] = await db
+    .select({
+      id: classers.id,
+      name: classers.name,
+      description: classers.description,
+      imageKey: classers.imageKey,
+      archivedAt: classers.archivedAt,
+    })
+    .from(classers)
+    .where(and(eq(classers.id, classerId), eq(classers.userId, userId)))
+    .limit(1);
+
+  if (!row) return null;
+
+  const items = await db
+    .select({ id: classerItems.id, name: classerItems.name, rank: classerItems.rank })
+    .from(classerItems)
+    .where(eq(classerItems.classerId, classerId))
+    .orderBy(asc(classerItems.rank));
+
+  return { classer: row, items };
 }
 
 export async function searchClassers(
