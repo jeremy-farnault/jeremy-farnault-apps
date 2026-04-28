@@ -10,6 +10,7 @@ import {
   insertClasser,
   updateClasserById,
 } from "./classer-mutations";
+import { getClasserItemById, insertClasserItem, updateClasserItemById } from "./item-mutations";
 import type { ClasserCursor, ClasserRow } from "./queries";
 import { getClassers, searchClassers } from "./queries";
 import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
@@ -125,5 +126,83 @@ export async function updateClasserAction(input: {
     description: input.description,
     imageKey: newImageKey,
     imageUrl: newImageKey ? getPublicImageUrl(newImageKey) : null,
+  };
+}
+
+// ─── Item actions ─────────────────────────────────────────────────────────────
+
+export type ItemResult = {
+  id: string;
+  name: string;
+  description: string | null;
+  imageKey: string | null;
+  imageUrl: string | null;
+  rank: number;
+};
+
+export async function createItemAction(input: {
+  classerId: string;
+  name: string;
+  description: string | null;
+  imageKey: string | null;
+  rank: number;
+  itemCount: number;
+}): Promise<ItemResult> {
+  const userId = await getUserId();
+  // Stub: inserts at end to avoid unique-constraint collision on (classerId, rank).
+  // Ticket 10 replaces this with rank-shift logic that honors input.rank.
+  const safeRank = input.itemCount + 1;
+  const { id } = await insertClasserItem(userId, input.classerId, {
+    name: input.name,
+    description: input.description,
+    imageKey: input.imageKey,
+    rank: safeRank,
+  });
+  return {
+    id,
+    name: input.name,
+    description: input.description,
+    imageKey: input.imageKey,
+    imageUrl: input.imageKey ? getPublicImageUrl(input.imageKey) : null,
+    rank: safeRank,
+  };
+}
+
+export async function updateItemAction(input: {
+  id: string;
+  name: string;
+  description: string | null;
+  imageKey: string | null;
+  removeImage: boolean;
+  rank: number;
+}): Promise<ItemResult> {
+  const userId = await getUserId();
+  const existing = await getClasserItemById(userId, input.id);
+  if (!existing) throw new Error("Item not found");
+
+  let newImageKey = input.imageKey;
+
+  if (input.removeImage && existing.imageKey) {
+    await deleteS3Object(existing.imageKey);
+    newImageKey = null;
+  } else if (input.imageKey && input.imageKey !== existing.imageKey && existing.imageKey) {
+    await deleteS3Object(existing.imageKey);
+  }
+
+  // Stub: rank unchanged until ticket 10 implements shift logic.
+  await updateClasserItemById(userId, input.id, {
+    name: input.name,
+    description: input.description,
+    imageKey: newImageKey,
+    rank: existing.rank,
+  });
+
+  return {
+    id: input.id,
+    name: input.name,
+    description: input.description,
+    imageKey: newImageKey,
+    imageUrl: newImageKey ? getPublicImageUrl(newImageKey) : null,
+    rank: existing.rank,
   };
 }
