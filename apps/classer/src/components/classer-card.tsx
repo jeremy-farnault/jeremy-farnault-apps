@@ -17,10 +17,9 @@ type Props = {
   classer: ClasserCardData;
   onEdit: () => void;
   onArchive: () => void;
-  onDelete: () => void;
 };
 
-export function ClasserCard({ classer, onEdit, onArchive, onDelete }: Props) {
+export function ClasserCard({ classer, onEdit, onArchive }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
   const hasImage = classer.imageUrl !== null;
 
@@ -75,7 +74,6 @@ export function ClasserCard({ classer, onEdit, onArchive, onDelete }: Props) {
           menuVisible={menuVisible}
           onEdit={onEdit}
           onArchive={onArchive}
-          onDelete={onDelete}
         />
       </div>
     </div>

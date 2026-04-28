@@ -11,11 +11,12 @@ import {
   deleteClasserById,
   getClasserById,
   insertClasser,
+  restoreClasserById,
   updateClasserById,
 } from "./classer-mutations";
 import { getClasserItemById, updateClasserItemById } from "./item-mutations";
 import type { ClasserCursor, ClasserRow } from "./queries";
-import { getClassers, searchClassers } from "./queries";
+import { getArchivedClassers, getClassers, searchClassers } from "./queries";
 import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
 import { getPublicImageUrl } from "./s3-url";
 
@@ -86,13 +87,38 @@ export async function searchClassersAction(query: string): Promise<ClasserCardDa
 export async function archiveClasserAction(id: string): Promise<void> {
   const userId = await getUserId();
   await archiveClasserById(userId, id);
+  revalidatePath("/", "layout");
+}
+
+export async function restoreClasserAction(id: string): Promise<void> {
+  const userId = await getUserId();
+  await restoreClasserById(userId, id);
+  revalidatePath("/", "layout");
 }
 
 export async function deleteClasserAction(id: string): Promise<void> {
   const userId = await getUserId();
   const existing = await getClasserById(userId, id);
-  if (existing?.imageKey) await deleteS3Object(existing.imageKey);
+  if (!existing) return;
+
+  const items = await db
+    .select({ imageKey: classerItems.imageKey })
+    .from(classerItems)
+    .where(eq(classerItems.classerId, id));
+
+  await Promise.all([
+    existing.imageKey ? deleteS3Object(existing.imageKey) : Promise.resolve(),
+    ...items.filter((i) => i.imageKey).map((i) => deleteS3Object(i.imageKey!)),
+  ]);
+
   await deleteClasserById(userId, id);
+  revalidatePath("/", "layout");
+}
+
+export async function fetchArchivedClassersAction(): Promise<ClasserCardData[]> {
+  const userId = await getUserId();
+  const results = await getArchivedClassers(userId);
+  return results.map(toCardClasser);
 }
 
 // ─── Write actions ────────────────────────────────────────────────────────────

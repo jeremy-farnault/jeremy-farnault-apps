@@ -1,5 +1,5 @@
 import { classerItems, classers, db } from "@jf/db";
-import { and, asc, count, desc, eq, ilike, isNull, lt, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNotNull, isNull, lt, or } from "drizzle-orm";
 
 export type Classer = typeof classers.$inferSelect;
 
@@ -102,6 +102,23 @@ export async function getClasserDetail(
     .orderBy(asc(classerItems.rank));
 
   return { classer: row, items };
+}
+
+export async function getArchivedClassers(userId: string): Promise<ClasserRow[]> {
+  return db
+    .select({
+      id: classers.id,
+      name: classers.name,
+      description: classers.description,
+      imageKey: classers.imageKey,
+      itemCount: count(classerItems.id),
+      createdAt: classers.createdAt,
+    })
+    .from(classers)
+    .leftJoin(classerItems, eq(classerItems.classerId, classers.id))
+    .where(and(eq(classers.userId, userId), isNotNull(classers.archivedAt)))
+    .groupBy(classers.id)
+    .orderBy(desc(classers.archivedAt), desc(classers.id));
 }
 
 export async function searchClassers(

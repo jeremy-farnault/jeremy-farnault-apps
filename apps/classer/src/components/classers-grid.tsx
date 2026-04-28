@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  archiveClasserAction,
-  deleteClasserAction,
-  fetchClassersAction,
-  searchClassersAction,
-} from "@/lib/actions";
+import { archiveClasserAction, fetchClassersAction, searchClassersAction } from "@/lib/actions";
 import type { ClasserResult } from "@/lib/actions";
 import type { ClasserCursor } from "@/lib/queries";
 import { FloatingCTA, Grid, SearchInput } from "@jf/ui";
@@ -53,11 +48,6 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
   }
 
   function handleClasserArchived(id: string) {
-    setClassers((prev) => prev.filter((c) => c.id !== id));
-    setSearchResults((prev) => prev?.filter((c) => c.id !== id) ?? null);
-  }
-
-  function handleClasserDeleted(id: string) {
     setClassers((prev) => prev.filter((c) => c.id !== id));
     setSearchResults((prev) => prev?.filter((c) => c.id !== id) ?? null);
   }
@@ -130,10 +120,6 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
                   onArchive={async () => {
                     await archiveClasserAction(classer.id);
                     handleClasserArchived(classer.id);
-                  }}
-                  onDelete={async () => {
-                    await deleteClasserAction(classer.id);
-                    handleClasserDeleted(classer.id);
                   }}
                 />
               ))}

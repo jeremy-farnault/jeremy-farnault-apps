@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionModal, Tooltip } from "@jf/ui";
-import { ArchiveIcon, PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import { ArchiveIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import type { ClasserCardData } from "./classer-card";
 
@@ -10,19 +10,18 @@ type Props = {
   menuVisible?: boolean;
   onEdit: () => void;
   onArchive: () => void;
-  onDelete: () => void;
 };
 
-export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive, onDelete }: Props) {
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const shouldMount = deleteOpen || (menuVisible ?? true);
+export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive }: Props) {
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const shouldMount = archiveOpen || (menuVisible ?? true);
 
   return (
     <>
       {shouldMount && (
         <div
           className={
-            deleteOpen
+            archiveOpen
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100 transition-opacity duration-150"
           }
@@ -44,21 +43,11 @@ export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive, on
             <Tooltip content="Archive">
               <button
                 type="button"
-                onClick={onArchive}
+                onClick={() => setArchiveOpen(true)}
                 aria-label="Archive classer"
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) hover:bg-(--grey-700) text-white"
               >
                 <ArchiveIcon size={14} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Delete">
-              <button
-                type="button"
-                onClick={() => setDeleteOpen(true)}
-                aria-label="Delete classer"
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) hover:bg-(--grey-700) text-white"
-              >
-                <TrashIcon size={14} />
               </button>
             </Tooltip>
           </div>
@@ -66,21 +55,21 @@ export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive, on
       )}
 
       <ActionModal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
+        isOpen={archiveOpen}
+        onClose={() => setArchiveOpen(false)}
         size="small"
-        title="Delete classer"
-        paragraph={`Permanently delete "${classer.name}"? This cannot be undone.`}
+        title="Archive classer"
+        paragraph={`Archive "${classer.name}"? It will be hidden from your list and can be restored later.`}
         primaryButton={{
-          label: "Delete",
+          label: "Archive",
           onClick: () => {
-            setDeleteOpen(false);
-            onDelete();
+            setArchiveOpen(false);
+            onArchive();
           },
         }}
         secondaryButton={{
           label: "Cancel",
-          onClick: () => setDeleteOpen(false),
+          onClick: () => setArchiveOpen(false),
         }}
       />
     </>

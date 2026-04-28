@@ -44,6 +44,13 @@ export async function archiveClasserById(userId: string, id: string): Promise<vo
     .where(and(eq(classers.id, id), eq(classers.userId, userId)));
 }
 
+export async function restoreClasserById(userId: string, id: string): Promise<void> {
+  await db
+    .update(classers)
+    .set({ archivedAt: null, updatedAt: new Date() })
+    .where(and(eq(classers.id, id), eq(classers.userId, userId)));
+}
+
 export async function deleteClasserById(userId: string, id: string): Promise<void> {
   await db.delete(classers).where(and(eq(classers.id, id), eq(classers.userId, userId)));
 }
