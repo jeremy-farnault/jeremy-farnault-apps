@@ -2,7 +2,7 @@
 
 import type { ClasserCardData } from "@/components/classer-card";
 import { auth } from "@jf/auth";
-import { classerItems, db } from "@jf/db";
+import { classerItems, db, withTransaction } from "@jf/db";
 import { and, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -179,7 +179,7 @@ export async function createItemAction(input: {
 }): Promise<ItemResult> {
   const userId = await getUserId();
 
-  const { id } = await db.transaction(async (tx) => {
+  const { id } = await withTransaction(async (tx) => {
     await tx
       .update(classerItems)
       .set({ rank: sql`${classerItems.rank} + 1`, updatedAt: new Date() })
@@ -274,7 +274,7 @@ export async function updateItemAction(input: {
   const rankA = existing.rank;
   const rankB = input.rank;
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     await tx
       .update(classerItems)
       .set({ rank: -1, updatedAt: new Date() })
@@ -339,7 +339,7 @@ export async function deleteItemAction(input: { id: string; classerId: string })
 
   const deletedRank = existing.rank;
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     await tx
       .delete(classerItems)
       .where(and(eq(classerItems.id, input.id), eq(classerItems.userId, userId)));

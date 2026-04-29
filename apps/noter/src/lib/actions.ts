@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@jf/auth";
-import { db, folders, notes } from "@jf/db";
+import { db, folders, notes, withTransaction } from "@jf/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -62,7 +62,7 @@ export async function archiveFolder(folderId: string): Promise<void> {
   const folderIds = getDescendantIds(folderId, allFolders);
   const now = new Date();
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     await tx
       .update(folders)
       .set({ archivedAt: now, updatedAt: now })
@@ -101,7 +101,7 @@ export async function restoreFolder(folderId: string): Promise<void> {
   const descendantIds = folderIds.filter((id) => id !== folderId);
   const now = new Date();
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     await tx
       .update(folders)
       .set({ archivedAt: null, parentFolderId: targetParentId, updatedAt: now })
