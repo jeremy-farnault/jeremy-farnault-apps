@@ -4,8 +4,9 @@ import { archiveClasserAction, fetchClassersAction, searchClassersAction } from 
 import type { ClasserResult } from "@/lib/actions";
 import type { ClasserCursor } from "@/lib/queries";
 import { FloatingCTA, Grid, SearchInput } from "@jf/ui";
-import { RankingIcon } from "@phosphor-icons/react";
+import { PlusSquareIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
+import { Breadcrumb } from "./breadcrumb";
 import type { ClasserCardData } from "./classer-card";
 import { ClasserCard } from "./classer-card";
 import { ClasserFormModal } from "./classer-form-modal";
@@ -98,8 +99,13 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
   return (
     <>
       <div>
+        <Breadcrumb crumbs={[]} />
         <div className="mb-6">
-          <SearchInput onDebouncedChange={handleDebouncedSearch} placeholder="Search classers…" />
+          <SearchInput
+            onDebouncedChange={handleDebouncedSearch}
+            placeholder="Search classers…"
+            className="min-w-[250px] max-w-[300px]"
+          />
         </div>
 
         {isEmpty && !searchLoading ? (
@@ -136,7 +142,7 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
       </div>
 
       <FloatingCTA
-        icon={<RankingIcon size={22} />}
+        icon={<PlusSquareIcon size={22} />}
         onClick={() => {
           setEditingClasser(undefined);
           setModalOpen(true);

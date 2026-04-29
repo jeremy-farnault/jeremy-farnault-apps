@@ -29,7 +29,7 @@ export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive }: 
           onKeyDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col gap-1">
             <Tooltip content="Edit">
               <button
                 type="button"

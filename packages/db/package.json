@@ -20,10 +20,12 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.2",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@jf/config": "workspace:*",
+    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.30.0",
     "typescript": "^5.7.0"
   }
