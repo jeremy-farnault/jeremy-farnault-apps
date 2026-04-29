@@ -11,11 +11,9 @@ type Tx = NeonDatabase<typeof schema>;
 export async function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error("DATABASE_URL environment variable is required");
-
   const pool = new Pool({ connectionString: databaseUrl });
-  const db = drizzle(pool, { schema });
   try {
-    return await db.transaction(fn);
+    return await drizzle(pool, { schema }).transaction(fn);
   } finally {
     await pool.end();
   }
