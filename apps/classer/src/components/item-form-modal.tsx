@@ -6,7 +6,7 @@ import {
   updateItemAction,
 } from "@/lib/actions";
 import type { ItemResult } from "@/lib/actions";
-import { Button, TextInput, Textarea } from "@jf/ui";
+import { Button, Select, SelectItem, TextInput, Textarea } from "@jf/ui";
 import { RankingIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
@@ -207,19 +207,17 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
                 <label htmlFor="item-rank" className="text-sm font-medium text-(--grey-700)">
                   Rank
                 </label>
-                <input
-                  id="item-rank"
-                  type="number"
-                  min={1}
-                  max={maxRank}
-                  value={form.rank}
-                  onChange={(e) =>
-                    setField("rank", Math.max(1, Math.min(maxRank, Number(e.target.value))))
-                  }
+                <Select
+                  value={String(form.rank)}
+                  onValueChange={(v) => setField("rank", Number(v))}
                   disabled={submitting}
-                  className="w-full rounded-[10px] border border-(--surface-300) bg-(--surface-100) px-3 py-2 text-sm text-(--grey-900) outline-none focus:border-(--green-500) focus:ring-1 focus:ring-(--green-500) disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                <p className="text-xs text-(--grey-500)">Valid range: 1 – {maxRank}</p>
+                >
+                  {Array.from({ length: maxRank }, (_, i) => i + 1).map((r) => (
+                    <SelectItem key={r} value={String(r)}>
+                      {r}
+                    </SelectItem>
+                  ))}
+                </Select>
               </div>
 
               <div className="flex flex-col gap-2">

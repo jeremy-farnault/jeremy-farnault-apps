@@ -5,8 +5,9 @@ import { ItemCard } from "@/components/item-card";
 import type { ItemCardData } from "@/components/item-card";
 import { ItemFormModal } from "@/components/item-form-modal";
 import type { ItemForEdit } from "@/components/item-form-modal";
+import { updateItemAction } from "@/lib/actions";
 import { FloatingCTA } from "@jf/ui";
-import { PlusIcon } from "@phosphor-icons/react";
+import { PlusSquareIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -22,6 +23,27 @@ export function ClasserDetailClient({ classer, items }: Props) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ItemForEdit | undefined>();
+  const [moving, setMoving] = useState<string | null>(null);
+
+  async function moveItem(item: ItemCardData, direction: "up" | "down") {
+    if (moving) return;
+    const newRank = direction === "up" ? item.rank - 1 : item.rank + 1;
+    setMoving(item.id);
+    try {
+      await updateItemAction({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        imageKey: item.imageKey,
+        rank: newRank,
+        removeImage: false,
+        itemCount: items.length,
+      });
+      router.refresh();
+    } finally {
+      setMoving(null);
+    }
+  }
 
   function openCreate() {
     setEditingItem(undefined);
@@ -73,8 +95,8 @@ export function ClasserDetailClient({ classer, items }: Props) {
                 key={item.id}
                 item={item}
                 totalCount={items.length}
-                onUp={() => {}}
-                onDown={() => {}}
+                onUp={() => moveItem(item, "up")}
+                onDown={() => moveItem(item, "down")}
                 onEdit={() => openEdit(item)}
                 onDelete={() => {}}
               />
@@ -83,7 +105,7 @@ export function ClasserDetailClient({ classer, items }: Props) {
         )}
       </main>
 
-      <FloatingCTA icon={<PlusIcon size={22} />} onClick={openCreate} />
+      <FloatingCTA icon={<PlusSquareIcon size={22} />} onClick={openCreate} />
 
       <ItemFormModal
         isOpen={isModalOpen}
