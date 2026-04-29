@@ -9,6 +9,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db"],
+  serverExternalPackages: ["ws"],
   images: {
     remotePatterns: [
       {

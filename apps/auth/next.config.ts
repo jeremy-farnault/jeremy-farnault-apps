@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db"],
+  serverExternalPackages: ["ws"],
 };
 
 export default nextConfig;
