@@ -32,7 +32,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
 
   useEffect(() => {
     if (!isOpen) return;
-    setValue(existingLog?.value ?? (habit.type === "boolean" ? "false" : ""));
+    setValue(existingLog?.value ?? (habit.type === "boolean" ? "true" : ""));
     setComment(existingLog?.comment ?? "");
   }, [isOpen, existingLog, habit.type]);
 
