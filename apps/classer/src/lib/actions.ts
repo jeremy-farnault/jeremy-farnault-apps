@@ -180,14 +180,27 @@ export async function createItemAction(input: {
   const userId = await getUserId();
 
   const { id } = await withTransaction(async (tx) => {
+    // Two-step rank shift to avoid unique constraint violations during bulk update.
+    // Step 1: move affected ranks out of range into a safe staging area.
     await tx
       .update(classerItems)
-      .set({ rank: sql`${classerItems.rank} + 1`, updatedAt: new Date() })
+      .set({ rank: sql`${classerItems.rank} + 1000000`, updatedAt: new Date() })
       .where(
         and(
           eq(classerItems.classerId, input.classerId),
           eq(classerItems.userId, userId),
           gte(classerItems.rank, input.rank)
+        )
+      );
+    // Step 2: land them at their final values (net: +1).
+    await tx
+      .update(classerItems)
+      .set({ rank: sql`${classerItems.rank} - 999999`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(classerItems.classerId, input.classerId),
+          eq(classerItems.userId, userId),
+          gt(classerItems.rank, 999999)
         )
       );
 
@@ -283,7 +296,7 @@ export async function updateItemAction(input: {
     if (rankB < rankA) {
       await tx
         .update(classerItems)
-        .set({ rank: sql`${classerItems.rank} + 1`, updatedAt: new Date() })
+        .set({ rank: sql`${classerItems.rank} + 1000000`, updatedAt: new Date() })
         .where(
           and(
             eq(classerItems.classerId, existing.classerId),
@@ -292,16 +305,36 @@ export async function updateItemAction(input: {
             lt(classerItems.rank, rankA)
           )
         );
+      await tx
+        .update(classerItems)
+        .set({ rank: sql`${classerItems.rank} - 999999`, updatedAt: new Date() })
+        .where(
+          and(
+            eq(classerItems.classerId, existing.classerId),
+            eq(classerItems.userId, userId),
+            gt(classerItems.rank, 999999)
+          )
+        );
     } else {
       await tx
         .update(classerItems)
-        .set({ rank: sql`${classerItems.rank} - 1`, updatedAt: new Date() })
+        .set({ rank: sql`${classerItems.rank} + 1000000`, updatedAt: new Date() })
         .where(
           and(
             eq(classerItems.classerId, existing.classerId),
             eq(classerItems.userId, userId),
             gt(classerItems.rank, rankA),
             lte(classerItems.rank, rankB)
+          )
+        );
+      await tx
+        .update(classerItems)
+        .set({ rank: sql`${classerItems.rank} - 1000001`, updatedAt: new Date() })
+        .where(
+          and(
+            eq(classerItems.classerId, existing.classerId),
+            eq(classerItems.userId, userId),
+            gt(classerItems.rank, 999999)
           )
         );
     }
@@ -346,12 +379,22 @@ export async function deleteItemAction(input: { id: string; classerId: string })
 
     await tx
       .update(classerItems)
-      .set({ rank: sql`${classerItems.rank} - 1`, updatedAt: new Date() })
+      .set({ rank: sql`${classerItems.rank} + 1000000`, updatedAt: new Date() })
       .where(
         and(
           eq(classerItems.classerId, input.classerId),
           eq(classerItems.userId, userId),
           gt(classerItems.rank, deletedRank)
+        )
+      );
+    await tx
+      .update(classerItems)
+      .set({ rank: sql`${classerItems.rank} - 1000001`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(classerItems.classerId, input.classerId),
+          eq(classerItems.userId, userId),
+          gt(classerItems.rank, 999999)
         )
       );
   });
