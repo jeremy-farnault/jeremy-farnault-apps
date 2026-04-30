@@ -137,7 +137,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
         initialContent={note?.body ?? null}
         onChange={setBody}
         placeholder="Write something…"
-        className="min-h-[200px]"
+        className="min-h-[200px] max-h-[60vh] overflow-y-auto"
       />
       <ColorPicker value={color} onChange={setColor} />
       {isSaving && (
