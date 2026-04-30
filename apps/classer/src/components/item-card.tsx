@@ -2,6 +2,7 @@
 
 import { ActionModal } from "@jf/ui";
 import { ArrowDownIcon, ArrowUpIcon, TrashIcon } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useState } from "react";
 
 export type ItemCardData = {
@@ -37,7 +38,15 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
         {/* Left: thumbnail */}
         <div className="w-[120px] shrink-0 overflow-hidden md:w-40">
           {item.imageUrl ? (
-            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+            <div className="relative h-full w-full">
+              <Image
+                src={item.imageUrl}
+                alt={item.name}
+                fill
+                className="object-cover"
+                sizes="160px"
+              />
+            </div>
           ) : (
             <div className="h-full w-full bg-(--green-400)" />
           )}

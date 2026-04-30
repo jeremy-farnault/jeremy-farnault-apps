@@ -8,6 +8,7 @@ import type { ItemForEdit } from "@/components/item-form-modal";
 import { updateItemAction } from "@/lib/actions";
 import { FloatingCTA } from "@jf/ui";
 import { PlusSquareIcon } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -71,12 +72,15 @@ export function ClasserDetailClient({ classer, items }: Props) {
 
         <header className="mb-6">
           {classer.imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={classer.imageUrl}
-              alt={classer.name}
-              className="mb-4 h-48 w-full rounded-[22px] object-cover"
-            />
+            <div className="relative mb-4 h-48 w-full overflow-hidden rounded-[22px]">
+              <Image
+                src={classer.imageUrl}
+                alt={classer.name}
+                fill
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
           )}
           <h1 className="text-2xl font-bold text-(--grey-900)">{classer.name}</h1>
           {classer.description && (

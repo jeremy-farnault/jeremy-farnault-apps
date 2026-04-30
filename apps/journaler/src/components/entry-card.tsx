@@ -1,6 +1,7 @@
 "use client";
 
 import { CATEGORY_COLORS } from "@/lib/category-colors";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { EntryActionsMenu } from "./entry-actions-menu";
 
@@ -45,16 +46,17 @@ export function EntryCard({ entry, onEdit, onDelete }: Props) {
       {/* Top 2/3: image or category color */}
       <div
         className="relative flex-[2]"
-        style={
-          hasImage
-            ? {
-                backgroundImage: `url(${entry.imageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : { backgroundColor: CATEGORY_COLORS[entry.category] }
-        }
+        style={!hasImage ? { backgroundColor: CATEGORY_COLORS[entry.category] } : undefined}
       >
+        {hasImage && (
+          <Image
+            src={entry.imageUrl!}
+            alt={entry.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 200px"
+          />
+        )}
         {hasImage && (
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
         )}
