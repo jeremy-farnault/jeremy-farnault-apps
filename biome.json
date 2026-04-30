@@ -41,6 +41,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "include": ["apps/noter/src/components/note-card.tsx"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double",

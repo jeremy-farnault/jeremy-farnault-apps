@@ -1,6 +1,6 @@
 "use client";
 
-import { extractPlainText } from "@/lib/note-body-utils";
+import { renderToHtml } from "@/lib/note-body-utils";
 import { DEFAULT_COLOR } from "@/lib/note-utils.ts";
 import type { Folder, Note } from "@/lib/queries";
 import { cn } from "@jf/ui";
@@ -71,7 +71,10 @@ export function NoteCard({
         className="absolute inset-0 rounded-[22px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2"
       />
 
-      <div className="relative flex-1 flex flex-col justify-start overflow-hidden w-full pointer-events-none">
+      <div
+        className="relative flex-1 flex flex-col justify-start overflow-hidden w-full pointer-events-none"
+        style={{ maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)" }}
+      >
         {note.title && (
           <div className="mb-1 flex items-center gap-1 min-w-0 w-full">
             {note.pinned && <PushPinIcon size={14} className="shrink-0" />}
@@ -79,9 +82,10 @@ export function NoteCard({
           </div>
         )}
         {note.body && (
-          <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">
-            {extractPlainText(note.body)}
-          </p>
+          <div
+            className="note-card-body text-sm text-(--grey-700)"
+            dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
+          />
         )}
       </div>
 

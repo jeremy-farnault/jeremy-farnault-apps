@@ -1,6 +1,8 @@
 type ProseMirrorNode = {
   type: string;
   text?: string;
+  attrs?: Record<string, unknown>;
+  marks?: { type: string }[];
   content?: ProseMirrorNode[];
 };
 
@@ -26,6 +28,63 @@ function collectText(node: ProseMirrorNode): string {
   if (node.type === "text") return node.text ?? "";
   if (!node.content) return "";
   return node.content.map(collectText).join(node.type === "paragraph" ? "\n" : "");
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderNodeToHtml(node: ProseMirrorNode): string {
+  if (node.type === "text") {
+    let html = escapeHtml(node.text ?? "");
+    if (node.marks) {
+      for (const mark of node.marks) {
+        if (mark.type === "bold") html = `<strong>${html}</strong>`;
+        else if (mark.type === "italic") html = `<em>${html}</em>`;
+        else if (mark.type === "underline") html = `<u>${html}</u>`;
+        else if (mark.type === "code") html = `<code>${html}</code>`;
+      }
+    }
+    return html;
+  }
+
+  const inner = (node.content ?? []).map(renderNodeToHtml).join("");
+
+  switch (node.type) {
+    case "doc":
+      return inner;
+    case "paragraph":
+      return `<p>${inner}</p>`;
+    case "heading": {
+      const level = (node.attrs?.level as number) ?? 1;
+      return `<h${level}>${inner}</h${level}>`;
+    }
+    case "bulletList":
+      return `<ul>${inner}</ul>`;
+    case "orderedList":
+      return `<ol>${inner}</ol>`;
+    case "listItem":
+      return `<li>${inner}</li>`;
+    case "blockquote":
+      return `<blockquote>${inner}</blockquote>`;
+    case "codeBlock":
+      return `<pre><code>${inner}</code></pre>`;
+    case "hardBreak":
+      return "<br>";
+    default:
+      return inner;
+  }
+}
+
+export function renderToHtml(body: string | null): string {
+  if (!body) return "";
+  if (!isRichTextJson(body)) return `<p>${escapeHtml(body)}</p>`;
+  try {
+    const doc: ProseMirrorNode = JSON.parse(body);
+    return renderNodeToHtml(doc);
+  } catch {
+    return `<p>${escapeHtml(body)}</p>`;
+  }
 }
 
 export function extractPlainText(body: string | null, maxLen = 150): string {
