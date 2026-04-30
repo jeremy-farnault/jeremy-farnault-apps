@@ -9,7 +9,7 @@ function buildSvg(color: string, iconPath: string, size: number): string {
   const padding = size * 0.2;
   const iconSize = size - padding * 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" fill="${color}"/>
+  <rect width="${size}" height="${size}" rx="${Math.round(size * 0.195)}" fill="${color}"/>
   <svg x="${padding}" y="${padding}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256">
     <path fill="white" d="${iconPath}"/>
   </svg>
