@@ -113,7 +113,7 @@ export function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex h-11 w-[284px] items-center justify-between rounded-[10px]",
+            "flex h-11 w-[284px] min-w-[284px] max-w-[284px] items-center justify-between rounded-[10px]",
             "bg-(--surface-150) px-3 text-sm",
             "hover:bg-(--surface-200) focus:outline-none focus:ring-0",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
