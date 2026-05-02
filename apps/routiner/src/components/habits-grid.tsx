@@ -27,6 +27,13 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   const [searchResults, setSearchResults] = useState<Habit[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
+  const [viewMode, setViewMode] = useState<"heatmap" | "chart">("heatmap");
+  const [dateRange, setDateRange] = useState<{ from: string; to: string }>(() => {
+    const to = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 364 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return { from, to };
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
 
@@ -103,7 +110,17 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   return (
     <div className="w-full px-4 pt-6 pb-24">
       <Breadcrumb crumbs={[]} />
-      <HabitsFilterBar sort={sort} onSearch={handleSearch} onSortChange={handleSortChange} />
+      <HabitsFilterBar
+        sort={sort}
+        onSearch={handleSearch}
+        onSortChange={handleSortChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        dateRange={dateRange}
+        onDateRangeChange={(newRange) => {
+          if (newRange.from <= newRange.to) setDateRange(newRange);
+        }}
+      />
 
       {displayedHabits.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--grey-500)">
@@ -119,6 +136,8 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
               key={habit.id}
               habit={habit}
               logs={logsMap.get(habit.id) ?? []}
+              viewMode={viewMode}
+              dateRange={dateRange}
               onLog={(date, existingLog) => {
                 setLogTarget({
                   habit,

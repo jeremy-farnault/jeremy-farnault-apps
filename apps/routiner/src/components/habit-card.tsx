@@ -1,5 +1,6 @@
 "use client";
 
+import { HabitChart } from "@/components/habit-chart";
 import { HabitHeatmap } from "@/components/habit-heatmap";
 import type { Habit, HabitLog } from "@/lib/queries";
 import { Tooltip } from "@jf/ui";
@@ -10,13 +11,24 @@ import { useState } from "react";
 type Props = {
   habit: Habit;
   logs: HabitLog[];
+  viewMode: "heatmap" | "chart";
+  dateRange: { from: string; to: string };
   onLog: (date: string, existingLog?: HabitLog) => void;
   onEdit: () => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: Props) {
+export function HabitCard({
+  habit,
+  logs,
+  viewMode,
+  dateRange,
+  onLog,
+  onEdit,
+  onArchive,
+  onDelete,
+}: Props) {
   const [measured, setMeasured] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const todayLog = logs.find((l) => l.date === today);
@@ -25,21 +37,31 @@ export function HabitCard({ habit, logs, onLog, onEdit, onArchive, onDelete }: P
 
   return (
     <div className="group relative rounded-[22px] border border-(--grey-200) bg-(--surface-150) p-4">
-      {!measured && (
+      {!measured && viewMode === "heatmap" && (
         <div className="absolute inset-0 animate-pulse rounded-[22px] bg-(--muted)" />
       )}
-      <div className={`flex flex-col gap-3 ${measured ? "" : "invisible"}`}>
-        <HabitHeatmap
-          logs={heatmapLogs}
-          startDate={habit.startDate}
-          type={habit.type}
-          color={habit.color}
-          onDayClick={(date) => {
-            const existingLog = logs.find((l) => l.date === date);
-            onLog(date, existingLog);
-          }}
-          onMeasured={() => setMeasured(true)}
-        />
+      <div className={`flex flex-col gap-3 ${measured || viewMode === "chart" ? "" : "invisible"}`}>
+        {viewMode === "chart" ? (
+          <HabitChart
+            logs={logs}
+            type={habit.type}
+            color={`var(${habit.color})`}
+            from={dateRange.from}
+            to={dateRange.to}
+          />
+        ) : (
+          <HabitHeatmap
+            logs={heatmapLogs}
+            startDate={habit.startDate}
+            type={habit.type}
+            color={habit.color}
+            onDayClick={(date) => {
+              const existingLog = logs.find((l) => l.date === date);
+              onLog(date, existingLog);
+            }}
+            onMeasured={() => setMeasured(true)}
+          />
+        )}
 
         <div className="flex items-center justify-between gap-2">
           <Link
