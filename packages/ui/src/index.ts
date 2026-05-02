@@ -1,4 +1,5 @@
 export * from "./components/action-modal";
+export * from "./components/date-picker";
 export * from "./components/app-shell";
 export * from "./components/app-switcher";
 export * from "./components/button";

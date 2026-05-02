@@ -6,7 +6,7 @@ import {
   updateEntryAction,
 } from "@/lib/actions";
 import type { EntryCategory } from "@/lib/queries";
-import { Button, Select, SelectItem, TextInput, Textarea } from "@jf/ui";
+import { Button, DatePicker, Select, SelectItem, TextInput, Textarea } from "@jf/ui";
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
@@ -238,13 +238,10 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                   <label htmlFor="entry-date" className="text-sm font-medium text-(--grey-700)">
                     Date
                   </label>
-                  <input
-                    id="entry-date"
-                    type="date"
+                  <DatePicker
                     value={form.date}
-                    onChange={(e) => setField("date", e.target.value)}
+                    onChange={(v) => setField("date", v)}
                     disabled={submitting}
-                    className="h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm text-(--grey-900) border-none outline-none focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
                 </div>

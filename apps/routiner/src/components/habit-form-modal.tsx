@@ -2,7 +2,7 @@
 
 import { createHabitAction, updateHabitAction } from "@/lib/actions";
 import type { Habit } from "@/lib/queries";
-import { ActionModal, Select, SelectItem, TextInput, Textarea, Tooltip } from "@jf/ui";
+import { ActionModal, DatePicker, Select, SelectItem, TextInput, Textarea, Tooltip } from "@jf/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -149,21 +149,11 @@ export function HabitFormModal({ isOpen, onClose, habit, onCreated }: Props) {
         {isEditMode ? (
           <Tooltip content="Can't be changed after creation">
             <div className="cursor-not-allowed">
-              <input
-                type="date"
-                value={startDate}
-                disabled
-                className="h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none pointer-events-none opacity-50"
-              />
+              <DatePicker value={startDate} onChange={setStartDate} disabled />
             </div>
           </Tooltip>
         ) : (
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none"
-          />
+          <DatePicker value={startDate} onChange={setStartDate} disablePast />
         )}
       </div>
 
