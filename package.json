@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "generate:icon": "tsx scripts/generate-app-icon.ts",
+    "generate:splash": "tsx scripts/generate-splash-screens.ts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

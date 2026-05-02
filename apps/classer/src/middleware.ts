@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
 
   if (!sessionCookie) {
     const authUrl = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
-    const redirect = request.nextUrl.origin;
+    const redirect = request.nextUrl.href;
     return NextResponse.redirect(`${authUrl}/login?redirect=${encodeURIComponent(redirect)}`);
   }
 

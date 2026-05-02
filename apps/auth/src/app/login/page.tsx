@@ -5,11 +5,10 @@ import { TextInput } from "@jf/ui";
 import { apps } from "@jf/ui/config/apps";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
 
@@ -29,8 +28,7 @@ function LoginForm() {
       setError(signInError.message ?? "Login failed");
       setLoading(false);
     } else {
-      router.push(redirect ?? "/");
-      router.refresh();
+      window.location.href = redirect ?? "/";
     }
   }
 
