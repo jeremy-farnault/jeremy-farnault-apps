@@ -15,6 +15,7 @@ export default async function ArchivePage() {
     imageKey: c.imageKey,
     imageUrl: c.imageKey ? getPublicImageUrl(c.imageKey) : null,
     itemCount: c.itemCount,
+    updatedAt: c.updatedAt,
   }));
   return (
     <main className="w-full">
