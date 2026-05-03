@@ -5,7 +5,6 @@ import { HabitHeatmap } from "@/components/habit-heatmap";
 import type { Habit, HabitLog } from "@/lib/queries";
 import { Tooltip } from "@jf/ui";
 import { ArchiveIcon, CheckCircleIcon, PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
-import Link from "next/link";
 import { useState } from "react";
 
 type Props = {
@@ -64,12 +63,7 @@ export function HabitCard({
         )}
 
         <div className="flex items-center justify-between gap-2">
-          <Link
-            href={`/habit/${habit.id}`}
-            className="text-base font-semibold text-(--grey-900) truncate hover:underline"
-          >
-            {habit.name}
-          </Link>
+          <span className="text-base font-semibold text-(--grey-900) truncate">{habit.name}</span>
 
           <div className="flex items-center gap-0.5 shrink-0 transition-opacity duration-150 opacity-0 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100">
             <Tooltip content={hasLogToday ? "Edit today's log" : "Log today"}>

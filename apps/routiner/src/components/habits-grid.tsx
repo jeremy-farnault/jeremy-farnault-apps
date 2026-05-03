@@ -30,7 +30,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   const [viewMode, setViewMode] = useState<"heatmap" | "chart">("heatmap");
   const [dateRange, setDateRange] = useState<{ from: string; to: string }>(() => {
     const to = new Date().toISOString().slice(0, 10);
-    const from = new Date(Date.now() - 364 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     return { from, to };
   });
 

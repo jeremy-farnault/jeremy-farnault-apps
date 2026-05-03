@@ -47,7 +47,7 @@ function prepareData(
   type: HabitType,
   from: string,
   to: string
-): { date: string; value: number | null }[] {
+): { date: string; value: number }[] {
   const map = new Map(
     logs
       .filter((l) => l.date >= from && l.date <= to)
@@ -58,7 +58,7 @@ function prepareData(
   );
   return eachDay(from, to).map((date) => ({
     date,
-    value: map.has(date) ? (map.get(date) ?? null) : type === "boolean" ? 0 : null,
+    value: map.get(date) ?? 0,
   }));
 }
 
@@ -90,7 +90,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     const barSize = rangeDays > 180 ? 2 : rangeDays > 60 ? 4 : 8;
 
     return (
-      <div style={{ color }} className="[&_svg]:w-[95%]">
+      <div style={{ color }} className="[&_svg]:!w-[95%]">
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={data} margin={commonMargin}>
             <CartesianGrid vertical={false} stroke="var(--grey-200)" />
@@ -120,7 +120,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
   }
 
   return (
-    <div style={{ color }}>
+    <div style={{ color }} className="[&_svg]:!w-[95%]">
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={data} margin={commonMargin}>
           <CartesianGrid vertical={false} stroke="var(--grey-200)" />
