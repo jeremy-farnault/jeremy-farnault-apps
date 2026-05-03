@@ -12,6 +12,7 @@ export type ClasserRow = {
   imageKey: string | null;
   itemCount: number;
   createdAt: Date;
+  updatedAt: Date;
 };
 
 export async function getClassers(
@@ -36,6 +37,7 @@ export async function getClassers(
       imageKey: classers.imageKey,
       itemCount: count(classerItems.id),
       createdAt: classers.createdAt,
+      updatedAt: classers.updatedAt,
     })
     .from(classers)
     .leftJoin(classerItems, eq(classerItems.classerId, classers.id))
@@ -113,6 +115,7 @@ export async function getArchivedClassers(userId: string): Promise<ClasserRow[]>
       imageKey: classers.imageKey,
       itemCount: count(classerItems.id),
       createdAt: classers.createdAt,
+      updatedAt: classers.updatedAt,
     })
     .from(classers)
     .leftJoin(classerItems, eq(classerItems.classerId, classers.id))
@@ -134,6 +137,7 @@ export async function searchClassers(
       imageKey: classers.imageKey,
       itemCount: count(classerItems.id),
       createdAt: classers.createdAt,
+      updatedAt: classers.updatedAt,
     })
     .from(classers)
     .leftJoin(classerItems, eq(classerItems.classerId, classers.id))

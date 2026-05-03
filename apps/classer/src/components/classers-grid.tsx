@@ -3,20 +3,53 @@
 import { archiveClasserAction, fetchClassersAction, searchClassersAction } from "@/lib/actions";
 import type { ClasserResult } from "@/lib/actions";
 import type { ClasserCursor } from "@/lib/queries";
-import { FloatingCTA, Grid, SearchInput } from "@jf/ui";
+import { FloatingCTA, Grid, SearchInput, Select, SelectItem } from "@jf/ui";
 import { PlusSquareIcon } from "@phosphor-icons/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Breadcrumb } from "./breadcrumb";
 import type { ClasserCardData } from "./classer-card";
 import { ClasserCard } from "./classer-card";
 import { ClasserFormModal } from "./classer-form-modal";
 
+export type SortOption = "modified-desc" | "name-asc" | "name-desc" | "count-asc" | "count-desc";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "modified-desc", label: "Last modified" },
+  { value: "name-asc", label: "Name A–Z" },
+  { value: "name-desc", label: "Name Z–A" },
+  { value: "count-asc", label: "Items ↑" },
+  { value: "count-desc", label: "Items ↓" },
+];
+
+function sortClassers(classers: ClasserCardData[], sort: SortOption): ClasserCardData[] {
+  return [...classers].sort((a, b) => {
+    switch (sort) {
+      case "modified-desc":
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "count-asc":
+        return a.itemCount - b.itemCount;
+      case "count-desc":
+        return b.itemCount - a.itemCount;
+    }
+  });
+}
+
 type Props = {
   initialClassers: ClasserCardData[];
   initialNextCursor: ClasserCursor | null;
+  sort: SortOption;
 };
 
-export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
+export function ClassersGrid({ initialClassers, initialNextCursor, sort }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   // ── Infinite-scroll state ─────────────────────────────────────────────────
   const [classers, setClassers] = useState<ClasserCardData[]>(initialClassers);
   const [nextCursor, setNextCursor] = useState<ClasserCursor | null>(initialNextCursor);
@@ -39,11 +72,12 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
       const updated: ClasserCardData = {
         ...result,
         itemCount: classers.find((c) => c.id === result.id)?.itemCount ?? 0,
+        updatedAt: new Date(),
       };
       setClassers((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       setSearchResults((prev) => prev?.map((c) => (c.id === updated.id ? updated : c)) ?? null);
     } else {
-      const created: ClasserCardData = { ...result, itemCount: 0 };
+      const created: ClasserCardData = { ...result, itemCount: 0, updatedAt: new Date() };
       setClassers((prev) => [created, ...prev]);
     }
   }
@@ -92,20 +126,34 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
     }
   }
 
+  // ── Sort handler ──────────────────────────────────────────────────────────
+  function handleSortChange(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", value);
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
-  const displayClassers = searchResults ?? classers;
-  const isEmpty = displayClassers.length === 0;
+  const sorted = sortClassers(searchResults ?? classers, sort);
+  const isEmpty = sorted.length === 0;
 
   return (
     <>
       <div>
         <Breadcrumb crumbs={[]} />
-        <div className="mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
           <SearchInput
             onDebouncedChange={handleDebouncedSearch}
             placeholder="Search classers…"
             className="min-w-[250px] max-w-[300px]"
           />
+          <Select value={sort} onValueChange={handleSortChange} className="w-[250px]">
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </Select>
         </div>
 
         {isEmpty && !searchLoading ? (
@@ -115,7 +163,7 @@ export function ClassersGrid({ initialClassers, initialNextCursor }: Props) {
         ) : (
           <>
             <Grid>
-              {displayClassers.map((classer) => (
+              {sorted.map((classer) => (
                 <ClasserCard
                   key={classer.id}
                   classer={classer}

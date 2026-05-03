@@ -66,6 +66,7 @@ function toCardClasser(row: ClasserRow): ClasserCardData {
     imageKey: row.imageKey,
     imageUrl: row.imageKey ? getPublicImageUrl(row.imageKey) : null,
     itemCount: row.itemCount,
+    updatedAt: row.updatedAt,
   };
 }
 

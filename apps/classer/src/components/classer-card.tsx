@@ -11,6 +11,7 @@ export type ClasserCardData = {
   imageKey: string | null;
   imageUrl: string | null;
   itemCount: number;
+  updatedAt: Date;
 };
 
 type Props = {
