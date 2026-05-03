@@ -7,9 +7,18 @@ export type Folder = typeof folders.$inferSelect;
 export type Note = typeof notes.$inferSelect;
 
 export { type SortOption, type GridItem, sortItems } from "./grid-utils";
-export { getDescendantIds } from "./folder-utils";
+export { getDescendantIds, computeFolderEffectiveDates } from "./folder-utils";
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
+
+export async function getAllNotesMinimal(
+  userId: string
+): Promise<{ id: string; parentFolderId: string | null; updatedAt: Date }[]> {
+  return db
+    .select({ id: notes.id, parentFolderId: notes.parentFolderId, updatedAt: notes.updatedAt })
+    .from(notes)
+    .where(and(eq(notes.userId, userId), isNull(notes.archivedAt)));
+}
 
 export async function getAllFolders(userId: string): Promise<Folder[]> {
   return db

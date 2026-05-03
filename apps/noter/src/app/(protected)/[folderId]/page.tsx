@@ -2,7 +2,9 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { ItemsGrid } from "@/components/items-grid";
 import {
   type SortOption,
+  computeFolderEffectiveDates,
   getAllFolders,
+  getAllNotesMinimal,
   getFolderBreadcrumb,
   getFolderById,
   getFolderContents,
@@ -29,13 +31,15 @@ export default async function FolderPage({ params, searchParams }: Props) {
   const folder = await getFolderById(userId, folderId);
   if (!folder) notFound();
 
-  const [{ folders, notes }, crumbs, allFolders] = await Promise.all([
+  const [{ folders, notes }, crumbs, allFolders, allNotesMinimal] = await Promise.all([
     getFolderContents(userId, folderId),
     getFolderBreadcrumb(folderId),
     getAllFolders(userId),
+    getAllNotesMinimal(userId),
   ]);
 
   const sort = (sortParam as SortOption | undefined) ?? "modified-desc";
+  const folderEffectiveDates = computeFolderEffectiveDates(allFolders, allNotesMinimal);
 
   return (
     <ItemsGrid
@@ -45,6 +49,7 @@ export default async function FolderPage({ params, searchParams }: Props) {
       breadcrumb={<Breadcrumb crumbs={crumbs} />}
       currentFolderId={folderId}
       allFolders={allFolders}
+      folderEffectiveDates={folderEffectiveDates}
     />
   );
 }

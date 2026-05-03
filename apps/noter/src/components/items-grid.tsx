@@ -32,6 +32,7 @@ type Props = {
   breadcrumb: ReactNode;
   currentFolderId: string | null;
   allFolders: Folder[];
+  folderEffectiveDates?: Record<string, number>;
 };
 
 export function ItemsGrid({
@@ -41,6 +42,7 @@ export function ItemsGrid({
   breadcrumb,
   currentFolderId,
   allFolders,
+  folderEffectiveDates,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,7 +54,7 @@ export function ItemsGrid({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Note[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
-  const { pinnedItems, normalItems } = splitItems(folders, notes, sort);
+  const { pinnedItems, normalItems } = splitItems(folders, notes, sort, folderEffectiveDates);
   const hasPinned = pinnedItems.length > 0;
   const isEmpty = pinnedItems.length === 0 && normalItems.length === 0;
 

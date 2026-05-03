@@ -4,7 +4,12 @@ export type SortOption = "modified-desc" | "alpha-asc" | "alpha-desc" | "type";
 
 export type GridItem = { kind: "folder"; data: Folder } | { kind: "note"; data: Note };
 
-export function sortItems(folderList: Folder[], noteList: Note[], sort: SortOption): GridItem[] {
+export function sortItems(
+  folderList: Folder[],
+  noteList: Note[],
+  sort: SortOption,
+  folderEffectiveDates?: Record<string, number>
+): GridItem[] {
   const pinnedNotes = noteList.filter((n) => n.pinned);
   const unpinnedNotes = noteList.filter((n) => !n.pinned);
 
@@ -15,7 +20,12 @@ export function sortItems(folderList: Folder[], noteList: Note[], sort: SortOpti
   const label = (item: GridItem) =>
     item.kind === "folder" ? item.data.name : (item.data.title ?? "Untitled");
 
-  const updatedAt = (item: GridItem) => item.data.updatedAt.getTime();
+  const updatedAt = (item: GridItem) => {
+    if (item.kind === "folder" && folderEffectiveDates) {
+      return folderEffectiveDates[item.data.id] ?? item.data.updatedAt.getTime();
+    }
+    return item.data.updatedAt.getTime();
+  };
 
   switch (sort) {
     case "alpha-asc":
@@ -45,7 +55,8 @@ export function sortItems(folderList: Folder[], noteList: Note[], sort: SortOpti
 export function splitItems(
   folderList: Folder[],
   noteList: Note[],
-  sort: SortOption
+  sort: SortOption,
+  folderEffectiveDates?: Record<string, number>
 ): { pinnedItems: GridItem[]; normalItems: GridItem[] } {
   const pinnedNotes = noteList.filter((n) => n.pinned);
   const unpinnedNotes = noteList.filter((n) => !n.pinned);
@@ -56,7 +67,12 @@ export function splitItems(
 
   const label = (item: GridItem) =>
     item.kind === "folder" ? item.data.name : (item.data.title ?? "Untitled");
-  const updatedAt = (item: GridItem) => item.data.updatedAt.getTime();
+  const updatedAt = (item: GridItem) => {
+    if (item.kind === "folder" && folderEffectiveDates) {
+      return folderEffectiveDates[item.data.id] ?? item.data.updatedAt.getTime();
+    }
+    return item.data.updatedAt.getTime();
+  };
 
   switch (sort) {
     case "alpha-asc":
