@@ -130,10 +130,10 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
           <Line
             type="monotone"
             dataKey="value"
-            stroke="currentColor"
+            stroke={color}
             strokeWidth={2}
-            dot={data.length <= 60 ? { fill: "currentColor", stroke: "currentColor" } : false}
-            activeDot={{ r: 4, fill: "currentColor", stroke: "currentColor" }}
+            dot={data.length <= 60 ? { fill: color, stroke: color } : false}
+            activeDot={{ r: 4, fill: color, stroke: color }}
             connectNulls={false}
           />
         </LineChart>

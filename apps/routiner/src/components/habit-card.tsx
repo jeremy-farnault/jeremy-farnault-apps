@@ -45,7 +45,7 @@ export function HabitCard({
           <HabitChart
             logs={logs}
             type={habit.type}
-            color={`var(${habit.color})`}
+            color={habit.color}
             from={dateRange.from}
             to={dateRange.to}
           />
