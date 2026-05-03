@@ -31,19 +31,35 @@ function formatXTick(dateStr: string): string {
   });
 }
 
+function eachDay(from: string, to: string): string[] {
+  const days: string[] = [];
+  const cur = new Date(`${from}T00:00:00Z`);
+  const end = new Date(`${to}T00:00:00Z`);
+  while (cur <= end) {
+    days.push(cur.toISOString().slice(0, 10));
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return days;
+}
+
 function prepareData(
   logs: HabitLog[],
   type: HabitType,
   from: string,
   to: string
-): { date: string; value: number }[] {
-  return logs
-    .filter((l) => l.date >= from && l.date <= to)
-    .map((l) => ({
-      date: l.date,
-      value: type === "boolean" ? (l.value === "true" ? 1 : 0) : Number.parseFloat(l.value) || 0,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+): { date: string; value: number | null }[] {
+  const map = new Map(
+    logs
+      .filter((l) => l.date >= from && l.date <= to)
+      .map((l) => [
+        l.date,
+        type === "boolean" ? (l.value === "true" ? 1 : 0) : Number.parseFloat(l.value) || 0,
+      ])
+  );
+  return eachDay(from, to).map((date) => ({
+    date,
+    value: map.has(date) ? (map.get(date) ?? null) : type === "boolean" ? 0 : null,
+  }));
 }
 
 export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
@@ -57,7 +73,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     );
   }
 
-  const interval = Math.max(0, Math.floor(data.length / 8) - 1);
+  const interval = Math.max(0, Math.ceil(data.length / 6) - 1);
 
   const commonAxisProps = {
     tickLine: false as const,
@@ -74,7 +90,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     const barSize = rangeDays > 180 ? 2 : rangeDays > 60 ? 4 : 8;
 
     return (
-      <div style={{ color }}>
+      <div style={{ color }} className="[&_svg]:w-[95%]">
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={data} margin={commonMargin}>
             <CartesianGrid vertical={false} stroke="var(--grey-200)" />
