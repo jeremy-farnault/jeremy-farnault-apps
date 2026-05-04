@@ -65,6 +65,12 @@ function renderNodeToHtml(node: ProseMirrorNode): string {
       return `<ol>${inner}</ol>`;
     case "listItem":
       return `<li>${inner}</li>`;
+    case "taskList":
+      return `<ul class="task-list">${inner}</ul>`;
+    case "taskItem": {
+      const checked = node.attrs?.checked === true;
+      return `<li class="task-item"><input type="checkbox" disabled${checked ? " checked" : ""}> ${inner}</li>`;
+    }
     case "blockquote":
       return `<blockquote>${inner}</blockquote>`;
     case "codeBlock":

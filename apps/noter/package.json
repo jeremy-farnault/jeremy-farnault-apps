@@ -20,6 +20,8 @@
     "@phosphor-icons/react": "^2.1.7",
     "@serwist/next": "^9.0.0",
     "@tiptap/extension-bubble-menu": "^3.22.4",
+    "@tiptap/extension-task-item": "^3.22.4",
+    "@tiptap/extension-task-list": "^3.22.4",
     "@tiptap/extension-underline": "^3.22.4",
     "@tiptap/react": "^3.22.4",
     "@tiptap/starter-kit": "^3.22.4",

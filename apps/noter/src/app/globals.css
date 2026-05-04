@@ -36,3 +36,21 @@
   font-size: 0.7rem;
   margin: 0;
 }
+
+.note-card-body .task-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.note-card-body .task-item {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.note-card-body .task-item input[type="checkbox"] {
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}

@@ -2,6 +2,8 @@
 
 import { isRichTextJson, wrapPlainTextAsDoc } from "@/lib/note-body-utils";
 import { cn } from "@jf/ui";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
@@ -49,7 +51,7 @@ function BubbleButton({ active, onClick, children, title }: BubbleButtonProps) {
 export function RichTextEditor({ initialContent, onChange, placeholder, className }: Props) {
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [StarterKit, Underline],
+    extensions: [StarterKit, Underline, TaskList, TaskItem.configure({ nested: false })],
     content: parseInitial(initialContent),
     editorProps: {
       attributes: {
@@ -60,6 +62,9 @@ export function RichTextEditor({ initialContent, onChange, placeholder, classNam
           "[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-1 [&_h2]:mt-2",
           "[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-1",
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
+          "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0",
+          "[&_[data-type=taskItem]>label]:flex [&_[data-type=taskItem]>label]:items-start [&_[data-type=taskItem]>label]:gap-1.5 [&_[data-type=taskItem]>label]:cursor-pointer",
+          "[&_[data-type=taskItem][data-checked=true]_p]:line-through [&_[data-type=taskItem][data-checked=true]_p]:opacity-50",
           "[&_li]:my-0.5",
           "[&_p]:my-0 [&_p:empty]:min-h-[1.25rem]",
           className
@@ -137,6 +142,13 @@ export function RichTextEditor({ initialContent, onChange, placeholder, classNam
             title="Ordered list"
           >
             1≡
+          </BubbleButton>
+          <BubbleButton
+            active={editor.isActive("taskList")}
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            title="Todo list"
+          >
+            ☑
           </BubbleButton>
         </BubbleMenu>
       )}
