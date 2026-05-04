@@ -89,7 +89,12 @@ type Props = {
 };
 
 export function RichTextEditor({ editor, placeholder, className }: Props) {
-  const isEmpty = editor?.isEmpty ?? true;
+  const doc = editor?.state.doc;
+  const isEmpty =
+    !doc ||
+    (doc.childCount === 1 &&
+      doc.firstChild?.type.name === "paragraph" &&
+      doc.firstChild?.content.size === 0);
 
   return (
     <div className="relative">
