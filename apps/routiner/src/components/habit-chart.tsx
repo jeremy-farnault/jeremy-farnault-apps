@@ -83,7 +83,13 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
 
   const commonMargin = { top: 4, right: 0, left: -28, bottom: 0 };
 
-  const tooltipStyle = { fontSize: 11, zIndex: 50 };
+  const tooltipStyle = {
+    fontSize: 11,
+    zIndex: 50,
+    borderRadius: 12,
+    backgroundColor: "var(--grey-700)",
+  };
+  const tooltipTextStyle = { color: "white" };
 
   if (type === "boolean") {
     const rangeDays = (new Date(to).getTime() - new Date(from).getTime()) / 86_400_000;
@@ -110,6 +116,8 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
               formatter={(value) => [value === 1 ? "Done" : "Not done", ""]}
               labelFormatter={(label) => formatXTick(label as string)}
               contentStyle={tooltipStyle}
+              labelStyle={tooltipTextStyle}
+              itemStyle={tooltipTextStyle}
               isAnimationActive={false}
             />
             <Bar dataKey="value" fill="currentColor" radius={[3, 3, 0, 0]} barSize={barSize} />
@@ -141,6 +149,8 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
             ]}
             labelFormatter={(label) => formatXTick(label as string)}
             contentStyle={tooltipStyle}
+            labelStyle={tooltipTextStyle}
+            itemStyle={tooltipTextStyle}
             isAnimationActive={false}
           />
           <Line
