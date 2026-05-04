@@ -5,18 +5,10 @@ import { cn } from "@jf/ui";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+import { type Editor, ReactNodeViewRenderer } from "@tiptap/react";
 import { EditorContent, useEditor } from "@tiptap/react";
-import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskItemNode } from "./task-item-node";
-
-type Props = {
-  initialContent: string | null;
-  onChange: (json: string) => void;
-  placeholder?: string;
-  className?: string;
-};
 
 function parseInitial(body: string | null): object | string {
   if (!body) return "";
@@ -24,14 +16,14 @@ function parseInitial(body: string | null): object | string {
   return JSON.parse(wrapPlainTextAsDoc(body));
 }
 
-type BubbleButtonProps = {
+type ToolbarButtonProps = {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
   title: string;
 };
 
-function BubbleButton({ active, onClick, children, title }: BubbleButtonProps) {
+function ToolbarButton({ active, onClick, children, title }: ToolbarButtonProps) {
   return (
     <button
       type="button"
@@ -42,7 +34,9 @@ function BubbleButton({ active, onClick, children, title }: BubbleButtonProps) {
       }}
       className={cn(
         "flex h-7 w-7 items-center justify-center rounded text-xs font-semibold transition-colors",
-        active ? "bg-white/20 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
+        active
+          ? "bg-(--surface-300) text-(--grey-900)"
+          : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
       )}
     >
       {children}
@@ -50,8 +44,11 @@ function BubbleButton({ active, onClick, children, title }: BubbleButtonProps) {
   );
 }
 
-export function RichTextEditor({ initialContent, onChange, placeholder, className }: Props) {
-  const editor = useEditor({
+export function useNoteEditor(
+  initialContent: string | null,
+  onChange: (json: string) => void
+): Editor | null {
+  return useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
@@ -75,8 +72,7 @@ export function RichTextEditor({ initialContent, onChange, placeholder, classNam
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
           "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0",
           "[&_li]:my-0.5",
-          "[&_p]:my-0 [&_p:empty]:min-h-[1.25rem]",
-          className
+          "[&_p]:my-0 [&_p:empty]:min-h-[1.25rem]"
         ),
       },
     },
@@ -84,89 +80,99 @@ export function RichTextEditor({ initialContent, onChange, placeholder, classNam
       onChange(JSON.stringify(editor.getJSON()));
     },
   });
+}
 
+type Props = {
+  editor: Editor | null;
+  placeholder?: string;
+  className?: string;
+};
+
+export function RichTextEditor({ editor, placeholder, className }: Props) {
   const isEmpty = editor?.isEmpty ?? true;
 
   return (
     <div className="relative">
-      {editor && (
-        <BubbleMenu
-          editor={editor}
-          className="flex items-center gap-0.5 rounded-lg bg-(--grey-900) px-1.5 py-1 shadow-lg"
-        >
-          <BubbleButton
-            active={editor.isActive("bold")}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            title="Bold"
-          >
-            B
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("italic")}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="Italic"
-          >
-            <span className="italic">I</span>
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("underline")}
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            title="Underline"
-          >
-            <span className="underline">U</span>
-          </BubbleButton>
-          <div className="mx-1 h-4 w-px bg-white/20" />
-          <BubbleButton
-            active={editor.isActive("heading", { level: 1 })}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            title="Heading 1"
-          >
-            H1
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("heading", { level: 2 })}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            title="Heading 2"
-          >
-            H2
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("heading", { level: 3 })}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            title="Heading 3"
-          >
-            H3
-          </BubbleButton>
-          <div className="mx-1 h-4 w-px bg-white/20" />
-          <BubbleButton
-            active={editor.isActive("bulletList")}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="Bullet list"
-          >
-            •≡
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("orderedList")}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            title="Ordered list"
-          >
-            1≡
-          </BubbleButton>
-          <BubbleButton
-            active={editor.isActive("taskList")}
-            onClick={() => editor.chain().focus().toggleTaskList().run()}
-            title="Todo list"
-          >
-            ☑
-          </BubbleButton>
-        </BubbleMenu>
-      )}
       {isEmpty && placeholder && (
         <span className="pointer-events-none absolute left-3 top-2 text-sm text-(--grey-400)">
           {placeholder}
         </span>
       )}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className={className} />
+    </div>
+  );
+}
+
+export function FormattingToolbar({ editor }: { editor: Editor | null }) {
+  if (!editor) return null;
+
+  return (
+    <div className="flex items-center gap-0.5 border-t border-(--grey-200) pt-2">
+      <ToolbarButton
+        active={editor.isActive("bold")}
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        title="Bold"
+      >
+        B
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("italic")}
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        title="Italic"
+      >
+        <span className="italic">I</span>
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("underline")}
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        title="Underline"
+      >
+        <span className="underline">U</span>
+      </ToolbarButton>
+      <div className="mx-1 h-4 w-px bg-(--grey-200)" />
+      <ToolbarButton
+        active={editor.isActive("heading", { level: 1 })}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        title="Heading 1"
+      >
+        H1
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("heading", { level: 2 })}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        title="Heading 2"
+      >
+        H2
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("heading", { level: 3 })}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        title="Heading 3"
+      >
+        H3
+      </ToolbarButton>
+      <div className="mx-1 h-4 w-px bg-(--grey-200)" />
+      <ToolbarButton
+        active={editor.isActive("bulletList")}
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        title="Bullet list"
+      >
+        •≡
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("orderedList")}
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        title="Ordered list"
+      >
+        1≡
+      </ToolbarButton>
+      <ToolbarButton
+        active={editor.isActive("taskList")}
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        title="Todo list"
+      >
+        ☑
+      </ToolbarButton>
     </div>
   );
 }

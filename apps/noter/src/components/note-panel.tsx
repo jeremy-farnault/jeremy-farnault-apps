@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "./color-picker";
-import { RichTextEditor } from "./rich-text-editor";
+import { FormattingToolbar, RichTextEditor, useNoteEditor } from "./rich-text-editor";
 
 type Props = {
   note: Note | null;
@@ -25,6 +25,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   const [body, setBody] = useState(note?.body ?? "");
   const [color, setColor] = useState(note?.backgroundColor ?? DEFAULT_COLOR);
   const [isSaving, setIsSaving] = useState(false);
+  const editor = useNoteEditor(note?.body ?? null, setBody);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref mirrors state so async callbacks always read the latest value without stale closures
@@ -134,11 +135,11 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
         className="text-base font-semibold"
       />
       <RichTextEditor
-        initialContent={note?.body ?? null}
-        onChange={setBody}
+        editor={editor}
         placeholder="Write something…"
         className="min-h-[200px] max-h-[60vh] overflow-y-auto"
       />
+      <FormattingToolbar editor={editor} />
       <ColorPicker value={color} onChange={setColor} />
       {isSaving && (
         <CircleNotchIcon
