@@ -69,7 +69,12 @@ function renderNodeToHtml(node: ProseMirrorNode): string {
       return `<ul class="task-list">${inner}</ul>`;
     case "taskItem": {
       const checked = node.attrs?.checked === true;
-      return `<li class="task-item"><input type="checkbox" disabled${checked ? " checked" : ""}> ${inner}</li>`;
+      const checkSvg = checked
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="m9.907 15.162 9.589-8.717 1.009 1.11-9.59 8.717a2.75 2.75 0 0 1-3.794-.09L3.47 12.53l1.06-1.06 3.652 3.651a1.25 1.25 0 0 0 1.725.041" clip-rule="evenodd"/></svg>`
+        : "";
+      const chkClass = `task-checkbox${checked ? " task-checkbox--checked" : ""}`;
+      const labelClass = `task-item-label${checked ? " task-item-label--checked" : ""}`;
+      return `<li class="task-item"><span class="${chkClass}">${checkSvg}</span><div class="${labelClass}">${inner}</div></li>`;
     }
     case "blockquote":
       return `<blockquote>${inner}</blockquote>`;
