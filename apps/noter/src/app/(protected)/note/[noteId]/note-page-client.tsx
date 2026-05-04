@@ -3,7 +3,7 @@
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ColorPicker } from "@/components/color-picker";
 import { NoteActionsMenu } from "@/components/note-actions-menu";
-import { RichTextEditor } from "@/components/rich-text-editor";
+import { RichTextEditor, useNoteEditor } from "@/components/rich-text-editor";
 import { createNote, updateNote } from "@/lib/actions";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder, Note } from "@/lib/queries";
@@ -26,6 +26,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
   const [body, setBody] = useState(note?.body ?? "");
   const [color, setColor] = useState(note?.backgroundColor ?? DEFAULT_COLOR);
   const [isSaving, setIsSaving] = useState(false);
+  const editor = useNoteEditor(note.body, setBody);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noteIdRef = useRef<string | null>(note?.id ?? null);
@@ -115,8 +116,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
           className="text-base font-semibold"
         />
         <RichTextEditor
-          initialContent={note.body}
-          onChange={setBody}
+          editor={editor}
           placeholder="Write something…"
           className="min-h-[calc(100dvh-328px)] sm:min-h-[50vh]"
         />
