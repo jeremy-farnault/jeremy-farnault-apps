@@ -21,10 +21,11 @@ type Props = {
   folder: Folder;
   allFolders: Folder[];
   menuVisible?: boolean;
+  hideDelete?: boolean;
 };
 
-export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
-  const [modal, setModal] = useState<"rename" | "move" | "color" | "delete" | "archive" | null>(
+export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete }: Props) {
+  const [modal, setModal] = useState<"rename" | "move" | "color" | "archive" | "delete" | null>(
     null
   );
   const shouldMount = modal !== null || (menuVisible ?? true);
@@ -136,19 +137,21 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
               <ArchiveIcon size={14} />
             </button>
           </Tooltip>
-          <Tooltip content="Delete">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setModal("delete");
-              }}
-              aria-label="Delete"
-              className={iconBtnClass}
-            >
-              <TrashIcon size={14} />
-            </button>
-          </Tooltip>
+          {!hideDelete && (
+            <Tooltip content="Delete">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModal("delete");
+                }}
+                aria-label="Delete"
+                className={iconBtnClass}
+              >
+                <TrashIcon size={14} />
+              </button>
+            </Tooltip>
+          )}
         </div>
       )}
 

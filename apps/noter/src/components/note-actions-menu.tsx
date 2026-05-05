@@ -20,9 +20,16 @@ type Props = {
   allFolders: Folder[];
   alwaysVisible?: boolean;
   menuVisible?: boolean;
+  hideDelete?: boolean;
 };
 
-export function NoteActionsMenu({ note, allFolders, alwaysVisible, menuVisible }: Props) {
+export function NoteActionsMenu({
+  note,
+  allFolders,
+  alwaysVisible,
+  menuVisible,
+  hideDelete,
+}: Props) {
   const [modal, setModal] = useState<"move" | "delete" | "archive" | null>(null);
   const shouldMount = alwaysVisible || modal !== null || (menuVisible ?? true);
   const [isPending, startTransition] = useTransition();
@@ -129,16 +136,18 @@ export function NoteActionsMenu({ note, allFolders, alwaysVisible, menuVisible }
               <ArchiveIcon size={14} />
             </button>
           </Tooltip>
-          <Tooltip content="Delete">
-            <button
-              type="button"
-              onClick={() => setModal("delete")}
-              aria-label="Delete"
-              className={iconBtnClass}
-            >
-              <TrashIcon size={14} />
-            </button>
-          </Tooltip>
+          {!hideDelete && (
+            <Tooltip content="Delete">
+              <button
+                type="button"
+                onClick={() => setModal("delete")}
+                aria-label="Delete"
+                className={iconBtnClass}
+              >
+                <TrashIcon size={14} />
+              </button>
+            </Tooltip>
+          )}
         </div>
       )}
 

@@ -59,7 +59,12 @@ export function FolderCard({ folder, allFolders }: Props) {
       </div>
 
       <div className="relative flex justify-end mt-2">
-        <FolderActionsMenu folder={folder} allFolders={allFolders} menuVisible={menuVisible} />
+        <FolderActionsMenu
+          folder={folder}
+          allFolders={allFolders}
+          menuVisible={menuVisible}
+          hideDelete
+        />
       </div>
     </div>
   );

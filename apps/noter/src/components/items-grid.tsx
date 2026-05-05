@@ -146,7 +146,7 @@ export function ItemsGrid({
               <Divider />
             </>
           )}
-          <Grid>
+          <Grid startCols={2}>
             {normalItems.map((item) =>
               item.kind === "folder" ? (
                 <FolderCard key={item.data.id} folder={item.data} allFolders={allFolders} />

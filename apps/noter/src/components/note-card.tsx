@@ -90,7 +90,7 @@ export function NoteCard({
       </div>
 
       <div className="relative flex items-center justify-end gap-1">
-        <NoteActionsMenu note={note} allFolders={allFolders} menuVisible={menuVisible} />
+        <NoteActionsMenu note={note} allFolders={allFolders} menuVisible={menuVisible} hideDelete />
         {showFolderLink && (
           <Link
             href={parentFolderId ? `/${parentFolderId}` : "/"}
