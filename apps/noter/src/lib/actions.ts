@@ -223,6 +223,15 @@ export async function deleteNote(noteId: string): Promise<void> {
   revalidatePath("/", "layout");
 }
 
+export async function updateFolderColor(folderId: string, color: string | null): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .update(folders)
+    .set({ color, updatedAt: new Date() })
+    .where(and(eq(folders.id, folderId), eq(folders.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
 export async function deleteFolder(folderId: string): Promise<void> {
   const userId = await getAuthUserId();
   await db.delete(folders).where(and(eq(folders.id, folderId), eq(folders.userId, userId)));

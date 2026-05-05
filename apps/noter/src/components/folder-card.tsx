@@ -1,11 +1,17 @@
 "use client";
 
+import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder as FolderRow } from "@/lib/queries";
 import { FolderIcon } from "@phosphor-icons/react/dist/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { FolderActionsMenu } from "./folder-actions-menu";
+
+function getBorderColor(color: string): string {
+  if (color.includes("-200)")) return color.replace("-200)", "-100)");
+  return color.replace("-400)", "-600)");
+}
 
 type Props = {
   folder: FolderRow;
@@ -17,13 +23,17 @@ export function FolderCard({ folder, allFolders }: Props) {
   const pointerDownOnCard = useRef(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const bgColor = folder.color ?? DEFAULT_COLOR;
+  const borderColor = getBorderColor(bgColor);
+
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) setMenuVisible(true);
   }, []);
 
   return (
     <div
-      className="group relative flex h-[150px] w-full flex-col rounded-[22px] border border-(--grey-200) bg-(--surface-150) p-4 shadow-sm hover:bg-(--surface-200)"
+      className="group relative flex h-[150px] w-full flex-col rounded-[22px] border p-4 shadow-sm hover:brightness-95 transition-[filter] duration-300 ease-in-out"
+      style={{ backgroundColor: bgColor, borderColor }}
       onMouseEnter={() => setMenuVisible(true)}
       onMouseLeave={() => setMenuVisible(false)}
     >

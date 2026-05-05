@@ -14,6 +14,7 @@ export const folders = pgTable("folders", {
     onDelete: "cascade",
   }),
   name: text("name").notNull(),
+  color: text("color"),
   archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

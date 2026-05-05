@@ -57,6 +57,13 @@
       "when": 1777292487954,
       "tag": "0007_worried_madripoor",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1777962974295,
+      "tag": "0008_watery_mephistopheles",
+      "breakpoints": true
     }
   ]
 }

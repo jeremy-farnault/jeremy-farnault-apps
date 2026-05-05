@@ -1,11 +1,19 @@
 "use client";
 
-import { archiveFolder, deleteFolder } from "@/lib/actions";
+import { archiveFolder, deleteFolder, updateFolderColor } from "@/lib/actions";
+import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder } from "@/lib/queries";
 import { ActionModal, Tooltip, cn } from "@jf/ui";
-import { ArchiveIcon, FolderOpenIcon, PencilIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  ArchiveIcon,
+  FolderOpenIcon,
+  PaletteIcon,
+  PencilIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { ColorPicker } from "./color-picker";
 import { MoveFolderModal } from "./move-folder-modal";
 import { RenameFolderModal } from "./rename-folder-modal";
 
@@ -16,7 +24,9 @@ type Props = {
 };
 
 export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
-  const [modal, setModal] = useState<"rename" | "move" | "delete" | "archive" | null>(null);
+  const [modal, setModal] = useState<"rename" | "move" | "color" | "delete" | "archive" | null>(
+    null
+  );
   const shouldMount = modal !== null || (menuVisible ?? true);
   const [isPending, startTransition] = useTransition();
 
@@ -37,6 +47,18 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
       try {
         await deleteFolder(folder.id);
         toast.success("Folder deleted");
+        setModal(null);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
+  function handleColorChange(color: string) {
+    const newColor = color === DEFAULT_COLOR ? null : color;
+    startTransition(async () => {
+      try {
+        await updateFolderColor(folder.id, newColor);
         setModal(null);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -87,6 +109,19 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
               <FolderOpenIcon size={14} />
             </button>
           </Tooltip>
+          <Tooltip content="Color">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setModal("color");
+              }}
+              aria-label="Change color"
+              className={iconBtnClass}
+            >
+              <PaletteIcon size={14} />
+            </button>
+          </Tooltip>
           <Tooltip content="Archive">
             <button
               type="button"
@@ -121,6 +156,14 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible }: Props) {
       {modal === "move" && (
         <MoveFolderModal folder={folder} allFolders={allFolders} onClose={() => setModal(null)} />
       )}
+
+      <ActionModal
+        isOpen={modal === "color"}
+        onClose={() => setModal(null)}
+        size="small"
+        title="Folder color"
+        content={<ColorPicker value={folder.color ?? DEFAULT_COLOR} onChange={handleColorChange} />}
+      />
 
       <ActionModal
         isOpen={modal === "archive"}
