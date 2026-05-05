@@ -30,6 +30,7 @@ interface ActionModalProps {
   size: "small" | "large";
   closeOnBackdropClick?: boolean;
   closeOnEscapeKeyDown?: boolean;
+  mobilePosition?: "center" | "top";
 }
 
 const SIZE_CLASSES = {
@@ -49,13 +50,19 @@ export function ActionModal({
   size,
   closeOnBackdropClick = true,
   closeOnEscapeKeyDown = true,
+  mobilePosition = "center",
 }: ActionModalProps) {
   const hasButtons = primaryButton || secondaryButton;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]">
+        <Dialog.Overlay
+          className={cn(
+            "fixed inset-0 z-50 flex justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]",
+            mobilePosition === "top" ? "items-start pt-2 sm:items-center sm:pt-0" : "items-center"
+          )}
+        >
           <Dialog.Content
             {...(!closeOnEscapeKeyDown && {
               onEscapeKeyDown: (e: KeyboardEvent) => e.preventDefault(),

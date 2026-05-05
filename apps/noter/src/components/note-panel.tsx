@@ -150,5 +150,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
     </div>
   );
 
-  return <ActionModal isOpen onClose={onClose} size="large" content={content} />;
+  return (
+    <ActionModal isOpen onClose={onClose} size="large" content={content} mobilePosition="top" />
+  );
 }
