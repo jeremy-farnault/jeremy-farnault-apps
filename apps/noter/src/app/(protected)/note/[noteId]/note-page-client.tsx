@@ -3,7 +3,7 @@
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ColorPicker } from "@/components/color-picker";
 import { NoteActionsMenu } from "@/components/note-actions-menu";
-import { RichTextEditor, useNoteEditor } from "@/components/rich-text-editor";
+import { FormattingToolbar, RichTextEditor, useNoteEditor } from "@/components/rich-text-editor";
 import { createNote, updateNote } from "@/lib/actions";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder, Note } from "@/lib/queries";
@@ -26,7 +26,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
   const [body, setBody] = useState(note?.body ?? "");
   const [color, setColor] = useState(note?.backgroundColor ?? DEFAULT_COLOR);
   const [isSaving, setIsSaving] = useState(false);
-  const editor = useNoteEditor(note.body, setBody);
+  const editor = useNoteEditor(note.body, setBody, note.id ?? "");
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noteIdRef = useRef<string | null>(note?.id ?? null);
@@ -120,6 +120,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
           placeholder="Write something…"
           className="min-h-[calc(100dvh-328px)] sm:min-h-[50vh]"
         />
+        <FormattingToolbar editor={editor} noteId={note.id ?? ""} />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <ColorPicker value={color} onChange={setColor} />
           <div className="flex items-center gap-2">

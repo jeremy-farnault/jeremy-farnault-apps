@@ -25,7 +25,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   const [body, setBody] = useState(note?.body ?? "");
   const [color, setColor] = useState(note?.backgroundColor ?? DEFAULT_COLOR);
   const [isSaving, setIsSaving] = useState(false);
-  const editor = useNoteEditor(note?.body ?? null, setBody);
+  const editor = useNoteEditor(note?.body ?? null, setBody, note?.id ?? "");
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref mirrors state so async callbacks always read the latest value without stale closures
@@ -139,7 +139,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
         placeholder="Write something…"
         className="min-h-[200px] max-h-[60vh] overflow-y-auto"
       />
-      <FormattingToolbar editor={editor} />
+      <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
       <ColorPicker value={color} onChange={setColor} />
       {isSaving && (
         <CircleNotchIcon

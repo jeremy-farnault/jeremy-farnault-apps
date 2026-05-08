@@ -2,12 +2,14 @@
 
 import { isRichTextJson, wrapPlainTextAsDoc } from "@/lib/note-body-utils";
 import { cn } from "@jf/ui";
+import { BellIcon } from "@phosphor-icons/react";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
 import { type Editor, ReactNodeViewRenderer } from "@tiptap/react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { ReminderItemExtension } from "./reminder-item-node";
 import { TaskItemNode } from "./task-item-node";
 
 function parseInitial(body: string | null): object | string {
@@ -21,13 +23,15 @@ type ToolbarButtonProps = {
   onClick: () => void;
   children: React.ReactNode;
   title: string;
+  disabled?: boolean;
 };
 
-function ToolbarButton({ active, onClick, children, title }: ToolbarButtonProps) {
+function ToolbarButton({ active, onClick, children, title, disabled }: ToolbarButtonProps) {
   return (
     <button
       type="button"
       title={title}
+      disabled={disabled}
       onMouseDown={(e) => {
         e.preventDefault();
         onClick();
@@ -36,7 +40,8 @@ function ToolbarButton({ active, onClick, children, title }: ToolbarButtonProps)
         "flex h-7 w-7 items-center justify-center rounded text-xs font-semibold transition-colors",
         active
           ? "bg-(--surface-300) text-(--grey-900)"
-          : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+          : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)",
+        disabled && "pointer-events-none opacity-30"
       )}
     >
       {children}
@@ -46,7 +51,8 @@ function ToolbarButton({ active, onClick, children, title }: ToolbarButtonProps)
 
 export function useNoteEditor(
   initialContent: string | null,
-  onChange: (json: string) => void
+  onChange: (json: string) => void,
+  noteId = ""
 ): Editor | null {
   return useEditor({
     immediatelyRender: false,
@@ -59,6 +65,7 @@ export function useNoteEditor(
           return ReactNodeViewRenderer(TaskItemNode);
         },
       }).configure({ nested: false }),
+      ReminderItemExtension.configure({ noteId }),
     ],
     content: parseInitial(initialContent),
     editorProps: {
@@ -108,7 +115,13 @@ export function RichTextEditor({ editor, placeholder, className }: Props) {
   );
 }
 
-export function FormattingToolbar({ editor }: { editor: Editor | null }) {
+export function FormattingToolbar({
+  editor,
+  noteId = "",
+}: {
+  editor: Editor | null;
+  noteId?: string;
+}) {
   if (!editor) return null;
 
   return (
@@ -177,6 +190,21 @@ export function FormattingToolbar({ editor }: { editor: Editor | null }) {
         title="Todo list"
       >
         ☑
+      </ToolbarButton>
+      <div className="mx-1 h-4 w-px bg-(--grey-200)" />
+      <ToolbarButton
+        active={editor.isActive("reminderItem")}
+        onClick={() =>
+          editor
+            .chain()
+            .focus()
+            .insertContent({ type: "reminderItem", attrs: { blockId: crypto.randomUUID() } })
+            .run()
+        }
+        title="Add reminder"
+        disabled={!noteId}
+      >
+        <BellIcon size={14} />
       </ToolbarButton>
     </div>
   );
