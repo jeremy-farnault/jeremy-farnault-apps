@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     if (reminder.repeatRule === "NONE") {
       await db
         .update(reminders)
-        .set({ isDone: true, firedAt: now })
+        .set({ isDone: true, firedAt: now, updatedAt: now })
         .where(eq(reminders.id, reminder.id));
     } else {
       await db
@@ -89,6 +89,7 @@ export async function GET(request: Request) {
         .set({
           scheduledAt: nextScheduledAt(reminder.scheduledAt, reminder.repeatRule),
           firedAt: now,
+          updatedAt: now,
         })
         .where(eq(reminders.id, reminder.id));
     }
