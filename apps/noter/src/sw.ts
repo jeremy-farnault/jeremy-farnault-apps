@@ -14,3 +14,49 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+self.addEventListener("push", (event) => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const data = event.data?.json() as {
+          title?: string;
+          body?: string;
+          url?: string;
+        };
+        const title = data?.title ?? "Reminder";
+        const body = data?.body ?? "";
+        const url = data?.url ?? "/";
+
+        await self.registration.showNotification(title, {
+          body,
+          icon: "/icons/icon-192x192.png",
+          data: { url },
+        });
+      } catch (err) {
+        console.error("[SW] Failed to handle push event:", err);
+      }
+    })()
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url: string = (event.notification.data as { url?: string })?.url ?? "/";
+
+  event.waitUntil(
+    (async () => {
+      const windowClients = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of windowClients) {
+        if (client.url.endsWith(url) && "focus" in client) {
+          await client.focus();
+          return;
+        }
+      }
+      await self.clients.openWindow(url);
+    })()
+  );
+});
