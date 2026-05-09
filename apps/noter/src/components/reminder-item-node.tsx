@@ -1,5 +1,6 @@
 "use client";
 
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { createReminder, deleteReminder, updateReminder } from "@/lib/reminder-actions";
 import { DatePicker, Select, SelectItem, cn } from "@jf/ui";
 import { BellIcon, CheckIcon, TrashIcon } from "@phosphor-icons/react";
@@ -21,6 +22,8 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
     isDone: boolean;
   };
   const noteId: string = (extension as { options: { noteId: string } }).options.noteId;
+
+  const { requestPushSubscription } = usePushSubscription();
 
   const [pickerOpen, setPickerOpen] = useState(!scheduledAt);
   const [localTitle, setLocalTitle] = useState<string>(title ?? "");
@@ -51,6 +54,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
           repeatRule: localRepeat,
         });
         setPickerOpen(false);
+        requestPushSubscription();
       } catch {
         deleteNode();
       }
