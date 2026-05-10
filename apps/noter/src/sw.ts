@@ -1,3 +1,4 @@
+/// <reference lib="webworker" />
 import { defaultCache } from "@serwist/next/worker";
 import { Serwist } from "serwist";
 
@@ -15,7 +16,7 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
-self.addEventListener("push", (event) => {
+self.addEventListener("push", (event: PushEvent) => {
   event.waitUntil(
     (async () => {
       try {
@@ -33,6 +34,11 @@ self.addEventListener("push", (event) => {
           icon: "/icons/icon-192x192.png",
           data: { url },
         });
+
+        const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+        for (const client of clients) {
+          client.postMessage({ type: "REMINDER_RECEIVED" });
+        }
       } catch (err) {
         console.error("[SW] Failed to handle push event:", err);
       }
@@ -40,7 +46,7 @@ self.addEventListener("push", (event) => {
   );
 });
 
-self.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
   event.notification.close();
   const url: string = (event.notification.data as { url?: string })?.url ?? "/";
 

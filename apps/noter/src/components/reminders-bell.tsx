@@ -4,7 +4,7 @@ import { updateReminder } from "@/lib/reminder-actions";
 import { cn } from "@jf/ui";
 import { BellIcon, CheckIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ReminderItem = {
   id: string;
@@ -57,8 +57,7 @@ export function RemindersBell() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
+  const fetchReminders = useCallback(() => {
     setLoading(true);
     setError(false);
     fetch("/api/reminders")
@@ -66,7 +65,25 @@ export function RemindersBell() {
       .then((data) => setItems(data))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [open]);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    fetchReminders();
+  }, [open, fetchReminders]);
+
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+
+    function onMessage(event: MessageEvent) {
+      if (event.data?.type === "REMINDER_RECEIVED") {
+        fetchReminders();
+      }
+    }
+
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
+  }, [fetchReminders]);
 
   async function markDone(id: string) {
     await updateReminder(id, { isDone: true });
