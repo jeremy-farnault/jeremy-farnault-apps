@@ -5,8 +5,8 @@ import webpush from "web-push";
 
 webpush.setVapidDetails(
   "mailto:no-reply@jeremyfarnault.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "",
-  process.env.VAPID_PRIVATE_KEY ?? ""
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
 );
 
 function nextScheduledAt(scheduledAt: Date, repeatRule: string): Date {
