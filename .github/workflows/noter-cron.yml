@@ -1,0 +1,17 @@
+name: Noter Reminders Cron
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    name: Trigger reminders endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reminders cron
+        run: |
+          curl -f -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.NOTER_URL }}/api/cron/reminders"

@@ -68,6 +68,12 @@ export function RemindersBell() {
   }, []);
 
   useEffect(() => {
+    fetchReminders();
+    const interval = setInterval(fetchReminders, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchReminders]);
+
+  useEffect(() => {
     if (!open) return;
     fetchReminders();
   }, [open, fetchReminders]);
