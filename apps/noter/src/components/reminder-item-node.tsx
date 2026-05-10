@@ -2,13 +2,13 @@
 
 import { usePushSubscription } from "@/hooks/use-push-subscription";
 import { createReminder, deleteReminder, updateReminder } from "@/lib/reminder-actions";
+import type { RepeatRule } from "@/lib/reminder-actions";
 import { DatePicker, Select, SelectItem, cn } from "@jf/ui";
 import { BellIcon, CheckIcon, TrashIcon } from "@phosphor-icons/react";
 import { Node, NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
 import { useState } from "react";
-
-type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+import { toast } from "sonner";
 
 // ─── Node view component ──────────────────────────────────────────────────────
 
@@ -56,6 +56,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
         setPickerOpen(false);
         requestPushSubscription();
       } catch {
+        toast.error("Failed to save reminder");
         deleteNode();
       }
     } else {

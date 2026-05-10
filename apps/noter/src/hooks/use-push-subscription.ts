@@ -2,7 +2,8 @@
 
 import { toast } from "sonner";
 
-// Module-level guard: prevents re-prompting within the same browser session
+// Module-level (not component-level) so the guard survives HMR reloads in dev
+// and is shared across all component instances in production.
 let subscriptionAttempted = false;
 
 export function usePushSubscription() {

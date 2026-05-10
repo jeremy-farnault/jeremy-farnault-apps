@@ -4,7 +4,7 @@ import { updateReminder } from "@/lib/reminder-actions";
 import { cn } from "@jf/ui";
 import { BellIcon, CheckIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ReminderItem = {
   id: string;
@@ -55,14 +55,16 @@ export function RemindersBell() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<ReminderItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setLoading(true);
+    setError(false);
     fetch("/api/reminders")
       .then((r) => r.json())
       .then((data) => setItems(data))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [open]);
 
@@ -71,9 +73,13 @@ export function RemindersBell() {
     setItems((prev) => prev.filter((r) => r.id !== id));
   }
 
-  const now = new Date();
-  const due = items.filter((r) => new Date(r.scheduledAt) <= now);
-  const upcoming = items.filter((r) => new Date(r.scheduledAt) > now);
+  const { due, upcoming } = useMemo(() => {
+    const now = new Date();
+    return {
+      due: items.filter((r) => new Date(r.scheduledAt) <= now),
+      upcoming: items.filter((r) => new Date(r.scheduledAt) > now),
+    };
+  }, [items]);
   const hasDue = due.length > 0;
 
   return (
@@ -109,7 +115,9 @@ export function RemindersBell() {
 
           {loading && <p className="text-sm text-(--grey-400)">Loading…</p>}
 
-          {!loading && items.length === 0 && (
+          {!loading && error && <p className="text-sm text-red-500">Failed to load reminders</p>}
+
+          {!loading && !error && items.length === 0 && (
             <p className="text-sm text-(--grey-400)">No reminders</p>
           )}
 

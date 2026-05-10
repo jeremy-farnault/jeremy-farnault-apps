@@ -5,7 +5,7 @@ import { db, reminders } from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+export type RepeatRule = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 async function getAuthUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });

@@ -1,5 +1,5 @@
 import { db, notes, pushSubscriptions, reminders } from "@jf/db";
-import { and, eq, lte } from "drizzle-orm";
+import { and, eq, inArray, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 
@@ -50,11 +50,19 @@ export async function GET(request: Request) {
     .innerJoin(notes, eq(reminders.noteId, notes.id))
     .where(and(lte(reminders.scheduledAt, now), eq(reminders.isDone, false)));
 
+  const userIds = [...new Set(dueReminders.map((r) => r.userId))];
+  const allSubscriptions = userIds.length
+    ? await db.select().from(pushSubscriptions).where(inArray(pushSubscriptions.userId, userIds))
+    : [];
+  const subscriptionsByUser = new Map<string, typeof allSubscriptions>();
+  for (const sub of allSubscriptions) {
+    const list = subscriptionsByUser.get(sub.userId) ?? [];
+    list.push(sub);
+    subscriptionsByUser.set(sub.userId, list);
+  }
+
   for (const reminder of dueReminders) {
-    const subscriptions = await db
-      .select()
-      .from(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, reminder.userId));
+    const subscriptions = subscriptionsByUser.get(reminder.userId) ?? [];
 
     const payload = JSON.stringify({
       title: reminder.title,
