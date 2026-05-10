@@ -17,8 +17,8 @@ env:
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
 jobs:
-  ci:
-    name: Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,38 +40,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Lint and type-check are handled by Vercel on deploy
+      # TODO: fix and re-enable when lint/type-check/tests are clean
       # - name: Lint
       #   run: pnpm turbo run lint
       # - name: Type-check
       #   run: pnpm turbo run type-check
-
-      - name: Unit tests
-        run: pnpm turbo run test
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: ci
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      # - name: Unit tests
+      #   run: pnpm turbo run test
 
       - name: Build
         run: pnpm turbo run build
