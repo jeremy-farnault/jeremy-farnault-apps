@@ -58,3 +58,7 @@ jobs:
           NEXT_PUBLIC_AUTH_URL: "https://placeholder.vercel.app"
           AWS_S3_BUCKET_NAME: "placeholder-bucket"
           AWS_REGION: "eu-central-1"
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
