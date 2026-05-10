@@ -3,12 +3,6 @@ import { and, eq, inArray, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  "mailto:no-reply@jeremyfarnault.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 function nextScheduledAt(scheduledAt: Date, repeatRule: string): Date {
   const next = new Date(scheduledAt);
   switch (repeatRule) {
@@ -33,6 +27,12 @@ export async function GET(request: Request) {
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  webpush.setVapidDetails(
+    "mailto:no-reply@jeremyfarnault.com",
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
 
   const now = new Date();
 
