@@ -6,6 +6,7 @@ interface AppShellProps {
   appName: string;
   children: ReactNode;
   currentAppId?: string;
+  startSlot?: ReactNode;
   rightSlot?: ReactNode;
   titleHref?: string;
 }
@@ -15,6 +16,7 @@ export function AppShell({
   currentAppId,
   appName,
   appIcon,
+  startSlot,
   rightSlot,
   titleHref,
 }: AppShellProps) {
@@ -36,6 +38,7 @@ export function AppShell({
           </div>
         )}
         <div className="flex items-center gap-2">
+          {startSlot}
           <AppSwitcher {...(currentAppId !== undefined && { currentAppId })} />
           {rightSlot}
         </div>

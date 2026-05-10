@@ -106,7 +106,7 @@ export function RemindersBell() {
           align="end"
           sideOffset={8}
           className={cn(
-            "z-50 w-80 rounded-[22px] bg-(--card) p-4 outline-none",
+            "z-50 w-80 min-w-[120px] rounded-[22px] bg-(--card) p-4 outline-none",
             "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]",
             "animate-[overlay-in_0.3s_ease-in-out]"
           )}

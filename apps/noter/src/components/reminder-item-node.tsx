@@ -169,23 +169,26 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
             className="rounded-[10px] bg-(--surface-150) px-3 py-2 text-sm outline-none"
           />
           <DatePicker value={localDate} onChange={setLocalDate} disablePast />
-          <input
-            type="time"
-            value={localTime}
-            onChange={(e) => setLocalTime(e.target.value)}
-            className="h-11 rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none"
-          />
-          <Select
-            value={localRepeat}
-            onValueChange={(v) => setLocalRepeat(v as RepeatRule)}
-            placeholder="Repeat"
-          >
-            <SelectItem value="NONE">No repeat</SelectItem>
-            <SelectItem value="DAILY">Daily</SelectItem>
-            <SelectItem value="WEEKLY">Weekly</SelectItem>
-            <SelectItem value="MONTHLY">Monthly</SelectItem>
-            <SelectItem value="YEARLY">Yearly</SelectItem>
-          </Select>
+          <div className="flex gap-2">
+            <input
+              type="time"
+              value={localTime}
+              onChange={(e) => setLocalTime(e.target.value)}
+              className="h-11 flex-1 rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none"
+            />
+            <Select
+              value={localRepeat}
+              onValueChange={(v) => setLocalRepeat(v as RepeatRule)}
+              placeholder="Repeat"
+              className="flex-1"
+            >
+              <SelectItem value="NONE">No repeat</SelectItem>
+              <SelectItem value="DAILY">Daily</SelectItem>
+              <SelectItem value="WEEKLY">Weekly</SelectItem>
+              <SelectItem value="MONTHLY">Monthly</SelectItem>
+              <SelectItem value="YEARLY">Yearly</SelectItem>
+            </Select>
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -193,7 +196,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
                 e.preventDefault();
                 handleConfirm();
               }}
-              className="flex-1 rounded-lg bg-(--grey-900) px-3 py-2 text-sm text-(--grey-100)"
+              className="flex-1 inline-flex items-center justify-center rounded-[12px] h-[42px] px-4 text-sm font-medium transition-colors bg-(--grey-800) text-white hover:bg-(--grey-900)"
             >
               Set reminder
             </button>
@@ -203,7 +206,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
                 e.preventDefault();
                 handleCancel();
               }}
-              className="flex-1 rounded-lg bg-(--surface-200) px-3 py-2 text-sm text-(--grey-700)"
+              className="flex-1 inline-flex items-center justify-center rounded-[12px] h-[42px] px-4 text-sm font-medium transition-colors border border-(--grey-200) bg-transparent text-(--grey-900) hover:border-(--grey-300)"
             >
               Cancel
             </button>
