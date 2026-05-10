@@ -18,7 +18,7 @@ env:
 
 jobs:
   ci:
-    name: Type-check & Test
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,8 +40,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type-check
-        run: pnpm turbo run type-check
+      # Lint and type-check are handled by Vercel on deploy
+      # - name: Lint
+      #   run: pnpm turbo run lint
+      # - name: Type-check
+      #   run: pnpm turbo run type-check
 
       - name: Unit tests
         run: pnpm turbo run test
