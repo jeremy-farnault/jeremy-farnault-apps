@@ -84,6 +84,7 @@ export function NoteCard({
         {note.body && (
           <div
             className="note-card-body text-sm text-(--grey-700)"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: trusted output from internal note renderer
             dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
           />
         )}
