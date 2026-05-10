@@ -115,46 +115,48 @@ export function HabitFormModal({ isOpen, onClose, habit, onCreated }: Props) {
         {errors.name && <p className="text-xs text-(--red-500)">{errors.name}</p>}
       </div>
 
-      <div className="flex flex-col gap-1">
-        {isEditMode ? (
-          <Tooltip content="Can't be changed after creation">
-            <div className="cursor-not-allowed">
-              <div className="pointer-events-none">
-                <Select value={type} onValueChange={() => {}} disabled placeholder="Type">
-                  <SelectItem value="boolean">Boolean</SelectItem>
-                  <SelectItem value="numeric">Numeric</SelectItem>
-                  <SelectItem value="time">Time</SelectItem>
-                </Select>
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+        <div className="flex flex-col gap-1 flex-1">
+          {isEditMode ? (
+            <Tooltip content="Can't be changed after creation">
+              <div className="cursor-not-allowed">
+                <div className="pointer-events-none">
+                  <Select value={type} onValueChange={() => {}} disabled placeholder="Type">
+                    <SelectItem value="boolean">Boolean</SelectItem>
+                    <SelectItem value="numeric">Numeric</SelectItem>
+                    <SelectItem value="time">Time</SelectItem>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </Tooltip>
-        ) : (
-          <Select
-            value={type}
-            onValueChange={(v) => {
-              setType(v as "boolean" | "numeric" | "time");
-              if (errors.type) clearError("type");
-            }}
-            placeholder="Type"
-          >
-            <SelectItem value="boolean">Boolean</SelectItem>
-            <SelectItem value="numeric">Numeric</SelectItem>
-            <SelectItem value="time">Time</SelectItem>
-          </Select>
-        )}
-        {errors.type && <p className="text-xs text-(--red-500)">{errors.type}</p>}
-      </div>
+            </Tooltip>
+          ) : (
+            <Select
+              value={type}
+              onValueChange={(v) => {
+                setType(v as "boolean" | "numeric" | "time");
+                if (errors.type) clearError("type");
+              }}
+              placeholder="Type"
+            >
+              <SelectItem value="boolean">Boolean</SelectItem>
+              <SelectItem value="numeric">Numeric</SelectItem>
+              <SelectItem value="time">Time</SelectItem>
+            </Select>
+          )}
+          {errors.type && <p className="text-xs text-(--red-500)">{errors.type}</p>}
+        </div>
 
-      <div className="flex flex-col gap-1">
-        {isEditMode ? (
-          <Tooltip content="Can't be changed after creation">
-            <div className="cursor-not-allowed">
-              <DatePicker value={startDate} onChange={setStartDate} disabled />
-            </div>
-          </Tooltip>
-        ) : (
-          <DatePicker value={startDate} onChange={setStartDate} disablePast />
-        )}
+        <div className="flex flex-col gap-1 sm:flex sm:justify-end">
+          {isEditMode ? (
+            <Tooltip content="Can't be changed after creation">
+              <div className="cursor-not-allowed">
+                <DatePicker value={startDate} onChange={setStartDate} disabled />
+              </div>
+            </Tooltip>
+          ) : (
+            <DatePicker value={startDate} onChange={setStartDate} disablePast />
+          )}
+        </div>
       </div>
 
       <ColorPicker value={color} onChange={setColor} />

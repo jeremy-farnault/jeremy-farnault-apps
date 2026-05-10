@@ -89,14 +89,14 @@ function SelectContent({ children, className }: SelectContentProps) {
       position="popper"
       sideOffset={6}
       className={cn(
-        "z-50 min-w-[var(--radix-select-trigger-width)] overflow-hidden",
+        "z-50 min-w-[var(--radix-select-trigger-width)] overflow-clip",
         "rounded-[16px] bg-(--card) p-4",
         "shadow-[0_24px_36px_0_rgba(0,0,0,0.25)]",
         "animate-[overlay-in_0.3s_ease-in-out]",
         className
       )}
     >
-      <SelectPrimitive.Viewport className="flex flex-col gap-2">
+      <SelectPrimitive.Viewport className="flex flex-col gap-2 max-h-[240px] overflow-y-auto">
         {children}
       </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>
