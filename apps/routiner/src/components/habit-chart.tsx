@@ -81,7 +81,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     tick: { fontSize: 10, fill: "var(--grey-400)" },
   };
 
-  const commonMargin = { top: 4, right: 0, left: -28, bottom: 0 };
+  const commonMargin = { top: 4, right: 8, left: -28, bottom: 0 };
 
   const tooltipStyle = {
     fontSize: 11,
@@ -96,7 +96,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     const barSize = rangeDays > 180 ? 2 : rangeDays > 60 ? 4 : 8;
 
     return (
-      <div style={{ color }} className="[&_svg]:!w-[95%]">
+      <div style={{ color }}>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={data} margin={commonMargin}>
             <CartesianGrid vertical={false} stroke="var(--grey-200)" />
@@ -128,7 +128,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
   }
 
   return (
-    <div style={{ color }} className="[&_svg]:!w-[95%]">
+    <div style={{ color }}>
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={data} margin={commonMargin}>
           <CartesianGrid vertical={false} stroke="var(--grey-200)" />
@@ -161,6 +161,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
             dot={data.length <= 60 ? { fill: color, stroke: color } : false}
             activeDot={{ r: 4, fill: color, stroke: color }}
             connectNulls={false}
+            clip={false}
           />
         </LineChart>
       </ResponsiveContainer>
