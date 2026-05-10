@@ -242,6 +242,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                     value={form.date}
                     onChange={(v) => setField("date", v)}
                     disabled={submitting}
+                    calendarAlign="end"
                   />
                   {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
                 </div>

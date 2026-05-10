@@ -18,6 +18,7 @@ interface DatePickerProps {
   placeholder?: string;
   disablePast?: boolean;
   accentColor?: string;
+  calendarAlign?: "start" | "end";
 }
 
 function parseDate(value: string): Date | undefined {
@@ -101,6 +102,7 @@ export function DatePicker({
   placeholder = "Select date",
   disablePast = false,
   accentColor = "var(--yellow-400)",
+  calendarAlign = "start",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = parseDate(value);
@@ -113,7 +115,7 @@ export function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex h-11 w-[284px] min-w-[284px] max-w-[284px] items-center justify-between rounded-[10px]",
+            "flex h-11 w-full items-center justify-between rounded-[10px]",
             "bg-(--surface-150) px-3 text-sm",
             "hover:bg-(--surface-200) focus:outline-none focus:ring-0",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
@@ -126,10 +128,10 @@ export function DatePicker({
       </PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
-          align="start"
+          align={calendarAlign}
           sideOffset={6}
           className={cn(
-            "z-50 w-[var(--radix-popover-trigger-width)]",
+            "z-50 w-[284px]",
             "rounded-[16px] bg-(--card) p-4",
             "shadow-[0_24px_36px_0_rgba(0,0,0,0.25)]",
             "animate-[overlay-in_0.3s_ease-in-out]"
