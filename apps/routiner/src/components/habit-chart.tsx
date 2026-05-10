@@ -161,6 +161,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
             dot={data.length <= 60 ? { fill: color, stroke: color } : false}
             activeDot={{ r: 4, fill: color, stroke: color }}
             connectNulls={false}
+            // @ts-expect-error — recharts types don't accept boolean but false works at runtime
             clip={false}
           />
         </LineChart>
