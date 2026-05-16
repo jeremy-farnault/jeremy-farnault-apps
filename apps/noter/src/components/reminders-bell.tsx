@@ -128,6 +128,7 @@ export function RemindersBell() {
         <Popover.Content
           align="end"
           sideOffset={8}
+          collisionPadding={16}
           className={cn(
             "z-50 w-80 min-w-[120px] rounded-[22px] bg-(--card) p-4 outline-none",
             "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]",
