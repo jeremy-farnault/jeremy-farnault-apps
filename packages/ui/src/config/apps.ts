@@ -1,5 +1,5 @@
 import type { Icon } from "@phosphor-icons/react";
-import { ChecksIcon, NotepadIcon, RankingIcon, StackIcon } from "@phosphor-icons/react";
+import { ChecksIcon, CoinsIcon, NotepadIcon, RankingIcon, StackIcon } from "@phosphor-icons/react";
 
 export interface AppDefinition {
   id: string;
@@ -37,5 +37,12 @@ export const apps: AppDefinition[] = [
     icon: RankingIcon,
     href: process.env.NEXT_PUBLIC_CLASSER_URL ?? "#",
     accentColor: "--green-400",
+  },
+  {
+    id: "financer",
+    name: "Financer",
+    icon: CoinsIcon,
+    href: process.env.NEXT_PUBLIC_FINANCER_URL ?? "#",
+    accentColor: "--purple-400",
   },
 ];

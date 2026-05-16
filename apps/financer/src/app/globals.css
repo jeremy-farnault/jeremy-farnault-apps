@@ -1,0 +1,5 @@
+:root,
+.dark {
+  --primary: var(--purple-400);
+  --secondary: var(--purple-600);
+}
