@@ -33,9 +33,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
 
   const { requestPushSubscription } = usePushSubscription();
 
-  const initialDateTime = scheduledAt
-    ? new Date(scheduledAt)
-    : (() => { const d = new Date(); d.setHours(9, 0, 0, 0); return d; })();
+  const initialDateTime = scheduledAt ? new Date(scheduledAt) : new Date();
 
   const [pickerOpen, setPickerOpen] = useState(!scheduledAt);
   const [localTitle, setLocalTitle] = useState<string>(title ?? "");
@@ -158,28 +156,32 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
             {repeatRule.toLowerCase()}
           </span>
         )}
-        <button
-          type="button"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleToggleDone();
-          }}
-          className="shrink-0 text-(--grey-400) hover:text-(--grey-700)"
-          title="Toggle done"
-        >
-          <CheckIcon size={14} />
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            handleDelete();
-          }}
-          className="shrink-0 text-(--grey-400) hover:text-red-500"
-          title="Delete reminder"
-        >
-          <TrashIcon size={14} />
-        </button>
+        {reminderId && (
+          <>
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleToggleDone();
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              title="Toggle done"
+            >
+              <CheckIcon size={14} />
+            </button>
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              title="Delete reminder"
+            >
+              <TrashIcon size={14} />
+            </button>
+          </>
+        )}
       </div>
 
       {pickerOpen && (
@@ -203,28 +205,29 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
               <SelectItem value="YEARLY">Yearly</SelectItem>
             </Select>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <DatePicker
-                value={localDate}
-                onChange={setLocalDate}
+              <DatePicker value={localDate} onChange={setLocalDate} accentColor="var(--primary)" />
+              <TimeInput
+                value={localTime}
+                onChange={setLocalTime}
                 accentColor="var(--primary)"
+                align="end"
               />
-              <TimeInput value={localTime} onChange={setLocalTime} accentColor="var(--primary)" align="end" />
             </div>
           </div>
           <div className="flex flex-row justify-end gap-2 p-2">
             <button
               type="button"
               onClick={handleCancel}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--grey-900) hover:bg-(--surface-150) focus:outline-none"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
             >
-              <XIcon size={20} />
+              <XIcon size={14} />
             </button>
             <button
               type="button"
               onClick={handlePickerConfirm}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--grey-900) hover:bg-(--surface-150) focus:outline-none"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
             >
-              <CheckIcon size={20} />
+              <CheckIcon size={14} />
             </button>
           </div>
         </div>
