@@ -4,6 +4,7 @@ import { auth } from "@jf/auth";
 import {
   db,
   financerEntries,
+  financerIncomeEntries,
   financerIncomeSources,
   financerSummaries,
   withTransaction,
@@ -75,6 +76,28 @@ export async function deleteIncomeSource(id: string): Promise<void> {
   await db
     .delete(financerIncomeSources)
     .where(and(eq(financerIncomeSources.id, id), eq(financerIncomeSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function upsertIncomeEntry(
+  sourceId: string,
+  month: string,
+  value: string
+): Promise<void> {
+  const numericValue = Number(value);
+  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  const userId = await getAuthUserId();
+
+  await db
+    .delete(financerIncomeEntries)
+    .where(
+      and(
+        eq(financerIncomeEntries.userId, userId),
+        eq(financerIncomeEntries.sourceId, sourceId),
+        eq(financerIncomeEntries.month, month)
+      )
+    );
+  await db.insert(financerIncomeEntries).values({ userId, sourceId, value, month });
   revalidatePath("/", "layout");
 }
 

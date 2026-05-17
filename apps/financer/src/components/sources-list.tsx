@@ -1,18 +1,36 @@
 "use client";
 
-import { deleteIncomeSource, updateIncomeSource } from "@/lib/actions";
-import type { IncomeSourceRow } from "@/lib/queries";
+import { deleteIncomeSource, updateIncomeSource, upsertIncomeEntry } from "@/lib/actions";
+import type { IncomeSourceRow, SavingsRow } from "@/lib/queries";
 import { ActionModal, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export function SourcesList({ sources }: { sources: IncomeSourceRow[] }) {
+function formatMonth(month: string): string {
+  return new Date(`${month}-01`).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+interface SourcesListProps {
+  sources: IncomeSourceRow[];
+  month: string;
+  savingsData: SavingsRow[];
+}
+
+export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
   const [editingSource, setEditingSource] = useState<IncomeSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<IncomeSourceRow | null>(null);
+  const [loggingSource, setLoggingSource] = useState<IncomeSourceRow | null>(null);
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("");
+  const [logValue, setLogValue] = useState("");
+  const [logValueError, setLogValueError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
+
+  const existingTotals = new Map(savingsData.map((r) => [r.sourceId, r.total]));
 
   function openEdit(source: IncomeSourceRow) {
     setEditingSource(source);
@@ -52,6 +70,35 @@ export function SourcesList({ sources }: { sources: IncomeSourceRow[] }) {
     });
   }
 
+  function openLog(source: IncomeSourceRow) {
+    const existing = existingTotals.get(source.id);
+    setLoggingSource(source);
+    setLogValue(existing ? String(existing) : "");
+  }
+
+  function handleLogClose() {
+    setLoggingSource(null);
+    setLogValue("");
+    setLogValueError(undefined);
+  }
+
+  function handleLogSubmit() {
+    if (!loggingSource) return;
+    if (!Number(logValue) || Number(logValue) <= 0) {
+      setLogValueError("Enter a positive number");
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await upsertIncomeEntry(loggingSource.id, month, logValue);
+        toast.success("Amount logged");
+        handleLogClose();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
   if (sources.length === 0) {
     return <p className="text-sm text-(--grey-500)">No income sources yet.</p>;
   }
@@ -68,23 +115,32 @@ export function SourcesList({ sources }: { sources: IncomeSourceRow[] }) {
               {source.name}
               <span className="ml-2 text-xs text-(--grey-500)">{source.currency}</span>
             </span>
-            <div className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => openEdit(source)}
-                aria-label="Edit source"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                onClick={() => openLog(source)}
+                className="h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
               >
-                <PencilSimpleIcon size={16} />
+                {existingTotals.has(source.id) ? "Edit" : "+ Log"}
               </button>
-              <button
-                type="button"
-                onClick={() => setDeletingSource(source)}
-                aria-label="Delete source"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-              >
-                <TrashIcon size={16} />
-              </button>
+              <div className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => openEdit(source)}
+                  aria-label="Edit source"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                >
+                  <PencilSimpleIcon size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeletingSource(source)}
+                  aria-label="Delete source"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                >
+                  <TrashIcon size={16} />
+                </button>
+              </div>
             </div>
           </li>
         ))}
@@ -127,6 +183,33 @@ export function SourcesList({ sources }: { sources: IncomeSourceRow[] }) {
         }
         primaryButton={{ label: "Delete", loading: isPending, onClick: handleDeleteConfirm }}
         secondaryButton={{ label: "Cancel", onClick: () => setDeletingSource(null) }}
+        closeOnBackdropClick={!isPending}
+        closeOnEscapeKeyDown={!isPending}
+      />
+
+      <ActionModal
+        isOpen={!!loggingSource}
+        onClose={handleLogClose}
+        size="small"
+        title="Log amount"
+        content={
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-(--grey-500)">
+              {loggingSource?.name} · {loggingSource?.currency} · {formatMonth(month)}
+            </p>
+            <TextInput
+              value={logValue}
+              onChange={(v) => {
+                setLogValue(v);
+                setLogValueError(undefined);
+              }}
+              placeholder="Amount"
+            />
+            {logValueError && <p className="text-xs text-red-500">{logValueError}</p>}
+          </div>
+        }
+        primaryButton={{ label: "Save", loading: isPending, onClick: handleLogSubmit }}
+        secondaryButton={{ label: "Cancel", onClick: handleLogClose }}
         closeOnBackdropClick={!isPending}
         closeOnEscapeKeyDown={!isPending}
       />

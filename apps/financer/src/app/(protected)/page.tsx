@@ -69,7 +69,7 @@ export default async function FinancerPage({
       {view === "savings" && (
         <>
           <MonthNav month={month} />
-          <SourcesList sources={sources} />
+          <SourcesList sources={sources} month={month} savingsData={savingsData} />
           <SavingsList data={savingsData} />
           <SavingsCta />
         </>
