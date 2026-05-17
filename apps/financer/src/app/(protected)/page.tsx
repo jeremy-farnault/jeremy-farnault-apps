@@ -3,6 +3,7 @@ import { MonthNav } from "@/components/month-nav";
 import { SavingsCta } from "@/components/savings-cta";
 import { SavingsList } from "@/components/savings-list";
 import { SourcesList } from "@/components/sources-list";
+import { SpendingChart } from "@/components/spending-chart";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
@@ -61,6 +62,7 @@ export default async function FinancerPage({
       {view === "spending" && (
         <>
           <MonthNav month={month} />
+          <SpendingChart data={spendingData} />
           <SpendingList data={spendingData} />
           {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
           <SpendingCta viewedMonth={month} availableMonths={availableMonths} />
