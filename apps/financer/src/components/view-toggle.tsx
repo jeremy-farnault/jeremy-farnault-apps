@@ -4,7 +4,7 @@ import { cn } from "@jf/ui";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface ViewToggleProps {
-  view: "spending" | "savings";
+  view: "spending" | "savings" | "overview";
 }
 
 export function ViewToggle({ view }: ViewToggleProps) {
@@ -12,7 +12,7 @@ export function ViewToggle({ view }: ViewToggleProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function setView(v: "spending" | "savings") {
+  function setView(v: "spending" | "savings" | "overview") {
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", v);
     router.replace(`${pathname}?${params.toString()}`);
@@ -20,7 +20,7 @@ export function ViewToggle({ view }: ViewToggleProps) {
 
   return (
     <div className="flex rounded-[12px] p-1 bg-(--surface-150) self-start">
-      {(["spending", "savings"] as const).map((v) => (
+      {(["spending", "savings", "overview"] as const).map((v) => (
         <button
           key={v}
           type="button"

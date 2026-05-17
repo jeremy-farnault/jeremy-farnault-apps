@@ -5,7 +5,7 @@ import {
   financerIncomeSources,
   financerSummaries,
 } from "@jf/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -21,6 +21,12 @@ export type SavingsRow = {
   name: string;
   currency: string;
   total: number;
+};
+
+export type MonthlyTotals = {
+  month: string;
+  spending: number;
+  savings: Record<string, number>;
 };
 
 export type IncomeSourceRow = {
@@ -147,4 +153,51 @@ export async function getAvailableMonths(userId: string): Promise<string[]> {
 
   const past = Array.from(all).sort((a, b) => b.localeCompare(a));
   return [currentMonth, ...past];
+}
+
+export async function getMonthlyTotals(userId: string, months: string[]): Promise<MonthlyTotals[]> {
+  if (months.length === 0) return [];
+
+  const [summaries, entries, incomeRows] = await Promise.all([
+    db
+      .select({ month: financerSummaries.month, value: financerSummaries.value })
+      .from(financerSummaries)
+      .where(and(eq(financerSummaries.userId, userId), inArray(financerSummaries.month, months))),
+    db
+      .select({ month: financerEntries.month, value: financerEntries.value })
+      .from(financerEntries)
+      .where(and(eq(financerEntries.userId, userId), inArray(financerEntries.month, months))),
+    db
+      .select({
+        month: financerIncomeEntries.month,
+        value: financerIncomeEntries.value,
+        currency: financerIncomeSources.currency,
+      })
+      .from(financerIncomeEntries)
+      .innerJoin(
+        financerIncomeSources,
+        eq(financerIncomeEntries.sourceId, financerIncomeSources.id)
+      )
+      .where(
+        and(eq(financerIncomeEntries.userId, userId), inArray(financerIncomeEntries.month, months))
+      ),
+  ]);
+
+  const result = new Map<string, MonthlyTotals>(
+    months.map((m) => [m, { month: m, spending: 0, savings: {} }])
+  );
+
+  for (const row of [...summaries, ...entries]) {
+    const entry = result.get(row.month);
+    if (entry) entry.spending += Number(row.value);
+  }
+
+  for (const row of incomeRows) {
+    const entry = result.get(row.month);
+    if (entry) {
+      entry.savings[row.currency] = (entry.savings[row.currency] ?? 0) + Number(row.value);
+    }
+  }
+
+  return months.map((m) => result.get(m)!);
 }
