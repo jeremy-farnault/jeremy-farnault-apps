@@ -33,6 +33,15 @@ export async function getSpendingForMonth(userId: string, month: string): Promis
     .sort((a, b) => a.category.localeCompare(b.category));
 }
 
+export async function hasOpenEntries(userId: string, month: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: financerEntries.id })
+    .from(financerEntries)
+    .where(and(eq(financerEntries.userId, userId), eq(financerEntries.month, month)))
+    .limit(1);
+  return rows.length > 0;
+}
+
 export async function getAvailableMonths(userId: string): Promise<string[]> {
   const [entryMonths, summaryMonths] = await Promise.all([
     db

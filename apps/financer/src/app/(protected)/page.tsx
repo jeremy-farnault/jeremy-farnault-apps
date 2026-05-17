@@ -1,8 +1,9 @@
+import { CloseMonthButton } from "@/components/close-month-button";
 import { MonthNav } from "@/components/month-nav";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
-import { getAvailableMonths, getSpendingForMonth } from "@/lib/queries";
+import { getAvailableMonths, getSpendingForMonth, hasOpenEntries } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 
@@ -26,10 +27,14 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const [spendingData, availableMonths] =
+  const [spendingData, availableMonths, openEntries] =
     view === "spending"
-      ? await Promise.all([getSpendingForMonth(userId, month), getAvailableMonths(userId)])
-      : [[], []];
+      ? await Promise.all([
+          getSpendingForMonth(userId, month),
+          getAvailableMonths(userId),
+          hasOpenEntries(userId, month),
+        ])
+      : [[], [], false];
 
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
@@ -38,6 +43,7 @@ export default async function FinancerPage({
         <>
           <MonthNav month={month} />
           <SpendingList data={spendingData} />
+          {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
           <SpendingCta viewedMonth={month} availableMonths={availableMonths} />
         </>
       )}
