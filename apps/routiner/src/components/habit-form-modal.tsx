@@ -146,7 +146,7 @@ export function HabitFormModal({ isOpen, onClose, habit, onCreated }: Props) {
           {errors.type && <p className="text-xs text-(--red-500)">{errors.type}</p>}
         </div>
 
-        <div className="flex flex-col gap-1 sm:flex sm:justify-end">
+        <div className="flex flex-col gap-1 sm:flex-1">
           {isEditMode ? (
             <Tooltip content="Can't be changed after creation">
               <div className="cursor-not-allowed">

@@ -1,9 +1,11 @@
 import {
   db,
   financerEntries,
+  financerExchangeRates,
   financerIncomeEntries,
   financerIncomeSources,
   financerSummaries,
+  financerUserSettings,
 } from "@jf/db";
 import { and, eq, inArray } from "drizzle-orm";
 
@@ -153,6 +155,48 @@ export async function getAvailableMonths(userId: string): Promise<string[]> {
 
   const past = Array.from(all).sort((a, b) => b.localeCompare(a));
   return [currentMonth, ...past];
+}
+
+const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "SEK", "NZD", "JPY"] as const;
+
+export async function getHomeCurrency(userId: string): Promise<string> {
+  const [row] = await db
+    .select({ homeCurrency: financerUserSettings.homeCurrency })
+    .from(financerUserSettings)
+    .where(eq(financerUserSettings.userId, userId));
+  return row?.homeCurrency ?? "USD";
+}
+
+export async function getExchangeRates(): Promise<Record<string, number>> {
+  const rows = await db
+    .select({
+      currency: financerExchangeRates.currency,
+      rate: financerExchangeRates.rate,
+      updatedAt: financerExchangeRates.updatedAt,
+    })
+    .from(financerExchangeRates)
+    .where(inArray(financerExchangeRates.currency, [...SUPPORTED_CURRENCIES]));
+
+  const stale =
+    rows.length < SUPPORTED_CURRENCIES.length ||
+    rows.some((r) => Date.now() - r.updatedAt.getTime() > 24 * 60 * 60 * 1000);
+
+  if (stale) {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    const json = await res.json();
+    const fresh = SUPPORTED_CURRENCIES.map((c) => ({
+      currency: c,
+      rate: String(json.rates[c] ?? 1),
+      updatedAt: new Date(),
+    }));
+    await db
+      .delete(financerExchangeRates)
+      .where(inArray(financerExchangeRates.currency, [...SUPPORTED_CURRENCIES]));
+    await db.insert(financerExchangeRates).values(fresh);
+    return Object.fromEntries(fresh.map((r) => [r.currency, Number(r.rate)]));
+  }
+
+  return Object.fromEntries(rows.map((r) => [r.currency, Number(r.rate)]));
 }
 
 export async function getMonthlyTotals(userId: string, months: string[]): Promise<MonthlyTotals[]> {

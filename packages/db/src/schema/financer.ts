@@ -51,3 +51,19 @@ export const financerIncomeEntries = pgTable("financer_income_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export const financerUserSettings = pgTable("financer_user_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+  homeCurrency: text("home_currency").notNull().default("USD"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const financerExchangeRates = pgTable("financer_exchange_rates", {
+  currency: text("currency").primaryKey(),
+  rate: numeric("rate", { precision: 18, scale: 8 }).notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});

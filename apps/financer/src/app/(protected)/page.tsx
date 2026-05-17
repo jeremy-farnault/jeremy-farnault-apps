@@ -10,6 +10,8 @@ import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
 import {
   getAvailableMonths,
+  getExchangeRates,
+  getHomeCurrency,
   getIncomeSources,
   getMonthlyTotals,
   getSavingsAvailableMonths,
@@ -60,14 +62,16 @@ export default async function FinancerPage({
         ])
       : [[], [], false];
 
-  const [savingsData, _savingsMonths, sources] =
+  const [savingsData, _savingsMonths, sources, homeCurrency, rates] =
     view === "savings"
       ? await Promise.all([
           getSavingsForMonth(userId, month),
           getSavingsAvailableMonths(userId),
           getIncomeSources(userId),
+          getHomeCurrency(userId),
+          getExchangeRates(),
         ])
-      : [[], [], []];
+      : [[], [], [], "USD", {}];
 
   const monthlyTotals =
     view === "overview" ? await getMonthlyTotals(userId, getLast12Months()) : [];
@@ -88,7 +92,7 @@ export default async function FinancerPage({
         <>
           <MonthNav month={month} />
           <SourcesList sources={sources} month={month} savingsData={savingsData} />
-          <SavingsList data={savingsData} />
+          <SavingsList data={savingsData} homeCurrency={homeCurrency} rates={rates} />
           <SavingsCta />
         </>
       )}

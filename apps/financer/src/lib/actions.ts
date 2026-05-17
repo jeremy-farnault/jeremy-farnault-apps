@@ -7,6 +7,7 @@ import {
   financerIncomeEntries,
   financerIncomeSources,
   financerSummaries,
+  financerUserSettings,
   withTransaction,
 } from "@jf/db";
 import { and, eq } from "drizzle-orm";
@@ -98,6 +99,18 @@ export async function upsertIncomeEntry(
       )
     );
   await db.insert(financerIncomeEntries).values({ userId, sourceId, value, month });
+  revalidatePath("/", "layout");
+}
+
+export async function setHomeCurrency(currency: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .insert(financerUserSettings)
+    .values({ userId, homeCurrency: currency, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: financerUserSettings.userId,
+      set: { homeCurrency: currency, updatedAt: new Date() },
+    });
   revalidatePath("/", "layout");
 }
 

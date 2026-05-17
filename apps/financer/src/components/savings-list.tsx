@@ -4,7 +4,15 @@ function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function SavingsList({ data }: { data: SavingsRow[] }) {
+export function SavingsList({
+  data,
+  homeCurrency,
+  rates,
+}: {
+  data: SavingsRow[];
+  homeCurrency: string;
+  rates: Record<string, number>;
+}) {
   if (data.length === 0) {
     return <p className="text-sm text-(--grey-500)">No savings logged for this month.</p>;
   }
@@ -16,6 +24,14 @@ export function SavingsList({ data }: { data: SavingsRow[] }) {
   const sortedCurrencies = Array.from(currencyTotals.entries()).sort(([a], [b]) =>
     a.localeCompare(b)
   );
+
+  const grandTotal = data.reduce((sum, row) => {
+    const rateFrom = rates[row.currency] ?? 1;
+    const rateTo = rates[homeCurrency] ?? 1;
+    return sum + row.total * (rateTo / rateFrom);
+  }, 0);
+
+  const showGrandTotal = Object.keys(rates).length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -42,6 +58,14 @@ export function SavingsList({ data }: { data: SavingsRow[] }) {
             </span>
           </div>
         ))}
+        {showGrandTotal && (
+          <div className="flex justify-between pt-2 text-sm font-semibold text-(--grey-900)">
+            <span>Total</span>
+            <span>
+              ≈ {homeCurrency} {formatAmount(grandTotal)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
