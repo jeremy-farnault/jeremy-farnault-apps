@@ -1,7 +1,13 @@
 "use server";
 
 import { auth } from "@jf/auth";
-import { db, financerEntries, financerSummaries, withTransaction } from "@jf/db";
+import {
+  db,
+  financerEntries,
+  financerIncomeSources,
+  financerSummaries,
+  withTransaction,
+} from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -28,6 +34,47 @@ export async function createSpendingEntry(data: {
     value: data.value,
     month: data.month,
   });
+  revalidatePath("/", "layout");
+}
+
+export async function createIncomeSource(data: {
+  name: string;
+  currency: string;
+}): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  if (!data.currency.trim()) throw new Error("Currency is required");
+  const userId = await getAuthUserId();
+  await db.insert(financerIncomeSources).values({
+    userId,
+    name: data.name.trim(),
+    currency: data.currency.trim().toUpperCase(),
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function updateIncomeSource(
+  id: string,
+  data: { name: string; currency: string }
+): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  if (!data.currency.trim()) throw new Error("Currency is required");
+  const userId = await getAuthUserId();
+  await db
+    .update(financerIncomeSources)
+    .set({
+      name: data.name.trim(),
+      currency: data.currency.trim().toUpperCase(),
+      updatedAt: new Date(),
+    })
+    .where(and(eq(financerIncomeSources.id, id), eq(financerIncomeSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteIncomeSource(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .delete(financerIncomeSources)
+    .where(and(eq(financerIncomeSources.id, id), eq(financerIncomeSources.userId, userId)));
   revalidatePath("/", "layout");
 }
 

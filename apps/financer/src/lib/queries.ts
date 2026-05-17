@@ -23,6 +23,13 @@ export type SavingsRow = {
   total: number;
 };
 
+export type IncomeSourceRow = {
+  id: string;
+  name: string;
+  currency: string;
+  hasEntries: boolean;
+};
+
 export async function getSpendingForMonth(userId: string, month: string): Promise<SpendingRow[]> {
   const [entries, summaries] = await Promise.all([
     db
@@ -98,6 +105,28 @@ export async function getSavingsAvailableMonths(userId: string): Promise<string[
 
   const past = Array.from(all).sort((a, b) => b.localeCompare(a));
   return [currentMonth, ...past];
+}
+
+export async function getIncomeSources(userId: string): Promise<IncomeSourceRow[]> {
+  const [sources, entrySources] = await Promise.all([
+    db
+      .select({
+        id: financerIncomeSources.id,
+        name: financerIncomeSources.name,
+        currency: financerIncomeSources.currency,
+      })
+      .from(financerIncomeSources)
+      .where(eq(financerIncomeSources.userId, userId)),
+    db
+      .selectDistinct({ sourceId: financerIncomeEntries.sourceId })
+      .from(financerIncomeEntries)
+      .where(eq(financerIncomeEntries.userId, userId)),
+  ]);
+
+  const sourceIdsWithEntries = new Set(entrySources.map((r) => r.sourceId));
+  return sources
+    .map((s) => ({ ...s, hasEntries: sourceIdsWithEntries.has(s.id) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getAvailableMonths(userId: string): Promise<string[]> {
