@@ -1,7 +1,8 @@
 import { MonthNav } from "@/components/month-nav";
+import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
-import { getSpendingForMonth } from "@/lib/queries";
+import { getAvailableMonths, getSpendingForMonth } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 
@@ -25,7 +26,10 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const spendingData = view === "spending" ? await getSpendingForMonth(userId, month) : [];
+  const [spendingData, availableMonths] =
+    view === "spending"
+      ? await Promise.all([getSpendingForMonth(userId, month), getAvailableMonths(userId)])
+      : [[], []];
 
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
@@ -34,6 +38,7 @@ export default async function FinancerPage({
         <>
           <MonthNav month={month} />
           <SpendingList data={spendingData} />
+          <SpendingCta viewedMonth={month} availableMonths={availableMonths} />
         </>
       )}
       {view === "savings" && <p className="text-sm text-(--grey-500)">Savings coming soon.</p>}
