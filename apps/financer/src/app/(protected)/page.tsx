@@ -1,9 +1,16 @@
 import { CloseMonthButton } from "@/components/close-month-button";
 import { MonthNav } from "@/components/month-nav";
+import { SavingsList } from "@/components/savings-list";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
-import { getAvailableMonths, getSpendingForMonth, hasOpenEntries } from "@/lib/queries";
+import {
+  getAvailableMonths,
+  getSavingsAvailableMonths,
+  getSavingsForMonth,
+  getSpendingForMonth,
+  hasOpenEntries,
+} from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
 
@@ -36,6 +43,11 @@ export default async function FinancerPage({
         ])
       : [[], [], false];
 
+  const [savingsData, _savingsMonths] =
+    view === "savings"
+      ? await Promise.all([getSavingsForMonth(userId, month), getSavingsAvailableMonths(userId)])
+      : [[], []];
+
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
       <ViewToggle view={view} />
@@ -47,7 +59,12 @@ export default async function FinancerPage({
           <SpendingCta viewedMonth={month} availableMonths={availableMonths} />
         </>
       )}
-      {view === "savings" && <p className="text-sm text-(--grey-500)">Savings coming soon.</p>}
+      {view === "savings" && (
+        <>
+          <MonthNav month={month} />
+          <SavingsList data={savingsData} />
+        </>
+      )}
     </main>
   );
 }
