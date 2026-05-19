@@ -128,7 +128,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
 
   const content = (
     <div className="flex flex-col gap-4 flex-1 min-h-0">
-      <div className="shrink-0">
+      <div className="shrink-0 pr-10 sm:pr-0">
         <TextInput
           value={title}
           onChange={setTitle}
@@ -139,7 +139,8 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       <RichTextEditor
         editor={editor}
         placeholder="Write something…"
-        containerClassName="flex-1 min-h-0 overflow-y-auto sm:min-h-[200px] sm:max-h-[60vh]"
+        containerClassName="flex-1 min-h-0 rounded-[10px] overflow-hidden sm:min-h-[200px] sm:max-h-[60vh]"
+        className="h-full overflow-y-auto"
       />
       <div className="shrink-0 flex flex-col gap-4">
         <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
