@@ -93,9 +93,10 @@ type Props = {
   editor: Editor | null;
   placeholder?: string;
   className?: string;
+  containerClassName?: string;
 };
 
-export function RichTextEditor({ editor, placeholder, className }: Props) {
+export function RichTextEditor({ editor, placeholder, className, containerClassName }: Props) {
   const doc = editor?.state.doc;
   const isEmpty =
     !doc ||
@@ -104,7 +105,7 @@ export function RichTextEditor({ editor, placeholder, className }: Props) {
       doc.firstChild?.content.size === 0);
 
   return (
-    <div className="relative">
+    <div className={cn("relative", containerClassName)}>
       {isEmpty && placeholder && (
         <span className="pointer-events-none absolute left-3 top-2 text-sm text-(--grey-400)">
           {placeholder}

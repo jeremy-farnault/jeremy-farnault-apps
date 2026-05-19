@@ -127,20 +127,24 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   }, [title, body]);
 
   const content = (
-    <div className="flex flex-col gap-4">
-      <TextInput
-        value={title}
-        onChange={setTitle}
-        placeholder="Title"
-        className="text-base font-semibold"
-      />
+    <div className="flex flex-col gap-4 flex-1 min-h-0">
+      <div className="shrink-0">
+        <TextInput
+          value={title}
+          onChange={setTitle}
+          placeholder="Title"
+          className="text-base font-semibold"
+        />
+      </div>
       <RichTextEditor
         editor={editor}
         placeholder="Write something…"
-        className="min-h-[200px] max-h-[60vh] overflow-y-auto"
+        containerClassName="flex-1 min-h-0 overflow-y-auto sm:min-h-[200px] sm:max-h-[60vh]"
       />
-      <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
-      <ColorPicker value={color} onChange={setColor} />
+      <div className="shrink-0 flex flex-col gap-4">
+        <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
+        <ColorPicker value={color} onChange={setColor} />
+      </div>
       {isSaving && (
         <CircleNotchIcon
           size={14}
@@ -151,6 +155,13 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
   );
 
   return (
-    <ActionModal isOpen onClose={onClose} size="large" content={content} mobilePosition="top" />
+    <ActionModal
+      isOpen
+      onClose={onClose}
+      size="large"
+      content={content}
+      mobilePosition="top"
+      fitMobileViewport
+    />
   );
 }

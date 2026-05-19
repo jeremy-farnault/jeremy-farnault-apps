@@ -31,6 +31,7 @@ interface ActionModalProps {
   closeOnBackdropClick?: boolean;
   closeOnEscapeKeyDown?: boolean;
   mobilePosition?: "center" | "top";
+  fitMobileViewport?: boolean;
 }
 
 const SIZE_CLASSES = {
@@ -51,6 +52,7 @@ export function ActionModal({
   closeOnBackdropClick = true,
   closeOnEscapeKeyDown = true,
   mobilePosition = "center",
+  fitMobileViewport = false,
 }: ActionModalProps) {
   const hasButtons = primaryButton || secondaryButton;
 
@@ -60,7 +62,11 @@ export function ActionModal({
         <Dialog.Overlay
           className={cn(
             "fixed inset-0 z-50 flex justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]",
-            mobilePosition === "top" ? "items-start pt-2 sm:items-center sm:pt-0" : "items-center"
+            mobilePosition === "top"
+              ? fitMobileViewport
+                ? "items-start sm:items-center sm:pt-0"
+                : "items-start pt-2 sm:items-center sm:pt-0"
+              : "items-center"
           )}
         >
           <Dialog.Content
@@ -75,9 +81,13 @@ export function ActionModal({
               }
             }}
             className={cn(
-              "relative flex flex-col rounded-[22px] bg-(--card) p-8",
+              "relative flex flex-col bg-(--card) p-8",
+              fitMobileViewport ? "rounded-none sm:rounded-[22px]" : "rounded-[22px]",
               "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none",
-              "w-full max-w-[calc(100vw-2rem)]",
+              fitMobileViewport
+                ? "w-full max-w-none sm:max-w-[calc(100vw-2rem)]"
+                : "w-full max-w-[calc(100vw-2rem)]",
+              fitMobileViewport && "h-dvh sm:h-auto overflow-hidden",
               SIZE_CLASSES[size],
               "animate-[modal-in_0.3s_ease-in-out]"
             )}
@@ -93,7 +103,18 @@ export function ActionModal({
               </button>
             )}
 
-            <div className="flex flex-col gap-4">
+            {fitMobileViewport && closeOnBackdropClick && (
+              <button
+                onClick={onClose}
+                aria-label="Close dialog"
+                className="sm:hidden absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
+                type="button"
+              >
+                <XIcon size={16} weight="bold" />
+              </button>
+            )}
+
+            <div className={cn("flex flex-col gap-4", fitMobileViewport && "flex-1 min-h-0")}>
               {icon}
               {title ? (
                 <Dialog.Title className="text-base font-semibold text-(--grey-900)">
