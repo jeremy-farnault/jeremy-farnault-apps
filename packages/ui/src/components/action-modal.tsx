@@ -2,7 +2,7 @@
 
 import { CircleNotchIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 
@@ -56,6 +56,21 @@ export function ActionModal({
 }: ActionModalProps) {
   const hasButtons = primaryButton || secondaryButton;
 
+  // Track the visual viewport height (accounts for soft keyboard on mobile).
+  // dvh alone is unreliable in iOS Safari standalone/PWA mode.
+  const [mobileHeight, setMobileHeight] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    if (!fitMobileViewport) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      setMobileHeight(window.innerWidth < 640 ? vv.height : undefined);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    return () => vv.removeEventListener("resize", update);
+  }, [fitMobileViewport]);
+
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
@@ -87,10 +102,11 @@ export function ActionModal({
               fitMobileViewport
                 ? "w-full max-w-none sm:max-w-[calc(100vw-2rem)]"
                 : "w-full max-w-[calc(100vw-2rem)]",
-              fitMobileViewport && "h-dvh sm:h-auto overflow-hidden",
+              fitMobileViewport && "overflow-hidden sm:h-auto",
               SIZE_CLASSES[size],
               "animate-[modal-in_0.3s_ease-in-out]"
             )}
+            style={mobileHeight !== undefined ? { height: `${mobileHeight}px` } : undefined}
           >
             {!closeOnBackdropClick && (
               <button
