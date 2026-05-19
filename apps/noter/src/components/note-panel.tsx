@@ -139,8 +139,8 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       <RichTextEditor
         editor={editor}
         placeholder="Write something…"
-        containerClassName="flex-1 min-h-0 rounded-[10px] overflow-hidden sm:min-h-[200px] sm:max-h-[60vh]"
-        className="h-full overflow-y-auto"
+        containerClassName="flex-1 min-h-0 rounded-[10px] overflow-hidden sm:overflow-y-auto sm:min-h-[200px] sm:max-h-[60vh]"
+        className="h-full overflow-y-auto sm:h-auto sm:min-h-[200px]"
       />
       <div className="shrink-0 flex flex-col gap-4">
         <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
