@@ -157,7 +157,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
           </span>
         )}
         {reminderId && (
-          <>
+          <div className="flex">
             <button
               type="button"
               onMouseDown={(e) => {
@@ -180,7 +180,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
             >
               <TrashIcon size={14} />
             </button>
-          </>
+          </div>
         )}
       </div>
 
