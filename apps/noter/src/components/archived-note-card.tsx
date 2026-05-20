@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteNote, restoreNote } from "@/lib/actions";
+import { renderToHtml } from "@/lib/note-body-utils";
 import type { Note } from "@/lib/queries";
 import { ActionModal } from "@jf/ui";
 import { ArrowCounterClockwiseIcon, DotsThreeVerticalIcon, TrashIcon } from "@phosphor-icons/react";
@@ -54,7 +55,10 @@ export function ArchivedNoteCard({ note }: Props) {
         className="relative flex h-[150px] flex-col rounded-[22px] border p-4 shadow-sm"
         style={{ backgroundColor: bgColor, borderColor, opacity: isPending ? 0.5 : 1 }}
       >
-        <div className="flex-1 overflow-hidden">
+        <div
+          className="flex-1 overflow-hidden pointer-events-none"
+          style={{ maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)" }}
+        >
           {note.title && (
             <div className="mb-1 min-w-0 w-full">
               <span className="text-base font-semibold text-(--grey-900) truncate block">
@@ -63,9 +67,10 @@ export function ArchivedNoteCard({ note }: Props) {
             </div>
           )}
           {note.body && (
-            <p className="text-sm text-(--grey-700) line-clamp-4 whitespace-pre-line">
-              {note.body}
-            </p>
+            <div
+              className="note-card-body text-sm text-(--grey-700)"
+              dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
+            />
           )}
         </div>
 

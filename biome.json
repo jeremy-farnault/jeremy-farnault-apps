@@ -43,7 +43,10 @@
   },
   "overrides": [
     {
-      "include": ["apps/noter/src/components/note-card.tsx"],
+      "include": [
+        "apps/noter/src/components/note-card.tsx",
+        "apps/noter/src/components/archived-note-card.tsx"
+      ],
       "linter": {
         "rules": {
           "security": {
