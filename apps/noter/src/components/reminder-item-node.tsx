@@ -126,13 +126,16 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
       })
     : null;
 
+  const isDue = !!(scheduledAt && !isDone && new Date(scheduledAt) <= new Date());
+
   return (
     <NodeViewWrapper>
       <div
         className={cn(
           "flex items-center gap-2 rounded-lg border border-(--grey-200)",
           "bg-(--surface-100) px-3 py-2 text-sm",
-          isDone && "opacity-50"
+          isDone && "opacity-50",
+          isDue && "border-red-300"
         )}
       >
         <BellIcon size={14} className="shrink-0 text-(--grey-500)" />
