@@ -1,20 +1,10 @@
 "use client";
 
-import type { MonthlyTotals } from "@/lib/queries";
+import { CATEGORY_COLORS, SOURCE_COLORS } from "@/lib/constants";
+import type { IncomeSourceRow, MonthlyTotals } from "@/lib/queries";
 import { cn } from "@jf/ui";
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
-const CURRENCY_COLORS = [
-  "var(--blue-400)",
-  "var(--green-400)",
-  "var(--teal-400)",
-  "var(--moss-400)",
-  "var(--beige-400)",
-  "var(--yellow-400)",
-  "var(--magenta-400)",
-  "var(--red-400)",
-];
 
 function formatMonthLabel(month: string): string {
   return new Date(`${month}-01`).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
@@ -24,7 +14,10 @@ function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function OverviewChart({ data }: { data: MonthlyTotals[] }) {
+export function OverviewChart({
+  data,
+  sources,
+}: { data: MonthlyTotals[]; sources: IncomeSourceRow[] }) {
   const [mode, setMode] = useState<"both" | "spending" | "savings">("both");
 
   const hasAnyData = data.some(
@@ -32,13 +25,17 @@ export function OverviewChart({ data }: { data: MonthlyTotals[] }) {
   );
   if (!hasAnyData) return null;
 
-  const allCurrencies = Array.from(new Set(data.flatMap((d) => Object.keys(d.savings))));
+  const allSources = Array.from(new Set(data.flatMap((d) => Object.keys(d.savings))));
+  const allCategories = Array.from(new Set(data.flatMap((d) => Object.keys(d.spendingByCategory))));
 
   const chartData = data.map((d) => ({
     month: d.month,
     spending: d.spending,
     totalSavings: Object.values(d.savings).reduce((a, b) => a + b, 0),
-    ...Object.fromEntries(allCurrencies.map((c) => [`savings_${c}`, d.savings[c] ?? 0])),
+    ...Object.fromEntries(allSources.map((s) => [`savings_${s}`, d.savings[s] ?? 0])),
+    ...Object.fromEntries(
+      allCategories.map((c) => [`spending_${c}`, d.spendingByCategory[c] ?? 0])
+    ),
   }));
 
   const tooltipStyle = {
@@ -85,31 +82,39 @@ export function OverviewChart({ data }: { data: MonthlyTotals[] }) {
             contentStyle={tooltipStyle}
             labelStyle={tooltipTextStyle}
             itemStyle={tooltipTextStyle}
-            formatter={(v: number) => [formatAmount(v), ""]}
+            formatter={(v: number, name: string) => [formatAmount(v), name]}
             labelFormatter={formatMonthLabel}
             isAnimationActive={false}
           />
 
-          {(mode === "spending" || mode === "both") && (
-            <Bar
-              dataKey="spending"
-              fill="var(--primary)"
-              name="Spending"
-              radius={mode === "spending" ? [4, 4, 0, 0] : [2, 2, 0, 0]}
-            />
-          )}
-
-          {mode === "savings" &&
-            allCurrencies.map((currency, i) => (
+          {(mode === "spending" || mode === "both") &&
+            allCategories.map((category, i) => (
               <Bar
-                key={currency}
-                dataKey={`savings_${currency}`}
-                stackId="savings"
-                fill={CURRENCY_COLORS[i % CURRENCY_COLORS.length]}
-                name={currency}
-                radius={i === allCurrencies.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                key={category}
+                dataKey={`spending_${category}`}
+                stackId="spending"
+                fill={CATEGORY_COLORS[category] ?? "var(--grey-400)"}
+                name={category}
+                radius={i === allCategories.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
               />
             ))}
+
+          {mode === "savings" &&
+            allSources.map((sourceName, i) => {
+              const colorIndex = sources.findIndex((s) => s.name === sourceName);
+              const color =
+                SOURCE_COLORS[(colorIndex >= 0 ? colorIndex : i) % SOURCE_COLORS.length];
+              return (
+                <Bar
+                  key={sourceName}
+                  dataKey={`savings_${sourceName}`}
+                  stackId="savings"
+                  fill={color}
+                  name={sourceName}
+                  radius={i === allSources.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                />
+              );
+            })}
 
           {mode === "both" && (
             <Bar

@@ -24,6 +24,7 @@ export async function createSpendingEntry(data: {
   category: string;
   value: string;
   month: string;
+  currency: string;
 }): Promise<void> {
   if (!data.category.trim()) throw new Error("Category is required");
   const numericValue = Number(data.value);
@@ -35,7 +36,36 @@ export async function createSpendingEntry(data: {
     category: data.category,
     value: data.value,
     month: data.month,
+    currency: data.currency,
   });
+  revalidatePath("/", "layout");
+}
+
+export async function updateSpendingEntry(
+  id: string,
+  data: { category: string; currency: string; value: string }
+): Promise<void> {
+  if (!data.category.trim()) throw new Error("Category is required");
+  const numericValue = Number(data.value);
+  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  const userId = await getAuthUserId();
+  await db
+    .update(financerEntries)
+    .set({
+      category: data.category,
+      currency: data.currency,
+      value: data.value,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(financerEntries.id, id), eq(financerEntries.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteSpendingEntry(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .delete(financerEntries)
+    .where(and(eq(financerEntries.id, id), eq(financerEntries.userId, userId)));
   revalidatePath("/", "layout");
 }
 
@@ -80,7 +110,7 @@ export async function deleteIncomeSource(id: string): Promise<void> {
   revalidatePath("/", "layout");
 }
 
-export async function upsertIncomeEntry(
+export async function addIncomeEntry(
   sourceId: string,
   month: string,
   value: string
@@ -88,17 +118,26 @@ export async function upsertIncomeEntry(
   const numericValue = Number(value);
   if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
   const userId = await getAuthUserId();
+  await db.insert(financerIncomeEntries).values({ userId, sourceId, value, month });
+  revalidatePath("/", "layout");
+}
 
+export async function updateIncomeEntry(id: string, value: string): Promise<void> {
+  const numericValue = Number(value);
+  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  const userId = await getAuthUserId();
+  await db
+    .update(financerIncomeEntries)
+    .set({ value, updatedAt: new Date() })
+    .where(and(eq(financerIncomeEntries.id, id), eq(financerIncomeEntries.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteIncomeEntry(id: string): Promise<void> {
+  const userId = await getAuthUserId();
   await db
     .delete(financerIncomeEntries)
-    .where(
-      and(
-        eq(financerIncomeEntries.userId, userId),
-        eq(financerIncomeEntries.sourceId, sourceId),
-        eq(financerIncomeEntries.month, month)
-      )
-    );
-  await db.insert(financerIncomeEntries).values({ userId, sourceId, value, month });
+    .where(and(eq(financerIncomeEntries.id, id), eq(financerIncomeEntries.userId, userId)));
   revalidatePath("/", "layout");
 }
 
@@ -118,25 +157,33 @@ export async function closeMonth(month: string): Promise<void> {
   const userId = await getAuthUserId();
 
   const entries = await db
-    .select({ category: financerEntries.category, value: financerEntries.value })
+    .select({
+      category: financerEntries.category,
+      currency: financerEntries.currency,
+      value: financerEntries.value,
+    })
     .from(financerEntries)
     .where(and(eq(financerEntries.userId, userId), eq(financerEntries.month, month)));
 
   if (entries.length === 0) throw new Error("No open entries for this month");
 
-  const totals = new Map<string, number>();
+  const totals = new Map<string, { currency: string; total: number }>();
   for (const row of entries) {
-    totals.set(row.category, (totals.get(row.category) ?? 0) + Number(row.value));
+    const key = `${row.category}::${row.currency}`;
+    const existing = totals.get(key);
+    if (existing) {
+      existing.total += Number(row.value);
+    } else {
+      totals.set(key, { currency: row.currency, total: Number(row.value) });
+    }
   }
 
   await withTransaction(async (tx) => {
     await tx.insert(financerSummaries).values(
-      Array.from(totals.entries()).map(([category, total]) => ({
-        userId,
-        category,
-        value: String(total),
-        month,
-      }))
+      Array.from(totals.entries()).map(([key, { currency, total }]) => {
+        const category = key.split("::")[0]!;
+        return { userId, category, currency, value: String(total), month };
+      })
     );
     await tx
       .delete(financerEntries)

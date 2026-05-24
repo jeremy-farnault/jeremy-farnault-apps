@@ -11,10 +11,7 @@ export default async function Page({ searchParams }: Props) {
   const userId = session?.user.id ?? "";
   const sort = (sortParam as SortOption | undefined) ?? "createdAt";
 
-  const [habits, logs] = await Promise.all([
-    getHabits(userId, sort),
-    getUserHabitLogs(userId),
-  ]);
+  const [habits, logs] = await Promise.all([getHabits(userId, sort), getUserHabitLogs(userId)]);
 
   return <HabitsGrid key={sort} habits={habits} logs={logs} sort={sort} />;
 }

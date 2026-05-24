@@ -7,10 +7,7 @@ import {
   CheckIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import {
-  type CSSProperties,
-  useState,
-} from "react";
+import { type CSSProperties, useState } from "react";
 import {
   type DayButtonProps,
   DayPicker,
@@ -190,7 +187,9 @@ export function DateTimeEdit({
                       key={year}
                       type="button"
                       onClick={() => handleSelectYear(year)}
-                      style={year === currentYear ? { backgroundColor: "var(--dt-accent)" } : undefined}
+                      style={
+                        year === currentYear ? { backgroundColor: "var(--dt-accent)" } : undefined
+                      }
                       className={cn(
                         "rounded-[10px] px-2 py-1.5 text-sm font-medium focus:outline-none",
                         year === currentYear
@@ -225,10 +224,7 @@ export function DateTimeEdit({
                 components={{
                   DayButton,
                   MonthCaption: (props) => (
-                    <Caption
-                      {...props}
-                      onToggleYearView={() => setViewMode("year")}
-                    />
+                    <Caption {...props} onToggleYearView={() => setViewMode("year")} />
                   ),
                 }}
               />

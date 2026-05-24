@@ -1,16 +1,19 @@
 "use client";
 
 import { createSpendingEntry } from "@/lib/actions";
-import { SPENDING_CATEGORIES } from "@/lib/constants";
+import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
-import { FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { MinusIcon, PlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface SpendingCtaProps {
   viewedMonth: string;
   availableMonths: string[];
+  homeCurrency: string;
 }
+
+type SpendingLogRow = { value: string; category: string; currency: string };
 
 function formatMonth(month: string): string {
   return new Date(`${month}-01`).toLocaleDateString("en-US", {
@@ -19,95 +22,88 @@ function formatMonth(month: string): string {
   });
 }
 
-function getCurrentMonth() {
-  return new Date().toISOString().slice(0, 7);
-}
-
-export function SpendingCta({ viewedMonth, availableMonths }: SpendingCtaProps) {
-  const [quickLogOpen, setQuickLogOpen] = useState(false);
-  const [fullCreateOpen, setFullCreateOpen] = useState(false);
-  const [value, setValue] = useState("");
-  const [category, setCategory] = useState("");
-  const [month, setMonth] = useState(viewedMonth);
-  const [valueError, setValueError] = useState<string | undefined>();
+export function SpendingCta({ viewedMonth, availableMonths, homeCurrency }: SpendingCtaProps) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<SpendingLogRow[]>([
+    { value: "", category: "", currency: homeCurrency },
+  ]);
+  const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([undefined]);
+  const [bulkMonth, setBulkMonth] = useState(viewedMonth);
   const [isPending, startTransition] = useTransition();
 
-  function handleClose() {
-    setQuickLogOpen(false);
-    setFullCreateOpen(false);
-    setValue("");
-    setCategory("");
-    setMonth(viewedMonth);
-    setValueError(undefined);
+  function handleOpen() {
+    setBulkMonth(viewedMonth);
+    setOpen(true);
   }
 
-  function handleSubmit(submittedMonth: string) {
-    if (!Number(value) || Number(value) <= 0) {
-      setValueError("Enter a positive number");
+  function handleClose() {
+    setOpen(false);
+    setRows([{ value: "", category: "", currency: homeCurrency }]);
+    setRowErrors([undefined]);
+    setBulkMonth(viewedMonth);
+  }
+
+  function addRow() {
+    setRows((prev) => [...prev, { value: "", category: "", currency: homeCurrency }]);
+    setRowErrors((prev) => [...prev, undefined]);
+  }
+
+  function removeRow(idx: number) {
+    setRows((prev) => prev.filter((_, i) => i !== idx));
+    setRowErrors((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateRow(idx: number, field: keyof SpendingLogRow, val: string) {
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: val } : r)));
+    setRowErrors((prev) => prev.map((e, i) => (i === idx ? undefined : e)));
+  }
+
+  function handleSave() {
+    const nonBlank = rows
+      .map((row, idx) => ({ row, idx }))
+      .filter(({ row }) => row.value.trim() || row.category);
+
+    if (nonBlank.length === 0) {
+      handleClose();
       return;
     }
-    if (!category) {
+
+    const newErrors: (string | undefined)[] = rows.map(() => undefined);
+    let hasErrors = false;
+    for (const { row, idx } of nonBlank) {
+      if (!row.category) {
+        newErrors[idx] = "Select a category";
+        hasErrors = true;
+      } else if (!Number(row.value) || Number(row.value) <= 0) {
+        newErrors[idx] = "Enter a positive number";
+        hasErrors = true;
+      }
+    }
+    if (hasErrors) {
+      setRowErrors(newErrors);
       return;
     }
+
+    const validRows = nonBlank.map(({ row }) => row);
     startTransition(async () => {
       try {
-        await createSpendingEntry({ category, value, month: submittedMonth });
-        toast.success("Entry saved");
+        await Promise.all(
+          validRows.map((r) =>
+            createSpendingEntry({
+              category: r.category,
+              value: r.value,
+              month: bulkMonth,
+              currency: r.currency,
+            })
+          )
+        );
+        toast.success("Entries saved");
         handleClose();
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
     });
   }
-
-  const formContent = (
-    <div className="flex flex-col gap-3">
-      <TextInput
-        value={value}
-        onChange={(v) => {
-          setValue(v);
-          setValueError(undefined);
-        }}
-        placeholder="Amount"
-      />
-      {valueError && <p className="text-xs text-red-500">{valueError}</p>}
-      <Select value={category} onValueChange={setCategory} placeholder="Category">
-        {SPENDING_CATEGORIES.map((c) => (
-          <SelectItem key={c} value={c}>
-            {c}
-          </SelectItem>
-        ))}
-      </Select>
-    </div>
-  );
-
-  const fullCreateContent = (
-    <div className="flex flex-col gap-3">
-      <TextInput
-        value={value}
-        onChange={(v) => {
-          setValue(v);
-          setValueError(undefined);
-        }}
-        placeholder="Amount"
-      />
-      {valueError && <p className="text-xs text-red-500">{valueError}</p>}
-      <Select value={category} onValueChange={setCategory} placeholder="Category">
-        {SPENDING_CATEGORIES.map((c) => (
-          <SelectItem key={c} value={c}>
-            {c}
-          </SelectItem>
-        ))}
-      </Select>
-      <Select value={month} onValueChange={setMonth} placeholder="Month">
-        {availableMonths.map((m) => (
-          <SelectItem key={m} value={m}>
-            {formatMonth(m)}
-          </SelectItem>
-        ))}
-      </Select>
-    </div>
-  );
 
   return (
     <>
@@ -117,16 +113,8 @@ export function SpendingCta({ viewedMonth, availableMonths }: SpendingCtaProps) 
       >
         <button
           type="button"
-          onClick={() => setFullCreateOpen(true)}
-          aria-label="Log spending for another month"
-          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
-        >
-          <FolderPlusIcon size={22} />
-        </button>
-        <button
-          type="button"
-          onClick={() => setQuickLogOpen(true)}
-          aria-label="Quick log spending"
+          onClick={handleOpen}
+          aria-label="Log spending"
           className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
         >
           <PlusSquareIcon size={22} />
@@ -134,32 +122,81 @@ export function SpendingCta({ viewedMonth, availableMonths }: SpendingCtaProps) 
       </div>
 
       <ActionModal
-        isOpen={quickLogOpen}
+        isOpen={open}
         onClose={handleClose}
-        size="small"
+        size="large"
         title="Log spending"
-        content={formContent}
-        primaryButton={{
-          label: "Save",
-          loading: isPending,
-          onClick: () => handleSubmit(getCurrentMonth()),
-        }}
-        secondaryButton={{ label: "Cancel", onClick: handleClose }}
-        closeOnBackdropClick={!isPending}
-        closeOnEscapeKeyDown={!isPending}
-      />
-
-      <ActionModal
-        isOpen={fullCreateOpen}
-        onClose={handleClose}
-        size="small"
-        title="Log spending"
-        content={fullCreateContent}
-        primaryButton={{
-          label: "Save",
-          loading: isPending,
-          onClick: () => handleSubmit(month),
-        }}
+        content={
+          <div className="flex flex-col gap-4">
+            <Select value={bulkMonth} onValueChange={setBulkMonth} placeholder="Month">
+              {availableMonths.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {formatMonth(m)}
+                </SelectItem>
+              ))}
+            </Select>
+            <div className="flex flex-col gap-2">
+              {rows.map((row, idx) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID
+                <div key={idx} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-28 shrink-0">
+                      <TextInput
+                        value={row.value}
+                        onChange={(v) => updateRow(idx, "value", v)}
+                        placeholder="Amount"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Select
+                        value={row.category}
+                        onValueChange={(v) => updateRow(idx, "category", v)}
+                        placeholder="Category"
+                      >
+                        {SPENDING_CATEGORIES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                    <div className="w-24 shrink-0">
+                      <Select
+                        value={row.currency}
+                        onValueChange={(v) => updateRow(idx, "currency", v)}
+                        placeholder="Currency"
+                      >
+                        {CURRENCIES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeRow(idx)}
+                      aria-label="Remove row"
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900) ${idx === 0 ? "invisible" : ""}`}
+                    >
+                      <MinusIcon size={16} />
+                    </button>
+                  </div>
+                  {rowErrors[idx] && <p className="pl-1 text-xs text-red-500">{rowErrors[idx]}</p>}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={addRow}
+              className="flex items-center gap-1 self-start text-sm text-(--grey-600) hover:text-(--grey-900)"
+            >
+              <PlusIcon size={14} />
+              Add row
+            </button>
+          </div>
+        }
+        primaryButton={{ label: "Save", loading: isPending, onClick: handleSave }}
         secondaryButton={{ label: "Cancel", onClick: handleClose }}
         closeOnBackdropClick={!isPending}
         closeOnEscapeKeyDown={!isPending}

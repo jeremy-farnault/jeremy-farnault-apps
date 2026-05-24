@@ -15,7 +15,9 @@ import {
   getIncomeSources,
   getMonthlyTotals,
   getSavingsAvailableMonths,
+  getSavingsEntriesForMonth,
   getSavingsForMonth,
+  getSpendingEntriesForMonth,
   getSpendingForMonth,
   hasOpenEntries,
 } from "@/lib/queries";
@@ -53,16 +55,26 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const [spendingData, availableMonths, openEntries] =
+  const [
+    spendingData,
+    availableMonths,
+    openEntries,
+    spendingHomeCurrency,
+    spendingRates,
+    spendingEntries,
+  ] =
     view === "spending"
       ? await Promise.all([
           getSpendingForMonth(userId, month),
           getAvailableMonths(userId),
           hasOpenEntries(userId, month),
+          getHomeCurrency(userId),
+          getExchangeRates(),
+          getSpendingEntriesForMonth(userId, month),
         ])
-      : [[], [], false];
+      : [[], [], false, "USD", {}, []];
 
-  const [savingsData, _savingsMonths, sources, homeCurrency, rates] =
+  const [savingsData, savingsMonths, sources, homeCurrency, rates, savingsEntries] =
     view === "savings"
       ? await Promise.all([
           getSavingsForMonth(userId, month),
@@ -70,33 +82,51 @@ export default async function FinancerPage({
           getIncomeSources(userId),
           getHomeCurrency(userId),
           getExchangeRates(),
+          getSavingsEntriesForMonth(userId, month),
         ])
-      : [[], [], [], "USD", {}];
+      : [[], [], [], "USD", {}, []];
 
-  const monthlyTotals =
-    view === "overview" ? await getMonthlyTotals(userId, getLast12Months()) : [];
+  const [monthlyTotals, overviewSources] =
+    view === "overview"
+      ? await Promise.all([getMonthlyTotals(userId, getLast12Months()), getIncomeSources(userId)])
+      : [[], []];
 
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
-      <ViewToggle view={view} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <ViewToggle view={view} />
+        {view !== "overview" && (
+          <div className="flex justify-center sm:justify-end">
+            <MonthNav month={month} />
+          </div>
+        )}
+      </div>
       {view === "spending" && (
         <>
-          <MonthNav month={month} />
           <SpendingChart data={spendingData} />
-          <SpendingList data={spendingData} />
+          <SpendingList
+            data={spendingData}
+            homeCurrency={spendingHomeCurrency}
+            rates={spendingRates}
+            isOpen={openEntries}
+            entries={spendingEntries}
+          />
           {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
-          <SpendingCta viewedMonth={month} availableMonths={availableMonths} />
+          <SpendingCta
+            viewedMonth={month}
+            availableMonths={availableMonths}
+            homeCurrency={spendingHomeCurrency}
+          />
         </>
       )}
       {view === "savings" && (
         <>
-          <MonthNav month={month} />
-          <SourcesList sources={sources} month={month} savingsData={savingsData} />
+          <SourcesList sources={sources} month={month} entries={savingsEntries} />
           <SavingsList data={savingsData} homeCurrency={homeCurrency} rates={rates} />
-          <SavingsCta />
+          <SavingsCta viewedMonth={month} availableMonths={savingsMonths} sources={sources} />
         </>
       )}
-      {view === "overview" && <OverviewChart data={monthlyTotals} />}
+      {view === "overview" && <OverviewChart data={monthlyTotals} sources={overviewSources} />}
     </main>
   );
 }

@@ -1,19 +1,8 @@
 "use client";
 
+import { CATEGORY_COLORS } from "@/lib/constants";
 import type { SpendingRow } from "@/lib/queries";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Entertainment: "var(--purple-400)",
-  Everyday: "var(--blue-400)",
-  Groceries: "var(--green-400)",
-  Health: "var(--teal-400)",
-  Housing: "var(--moss-400)",
-  "Presents & Hobbies": "var(--magenta-400)",
-  Restaurant: "var(--yellow-400)",
-  Transport: "var(--taupe-400)",
-  Other: "var(--beige-400)",
-};
 
 function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -44,13 +33,16 @@ export function SpendingChart({ data }: { data: SpendingRow[] }) {
         >
           {data.map((entry) => (
             <Cell
-              key={entry.category}
+              key={`${entry.category}-${entry.currency}`}
               fill={CATEGORY_COLORS[entry.category] ?? "var(--grey-400)"}
             />
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) => [formatAmount(value), ""]}
+          formatter={(value: number, name: string, props: { payload?: SpendingRow }) => [
+            formatAmount(value),
+            `${name} · ${props.payload?.currency ?? ""}`,
+          ]}
           contentStyle={tooltipStyle}
           labelStyle={tooltipTextStyle}
           itemStyle={tooltipTextStyle}

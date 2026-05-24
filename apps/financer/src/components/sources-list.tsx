@@ -1,7 +1,14 @@
 "use client";
 
-import { deleteIncomeSource, updateIncomeSource, upsertIncomeEntry } from "@/lib/actions";
-import type { IncomeSourceRow, SavingsRow } from "@/lib/queries";
+import {
+  addIncomeEntry,
+  deleteIncomeEntry,
+  deleteIncomeSource,
+  updateIncomeEntry,
+  updateIncomeSource,
+} from "@/lib/actions";
+import { SOURCE_COLORS } from "@/lib/constants";
+import type { IncomeSourceRow, SavingsEntryRow } from "@/lib/queries";
 import { ActionModal, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -17,10 +24,10 @@ function formatMonth(month: string): string {
 interface SourcesListProps {
   sources: IncomeSourceRow[];
   month: string;
-  savingsData: SavingsRow[];
+  entries: SavingsEntryRow[];
 }
 
-export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
+export function SourcesList({ sources, month, entries }: SourcesListProps) {
   const [editingSource, setEditingSource] = useState<IncomeSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<IncomeSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<IncomeSourceRow | null>(null);
@@ -28,9 +35,18 @@ export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
   const [currency, setCurrency] = useState("");
   const [logValue, setLogValue] = useState("");
   const [logValueError, setLogValueError] = useState<string | undefined>();
+  const [editingEntry, setEditingEntry] = useState<SavingsEntryRow | null>(null);
+  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
+  const [editEntryValue, setEditEntryValue] = useState("");
+  const [editEntryValueError, setEditEntryValueError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
 
-  const existingTotals = new Map(savingsData.map((r) => [r.sourceId, r.total]));
+  const entriesBySource = new Map<string, SavingsEntryRow[]>();
+  for (const entry of entries) {
+    const list = entriesBySource.get(entry.sourceId) ?? [];
+    list.push(entry);
+    entriesBySource.set(entry.sourceId, list);
+  }
 
   function openEdit(source: IncomeSourceRow) {
     setEditingSource(source);
@@ -71,9 +87,8 @@ export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
   }
 
   function openLog(source: IncomeSourceRow) {
-    const existing = existingTotals.get(source.id);
     setLoggingSource(source);
-    setLogValue(existing ? String(existing) : "");
+    setLogValue("");
   }
 
   function handleLogClose() {
@@ -90,9 +105,50 @@ export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
     }
     startTransition(async () => {
       try {
-        await upsertIncomeEntry(loggingSource.id, month, logValue);
+        await addIncomeEntry(loggingSource.id, month, logValue);
         toast.success("Amount logged");
         handleLogClose();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
+  function openEditEntry(entry: SavingsEntryRow) {
+    setEditingEntry(entry);
+    setEditEntryValue(String(entry.value));
+  }
+
+  function handleEditEntryClose() {
+    setEditingEntry(null);
+    setEditEntryValue("");
+    setEditEntryValueError(undefined);
+  }
+
+  function handleEditEntrySubmit() {
+    if (!editingEntry) return;
+    if (!Number(editEntryValue) || Number(editEntryValue) <= 0) {
+      setEditEntryValueError("Enter a positive number");
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await updateIncomeEntry(editingEntry.id, editEntryValue);
+        toast.success("Entry updated");
+        handleEditEntryClose();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
+  function handleDeleteEntryConfirm() {
+    if (!deletingEntryId) return;
+    startTransition(async () => {
+      try {
+        await deleteIncomeEntry(deletingEntryId);
+        toast.success("Entry deleted");
+        setDeletingEntryId(null);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
@@ -105,42 +161,72 @@ export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
 
   return (
     <>
-      <ul className="flex flex-col gap-2">
-        {sources.map((source) => (
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {sources.map((source, index) => (
           <li
             key={source.id}
-            className="group flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
+            style={{ borderLeft: `4px solid ${SOURCE_COLORS[index % SOURCE_COLORS.length]}` }}
+            className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
           >
-            <span className="text-sm font-medium text-(--grey-900)">
-              {source.name}
-              <span className="ml-2 text-xs text-(--grey-500)">{source.currency}</span>
-            </span>
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate text-sm font-medium text-(--grey-900)">{source.name}</span>
+              <span className="shrink-0 text-xs text-(--grey-500)">{source.currency}</span>
+            </div>
+            {(entriesBySource.get(source.id) ?? []).map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between rounded-[8px] bg-(--surface-150) px-2 py-1"
+              >
+                <span className="text-sm text-(--grey-700)">
+                  {entry.value.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => openEditEntry(entry)}
+                    aria-label="Edit entry"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  >
+                    <PencilSimpleIcon size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeletingEntryId(entry.id)}
+                    aria-label="Delete entry"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  >
+                    <TrashIcon size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => openEdit(source)}
+                aria-label="Edit source"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              >
+                <PencilSimpleIcon size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingSource(source)}
+                aria-label="Delete source"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              >
+                <TrashIcon size={16} />
+              </button>
               <button
                 type="button"
                 onClick={() => openLog(source)}
-                className="h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
+                className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
               >
-                {existingTotals.has(source.id) ? "Edit" : "+ Log"}
+                + Log
               </button>
-              <div className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => openEdit(source)}
-                  aria-label="Edit source"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-                >
-                  <PencilSimpleIcon size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDeletingSource(source)}
-                  aria-label="Delete source"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-                >
-                  <TrashIcon size={16} />
-                </button>
-              </div>
             </div>
           </li>
         ))}
@@ -183,6 +269,44 @@ export function SourcesList({ sources, month, savingsData }: SourcesListProps) {
         }
         primaryButton={{ label: "Delete", loading: isPending, onClick: handleDeleteConfirm }}
         secondaryButton={{ label: "Cancel", onClick: () => setDeletingSource(null) }}
+        closeOnBackdropClick={!isPending}
+        closeOnEscapeKeyDown={!isPending}
+      />
+
+      <ActionModal
+        isOpen={!!editingEntry}
+        onClose={handleEditEntryClose}
+        size="small"
+        title="Edit entry"
+        content={
+          <div className="flex flex-col gap-3">
+            <TextInput
+              value={editEntryValue}
+              onChange={(v) => {
+                setEditEntryValue(v);
+                setEditEntryValueError(undefined);
+              }}
+              placeholder="Amount"
+            />
+            {editEntryValueError && <p className="text-xs text-red-500">{editEntryValueError}</p>}
+          </div>
+        }
+        primaryButton={{ label: "Save", loading: isPending, onClick: handleEditEntrySubmit }}
+        secondaryButton={{ label: "Cancel", onClick: handleEditEntryClose }}
+        closeOnBackdropClick={!isPending}
+        closeOnEscapeKeyDown={!isPending}
+      />
+
+      <ActionModal
+        isOpen={!!deletingEntryId}
+        onClose={() => setDeletingEntryId(null)}
+        size="small"
+        title="Delete entry?"
+        content={
+          <p className="text-sm text-(--grey-700)">Are you sure you want to delete this entry?</p>
+        }
+        primaryButton={{ label: "Delete", loading: isPending, onClick: handleDeleteEntryConfirm }}
+        secondaryButton={{ label: "Cancel", onClick: () => setDeletingEntryId(null) }}
         closeOnBackdropClick={!isPending}
         closeOnEscapeKeyDown={!isPending}
       />

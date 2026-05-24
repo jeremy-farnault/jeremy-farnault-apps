@@ -19,7 +19,7 @@ export function ViewToggle({ view }: ViewToggleProps) {
   }
 
   return (
-    <div className="flex rounded-[12px] p-1 bg-(--surface-150) self-start">
+    <div className="flex gap-1 rounded-[12px] p-1 bg-(--surface-150) self-start">
       {(["spending", "savings", "overview"] as const).map((v) => (
         <button
           key={v}

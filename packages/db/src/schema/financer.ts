@@ -12,6 +12,7 @@ export const financerEntries = pgTable("financer_entries", {
   category: text("category").notNull(),
   value: numeric("value", { precision: 12, scale: 2 }).notNull(),
   month: text("month").notNull(),
+  currency: text("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -24,6 +25,7 @@ export const financerSummaries = pgTable("financer_summaries", {
   category: text("category").notNull(),
   value: numeric("value", { precision: 12, scale: 2 }).notNull(),
   month: text("month").notNull(),
+  currency: text("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

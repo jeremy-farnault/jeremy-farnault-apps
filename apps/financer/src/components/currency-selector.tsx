@@ -1,11 +1,10 @@
 "use client";
 
 import { setHomeCurrency } from "@/lib/actions";
+import { CURRENCIES } from "@/lib/constants";
 import { cn } from "@jf/ui";
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
-
-const CURRENCIES = ["USD", "EUR", "GBP", "SEK", "NZD", "JPY"] as const;
 
 export function CurrencySelector({ homeCurrency }: { homeCurrency: string }) {
   const [open, setOpen] = useState(false);

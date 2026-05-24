@@ -12,8 +12,8 @@ const SPACER_HEIGHT = 159;
 
 function parseTimeValue(value: string): { hour: number; minute: number } {
   const parts = value.split(":").map(Number);
-  const h = parts[0] ?? NaN;
-  const m = parts[1] ?? NaN;
+  const h = parts[0] ?? Number.NaN;
+  const m = parts[1] ?? Number.NaN;
   const hour = Number.isFinite(h) && h >= 0 && h <= 23 ? h : 0;
   const minute = Number.isFinite(m) && m >= 0 && m <= 59 ? m : 0;
   return { hour, minute };
@@ -31,7 +31,13 @@ interface TimeScrollPanelProps {
   accentColor?: string;
 }
 
-function TimeScrollPanel({ hour, minute, onHourChange, onMinuteChange, accentColor }: TimeScrollPanelProps) {
+function TimeScrollPanel({
+  hour,
+  minute,
+  onHourChange,
+  onMinuteChange,
+  accentColor,
+}: TimeScrollPanelProps) {
   const hourScrollRef = useRef<HTMLDivElement>(null);
   const minuteScrollRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +67,8 @@ function TimeScrollPanel({ hour, minute, onHourChange, onMinuteChange, accentCol
             style={h === hour ? { backgroundColor: "var(--dt-accent)" } : undefined}
             className={cn(
               "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-all duration-200 select-none focus:outline-none",
-              h !== hour && "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
+              h !== hour &&
+                "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
             )}
           >
             <span className="text-xs font-medium text-(--grey-850)">
@@ -85,7 +92,8 @@ function TimeScrollPanel({ hour, minute, onHourChange, onMinuteChange, accentCol
             style={m === minute ? { backgroundColor: "var(--dt-accent)" } : undefined}
             className={cn(
               "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-all duration-200 select-none focus:outline-none",
-              m !== minute && "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
+              m !== minute &&
+                "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
             )}
           >
             <span className="text-xs font-medium text-(--grey-850)">
@@ -111,6 +119,7 @@ export function TimePickerPanel({ value, onChange, accentColor }: TimePickerPane
   const [selectedHour, setSelectedHour] = useState(parsedHour);
   const [selectedMinute, setSelectedMinute] = useState(parsedMinute);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally only re-syncs on external value change
   useEffect(() => {
     const { hour, minute } = parseTimeValue(value);
     if (hour !== selectedHour) setSelectedHour(hour);
@@ -157,6 +166,7 @@ export function TimeInput({
 }: TimeInputProps) {
   const [open, setOpen] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once on mount to initialize a missing value
   useEffect(() => {
     if (!value) {
       const now = new Date();
@@ -173,10 +183,13 @@ export function TimeInput({
   const [hourClicked, setHourClicked] = useState(false);
   const [minuteClicked, setMinuteClicked] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally only re-syncs state when the popover opens
   useEffect(() => {
     if (open) {
       const now = new Date();
-      const { hour, minute } = value ? parseTimeValue(value) : { hour: now.getHours(), minute: now.getMinutes() };
+      const { hour, minute } = value
+        ? parseTimeValue(value)
+        : { hour: now.getHours(), minute: now.getMinutes() };
       setSelectedHour(hour);
       setSelectedMinute(minute);
       setHourClicked(false);
