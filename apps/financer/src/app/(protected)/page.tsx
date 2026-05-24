@@ -9,12 +9,10 @@ import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
 import {
-  getAvailableMonths,
   getExchangeRates,
   getHomeCurrency,
   getIncomeSources,
   getMonthlyTotals,
-  getSavingsAvailableMonths,
   getSavingsEntriesForMonth,
   getSavingsForMonth,
   getSpendingEntriesForMonth,
@@ -55,36 +53,27 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const [
-    spendingData,
-    availableMonths,
-    openEntries,
-    spendingHomeCurrency,
-    spendingRates,
-    spendingEntries,
-  ] =
+  const [spendingData, openEntries, spendingHomeCurrency, spendingRates, spendingEntries] =
     view === "spending"
       ? await Promise.all([
           getSpendingForMonth(userId, month),
-          getAvailableMonths(userId),
           hasOpenEntries(userId, month),
           getHomeCurrency(userId),
           getExchangeRates(),
           getSpendingEntriesForMonth(userId, month),
         ])
-      : [[], [], false, "USD", {}, []];
+      : [[], false, "USD", {}, []];
 
-  const [savingsData, savingsMonths, sources, homeCurrency, rates, savingsEntries] =
+  const [savingsData, sources, homeCurrency, rates, savingsEntries] =
     view === "savings"
       ? await Promise.all([
           getSavingsForMonth(userId, month),
-          getSavingsAvailableMonths(userId),
           getIncomeSources(userId),
           getHomeCurrency(userId),
           getExchangeRates(),
           getSavingsEntriesForMonth(userId, month),
         ])
-      : [[], [], [], "USD", {}, []];
+      : [[], [], "USD", {}, []];
 
   const [monthlyTotals, overviewSources] =
     view === "overview"
@@ -112,18 +101,14 @@ export default async function FinancerPage({
             entries={spendingEntries}
           />
           {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
-          <SpendingCta
-            viewedMonth={month}
-            availableMonths={availableMonths}
-            homeCurrency={spendingHomeCurrency}
-          />
+          <SpendingCta viewedMonth={month} homeCurrency={spendingHomeCurrency} />
         </>
       )}
       {view === "savings" && (
         <>
           <SourcesList sources={sources} month={month} entries={savingsEntries} />
           <SavingsList data={savingsData} homeCurrency={homeCurrency} rates={rates} />
-          <SavingsCta viewedMonth={month} availableMonths={savingsMonths} sources={sources} />
+          <SavingsCta viewedMonth={month} homeCurrency={homeCurrency} sources={sources} />
         </>
       )}
       {view === "overview" && <OverviewChart data={monthlyTotals} sources={overviewSources} />}

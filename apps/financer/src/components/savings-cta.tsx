@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 interface SavingsCtaProps {
   viewedMonth: string;
-  availableMonths: string[];
+  homeCurrency: string;
   sources: IncomeSourceRow[];
 }
 
@@ -23,7 +23,7 @@ function formatMonth(month: string): string {
   });
 }
 
-export function SavingsCta({ viewedMonth, availableMonths, sources }: SavingsCtaProps) {
+export function SavingsCta({ viewedMonth, homeCurrency, sources }: SavingsCtaProps) {
   // Add source modal state
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [name, setName] = useState("");
@@ -32,9 +32,10 @@ export function SavingsCta({ viewedMonth, availableMonths, sources }: SavingsCta
 
   // Bulk log modal state
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [rows, setRows] = useState<SavingsLogRow[]>([{ sourceId: "", currency: "", value: "" }]);
+  const [rows, setRows] = useState<SavingsLogRow[]>([
+    { sourceId: "", currency: homeCurrency, value: "" },
+  ]);
   const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([undefined]);
-  const [bulkMonth, setBulkMonth] = useState(viewedMonth);
   const [isBulkPending, startBulkTransition] = useTransition();
 
   // Add source handlers
@@ -59,19 +60,17 @@ export function SavingsCta({ viewedMonth, availableMonths, sources }: SavingsCta
 
   // Bulk log handlers
   function handleBulkOpen() {
-    setBulkMonth(viewedMonth);
     setBulkOpen(true);
   }
 
   function handleBulkClose() {
     setBulkOpen(false);
-    setRows([{ sourceId: "", currency: "", value: "" }]);
+    setRows([{ sourceId: "", currency: homeCurrency, value: "" }]);
     setRowErrors([undefined]);
-    setBulkMonth(viewedMonth);
   }
 
   function addRow() {
-    setRows((prev) => [...prev, { sourceId: "", currency: "", value: "" }]);
+    setRows((prev) => [...prev, { sourceId: "", currency: homeCurrency, value: "" }]);
     setRowErrors((prev) => [...prev, undefined]);
   }
 
@@ -124,7 +123,7 @@ export function SavingsCta({ viewedMonth, availableMonths, sources }: SavingsCta
     const validRows = nonBlank.map(({ row }) => row);
     startBulkTransition(async () => {
       try {
-        await Promise.all(validRows.map((r) => addIncomeEntry(r.sourceId, bulkMonth, r.value)));
+        await Promise.all(validRows.map((r) => addIncomeEntry(r.sourceId, viewedMonth, r.value)));
         toast.success("Entries saved");
         handleBulkClose();
       } catch (err) {
@@ -189,13 +188,7 @@ export function SavingsCta({ viewedMonth, availableMonths, sources }: SavingsCta
         title="Log savings"
         content={
           <div className="flex flex-col gap-4">
-            <Select value={bulkMonth} onValueChange={setBulkMonth} placeholder="Month">
-              {availableMonths.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {formatMonth(m)}
-                </SelectItem>
-              ))}
-            </Select>
+            <p className="text-sm text-(--grey-600)">For: {formatMonth(viewedMonth)}</p>
             <div className="flex flex-col gap-2">
               {rows.map((row, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID

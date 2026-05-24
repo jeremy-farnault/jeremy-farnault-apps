@@ -49,7 +49,7 @@ export function OverviewChart({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex rounded-[12px] p-1 bg-(--surface-150) self-start">
+      <div className="flex gap-1 rounded-[12px] p-1 bg-(--surface-150) self-start">
         {(["both", "spending", "savings"] as const).map((m) => (
           <button
             key={m}

@@ -9,7 +9,6 @@ import { toast } from "sonner";
 
 interface SpendingCtaProps {
   viewedMonth: string;
-  availableMonths: string[];
   homeCurrency: string;
 }
 
@@ -22,17 +21,15 @@ function formatMonth(month: string): string {
   });
 }
 
-export function SpendingCta({ viewedMonth, availableMonths, homeCurrency }: SpendingCtaProps) {
+export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<SpendingLogRow[]>([
     { value: "", category: "", currency: homeCurrency },
   ]);
   const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([undefined]);
-  const [bulkMonth, setBulkMonth] = useState(viewedMonth);
   const [isPending, startTransition] = useTransition();
 
   function handleOpen() {
-    setBulkMonth(viewedMonth);
     setOpen(true);
   }
 
@@ -40,7 +37,6 @@ export function SpendingCta({ viewedMonth, availableMonths, homeCurrency }: Spen
     setOpen(false);
     setRows([{ value: "", category: "", currency: homeCurrency }]);
     setRowErrors([undefined]);
-    setBulkMonth(viewedMonth);
   }
 
   function addRow() {
@@ -92,7 +88,7 @@ export function SpendingCta({ viewedMonth, availableMonths, homeCurrency }: Spen
             createSpendingEntry({
               category: r.category,
               value: r.value,
-              month: bulkMonth,
+              month: viewedMonth,
               currency: r.currency,
             })
           )
@@ -128,13 +124,7 @@ export function SpendingCta({ viewedMonth, availableMonths, homeCurrency }: Spen
         title="Log spending"
         content={
           <div className="flex flex-col gap-4">
-            <Select value={bulkMonth} onValueChange={setBulkMonth} placeholder="Month">
-              {availableMonths.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {formatMonth(m)}
-                </SelectItem>
-              ))}
-            </Select>
+            <p className="text-sm text-(--grey-600)">For: {formatMonth(viewedMonth)}</p>
             <div className="flex flex-col gap-2">
               {rows.map((row, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID
