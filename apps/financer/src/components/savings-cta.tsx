@@ -164,11 +164,13 @@ export function SavingsCta({ viewedMonth, homeCurrency, sources }: SavingsCtaPro
         content={
           <div className="flex flex-col gap-3">
             <TextInput value={name} onChange={setName} placeholder="Name" />
-            <TextInput
-              value={sourceCurrency}
-              onChange={setSourceCurrency}
-              placeholder="Currency (e.g. EUR)"
-            />
+            <Select value={sourceCurrency} onValueChange={setSourceCurrency} placeholder="Currency">
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </Select>
           </div>
         }
         primaryButton={{
