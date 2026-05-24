@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteSpendingEntry, updateSpendingEntry } from "@/lib/actions";
-import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
+import { CATEGORY_COLORS, CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import type { SpendingEntryRow, SpendingRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
@@ -107,6 +107,7 @@ export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: Spe
               {entries.map((entry) => (
                 <li
                   key={entry.id}
+                  style={{ borderLeft: `4px solid ${CATEGORY_COLORS[entry.category]}` }}
                   className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
                 >
                   <span className="text-sm font-medium text-(--grey-900)">{entry.category}</span>
@@ -250,6 +251,7 @@ export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: Spe
         {rows.map(({ category, currency, displayAmount, prefix }) => (
           <li
             key={`${category}-${currency}`}
+            style={{ borderLeft: `4px solid ${CATEGORY_COLORS[category]}` }}
             className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
           >
             <span className="text-sm font-medium text-(--grey-900)">{category}</span>
