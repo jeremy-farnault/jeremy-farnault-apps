@@ -2,8 +2,6 @@
 
 import { CATEGORY_COLORS, SOURCE_COLORS } from "@/lib/constants";
 import type { IncomeSourceRow, MonthlyTotals } from "@/lib/queries";
-import { cn } from "@jf/ui";
-import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 function formatMonthLabel(month: string): string {
@@ -18,8 +16,6 @@ export function OverviewChart({
   data,
   sources,
 }: { data: MonthlyTotals[]; sources: IncomeSourceRow[] }) {
-  const [mode, setMode] = useState<"both" | "spending" | "savings">("both");
-
   const hasAnyData = data.some(
     (d) => d.spending > 0 || Object.values(d.savings).some((v) => v > 0)
   );
@@ -48,47 +44,30 @@ export function OverviewChart({
   const axisTickProps = { fontSize: 10, fill: "var(--grey-400)" };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-1 rounded-[12px] p-1 bg-(--surface-150) self-start">
-        {(["both", "spending", "savings"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setMode(m)}
-            className={cn(
-              "h-8 px-3 rounded-[10px] text-xs font-medium capitalize transition-colors",
-              mode === m
-                ? "bg-(--primary) text-white"
-                : "text-(--grey-700) hover:bg-(--surface-200)"
-            )}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-          <CartesianGrid vertical={false} stroke="var(--grey-200)" />
-          <XAxis
-            dataKey="month"
-            tickFormatter={formatMonthLabel}
-            tickLine={false}
-            axisLine={false}
-            tick={axisTickProps}
-          />
-          <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-          <Tooltip
-            contentStyle={tooltipStyle}
-            labelStyle={tooltipTextStyle}
-            itemStyle={tooltipTextStyle}
-            formatter={(v: number, name: string) => [formatAmount(v), name]}
-            labelFormatter={formatMonthLabel}
-            isAnimationActive={false}
-          />
-
-          {(mode === "spending" || mode === "both") &&
-            allCategories.map((category, i) => (
+    <div className="flex flex-col gap-8">
+      {/* Overview: spending + savings */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium text-(--grey-600)">Overview</h3>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={chartData} barGap={4} barCategoryGap="30%">
+            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthLabel}
+              tickLine={false}
+              axisLine={false}
+              tick={axisTickProps}
+            />
+            <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              labelStyle={tooltipTextStyle}
+              itemStyle={tooltipTextStyle}
+              formatter={(v: number, name: string) => [formatAmount(v), name]}
+              labelFormatter={formatMonthLabel}
+              isAnimationActive={false}
+            />
+            {allCategories.map((category, i) => (
               <Bar
                 key={category}
                 dataKey={`spending_${category}`}
@@ -98,9 +77,75 @@ export function OverviewChart({
                 radius={i === allCategories.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
               />
             ))}
+            <Bar
+              dataKey="totalSavings"
+              fill="var(--blue-400)"
+              name="Savings"
+              radius={[2, 2, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-          {mode === "savings" &&
-            allSources.map((sourceName, i) => {
+      {/* Spending by category */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium text-(--grey-600)">Spending</h3>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={chartData} barGap={4} barCategoryGap="30%">
+            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthLabel}
+              tickLine={false}
+              axisLine={false}
+              tick={axisTickProps}
+            />
+            <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              labelStyle={tooltipTextStyle}
+              itemStyle={tooltipTextStyle}
+              formatter={(v: number, name: string) => [formatAmount(v), name]}
+              labelFormatter={formatMonthLabel}
+              isAnimationActive={false}
+            />
+            {allCategories.map((category, i) => (
+              <Bar
+                key={category}
+                dataKey={`spending_${category}`}
+                stackId="spending"
+                fill={CATEGORY_COLORS[category] ?? "var(--grey-400)"}
+                name={category}
+                radius={i === allCategories.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+              />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Savings by source */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium text-(--grey-600)">Savings</h3>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={chartData} barGap={4} barCategoryGap="30%">
+            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthLabel}
+              tickLine={false}
+              axisLine={false}
+              tick={axisTickProps}
+            />
+            <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              labelStyle={tooltipTextStyle}
+              itemStyle={tooltipTextStyle}
+              formatter={(v: number, name: string) => [formatAmount(v), name]}
+              labelFormatter={formatMonthLabel}
+              isAnimationActive={false}
+            />
+            {allSources.map((sourceName, i) => {
               const colorIndex = sources.findIndex((s) => s.name === sourceName);
               const color =
                 SOURCE_COLORS[(colorIndex >= 0 ? colorIndex : i) % SOURCE_COLORS.length];
@@ -115,17 +160,9 @@ export function OverviewChart({
                 />
               );
             })}
-
-          {mode === "both" && (
-            <Bar
-              dataKey="totalSavings"
-              fill="var(--blue-400)"
-              name="Savings"
-              radius={[2, 2, 0, 0]}
-            />
-          )}
-        </BarChart>
-      </ResponsiveContainer>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
