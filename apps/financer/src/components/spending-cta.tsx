@@ -125,7 +125,7 @@ export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
         content={
           <div className="flex flex-col gap-4">
             <p className="text-sm text-(--grey-600)">For: {formatMonth(viewedMonth)}</p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
               {rows.map((row, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID
                 <div key={idx} className="flex flex-col gap-1">
