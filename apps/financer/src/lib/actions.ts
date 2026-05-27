@@ -3,6 +3,8 @@
 import { auth } from "@jf/auth";
 import {
   db,
+  financerAssetEntries,
+  financerAssetSources,
   financerEntries,
   financerIncomeEntries,
   financerIncomeSources,
@@ -68,6 +70,78 @@ export async function deleteSpendingEntry(id: string): Promise<void> {
     .where(and(eq(financerEntries.id, id), eq(financerEntries.userId, userId)));
   revalidatePath("/", "layout");
 }
+
+// ─── Asset actions ────────────────────────────────────────────────────────────
+
+export async function createAssetSource(data: {
+  name: string;
+  currency: string;
+}): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  if (!data.currency.trim()) throw new Error("Currency is required");
+  const userId = await getAuthUserId();
+  await db.insert(financerAssetSources).values({
+    userId,
+    name: data.name.trim(),
+    currency: data.currency.trim().toUpperCase(),
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function updateAssetSource(
+  id: string,
+  data: { name: string; currency: string }
+): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  if (!data.currency.trim()) throw new Error("Currency is required");
+  const userId = await getAuthUserId();
+  await db
+    .update(financerAssetSources)
+    .set({
+      name: data.name.trim(),
+      currency: data.currency.trim().toUpperCase(),
+      updatedAt: new Date(),
+    })
+    .where(and(eq(financerAssetSources.id, id), eq(financerAssetSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteAssetSource(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .delete(financerAssetSources)
+    .where(and(eq(financerAssetSources.id, id), eq(financerAssetSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function addAssetEntry(sourceId: string, month: string, value: string): Promise<void> {
+  const numericValue = Number(value);
+  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  const userId = await getAuthUserId();
+  await db.insert(financerAssetEntries).values({ userId, sourceId, value, month });
+  revalidatePath("/", "layout");
+}
+
+export async function updateAssetEntry(id: string, value: string): Promise<void> {
+  const numericValue = Number(value);
+  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  const userId = await getAuthUserId();
+  await db
+    .update(financerAssetEntries)
+    .set({ value, updatedAt: new Date() })
+    .where(and(eq(financerAssetEntries.id, id), eq(financerAssetEntries.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteAssetEntry(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .delete(financerAssetEntries)
+    .where(and(eq(financerAssetEntries.id, id), eq(financerAssetEntries.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+// ─── Income actions ───────────────────────────────────────────────────────────
 
 export async function createIncomeSource(data: {
   name: string;

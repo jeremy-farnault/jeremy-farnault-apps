@@ -1,20 +1,20 @@
-import type { AssetRow as SavingsRow } from "@/lib/queries";
+import type { AssetRow } from "@/lib/queries";
 
 function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function SavingsList({
+export function AssetsList({
   data,
   homeCurrency,
   rates,
 }: {
-  data: SavingsRow[];
+  data: AssetRow[];
   homeCurrency: string;
   rates: Record<string, number>;
 }) {
   if (data.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No savings logged for this month.</p>;
+    return <p className="text-sm text-(--grey-500)">No assets logged for this month.</p>;
   }
 
   const currencyTotals = new Map<string, number>();

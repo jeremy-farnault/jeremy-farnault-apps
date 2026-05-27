@@ -29,6 +29,31 @@ export const financerSummaries = pgTable("financer_summaries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const financerAssetSources = pgTable("financer_asset_sources", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  currency: text("currency").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const financerAssetEntries = pgTable("financer_asset_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  sourceId: uuid("source_id")
+    .notNull()
+    .references(() => financerAssetSources.id, { onDelete: "cascade" }),
+  value: numeric("value", { precision: 12, scale: 2 }).notNull(),
+  month: text("month").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const financerIncomeSources = pgTable("financer_income_sources", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")

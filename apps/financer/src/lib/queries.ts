@@ -1,5 +1,7 @@
 import {
   db,
+  financerAssetEntries,
+  financerAssetSources,
   financerEntries,
   financerExchangeRates,
   financerIncomeEntries,
@@ -26,24 +28,37 @@ export type SpendingEntryRow = {
   value: number;
 };
 
-export type SavingsRow = {
+export type AssetRow = {
   sourceId: string;
   name: string;
   currency: string;
   total: number;
 };
 
-export type SavingsEntryRow = {
+export type AssetEntryRow = {
   id: string;
   sourceId: string;
   value: number;
 };
 
-export type MonthlyTotals = {
-  month: string;
-  spending: number;
-  savings: Record<string, number>;
-  spendingByCategory: Record<string, number>;
+export type AssetSourceRow = {
+  id: string;
+  name: string;
+  currency: string;
+  hasEntries: boolean;
+};
+
+export type IncomeRow = {
+  sourceId: string;
+  name: string;
+  currency: string;
+  total: number;
+};
+
+export type IncomeEntryRow = {
+  id: string;
+  sourceId: string;
+  value: number;
 };
 
 export type IncomeSourceRow = {
@@ -51,6 +66,14 @@ export type IncomeSourceRow = {
   name: string;
   currency: string;
   hasEntries: boolean;
+};
+
+export type MonthlyTotals = {
+  month: string;
+  spending: number;
+  assets: Record<string, number>;
+  income: Record<string, number>;
+  spendingByCategory: Record<string, number>;
 };
 
 export async function getSpendingForMonth(userId: string, month: string): Promise<SpendingRow[]> {
@@ -124,7 +147,91 @@ export async function hasOpenEntries(userId: string, month: string): Promise<boo
   return rows.length > 0;
 }
 
-export async function getSavingsForMonth(userId: string, month: string): Promise<SavingsRow[]> {
+export async function getAssetsForMonth(userId: string, month: string): Promise<AssetRow[]> {
+  const rows = await db
+    .select({
+      sourceId: financerAssetEntries.sourceId,
+      name: financerAssetSources.name,
+      currency: financerAssetSources.currency,
+      value: financerAssetEntries.value,
+    })
+    .from(financerAssetEntries)
+    .innerJoin(financerAssetSources, eq(financerAssetEntries.sourceId, financerAssetSources.id))
+    .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)));
+
+  const totals = new Map<string, { name: string; currency: string; total: number }>();
+  for (const row of rows) {
+    const existing = totals.get(row.sourceId);
+    if (existing) {
+      existing.total += Number(row.value);
+    } else {
+      totals.set(row.sourceId, {
+        name: row.name,
+        currency: row.currency,
+        total: Number(row.value),
+      });
+    }
+  }
+
+  return Array.from(totals.entries())
+    .map(([sourceId, { name, currency, total }]) => ({ sourceId, name, currency, total }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function getAssetEntriesForMonth(
+  userId: string,
+  month: string
+): Promise<AssetEntryRow[]> {
+  const rows = await db
+    .select({
+      id: financerAssetEntries.id,
+      sourceId: financerAssetEntries.sourceId,
+      value: financerAssetEntries.value,
+    })
+    .from(financerAssetEntries)
+    .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)));
+
+  return rows.map((r) => ({ id: r.id, sourceId: r.sourceId, value: Number(r.value) }));
+}
+
+export async function getAssetsAvailableMonths(userId: string): Promise<string[]> {
+  const months = await db
+    .selectDistinct({ month: financerAssetEntries.month })
+    .from(financerAssetEntries)
+    .where(eq(financerAssetEntries.userId, userId));
+
+  const currentMonth = getCurrentMonth();
+  const all = new Set(months.map((r) => r.month));
+  all.delete(currentMonth);
+
+  const past = Array.from(all).sort((a, b) => b.localeCompare(a));
+  return [currentMonth, ...past];
+}
+
+export async function getAssetSources(userId: string): Promise<AssetSourceRow[]> {
+  const [sources, entrySources] = await Promise.all([
+    db
+      .select({
+        id: financerAssetSources.id,
+        name: financerAssetSources.name,
+        currency: financerAssetSources.currency,
+        createdAt: financerAssetSources.createdAt,
+      })
+      .from(financerAssetSources)
+      .where(eq(financerAssetSources.userId, userId)),
+    db
+      .selectDistinct({ sourceId: financerAssetEntries.sourceId })
+      .from(financerAssetEntries)
+      .where(eq(financerAssetEntries.userId, userId)),
+  ]);
+
+  const sourceIdsWithEntries = new Set(entrySources.map((r) => r.sourceId));
+  return sources
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    .map(({ createdAt: _, ...s }) => ({ ...s, hasEntries: sourceIdsWithEntries.has(s.id) }));
+}
+
+export async function getIncomeForMonth(userId: string, month: string): Promise<IncomeRow[]> {
   const rows = await db
     .select({
       sourceId: financerIncomeEntries.sourceId,
@@ -155,10 +262,10 @@ export async function getSavingsForMonth(userId: string, month: string): Promise
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function getSavingsEntriesForMonth(
+export async function getIncomeEntriesForMonth(
   userId: string,
   month: string
-): Promise<SavingsEntryRow[]> {
+): Promise<IncomeEntryRow[]> {
   const rows = await db
     .select({
       id: financerIncomeEntries.id,
@@ -171,7 +278,7 @@ export async function getSavingsEntriesForMonth(
   return rows.map((r) => ({ id: r.id, sourceId: r.sourceId, value: Number(r.value) }));
 }
 
-export async function getSavingsAvailableMonths(userId: string): Promise<string[]> {
+export async function getIncomeAvailableMonths(userId: string): Promise<string[]> {
   const months = await db
     .selectDistinct({ month: financerIncomeEntries.month })
     .from(financerIncomeEntries)
@@ -273,7 +380,7 @@ export async function getExchangeRates(): Promise<Record<string, number>> {
 export async function getMonthlyTotals(userId: string, months: string[]): Promise<MonthlyTotals[]> {
   if (months.length === 0) return [];
 
-  const [summaries, entries, incomeRows] = await Promise.all([
+  const [summaries, entries, assetRows, incomeRows] = await Promise.all([
     db
       .select({
         month: financerSummaries.month,
@@ -292,6 +399,17 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
       .where(and(eq(financerEntries.userId, userId), inArray(financerEntries.month, months))),
     db
       .select({
+        month: financerAssetEntries.month,
+        value: financerAssetEntries.value,
+        name: financerAssetSources.name,
+      })
+      .from(financerAssetEntries)
+      .innerJoin(financerAssetSources, eq(financerAssetEntries.sourceId, financerAssetSources.id))
+      .where(
+        and(eq(financerAssetEntries.userId, userId), inArray(financerAssetEntries.month, months))
+      ),
+    db
+      .select({
         month: financerIncomeEntries.month,
         value: financerIncomeEntries.value,
         name: financerIncomeSources.name,
@@ -307,7 +425,10 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
   ]);
 
   const result = new Map<string, MonthlyTotals>(
-    months.map((m) => [m, { month: m, spending: 0, savings: {}, spendingByCategory: {} }])
+    months.map((m) => [
+      m,
+      { month: m, spending: 0, assets: {}, income: {}, spendingByCategory: {} },
+    ])
   );
 
   for (const row of [...summaries, ...entries]) {
@@ -319,10 +440,17 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
     }
   }
 
+  for (const row of assetRows) {
+    const entry = result.get(row.month);
+    if (entry) {
+      entry.assets[row.name] = (entry.assets[row.name] ?? 0) + Number(row.value);
+    }
+  }
+
   for (const row of incomeRows) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.savings[row.name] = (entry.savings[row.name] ?? 0) + Number(row.value);
+      entry.income[row.name] = (entry.income[row.name] ?? 0) + Number(row.value);
     }
   }
 

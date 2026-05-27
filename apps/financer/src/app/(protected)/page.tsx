@@ -1,20 +1,26 @@
+import { AssetSourcesList } from "@/components/asset-sources-list";
+import { AssetsCta } from "@/components/assets-cta";
+import { AssetsList } from "@/components/assets-list";
 import { CloseMonthButton } from "@/components/close-month-button";
+import { IncomeCta } from "@/components/income-cta";
+import { IncomeList } from "@/components/income-list";
+import { IncomeSourcesList } from "@/components/income-sources-list";
 import { MonthNav } from "@/components/month-nav";
 import { OverviewChart } from "@/components/overview-chart";
-import { SavingsCta } from "@/components/savings-cta";
-import { SavingsList } from "@/components/savings-list";
-import { SourcesList } from "@/components/sources-list";
 import { SpendingChart } from "@/components/spending-chart";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
 import {
+  getAssetEntriesForMonth,
+  getAssetSources,
+  getAssetsForMonth,
   getExchangeRates,
   getHomeCurrency,
+  getIncomeEntriesForMonth,
+  getIncomeForMonth,
   getIncomeSources,
   getMonthlyTotals,
-  getSavingsEntriesForMonth,
-  getSavingsForMonth,
   getSpendingEntriesForMonth,
   getSpendingForMonth,
   hasOpenEntries,
@@ -47,7 +53,13 @@ export default async function FinancerPage({
 }) {
   const { view: viewParam, month: monthParam } = await searchParams;
   const view =
-    viewParam === "savings" ? "savings" : viewParam === "overview" ? "overview" : "spending";
+    viewParam === "assets"
+      ? "assets"
+      : viewParam === "income"
+        ? "income"
+        : viewParam === "overview"
+          ? "overview"
+          : "spending";
   const month = isValidMonth(monthParam) ? monthParam : getCurrentMonth();
 
   const session = await auth.api.getSession({ headers: await headers() });
@@ -64,21 +76,36 @@ export default async function FinancerPage({
         ])
       : [[], false, "USD", {}, []];
 
-  const [savingsData, sources, homeCurrency, rates, savingsEntries] =
-    view === "savings"
+  const [assetsData, assetSources, assetsHomeCurrency, assetsRates, assetEntries] =
+    view === "assets"
       ? await Promise.all([
-          getSavingsForMonth(userId, month),
-          getIncomeSources(userId),
+          getAssetsForMonth(userId, month),
+          getAssetSources(userId),
           getHomeCurrency(userId),
           getExchangeRates(),
-          getSavingsEntriesForMonth(userId, month),
+          getAssetEntriesForMonth(userId, month),
         ])
       : [[], [], "USD", {}, []];
 
-  const [monthlyTotals, overviewSources] =
+  const [incomeData, incomeSources, incomeHomeCurrency, incomeRates, incomeEntries] =
+    view === "income"
+      ? await Promise.all([
+          getIncomeForMonth(userId, month),
+          getIncomeSources(userId),
+          getHomeCurrency(userId),
+          getExchangeRates(),
+          getIncomeEntriesForMonth(userId, month),
+        ])
+      : [[], [], "USD", {}, []];
+
+  const [monthlyTotals, overviewAssetSources, overviewIncomeSources] =
     view === "overview"
-      ? await Promise.all([getMonthlyTotals(userId, getLast12Months()), getIncomeSources(userId)])
-      : [[], []];
+      ? await Promise.all([
+          getMonthlyTotals(userId, getLast12Months()),
+          getAssetSources(userId),
+          getIncomeSources(userId),
+        ])
+      : [[], [], []];
 
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
@@ -104,14 +131,31 @@ export default async function FinancerPage({
           <SpendingCta viewedMonth={month} homeCurrency={spendingHomeCurrency} />
         </>
       )}
-      {view === "savings" && (
+      {view === "assets" && (
         <>
-          <SourcesList sources={sources} month={month} entries={savingsEntries} />
-          <SavingsList data={savingsData} homeCurrency={homeCurrency} rates={rates} />
-          <SavingsCta viewedMonth={month} homeCurrency={homeCurrency} sources={sources} />
+          <AssetSourcesList sources={assetSources} month={month} entries={assetEntries} />
+          <AssetsList data={assetsData} homeCurrency={assetsHomeCurrency} rates={assetsRates} />
+          <AssetsCta viewedMonth={month} homeCurrency={assetsHomeCurrency} sources={assetSources} />
         </>
       )}
-      {view === "overview" && <OverviewChart data={monthlyTotals} sources={overviewSources} />}
+      {view === "income" && (
+        <>
+          <IncomeSourcesList sources={incomeSources} month={month} entries={incomeEntries} />
+          <IncomeList data={incomeData} homeCurrency={incomeHomeCurrency} rates={incomeRates} />
+          <IncomeCta
+            viewedMonth={month}
+            homeCurrency={incomeHomeCurrency}
+            sources={incomeSources}
+          />
+        </>
+      )}
+      {view === "overview" && (
+        <OverviewChart
+          data={monthlyTotals}
+          assetSources={overviewAssetSources}
+          incomeSources={overviewIncomeSources}
+        />
+      )}
     </main>
   );
 }

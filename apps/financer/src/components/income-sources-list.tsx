@@ -7,11 +7,8 @@ import {
   updateIncomeEntry,
   updateIncomeSource,
 } from "@/lib/actions";
-import { ASSET_SOURCE_COLORS as SOURCE_COLORS } from "@/lib/constants";
-import type {
-  AssetSourceRow as IncomeSourceRow,
-  AssetEntryRow as SavingsEntryRow,
-} from "@/lib/queries";
+import { INCOME_SOURCE_COLORS } from "@/lib/constants";
+import type { IncomeEntryRow, IncomeSourceRow } from "@/lib/queries";
 import { ActionModal, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -24,13 +21,13 @@ function formatMonth(month: string): string {
   });
 }
 
-interface SourcesListProps {
+interface IncomeSourcesListProps {
   sources: IncomeSourceRow[];
   month: string;
-  entries: SavingsEntryRow[];
+  entries: IncomeEntryRow[];
 }
 
-export function SourcesList({ sources, month, entries }: SourcesListProps) {
+export function IncomeSourcesList({ sources, month, entries }: IncomeSourcesListProps) {
   const [editingSource, setEditingSource] = useState<IncomeSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<IncomeSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<IncomeSourceRow | null>(null);
@@ -38,13 +35,13 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
   const [currency, setCurrency] = useState("");
   const [logValue, setLogValue] = useState("");
   const [logValueError, setLogValueError] = useState<string | undefined>();
-  const [editingEntry, setEditingEntry] = useState<SavingsEntryRow | null>(null);
+  const [editingEntry, setEditingEntry] = useState<IncomeEntryRow | null>(null);
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
   const [editEntryValue, setEditEntryValue] = useState("");
   const [editEntryValueError, setEditEntryValueError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
 
-  const entriesBySource = new Map<string, SavingsEntryRow[]>();
+  const entriesBySource = new Map<string, IncomeEntryRow[]>();
   for (const entry of entries) {
     const list = entriesBySource.get(entry.sourceId) ?? [];
     list.push(entry);
@@ -117,7 +114,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     });
   }
 
-  function openEditEntry(entry: SavingsEntryRow) {
+  function openEditEntry(entry: IncomeEntryRow) {
     setEditingEntry(entry);
     setEditEntryValue(String(entry.value));
   }
@@ -168,7 +165,9 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
         {sources.map((source, index) => (
           <li
             key={source.id}
-            style={{ borderLeft: `4px solid ${SOURCE_COLORS[index % SOURCE_COLORS.length]}` }}
+            style={{
+              borderLeft: `4px solid ${INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length]}`,
+            }}
             className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
           >
             <div className="flex min-w-0 items-center gap-2">

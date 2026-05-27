@@ -1,6 +1,6 @@
 export const CURRENCIES = ["EUR", "GBP", "JPY", "NZD", "SEK", "USD"] as const;
 
-export const SOURCE_COLORS = [
+export const ASSET_SOURCE_COLORS = [
   "var(--blue-400)",
   "var(--green-400)",
   "var(--teal-400)",
@@ -9,6 +9,17 @@ export const SOURCE_COLORS = [
   "var(--yellow-400)",
   "var(--magenta-400)",
   "var(--red-400)",
+] as const;
+
+export const INCOME_SOURCE_COLORS = [
+  "var(--purple-400)",
+  "var(--teal-400)",
+  "var(--yellow-400)",
+  "var(--red-400)",
+  "var(--blue-400)",
+  "var(--green-400)",
+  "var(--magenta-400)",
+  "var(--moss-400)",
 ] as const;
 
 export const CATEGORY_COLORS: Record<string, string> = {

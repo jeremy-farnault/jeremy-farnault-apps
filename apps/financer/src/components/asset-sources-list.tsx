@@ -1,17 +1,14 @@
 "use client";
 
 import {
-  addIncomeEntry,
-  deleteIncomeEntry,
-  deleteIncomeSource,
-  updateIncomeEntry,
-  updateIncomeSource,
+  addAssetEntry,
+  deleteAssetEntry,
+  deleteAssetSource,
+  updateAssetEntry,
+  updateAssetSource,
 } from "@/lib/actions";
-import { ASSET_SOURCE_COLORS as SOURCE_COLORS } from "@/lib/constants";
-import type {
-  AssetSourceRow as IncomeSourceRow,
-  AssetEntryRow as SavingsEntryRow,
-} from "@/lib/queries";
+import { ASSET_SOURCE_COLORS } from "@/lib/constants";
+import type { AssetEntryRow, AssetSourceRow } from "@/lib/queries";
 import { ActionModal, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -24,34 +21,34 @@ function formatMonth(month: string): string {
   });
 }
 
-interface SourcesListProps {
-  sources: IncomeSourceRow[];
+interface AssetSourcesListProps {
+  sources: AssetSourceRow[];
   month: string;
-  entries: SavingsEntryRow[];
+  entries: AssetEntryRow[];
 }
 
-export function SourcesList({ sources, month, entries }: SourcesListProps) {
-  const [editingSource, setEditingSource] = useState<IncomeSourceRow | null>(null);
-  const [deletingSource, setDeletingSource] = useState<IncomeSourceRow | null>(null);
-  const [loggingSource, setLoggingSource] = useState<IncomeSourceRow | null>(null);
+export function AssetSourcesList({ sources, month, entries }: AssetSourcesListProps) {
+  const [editingSource, setEditingSource] = useState<AssetSourceRow | null>(null);
+  const [deletingSource, setDeletingSource] = useState<AssetSourceRow | null>(null);
+  const [loggingSource, setLoggingSource] = useState<AssetSourceRow | null>(null);
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("");
   const [logValue, setLogValue] = useState("");
   const [logValueError, setLogValueError] = useState<string | undefined>();
-  const [editingEntry, setEditingEntry] = useState<SavingsEntryRow | null>(null);
+  const [editingEntry, setEditingEntry] = useState<AssetEntryRow | null>(null);
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
   const [editEntryValue, setEditEntryValue] = useState("");
   const [editEntryValueError, setEditEntryValueError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
 
-  const entriesBySource = new Map<string, SavingsEntryRow[]>();
+  const entriesBySource = new Map<string, AssetEntryRow[]>();
   for (const entry of entries) {
     const list = entriesBySource.get(entry.sourceId) ?? [];
     list.push(entry);
     entriesBySource.set(entry.sourceId, list);
   }
 
-  function openEdit(source: IncomeSourceRow) {
+  function openEdit(source: AssetSourceRow) {
     setEditingSource(source);
     setName(source.name);
     setCurrency(source.currency);
@@ -67,7 +64,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     if (!editingSource || !name.trim() || !currency.trim()) return;
     startTransition(async () => {
       try {
-        await updateIncomeSource(editingSource.id, { name, currency });
+        await updateAssetSource(editingSource.id, { name, currency });
         toast.success("Source updated");
         handleEditClose();
       } catch (err) {
@@ -80,7 +77,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     if (!deletingSource) return;
     startTransition(async () => {
       try {
-        await deleteIncomeSource(deletingSource.id);
+        await deleteAssetSource(deletingSource.id);
         toast.success("Source deleted");
         setDeletingSource(null);
       } catch (err) {
@@ -89,7 +86,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     });
   }
 
-  function openLog(source: IncomeSourceRow) {
+  function openLog(source: AssetSourceRow) {
     setLoggingSource(source);
     setLogValue("");
   }
@@ -108,7 +105,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     }
     startTransition(async () => {
       try {
-        await addIncomeEntry(loggingSource.id, month, logValue);
+        await addAssetEntry(loggingSource.id, month, logValue);
         toast.success("Amount logged");
         handleLogClose();
       } catch (err) {
@@ -117,7 +114,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     });
   }
 
-  function openEditEntry(entry: SavingsEntryRow) {
+  function openEditEntry(entry: AssetEntryRow) {
     setEditingEntry(entry);
     setEditEntryValue(String(entry.value));
   }
@@ -136,7 +133,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     }
     startTransition(async () => {
       try {
-        await updateIncomeEntry(editingEntry.id, editEntryValue);
+        await updateAssetEntry(editingEntry.id, editEntryValue);
         toast.success("Entry updated");
         handleEditEntryClose();
       } catch (err) {
@@ -149,7 +146,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
     if (!deletingEntryId) return;
     startTransition(async () => {
       try {
-        await deleteIncomeEntry(deletingEntryId);
+        await deleteAssetEntry(deletingEntryId);
         toast.success("Entry deleted");
         setDeletingEntryId(null);
       } catch (err) {
@@ -159,7 +156,7 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
   }
 
   if (sources.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No income sources yet.</p>;
+    return <p className="text-sm text-(--grey-500)">No asset sources yet.</p>;
   }
 
   return (
@@ -168,7 +165,9 @@ export function SourcesList({ sources, month, entries }: SourcesListProps) {
         {sources.map((source, index) => (
           <li
             key={source.id}
-            style={{ borderLeft: `4px solid ${SOURCE_COLORS[index % SOURCE_COLORS.length]}` }}
+            style={{
+              borderLeft: `4px solid ${ASSET_SOURCE_COLORS[index % ASSET_SOURCE_COLORS.length]}`,
+            }}
             className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
           >
             <div className="flex min-w-0 items-center gap-2">
