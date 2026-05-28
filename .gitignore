@@ -21,6 +21,8 @@ test-results
 .env
 .env.local
 .env.*.local
+.env.production
+.env.*.production
 
 # Editor
 .vscode/settings.json
