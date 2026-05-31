@@ -1,9 +1,11 @@
 import { AssetSourcesList } from "@/components/asset-sources-list";
+import { AssetsChart } from "@/components/assets-chart";
 import { AssetsCta } from "@/components/assets-cta";
 import { AssetsList } from "@/components/assets-list";
 import { CloseAssetMonthButton } from "@/components/close-asset-month-button";
 import { CloseIncomeMonthButton } from "@/components/close-income-month-button";
 import { CloseMonthButton } from "@/components/close-month-button";
+import { IncomeChart } from "@/components/income-chart";
 import { IncomeCta } from "@/components/income-cta";
 import { IncomeList } from "@/components/income-list";
 import { IncomeSourcesList } from "@/components/income-sources-list";
@@ -153,6 +155,7 @@ export default async function FinancerPage({
       )}
       {view === "assets" && (
         <>
+          <AssetsChart data={assetsData} />
           <AssetSourcesList
             sources={assetSources}
             month={month}
@@ -166,6 +169,7 @@ export default async function FinancerPage({
       )}
       {view === "income" && (
         <>
+          <IncomeChart data={incomeData} />
           <IncomeSourcesList
             sources={incomeSources}
             month={month}
