@@ -10,6 +10,7 @@ interface TextInputProps {
   required?: boolean;
   name?: string;
   id?: string;
+  autoFocus?: boolean;
 }
 
 export function TextInput({
@@ -22,11 +23,14 @@ export function TextInput({
   required,
   name,
   id,
+  autoFocus,
 }: TextInputProps) {
   return (
     <input
       type={type}
       id={id}
+      // biome-ignore lint/a11y/noAutofocus: focus first input in modal for keyboard UX
+      autoFocus={autoFocus}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}

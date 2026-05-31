@@ -186,6 +186,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
                   onChange={(v) => setField("name", v)}
                   placeholder="e.g. Inception, Chez Panisse…"
                   disabled={submitting}
+                  autoFocus
                 />
                 {nameError && <p className="text-xs text-red-500">{nameError}</p>}
               </div>
