@@ -12,6 +12,118 @@ function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+type TooltipItem = { name: string; value: number; color: string; dataKey: string };
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipItem[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  const items = payload.filter((p) => p.name && p.value !== 0);
+  if (!items.length) return null;
+
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        borderRadius: 12,
+        backgroundColor: "var(--grey-700)",
+        padding: "8px 12px",
+      }}
+    >
+      <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
+      {items.map((item) => (
+        <div
+          key={item.dataKey}
+          style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: item.color,
+              flexShrink: 0,
+              display: "inline-block",
+            }}
+          />
+          <span>
+            {item.name}: {formatAmount(item.value)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const STACK_LABELS: Record<string, string> = {
+  spending: "Spending",
+  income: "Income",
+  assets: "Savings",
+};
+const STACK_ORDER = ["income", "spending", "assets"];
+
+function AllChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipItem[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const groups: Record<string, { total: number; color: string }> = {};
+  for (const item of payload) {
+    const prefix = item.dataKey.split("_")[0];
+    if (!prefix || item.value === 0) continue;
+    if (!groups[prefix]) groups[prefix] = { total: 0, color: item.color };
+    groups[prefix].total += item.value;
+  }
+
+  const entries = STACK_ORDER.flatMap((k) => {
+    const g = groups[k];
+    return g?.total ? [[k, g] as const] : [];
+  });
+  if (!entries.length) return null;
+
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        borderRadius: 12,
+        backgroundColor: "var(--grey-700)",
+        padding: "8px 12px",
+      }}
+    >
+      <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
+      {entries.map(([prefix, { total, color }]) => (
+        <div key={prefix} style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}>
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: color,
+              flexShrink: 0,
+              display: "inline-block",
+            }}
+          />
+          <span>
+            {STACK_LABELS[prefix] ?? prefix}: {formatAmount(total)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function OverviewChart({
   data,
   assetSources,
@@ -45,13 +157,6 @@ export function OverviewChart({
     ),
   }));
 
-  const tooltipStyle = {
-    fontSize: 11,
-    borderRadius: 12,
-    backgroundColor: "var(--grey-700)",
-    border: "none",
-  };
-  const tooltipTextStyle = { color: "white" };
   const axisTickProps = { fontSize: 10, fill: "var(--grey-400)" };
 
   return (
@@ -70,14 +175,7 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              labelStyle={tooltipTextStyle}
-              itemStyle={tooltipTextStyle}
-              formatter={(v: number, name: string) => [formatAmount(v), name]}
-              labelFormatter={formatMonthLabel}
-              isAnimationActive={false}
-            />
+            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
             {allCategories.map((category, i) => (
               <Bar
                 key={category}
@@ -106,14 +204,7 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              labelStyle={tooltipTextStyle}
-              itemStyle={tooltipTextStyle}
-              formatter={(v: number, name: string) => [formatAmount(v), name]}
-              labelFormatter={formatMonthLabel}
-              isAnimationActive={false}
-            />
+            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
             {allIncomeSources.map((sourceName, i) => {
               const colorIndex = incomeSources.findIndex((s) => s.name === sourceName);
               const color =
@@ -149,14 +240,7 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              labelStyle={tooltipTextStyle}
-              itemStyle={tooltipTextStyle}
-              formatter={(v: number, name: string) => [formatAmount(v), name]}
-              labelFormatter={formatMonthLabel}
-              isAnimationActive={false}
-            />
+            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
             {allAssetSources.map((sourceName, i) => {
               const colorIndex = assetSources.findIndex((s) => s.name === sourceName);
               const color =
@@ -192,14 +276,7 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              labelStyle={tooltipTextStyle}
-              itemStyle={tooltipTextStyle}
-              formatter={(v: number, name: string) => [formatAmount(v), name]}
-              labelFormatter={formatMonthLabel}
-              isAnimationActive={false}
-            />
+            <Tooltip content={<AllChartTooltip />} isAnimationActive={false} />
             {allCategories.map((category, i) => (
               <Bar
                 key={`all_spending_${category}`}
