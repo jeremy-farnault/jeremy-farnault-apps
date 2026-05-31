@@ -99,6 +99,13 @@
       "when": 1748131200000,
       "tag": "0013_financer_income_assets_split",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1748736000000,
+      "tag": "0014_financer_income_asset_summaries",
+      "breakpoints": true
     }
   ]
 }

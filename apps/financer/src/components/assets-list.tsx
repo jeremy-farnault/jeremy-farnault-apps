@@ -38,7 +38,7 @@ export function AssetsList({
       <ul className="flex flex-col gap-2">
         {data.map(({ sourceId, name, currency, total }) => (
           <li
-            key={sourceId}
+            key={sourceId ?? name}
             className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
           >
             <span className="text-sm font-medium text-(--grey-900)">{name}</span>

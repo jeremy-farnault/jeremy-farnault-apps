@@ -1,6 +1,8 @@
 import { AssetSourcesList } from "@/components/asset-sources-list";
 import { AssetsCta } from "@/components/assets-cta";
 import { AssetsList } from "@/components/assets-list";
+import { CloseAssetMonthButton } from "@/components/close-asset-month-button";
+import { CloseIncomeMonthButton } from "@/components/close-income-month-button";
 import { CloseMonthButton } from "@/components/close-month-button";
 import { IncomeCta } from "@/components/income-cta";
 import { IncomeList } from "@/components/income-list";
@@ -23,7 +25,9 @@ import {
   getMonthlyTotals,
   getSpendingEntriesForMonth,
   getSpendingForMonth,
+  hasOpenAssetEntries,
   hasOpenEntries,
+  hasOpenIncomeEntries,
 } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
@@ -76,7 +80,14 @@ export default async function FinancerPage({
         ])
       : [[], false, "USD", {}, []];
 
-  const [assetsData, assetSources, assetsHomeCurrency, assetsRates, assetEntries] =
+  const [
+    assetsData,
+    assetSources,
+    assetsHomeCurrency,
+    assetsRates,
+    assetEntries,
+    openAssetEntries,
+  ] =
     view === "assets"
       ? await Promise.all([
           getAssetsForMonth(userId, month),
@@ -84,10 +95,18 @@ export default async function FinancerPage({
           getHomeCurrency(userId),
           getExchangeRates(),
           getAssetEntriesForMonth(userId, month),
+          hasOpenAssetEntries(userId, month),
         ])
-      : [[], [], "USD", {}, []];
+      : [[], [], "USD", {}, [], false];
 
-  const [incomeData, incomeSources, incomeHomeCurrency, incomeRates, incomeEntries] =
+  const [
+    incomeData,
+    incomeSources,
+    incomeHomeCurrency,
+    incomeRates,
+    incomeEntries,
+    openIncomeEntries,
+  ] =
     view === "income"
       ? await Promise.all([
           getIncomeForMonth(userId, month),
@@ -95,8 +114,9 @@ export default async function FinancerPage({
           getHomeCurrency(userId),
           getExchangeRates(),
           getIncomeEntriesForMonth(userId, month),
+          hasOpenIncomeEntries(userId, month),
         ])
-      : [[], [], "USD", {}, []];
+      : [[], [], "USD", {}, [], false];
 
   const [monthlyTotals, overviewAssetSources, overviewIncomeSources] =
     view === "overview"
@@ -108,7 +128,7 @@ export default async function FinancerPage({
       : [[], [], []];
 
   return (
-    <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
+    <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-10 sm:gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <ViewToggle view={view} />
         {view !== "overview" && (
@@ -133,15 +153,27 @@ export default async function FinancerPage({
       )}
       {view === "assets" && (
         <>
-          <AssetSourcesList sources={assetSources} month={month} entries={assetEntries} />
+          <AssetSourcesList
+            sources={assetSources}
+            month={month}
+            entries={assetEntries}
+            isOpen={!!openAssetEntries}
+          />
           <AssetsList data={assetsData} homeCurrency={assetsHomeCurrency} rates={assetsRates} />
+          {openAssetEntries && <CloseAssetMonthButton month={month} assetsData={assetsData} />}
           <AssetsCta viewedMonth={month} homeCurrency={assetsHomeCurrency} sources={assetSources} />
         </>
       )}
       {view === "income" && (
         <>
-          <IncomeSourcesList sources={incomeSources} month={month} entries={incomeEntries} />
+          <IncomeSourcesList
+            sources={incomeSources}
+            month={month}
+            entries={incomeEntries}
+            isOpen={!!openIncomeEntries}
+          />
           <IncomeList data={incomeData} homeCurrency={incomeHomeCurrency} rates={incomeRates} />
+          {openIncomeEntries && <CloseIncomeMonthButton month={month} incomeData={incomeData} />}
           <IncomeCta
             viewedMonth={month}
             homeCurrency={incomeHomeCurrency}
