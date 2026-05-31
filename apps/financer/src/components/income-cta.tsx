@@ -110,8 +110,8 @@ export function IncomeCta({ viewedMonth, homeCurrency, sources }: IncomeCtaProps
       if (!row.sourceId) {
         newErrors[idx] = "Select a source";
         hasErrors = true;
-      } else if (!Number(row.value) || Number(row.value) <= 0) {
-        newErrors[idx] = "Enter a positive number";
+      } else if (!row.value.trim() || Number.isNaN(Number(row.value))) {
+        newErrors[idx] = "Enter a valid number";
         hasErrors = true;
       }
     }

@@ -99,8 +99,8 @@ export function IncomeSourcesList({ sources, month, entries }: IncomeSourcesList
 
   function handleLogSubmit() {
     if (!loggingSource) return;
-    if (!Number(logValue) || Number(logValue) <= 0) {
-      setLogValueError("Enter a positive number");
+    if (!logValue.trim() || Number.isNaN(Number(logValue))) {
+      setLogValueError("Enter a valid number");
       return;
     }
     startTransition(async () => {
@@ -127,8 +127,8 @@ export function IncomeSourcesList({ sources, month, entries }: IncomeSourcesList
 
   function handleEditEntrySubmit() {
     if (!editingEntry) return;
-    if (!Number(editEntryValue) || Number(editEntryValue) <= 0) {
-      setEditEntryValueError("Enter a positive number");
+    if (!editEntryValue.trim() || Number.isNaN(Number(editEntryValue))) {
+      setEditEntryValueError("Enter a valid number");
       return;
     }
     startTransition(async () => {

@@ -190,7 +190,7 @@ export async function addIncomeEntry(
   value: string
 ): Promise<void> {
   const numericValue = Number(value);
-  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  if (!value.trim() || Number.isNaN(numericValue)) throw new Error("Value must be a valid number");
   const userId = await getAuthUserId();
   await db.insert(financerIncomeEntries).values({ userId, sourceId, value, month });
   revalidatePath("/", "layout");
@@ -198,7 +198,7 @@ export async function addIncomeEntry(
 
 export async function updateIncomeEntry(id: string, value: string): Promise<void> {
   const numericValue = Number(value);
-  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  if (!value.trim() || Number.isNaN(numericValue)) throw new Error("Value must be a valid number");
   const userId = await getAuthUserId();
   await db
     .update(financerIncomeEntries)
