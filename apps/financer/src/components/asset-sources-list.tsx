@@ -6,10 +6,11 @@ import {
   deleteAssetSource,
   updateAssetEntry,
   updateAssetSource,
+  updateAssetSourceColor,
 } from "@/lib/actions";
-import { ASSET_SOURCE_COLORS } from "@/lib/constants";
+import { ASSET_SOURCE_COLORS, FINANCER_COLOR_PALETTE } from "@/lib/constants";
 import type { AssetEntryRow, AssetSourceRow } from "@/lib/queries";
-import { ActionModal, TextInput } from "@jf/ui";
+import { ActionModal, ColorPicker, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourc
   const [editingSource, setEditingSource] = useState<AssetSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<AssetSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<AssetSourceRow | null>(null);
+  const [coloringSourceId, setColoringSourceId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("");
   const [logValue, setLogValue] = useState("");
@@ -156,6 +158,17 @@ export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourc
     });
   }
 
+  function handleColorChange(sourceId: string, color: string) {
+    setColoringSourceId(null);
+    startTransition(async () => {
+      try {
+        await updateAssetSourceColor(sourceId, color);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
+
   if (sources.length === 0) {
     return <p className="text-sm text-(--grey-500)">No asset sources yet.</p>;
   }
@@ -163,80 +176,112 @@ export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourc
   return (
     <>
       <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {sources.map((source, index) => (
-          <li
-            key={source.id}
-            style={{
-              borderLeft: `4px solid ${ASSET_SOURCE_COLORS[index % ASSET_SOURCE_COLORS.length]}`,
-            }}
-            className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-sm font-medium text-(--grey-900)">{source.name}</span>
-              <span className="shrink-0 text-xs text-(--grey-500)">{source.currency}</span>
-            </div>
-            {(entriesBySource.get(source.id) ?? []).map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between rounded-[8px] bg-(--surface-150) px-2 py-1"
-              >
-                <span className="text-sm text-(--grey-700)">
-                  {entry.value.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
-                {isOpen && (
-                  <div className="flex items-center gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => openEditEntry(entry)}
-                      aria-label="Edit entry"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-                    >
-                      <PencilSimpleIcon size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeletingEntryId(entry.id)}
-                      aria-label="Delete entry"
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-                    >
-                      <TrashIcon size={14} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="flex items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => openEdit(source)}
-                aria-label="Edit source"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-              >
-                <PencilSimpleIcon size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeletingSource(source)}
-                aria-label="Delete source"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-              >
-                <TrashIcon size={16} />
-              </button>
-              {isOpen && (
+        {sources.map((source, index) => {
+          const effectiveColor =
+            source.color ??
+            ASSET_SOURCE_COLORS[index % ASSET_SOURCE_COLORS.length] ??
+            "var(--grey-400)";
+          return (
+            <li
+              key={source.id}
+              style={{ borderLeft: `4px solid ${effectiveColor}` }}
+              className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
+            >
+              <div className="flex min-w-0 items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => openLog(source)}
-                  className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
-                >
-                  + Log
-                </button>
+                  onClick={() =>
+                    setColoringSourceId(coloringSourceId === source.id ? null : source.id)
+                  }
+                  title="Change color"
+                  style={{
+                    width: 12,
+                    height: 12,
+                    flexShrink: 0,
+                    borderRadius: "50%",
+                    backgroundColor: effectiveColor,
+                    border: "1px solid rgba(0,0,0,0.15)",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                />
+                <span className="truncate text-sm font-medium text-(--grey-900)">
+                  {source.name}
+                </span>
+                <span className="shrink-0 text-xs text-(--grey-500)">{source.currency}</span>
+              </div>
+              {coloringSourceId === source.id && (
+                <div className="pt-1 pb-0.5">
+                  <ColorPicker
+                    palette={FINANCER_COLOR_PALETTE}
+                    value={effectiveColor}
+                    onChange={(color) => handleColorChange(source.id, color)}
+                  />
+                </div>
               )}
-            </div>
-          </li>
-        ))}
+              {(entriesBySource.get(source.id) ?? []).map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between rounded-[8px] bg-(--surface-150) px-2 py-1"
+                >
+                  <span className="text-sm text-(--grey-700)">
+                    {entry.value.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                  {isOpen && (
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => openEditEntry(entry)}
+                        aria-label="Edit entry"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                      >
+                        <PencilSimpleIcon size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingEntryId(entry.id)}
+                        aria-label="Delete entry"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                      >
+                        <TrashIcon size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => openEdit(source)}
+                  aria-label="Edit source"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                >
+                  <PencilSimpleIcon size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeletingSource(source)}
+                  aria-label="Delete source"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                >
+                  <TrashIcon size={16} />
+                </button>
+                {isOpen && (
+                  <button
+                    type="button"
+                    onClick={() => openLog(source)}
+                    className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
+                  >
+                    + Log
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <ActionModal

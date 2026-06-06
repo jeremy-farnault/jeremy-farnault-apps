@@ -155,7 +155,7 @@ export default async function FinancerPage({
       )}
       {view === "assets" && (
         <>
-          <AssetsChart data={assetsData} />
+          <AssetsChart data={assetsData} sources={assetSources} />
           <AssetSourcesList
             sources={assetSources}
             month={month}
@@ -169,7 +169,7 @@ export default async function FinancerPage({
       )}
       {view === "income" && (
         <>
-          <IncomeChart data={incomeData} />
+          <IncomeChart data={incomeData} sources={incomeSources} />
           <IncomeSourcesList
             sources={incomeSources}
             month={month}

@@ -108,6 +108,15 @@ export async function updateAssetSource(
   revalidatePath("/", "layout");
 }
 
+export async function updateAssetSourceColor(id: string, color: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .update(financerAssetSources)
+    .set({ color, updatedAt: new Date() })
+    .where(and(eq(financerAssetSources.id, id), eq(financerAssetSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
 export async function deleteAssetSource(id: string): Promise<void> {
   const userId = await getAuthUserId();
   await db
@@ -174,6 +183,15 @@ export async function updateIncomeSource(
       currency: data.currency.trim().toUpperCase(),
       updatedAt: new Date(),
     })
+    .where(and(eq(financerIncomeSources.id, id), eq(financerIncomeSources.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+export async function updateIncomeSourceColor(id: string, color: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .update(financerIncomeSources)
+    .set({ color, updatedAt: new Date() })
     .where(and(eq(financerIncomeSources.id, id), eq(financerIncomeSources.userId, userId)));
   revalidatePath("/", "layout");
 }

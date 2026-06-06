@@ -36,6 +36,7 @@ export const financerAssetSources = pgTable("financer_asset_sources", {
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   currency: text("currency").notNull(),
+  color: text("color"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -61,6 +62,7 @@ export const financerIncomeSources = pgTable("financer_income_sources", {
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   currency: text("currency").notNull(),
+  color: text("color"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

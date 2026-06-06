@@ -1,4 +1,5 @@
 export * from "./components/action-modal";
+export * from "./components/color-picker";
 export * from "./components/date-time-edit";
 export * from "./components/time-input";
 export * from "./components/checkbox";

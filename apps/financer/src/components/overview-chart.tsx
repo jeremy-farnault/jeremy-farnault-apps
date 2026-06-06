@@ -206,11 +206,10 @@ export function OverviewChart({
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
             <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
             {allIncomeSources.map((sourceName, i) => {
-              const colorIndex = incomeSources.findIndex((s) => s.name === sourceName);
               const color =
-                INCOME_SOURCE_COLORS[
-                  (colorIndex >= 0 ? colorIndex : i) % INCOME_SOURCE_COLORS.length
-                ];
+                incomeSources.find((s) => s.name === sourceName)?.color ??
+                INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
               return (
                 <Bar
                   key={sourceName}
@@ -242,11 +241,10 @@ export function OverviewChart({
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
             <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
             {allAssetSources.map((sourceName, i) => {
-              const colorIndex = assetSources.findIndex((s) => s.name === sourceName);
               const color =
-                ASSET_SOURCE_COLORS[
-                  (colorIndex >= 0 ? colorIndex : i) % ASSET_SOURCE_COLORS.length
-                ];
+                assetSources.find((s) => s.name === sourceName)?.color ??
+                ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
               return (
                 <Bar
                   key={sourceName}
@@ -288,11 +286,10 @@ export function OverviewChart({
               />
             ))}
             {allIncomeSources.map((sourceName, i) => {
-              const colorIndex = incomeSources.findIndex((s) => s.name === sourceName);
               const color =
-                INCOME_SOURCE_COLORS[
-                  (colorIndex >= 0 ? colorIndex : i) % INCOME_SOURCE_COLORS.length
-                ];
+                incomeSources.find((s) => s.name === sourceName)?.color ??
+                INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
               return (
                 <Bar
                   key={`all_income_${sourceName}`}
@@ -305,11 +302,10 @@ export function OverviewChart({
               );
             })}
             {allAssetSources.map((sourceName, i) => {
-              const colorIndex = assetSources.findIndex((s) => s.name === sourceName);
               const color =
-                ASSET_SOURCE_COLORS[
-                  (colorIndex >= 0 ? colorIndex : i) % ASSET_SOURCE_COLORS.length
-                ];
+                assetSources.find((s) => s.name === sourceName)?.color ??
+                ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
               return (
                 <Bar
                   key={`all_assets_${sourceName}`}

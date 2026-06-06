@@ -47,6 +47,7 @@ export type AssetSourceRow = {
   id: string;
   name: string;
   currency: string;
+  color: string | null;
   hasEntries: boolean;
 };
 
@@ -67,6 +68,7 @@ export type IncomeSourceRow = {
   id: string;
   name: string;
   currency: string;
+  color: string | null;
   hasEntries: boolean;
 };
 
@@ -265,6 +267,7 @@ export async function getAssetSources(userId: string): Promise<AssetSourceRow[]>
         id: financerAssetSources.id,
         name: financerAssetSources.name,
         currency: financerAssetSources.currency,
+        color: financerAssetSources.color,
         createdAt: financerAssetSources.createdAt,
       })
       .from(financerAssetSources)
@@ -382,6 +385,7 @@ export async function getIncomeSources(userId: string): Promise<IncomeSourceRow[
         id: financerIncomeSources.id,
         name: financerIncomeSources.name,
         currency: financerIncomeSources.currency,
+        color: financerIncomeSources.color,
         createdAt: financerIncomeSources.createdAt,
       })
       .from(financerIncomeSources)

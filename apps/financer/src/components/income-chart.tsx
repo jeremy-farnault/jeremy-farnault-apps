@@ -1,14 +1,20 @@
 "use client";
 
 import { INCOME_SOURCE_COLORS } from "@/lib/constants";
-import type { IncomeRow } from "@/lib/queries";
+import type { IncomeRow, IncomeSourceRow } from "@/lib/queries";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function IncomeChart({ data }: { data: IncomeRow[] }) {
+export function IncomeChart({
+  data,
+  sources,
+}: {
+  data: IncomeRow[];
+  sources?: IncomeSourceRow[];
+}) {
   if (data.length === 0) return null;
 
   const tooltipStyle = {
@@ -32,12 +38,13 @@ export function IncomeChart({ data }: { data: IncomeRow[] }) {
             outerRadius={90}
             strokeWidth={0}
           >
-            {data.map((entry, index) => (
-              <Cell
-                key={`${entry.name}-${entry.currency}`}
-                fill={INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length]}
-              />
-            ))}
+            {data.map((entry, index) => {
+              const color =
+                sources?.find((s) => s.name === entry.name)?.color ??
+                INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
+              return <Cell key={`${entry.name}-${entry.currency}`} fill={color} />;
+            })}
           </Pie>
           <Tooltip
             formatter={(value: number, name: string, props: { payload?: IncomeRow }) => [
@@ -52,17 +59,20 @@ export function IncomeChart({ data }: { data: IncomeRow[] }) {
         </PieChart>
       </ResponsiveContainer>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 px-2 mt-2">
-        {data.map((entry, index) => (
-          <div key={`${entry.name}-${entry.currency}`} className="flex items-center gap-1.5">
-            <div
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] }}
-            />
-            <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
-              {entry.name}
-            </span>
-          </div>
-        ))}
+        {data.map((entry, index) => {
+          const color =
+            sources?.find((s) => s.name === entry.name)?.color ??
+            INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
+            "var(--grey-400)";
+          return (
+            <div key={`${entry.name}-${entry.currency}`} className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+              <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
+                {entry.name}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
