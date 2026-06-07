@@ -3,3 +3,7 @@
   --primary: var(--blue-400);
   --secondary: var(--blue-600);
 }
+
+.greyscale-map img {
+  filter: grayscale(100%);
+}
