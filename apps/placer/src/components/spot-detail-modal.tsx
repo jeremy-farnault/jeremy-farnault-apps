@@ -21,6 +21,14 @@ export function SpotDetailModal({ spot, onClose }: SpotDetailModalProps) {
       content={
         spot && (
           <div className="flex flex-col gap-3">
+            {spot.photoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={spot.photoUrl}
+                alt={spot.name}
+                className="h-40 w-full rounded-[12px] object-cover"
+              />
+            )}
             {spot.category && (
               <div className="flex items-center gap-2">
                 <span

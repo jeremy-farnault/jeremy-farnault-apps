@@ -1,5 +1,6 @@
 import { db, placerCategories, placerSpots } from "@jf/db";
 import { eq } from "drizzle-orm";
+import { getPublicImageUrl } from "./s3-url";
 
 export type CategoryRow = {
   id: string;
@@ -12,7 +13,7 @@ export type SpotRow = {
   id: string;
   name: string;
   description: string | null;
-  photoKey: string | null;
+  photoUrl: string | null;
   lat: number;
   lng: number;
   category: { id: string; name: string; color: string; icon: string } | null;
@@ -56,10 +57,21 @@ export async function getSpots(userId: string): Promise<SpotRow[]> {
 
   return rows
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-    .map(({ createdAt: _, categoryId, categoryName, categoryColor, categoryIcon, ...r }) => ({
-      ...r,
-      category: categoryId
-        ? { id: categoryId, name: categoryName!, color: categoryColor!, icon: categoryIcon! }
-        : null,
-    }));
+    .map(
+      ({
+        createdAt: _,
+        photoKey,
+        categoryId,
+        categoryName,
+        categoryColor,
+        categoryIcon,
+        ...r
+      }) => ({
+        ...r,
+        photoUrl: photoKey ? getPublicImageUrl(photoKey) : null,
+        category: categoryId
+          ? { id: categoryId, name: categoryName!, color: categoryColor!, icon: categoryIcon! }
+          : null,
+      })
+    );
 }

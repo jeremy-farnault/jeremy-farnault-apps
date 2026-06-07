@@ -9,6 +9,7 @@ import { SpotDetailModal } from "./spot-detail-modal";
 
 interface PlacerMapProps {
   spots: SpotRow[];
+  pendingLocation?: { lat: number; lng: number } | null;
 }
 
 function createSpotIcon(color: string) {
@@ -20,7 +21,14 @@ function createSpotIcon(color: string) {
   });
 }
 
-export function PlacerMap({ spots }: PlacerMapProps) {
+const pendingIcon = L.divIcon({
+  html: `<div style="width:18px;height:18px;border-radius:50%;background:transparent;border:3px solid var(--blue-400);box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+  className: "",
+});
+
+export function PlacerMap({ spots, pendingLocation }: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
 
   return (
@@ -42,6 +50,9 @@ export function PlacerMap({ spots }: PlacerMapProps) {
               eventHandlers={{ click: () => setSelectedSpot(spot) }}
             />
           ))}
+          {pendingLocation && (
+            <Marker position={[pendingLocation.lat, pendingLocation.lng]} icon={pendingIcon} />
+          )}
         </MapContainer>
       </div>
 
