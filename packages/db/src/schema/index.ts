@@ -4,3 +4,4 @@ export * from "./journaler";
 export * from "./routiner";
 export * from "./classer";
 export * from "./financer";
+export * from "./placer";
