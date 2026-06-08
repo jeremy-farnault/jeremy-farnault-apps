@@ -2,14 +2,15 @@
 
 import type { SpotRow } from "@/lib/queries";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useState } from "react";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { SpotDetailModal } from "./spot-detail-modal";
 
 interface PlacerMapProps {
   spots: SpotRow[];
   pendingLocation?: { lat: number; lng: number } | null;
+  flyToTarget?: { lat: number; lng: number; zoom: number } | null;
+  activeCategoryId?: string | null;
 }
 
 function createSpotIcon(color: string) {
@@ -28,8 +29,28 @@ const pendingIcon = L.divIcon({
   className: "",
 });
 
-export function PlacerMap({ spots, pendingLocation }: PlacerMapProps) {
+function FlyTo({
+  target,
+}: { target: { lat: number; lng: number; zoom: number } | null | undefined }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!target) return;
+    map.flyTo([target.lat, target.lng], target.zoom);
+  }, [target, map]);
+  return null;
+}
+
+export function PlacerMap({
+  spots,
+  pendingLocation,
+  flyToTarget,
+  activeCategoryId,
+}: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
+
+  const visibleSpots = activeCategoryId
+    ? spots.filter((s) => s.category?.id === activeCategoryId)
+    : spots;
 
   return (
     <>
@@ -42,7 +63,8 @@ export function PlacerMap({ spots, pendingLocation }: PlacerMapProps) {
           zoomControl={true}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {spots.map((spot) => (
+          <FlyTo target={flyToTarget} />
+          {visibleSpots.map((spot) => (
             <Marker
               key={spot.id}
               position={[spot.lat, spot.lng]}
