@@ -26,7 +26,7 @@ export function PlacerClient({ spots, categories }: PlacerClientProps) {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
   return (
-    <main className="relative w-full" style={{ height: "calc(100dvh - 56px)" }}>
+    <main className="relative w-full p-3" style={{ height: "calc(100dvh - 56px)" }}>
       <PlacerMap
         spots={spots}
         pendingLocation={pendingLocation}

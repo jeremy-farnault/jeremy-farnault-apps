@@ -108,7 +108,7 @@ export function MapSearchBar({
   }
 
   return (
-    <div className="fixed top-4 left-1/2 z-50 flex w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 gap-2">
+    <div className="absolute top-7 right-7 z-[3000] flex w-[min(520px,calc(100%-3.5rem))] gap-2 rounded-xl bg-(--card) p-2 shadow-[0_0_10px_rgba(0,0,0,0.1)]">
       <div
         className="relative flex-1"
         onFocus={() => setShowResults(true)}

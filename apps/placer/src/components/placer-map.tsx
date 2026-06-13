@@ -2,7 +2,7 @@
 
 import type { SpotRow } from "@/lib/queries";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { SpotDetailModal } from "./spot-detail-modal";
 
@@ -29,6 +29,50 @@ const pendingIcon = L.divIcon({
   className: "",
 });
 
+function FitBounds({ markers, skip }: { markers: [number, number][]; skip: boolean }) {
+  const map = useMap();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    if (skip || markers.length === 0) return;
+
+    timerRef.current = setTimeout(() => {
+      const valid = markers.filter(([lat, lng]) => lat !== undefined && lng !== undefined);
+      if (valid.length === 0) return;
+
+      if (valid.length === 1) {
+        map.setView(valid[0]!, 10);
+      } else {
+        map.fitBounds(L.latLngBounds(valid), { maxZoom: 16, padding: [50, 50] });
+      }
+    }, 300);
+
+    return () => clearTimeout(timerRef.current);
+  }, [markers, map, skip]);
+
+  return null;
+}
+
+function UserLocation({ onLocated }: { onLocated: () => void }) {
+  const map = useMap();
+  const calledRef = useRef(false);
+
+  useEffect(() => {
+    if (calledRef.current || !navigator.geolocation) return;
+    calledRef.current = true;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        map.setView([coords.latitude, coords.longitude], 16);
+        onLocated();
+      },
+      () => {}
+    );
+  }, [map, onLocated]);
+
+  return null;
+}
+
 function FlyTo({
   target,
 }: { target: { lat: number; lng: number; zoom: number } | null | undefined }) {
@@ -47,23 +91,34 @@ export function PlacerMap({
   activeCategoryId,
 }: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
+  const [locationOverride, setLocationOverride] = useState(false);
 
   const visibleSpots = activeCategoryId
     ? spots.filter((s) => s.category?.id === activeCategoryId)
     : spots;
 
+  const markerPositions = useMemo((): [number, number][] => {
+    const positions: [number, number][] = visibleSpots.map((s) => [s.lat, s.lng]);
+    if (pendingLocation) positions.push([pendingLocation.lat, pendingLocation.lng]);
+    return positions;
+  }, [visibleSpots, pendingLocation]);
+
   return (
     <>
-      <div className="greyscale-map h-full w-full">
+      <div className="h-full w-full isolate overflow-hidden rounded-[22px]">
         <MapContainer
           center={[20, 0]}
           zoom={2}
+          minZoom={5}
           style={{ height: "100%", width: "100%" }}
           attributionControl={false}
           zoomControl={true}
+          className="greyscale-map"
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FlyTo target={flyToTarget} />
+          <FitBounds markers={markerPositions} skip={locationOverride} />
+          <UserLocation onLocated={() => setLocationOverride(true)} />
           {visibleSpots.map((spot) => (
             <Marker
               key={spot.id}

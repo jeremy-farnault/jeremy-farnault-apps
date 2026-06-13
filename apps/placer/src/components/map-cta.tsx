@@ -35,7 +35,7 @@ export function MapCta({ categories, onLocationSelected, onSpotFormClosed }: Map
   return (
     <>
       <div
-        className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 gap-3"
+        className="absolute bottom-8 left-1/2 z-[3000] flex -translate-x-1/2 gap-3"
         style={{ animation: "cta-slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}
       >
         <button
