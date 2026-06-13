@@ -11,6 +11,8 @@ interface PlacerMapProps {
   pendingLocation?: { lat: number; lng: number } | null;
   flyToTarget?: { lat: number; lng: number; zoom: number } | null;
   activeCategoryId?: string | null;
+  pinnableLocation?: { lat: number; lng: number } | null;
+  onPinClick?: () => void;
 }
 
 function createSpotIcon(color: string) {
@@ -26,6 +28,20 @@ const pendingIcon = L.divIcon({
   html: `<div style="width:18px;height:18px;border-radius:50%;background:transparent;border:3px solid var(--blue-400);box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
   iconSize: [18, 18],
   iconAnchor: [9, 9],
+  className: "",
+});
+
+const userPosIcon = L.divIcon({
+  html: `<div style="width:16px;height:16px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+  className: "",
+});
+
+const pinnableIcon = L.divIcon({
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;line-height:1;cursor:pointer;">+</div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
   className: "",
 });
 
@@ -53,7 +69,7 @@ function FitBounds({ markers, skip }: { markers: [number, number][]; skip: boole
   return null;
 }
 
-function UserLocation({ onLocated }: { onLocated: () => void }) {
+function UserLocation({ onPosition }: { onPosition: (pos: [number, number]) => void }) {
   const map = useMap();
   const calledRef = useRef(false);
 
@@ -63,12 +79,62 @@ function UserLocation({ onLocated }: { onLocated: () => void }) {
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        map.setView([coords.latitude, coords.longitude], 16);
-        onLocated();
+        const pos: [number, number] = [coords.latitude, coords.longitude];
+        map.setView(pos, 16);
+        onPosition(pos);
       },
       () => {}
     );
-  }, [map, onLocated]);
+  }, [map, onPosition]);
+
+  return null;
+}
+
+function LocateControl({ userPosition }: { userPosition: [number, number] | null }) {
+  const map = useMap();
+  const posRef = useRef(userPosition);
+  posRef.current = userPosition;
+
+  useEffect(() => {
+    const btn = L.DomUtil.create("button") as HTMLButtonElement;
+    btn.type = "button";
+    btn.title = "Go to my location";
+    btn.style.cssText =
+      "display:flex;align-items:center;justify-content:center;width:30px;height:30px;cursor:pointer;background:var(--card);border:none;border-radius:0.75rem;box-shadow:0 0 10px rgba(0,0,0,0.1);";
+    btn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"/></svg>';
+
+    L.DomEvent.disableClickPropagation(btn);
+    btn.onclick = () => {
+      if (posRef.current) {
+        map.flyTo(posRef.current, 16);
+      } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => {
+            const pos: [number, number] = [coords.latitude, coords.longitude];
+            posRef.current = pos;
+            map.flyTo(pos, 16);
+          },
+          () => {}
+        );
+      }
+    };
+
+    const container = L.DomUtil.create("div", "leaflet-control");
+    container.appendChild(btn);
+
+    const Ctrl = L.Control.extend({
+      onAdd: () => container,
+      onRemove: () => {},
+    });
+    const ctrl = new (Ctrl as new (opts: L.ControlOptions) => L.Control)({
+      position: "bottomright",
+    });
+    ctrl.addTo(map);
+    return () => {
+      map.removeControl(ctrl);
+    };
+  }, [map]);
 
   return null;
 }
@@ -89,9 +155,12 @@ export function PlacerMap({
   pendingLocation,
   flyToTarget,
   activeCategoryId,
+  pinnableLocation,
+  onPinClick,
 }: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
   const [locationOverride, setLocationOverride] = useState(false);
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
 
   const visibleSpots = activeCategoryId
     ? spots.filter((s) => s.category?.id === activeCategoryId)
@@ -109,7 +178,7 @@ export function PlacerMap({
         <MapContainer
           center={[20, 0]}
           zoom={2}
-          minZoom={5}
+          minZoom={3}
           style={{ height: "100%", width: "100%" }}
           attributionControl={false}
           zoomControl={true}
@@ -118,7 +187,13 @@ export function PlacerMap({
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FlyTo target={flyToTarget} />
           <FitBounds markers={markerPositions} skip={locationOverride} />
-          <UserLocation onLocated={() => setLocationOverride(true)} />
+          <UserLocation
+            onPosition={(pos) => {
+              setUserPosition(pos);
+              setLocationOverride(true);
+            }}
+          />
+          <LocateControl userPosition={userPosition} />
           {visibleSpots.map((spot) => (
             <Marker
               key={spot.id}
@@ -129,6 +204,14 @@ export function PlacerMap({
           ))}
           {pendingLocation && (
             <Marker position={[pendingLocation.lat, pendingLocation.lng]} icon={pendingIcon} />
+          )}
+          {userPosition && <Marker position={userPosition} icon={userPosIcon} />}
+          {pinnableLocation && (
+            <Marker
+              position={[pinnableLocation.lat, pinnableLocation.lng]}
+              icon={pinnableIcon}
+              eventHandlers={{ click: () => onPinClick?.() }}
+            />
           )}
         </MapContainer>
       </div>

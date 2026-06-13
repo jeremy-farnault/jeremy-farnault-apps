@@ -70,7 +70,7 @@ export function LocationSearchModal({ isOpen, onClose, onSelect }: LocationSearc
     <ActionModal
       isOpen={isOpen}
       onClose={onClose}
-      size="small"
+      size="large"
       title="Find location"
       content={
         <div className="flex flex-col gap-3">

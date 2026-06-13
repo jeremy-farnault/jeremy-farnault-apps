@@ -22,6 +22,7 @@ interface MapSearchBarProps {
   activeCategoryId: string | null;
   onFlyTo: (target: { lat: number; lng: number; zoom: number }) => void;
   onCategoryChange: (id: string | null) => void;
+  onPinLocation?: (loc: { lat: number; lng: number }) => void;
 }
 
 function parseCoordinates(input: string): { lat: number; lng: number } | null {
@@ -40,6 +41,7 @@ export function MapSearchBar({
   activeCategoryId,
   onFlyTo,
   onCategoryChange,
+  onPinLocation,
 }: MapSearchBarProps) {
   const [query, setQuery] = useState("");
   const [nominatimResults, setNominatimResults] = useState<NominatimResult[]>([]);
@@ -95,9 +97,11 @@ export function MapSearchBar({
     if (result.kind === "spot") {
       onFlyTo({ lat: result.spot.lat, lng: result.spot.lng, zoom: 15 });
     } else if (result.kind === "address") {
-      onFlyTo({ lat: result.lat, lng: result.lng, zoom: 14 });
+      onFlyTo({ lat: result.lat, lng: result.lng, zoom: 16 });
+      onPinLocation?.({ lat: result.lat, lng: result.lng });
     } else {
-      onFlyTo({ lat: result.lat, lng: result.lng, zoom: 14 });
+      onFlyTo({ lat: result.lat, lng: result.lng, zoom: 16 });
+      onPinLocation?.({ lat: result.lat, lng: result.lng });
     }
     setQuery("");
     setShowResults(false);
