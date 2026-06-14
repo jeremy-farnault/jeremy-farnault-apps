@@ -89,7 +89,7 @@ function SelectContent({ children, className }: SelectContentProps) {
       position="popper"
       sideOffset={6}
       className={cn(
-        "z-50 min-w-[var(--radix-select-trigger-width)] overflow-clip",
+        "z-[9100] min-w-[var(--radix-select-trigger-width)] overflow-clip",
         "rounded-[16px] bg-(--card) p-4",
         "shadow-[0_24px_36px_0_rgba(0,0,0,0.25)]",
         "animate-[overlay-in_0.3s_ease-in-out]",
