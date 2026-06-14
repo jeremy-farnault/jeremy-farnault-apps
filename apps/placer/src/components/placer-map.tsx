@@ -1,9 +1,12 @@
 "use client";
 
+import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from "@/lib/constants";
 import type { SpotRow } from "@/lib/queries";
 import L from "leaflet";
+import { createElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { renderToStaticMarkup } from "react-dom/server";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { SpotDetailModal } from "./spot-detail-modal";
 
 interface PlacerMapProps {
@@ -13,13 +16,21 @@ interface PlacerMapProps {
   activeCategoryId?: string | null;
   pinnableLocation?: { lat: number; lng: number } | null;
   onPinClick?: () => void;
+  onMapDoubleClick?: (loc: { lat: number; lng: number }) => void;
 }
 
-function createSpotIcon(color: string) {
+function createSpotIcon(color: string, iconName: string) {
+  const Icon = CATEGORY_ICONS[iconName] ?? CATEGORY_ICONS[DEFAULT_CATEGORY_ICON]!;
+  const iconSvg = renderToStaticMarkup(
+    createElement(Icon as React.ComponentType<{ size: number; color: string }>, {
+      size: 14,
+      color: "white",
+    })
+  );
   return L.divIcon({
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35)"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: `<div style="width:28px;height:28px;border-radius:6px;background:${color};border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">${iconSvg}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
     className: "",
   });
 }
@@ -39,7 +50,7 @@ const userPosIcon = L.divIcon({
 });
 
 const pinnableIcon = L.divIcon({
-  html: `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;line-height:1;cursor:pointer;">+</div>`,
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="white"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
   className: "",
@@ -139,6 +150,23 @@ function LocateControl({ userPosition }: { userPosition: [number, number] | null
   return null;
 }
 
+const MIN_ZOOM_FOR_PLACEMENT = 10;
+
+function MapDoubleClick({
+  onDoubleClick,
+}: { onDoubleClick: ((loc: { lat: number; lng: number }) => void) | undefined }) {
+  const map = useMapEvents({
+    dblclick(e) {
+      if (map.getZoom() >= MIN_ZOOM_FOR_PLACEMENT) {
+        onDoubleClick?.({ lat: e.latlng.lat, lng: e.latlng.lng });
+      } else {
+        map.zoomIn();
+      }
+    },
+  });
+  return null;
+}
+
 function FlyTo({
   target,
 }: { target: { lat: number; lng: number; zoom: number } | null | undefined }) {
@@ -157,6 +185,7 @@ export function PlacerMap({
   activeCategoryId,
   pinnableLocation,
   onPinClick,
+  onMapDoubleClick,
 }: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
   const [locationOverride, setLocationOverride] = useState(false);
@@ -179,12 +208,14 @@ export function PlacerMap({
           center={[20, 0]}
           zoom={2}
           minZoom={3}
+          doubleClickZoom={false}
           style={{ height: "100%", width: "100%" }}
           attributionControl={false}
           zoomControl={true}
           className="greyscale-map"
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapDoubleClick onDoubleClick={onMapDoubleClick} />
           <FlyTo target={flyToTarget} />
           <FitBounds markers={markerPositions} skip={locationOverride} />
           <UserLocation
@@ -198,7 +229,10 @@ export function PlacerMap({
             <Marker
               key={spot.id}
               position={[spot.lat, spot.lng]}
-              icon={createSpotIcon(spot.category?.color ?? "var(--grey-400)")}
+              icon={createSpotIcon(
+                spot.category?.color ?? "var(--grey-400)",
+                spot.category?.icon ?? DEFAULT_CATEGORY_ICON
+              )}
               eventHandlers={{ click: () => setSelectedSpot(spot) }}
             />
           ))}

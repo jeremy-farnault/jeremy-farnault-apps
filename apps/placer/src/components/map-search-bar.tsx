@@ -95,7 +95,7 @@ export function MapSearchBar({
 
   function handleSelect(result: SearchResult) {
     if (result.kind === "spot") {
-      onFlyTo({ lat: result.spot.lat, lng: result.spot.lng, zoom: 15 });
+      onFlyTo({ lat: result.spot.lat, lng: result.spot.lng, zoom: 18 });
     } else if (result.kind === "address") {
       onFlyTo({ lat: result.lat, lng: result.lng, zoom: 16 });
       onPinLocation?.({ lat: result.lat, lng: result.lng });

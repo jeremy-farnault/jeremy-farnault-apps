@@ -1,8 +1,9 @@
 "use client";
 
+import { useReverseGeocode } from "@/hooks/use-reverse-geocode";
 import { createSpot, generatePresignedUploadUrlAction } from "@/lib/actions";
 import type { CategoryRow } from "@/lib/queries";
-import { Select, SelectItem, TextInput, Textarea } from "@jf/ui";
+import { Select, SelectItem, Skeleton, TextInput, Textarea } from "@jf/ui";
 import { MapPinIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
@@ -24,6 +25,7 @@ interface SpotFormModalProps {
 }
 
 export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFormModalProps) {
+  const { address, loading: addressLoading } = useReverseGeocode(location?.lat, location?.lng);
   const [form, setForm] = useState<FormState>({ name: "", categoryId: "", description: "" });
   const [nameError, setNameError] = useState<string | undefined>();
   const [imageState, setImageState] = useState<ImageState>({ status: "none" });
@@ -108,7 +110,7 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && !submitting && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out] p-4">
+        <Dialog.Overlay className="fixed inset-0 z-[9000] flex items-center justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out] p-4">
           <Dialog.Content className="relative flex w-full max-w-[400px] flex-col rounded-[22px] bg-(--card) p-8 shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none animate-[modal-in_0.3s_ease-in-out] max-h-[90vh] overflow-y-auto">
             <button
               type="button"
@@ -208,9 +210,13 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               </div>
 
               {location && (
-                <p className="font-mono text-xs text-(--grey-400)">
-                  {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
-                </p>
+                <div className="flex flex-col gap-1">
+                  {addressLoading && <Skeleton height={20} className="rounded" />}
+                  {address && <p className="text-xs text-(--grey-500)">{address}</p>}
+                  <p className="font-mono text-xs text-(--grey-400)">
+                    {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+                  </p>
+                </div>
               )}
 
               <div className="mt-2 flex gap-2">

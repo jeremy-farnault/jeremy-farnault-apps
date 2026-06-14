@@ -39,6 +39,10 @@ export function PlacerClient({ spots, categories }: PlacerClientProps) {
         activeCategoryId={activeCategoryId}
         pinnableLocation={pinnableLocation}
         onPinClick={() => setPinSpotOpen(true)}
+        onMapDoubleClick={(loc) => {
+          setPinnableLocation(loc);
+          setPinSpotOpen(true);
+        }}
       />
       <MapSearchBar
         spots={spots}

@@ -76,7 +76,7 @@ export function ActionModal({
       <Dialog.Portal>
         <Dialog.Overlay
           className={cn(
-            "fixed inset-0 z-50 flex justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]",
+            "fixed inset-0 z-[9000] flex justify-center bg-[rgba(34,34,38,0.30)] backdrop-blur-[13px] animate-[overlay-in_0.3s_ease-in-out]",
             mobilePosition === "top"
               ? fitMobileViewport
                 ? "items-start sm:items-center sm:pt-0"

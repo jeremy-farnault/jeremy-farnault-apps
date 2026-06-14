@@ -1,8 +1,9 @@
 "use client";
 
+import { useReverseGeocode } from "@/hooks/use-reverse-geocode";
 import { CATEGORY_ICONS } from "@/lib/constants";
 import type { SpotRow } from "@/lib/queries";
-import { ActionModal } from "@jf/ui";
+import { ActionModal, Skeleton } from "@jf/ui";
 
 interface SpotDetailModalProps {
   spot: SpotRow | null;
@@ -11,6 +12,7 @@ interface SpotDetailModalProps {
 
 export function SpotDetailModal({ spot, onClose }: SpotDetailModalProps) {
   const IconComp = spot?.category ? CATEGORY_ICONS[spot.category.icon] : undefined;
+  const { address, loading: addressLoading } = useReverseGeocode(spot?.lat, spot?.lng);
 
   return (
     <ActionModal
@@ -41,9 +43,13 @@ export function SpotDetailModal({ spot, onClose }: SpotDetailModalProps) {
               </div>
             )}
             {spot.description && <p className="text-sm text-(--grey-700)">{spot.description}</p>}
-            <p className="font-mono text-xs text-(--grey-500)">
-              {spot.lat.toFixed(5)}, {spot.lng.toFixed(5)}
-            </p>
+            <div className="flex flex-col gap-1">
+              {addressLoading && <Skeleton height={12} className="rounded" />}
+              {address && <p className="text-xs text-(--grey-500)">{address}</p>}
+              <p className="font-mono text-xs text-(--grey-400)">
+                {spot.lat.toFixed(5)}, {spot.lng.toFixed(5)}
+              </p>
+            </div>
           </div>
         )
       }
