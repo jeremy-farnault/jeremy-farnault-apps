@@ -43,6 +43,33 @@ export async function generatePresignedUploadUrlAction(
   return generatePresignedUploadUrl(filename);
 }
 
+export async function updateSpot(data: {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  categoryId: string | null;
+  description: string | null;
+  photoKey: string | null | undefined;
+}): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  const userId = await getAuthUserId();
+  const setData: Record<string, unknown> = {
+    name: data.name.trim(),
+    lat: data.lat,
+    lng: data.lng,
+    categoryId: data.categoryId,
+    description: data.description,
+    updatedAt: new Date(),
+  };
+  if (data.photoKey !== undefined) setData.photoKey = data.photoKey;
+  await db
+    .update(placerSpots)
+    .set(setData)
+    .where(and(eq(placerSpots.id, data.id), eq(placerSpots.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
 export async function createSpot(data: {
   name: string;
   lat: number;

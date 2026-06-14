@@ -1,7 +1,7 @@
 "use client";
 
 import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from "@/lib/constants";
-import type { SpotRow } from "@/lib/queries";
+import type { CategoryRow, SpotRow } from "@/lib/queries";
 import L from "leaflet";
 import { createElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { SpotDetailModal } from "./spot-detail-modal";
 
 interface PlacerMapProps {
   spots: SpotRow[];
+  categories: CategoryRow[];
   pendingLocation?: { lat: number; lng: number } | null;
   flyToTarget?: { lat: number; lng: number; zoom: number } | null;
   activeCategoryId?: string | null;
@@ -20,9 +21,10 @@ interface PlacerMapProps {
 }
 
 function createSpotIcon(color: string, iconName: string) {
-  const Icon = CATEGORY_ICONS[iconName] ?? CATEGORY_ICONS[DEFAULT_CATEGORY_ICON]!;
+  const Icon = (CATEGORY_ICONS[iconName] ??
+    CATEGORY_ICONS[DEFAULT_CATEGORY_ICON]) as React.ComponentType<{ size: number; color: string }>;
   const iconSvg = renderToStaticMarkup(
-    createElement(Icon as React.ComponentType<{ size: number; color: string }>, {
+    createElement(Icon, {
       size: 14,
       color: "white",
     })
@@ -67,8 +69,8 @@ function FitBounds({ markers, skip }: { markers: [number, number][]; skip: boole
       const valid = markers.filter(([lat, lng]) => lat !== undefined && lng !== undefined);
       if (valid.length === 0) return;
 
-      if (valid.length === 1) {
-        map.setView(valid[0]!, 10);
+      if (valid.length === 1 && valid[0]) {
+        map.setView(valid[0], 10);
       } else {
         map.fitBounds(L.latLngBounds(valid), { maxZoom: 16, padding: [50, 50] });
       }
@@ -180,6 +182,7 @@ function FlyTo({
 
 export function PlacerMap({
   spots,
+  categories,
   pendingLocation,
   flyToTarget,
   activeCategoryId,
@@ -250,7 +253,11 @@ export function PlacerMap({
         </MapContainer>
       </div>
 
-      <SpotDetailModal spot={selectedSpot} onClose={() => setSelectedSpot(null)} />
+      <SpotDetailModal
+        spot={selectedSpot}
+        categories={categories}
+        onClose={() => setSelectedSpot(null)}
+      />
     </>
   );
 }

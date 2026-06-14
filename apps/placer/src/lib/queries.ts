@@ -70,7 +70,12 @@ export async function getSpots(userId: string): Promise<SpotRow[]> {
         ...r,
         photoUrl: photoKey ? getPublicImageUrl(photoKey) : null,
         category: categoryId
-          ? { id: categoryId, name: categoryName!, color: categoryColor!, icon: categoryIcon! }
+          ? {
+              id: categoryId,
+              name: categoryName ?? "",
+              color: categoryColor ?? "",
+              icon: categoryIcon ?? "",
+            }
           : null,
       })
     );

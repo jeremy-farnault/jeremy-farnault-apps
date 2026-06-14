@@ -28,8 +28,8 @@ interface MapSearchBarProps {
 function parseCoordinates(input: string): { lat: number; lng: number } | null {
   const match = /^([-+]?\d+(?:\.\d*)?)\s*,\s*([-+]?\d+(?:\.\d*)?)$/.exec(input.trim());
   if (!match) return null;
-  const lat = Number.parseFloat(match[1]!);
-  const lng = Number.parseFloat(match[2]!);
+  const lat = Number.parseFloat(match[1] ?? "");
+  const lng = Number.parseFloat(match[2] ?? "");
   if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
   if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
   return { lat, lng };

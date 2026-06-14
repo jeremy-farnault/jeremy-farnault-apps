@@ -34,6 +34,7 @@ export function PlacerClient({ spots, categories }: PlacerClientProps) {
     <main className="relative w-full p-3" style={{ height: "calc(100dvh - 56px)" }}>
       <PlacerMap
         spots={spots}
+        categories={categories}
         pendingLocation={pendingLocation}
         flyToTarget={flyToTarget}
         activeCategoryId={activeCategoryId}

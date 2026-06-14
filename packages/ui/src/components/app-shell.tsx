@@ -22,7 +22,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="relative flex flex-col items-center justify-start w-full max-w-[1024px] min-h-screen pb-16 md:pb-0">
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between px-4 w-full pt-3">
+      <header className="sticky top-0 z-[4000] flex h-14 items-center justify-between px-4 w-full pt-3">
         {titleHref ? (
           <a
             href={titleHref}
