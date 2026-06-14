@@ -7,6 +7,30 @@ import { createElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+
+function MapRefCapture({ mapRef }: { mapRef: React.RefObject<L.Map | null> }) {
+  const map = useMap();
+  mapRef.current = map;
+  return null;
+}
+
+function SpotHoverBubble({ spot, x, y }: { spot: SpotRow; x: number; y: number }) {
+  return (
+    <div
+      className="pointer-events-none absolute z-[3500] animate-[overlay-in_0.15s_ease-out]"
+      style={{ left: x + 20, top: y, transform: "translateY(-50%)" }}
+    >
+      <div className="w-[180px] overflow-hidden rounded-[12px] bg-(--card) shadow-[0_8px_24px_0_rgba(0,0,0,0.2)]">
+        <div className="px-3 py-2">
+          <p className="truncate text-sm font-medium text-(--grey-900)">{spot.name}</p>
+        </div>
+        {spot.photoUrl && (
+          <img src={spot.photoUrl} alt={spot.name} className="h-[100px] w-full object-cover" />
+        )}
+      </div>
+    </div>
+  );
+}
 import { SpotDetailModal } from "./spot-detail-modal";
 
 interface PlacerMapProps {
@@ -191,8 +215,12 @@ export function PlacerMap({
   onMapDoubleClick,
 }: PlacerMapProps) {
   const [selectedSpot, setSelectedSpot] = useState<SpotRow | null>(null);
+  const [hoveredSpot, setHoveredSpot] = useState<{ spot: SpotRow; x: number; y: number } | null>(
+    null
+  );
   const [locationOverride, setLocationOverride] = useState(false);
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
   const visibleSpots = activeCategoryId
     ? spots.filter((s) => s.category?.id === activeCategoryId)
@@ -206,51 +234,66 @@ export function PlacerMap({
 
   return (
     <>
-      <div className="h-full w-full isolate overflow-hidden rounded-[22px]">
-        <MapContainer
-          center={[20, 0]}
-          zoom={2}
-          minZoom={3}
-          doubleClickZoom={false}
-          style={{ height: "100%", width: "100%" }}
-          attributionControl={false}
-          zoomControl={true}
-          className="greyscale-map"
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <MapDoubleClick onDoubleClick={onMapDoubleClick} />
-          <FlyTo target={flyToTarget} />
-          <FitBounds markers={markerPositions} skip={locationOverride} />
-          <UserLocation
-            onPosition={(pos) => {
-              setUserPosition(pos);
-              setLocationOverride(true);
-            }}
-          />
-          <LocateControl userPosition={userPosition} />
-          {visibleSpots.map((spot) => (
-            <Marker
-              key={spot.id}
-              position={[spot.lat, spot.lng]}
-              icon={createSpotIcon(
-                spot.category?.color ?? "var(--grey-400)",
-                spot.category?.icon ?? DEFAULT_CATEGORY_ICON
-              )}
-              eventHandlers={{ click: () => setSelectedSpot(spot) }}
+      <div className="relative h-full w-full">
+        <div className="h-full w-full isolate overflow-hidden rounded-[22px]">
+          <MapContainer
+            center={[20, 0]}
+            zoom={2}
+            minZoom={3}
+            doubleClickZoom={false}
+            style={{ height: "100%", width: "100%" }}
+            attributionControl={false}
+            zoomControl={true}
+            className="greyscale-map"
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <MapRefCapture mapRef={mapRef} />
+            <MapDoubleClick onDoubleClick={onMapDoubleClick} />
+            <FlyTo target={flyToTarget} />
+            <FitBounds markers={markerPositions} skip={locationOverride} />
+            <UserLocation
+              onPosition={(pos) => {
+                setUserPosition(pos);
+                setLocationOverride(true);
+              }}
             />
-          ))}
-          {pendingLocation && (
-            <Marker position={[pendingLocation.lat, pendingLocation.lng]} icon={pendingIcon} />
-          )}
-          {userPosition && <Marker position={userPosition} icon={userPosIcon} />}
-          {pinnableLocation && (
-            <Marker
-              position={[pinnableLocation.lat, pinnableLocation.lng]}
-              icon={pinnableIcon}
-              eventHandlers={{ click: () => onPinClick?.() }}
-            />
-          )}
-        </MapContainer>
+            <LocateControl userPosition={userPosition} />
+            {visibleSpots.map((spot) => (
+              <Marker
+                key={spot.id}
+                position={[spot.lat, spot.lng]}
+                icon={createSpotIcon(
+                  spot.category?.color ?? "var(--grey-400)",
+                  spot.category?.icon ?? DEFAULT_CATEGORY_ICON
+                )}
+                eventHandlers={{
+                  click: () => setSelectedSpot(spot),
+                  mouseover: () => {
+                    const map = mapRef.current;
+                    if (!map) return;
+                    const point = map.latLngToContainerPoint([spot.lat, spot.lng]);
+                    setHoveredSpot({ spot, x: point.x, y: point.y });
+                  },
+                  mouseout: () => setHoveredSpot(null),
+                }}
+              />
+            ))}
+            {pendingLocation && (
+              <Marker position={[pendingLocation.lat, pendingLocation.lng]} icon={pendingIcon} />
+            )}
+            {userPosition && <Marker position={userPosition} icon={userPosIcon} />}
+            {pinnableLocation && (
+              <Marker
+                position={[pinnableLocation.lat, pinnableLocation.lng]}
+                icon={pinnableIcon}
+                eventHandlers={{ click: () => onPinClick?.() }}
+              />
+            )}
+          </MapContainer>
+        </div>
+        {hoveredSpot && (
+          <SpotHoverBubble spot={hoveredSpot.spot} x={hoveredSpot.x} y={hoveredSpot.y} />
+        )}
       </div>
 
       <SpotDetailModal
