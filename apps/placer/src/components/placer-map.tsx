@@ -243,7 +243,7 @@ export function PlacerMap({
             doubleClickZoom={false}
             style={{ height: "100%", width: "100%" }}
             attributionControl={false}
-            zoomControl={true}
+            zoomControl={false}
             className="greyscale-map"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

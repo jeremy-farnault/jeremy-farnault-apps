@@ -1,7 +1,8 @@
 "use client";
 
+import { type NominatimAddress, formatAddress } from "@/lib/format-address";
 import type { CategoryRow, SpotRow } from "@/lib/queries";
-import { Select, SelectItem, TextInput } from "@jf/ui";
+import { Select, SelectItem, TextInput, Tooltip } from "@jf/ui";
 import { useEffect, useState } from "react";
 
 type NominatimResult = {
@@ -9,6 +10,7 @@ type NominatimResult = {
   display_name: string;
   lat: string;
   lon: string;
+  address?: NominatimAddress;
 };
 
 type SearchResult =
@@ -65,7 +67,7 @@ export function MapSearchBar({
       setIsLoading(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=json&limit=5`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=json&limit=5&addressdetails=1`
         );
         const data: NominatimResult[] = await res.json();
         setNominatimResults(data);
@@ -172,24 +174,28 @@ export function MapSearchBar({
               <>
                 {spotResults.length > 0 && <div className="mx-3 h-px bg-(--border)" />}
                 <p className="px-3 pb-1 pt-2 text-xs text-(--grey-400)">Places</p>
-                {nominatimResults.map((r) => (
-                  <button
-                    key={r.place_id}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() =>
-                      handleSelect({
-                        kind: "address",
-                        display_name: r.display_name,
-                        lat: Number.parseFloat(r.lat),
-                        lng: Number.parseFloat(r.lon),
-                      })
-                    }
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
-                  >
-                    <span className="truncate">{r.display_name}</span>
-                  </button>
-                ))}
+                {nominatimResults.map((r) => {
+                  const short = r.address ? formatAddress(r.address) : r.display_name;
+                  return (
+                    <Tooltip key={r.place_id} content={r.display_name} side="top">
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() =>
+                          handleSelect({
+                            kind: "address",
+                            display_name: r.display_name,
+                            lat: Number.parseFloat(r.lat),
+                            lng: Number.parseFloat(r.lon),
+                          })
+                        }
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                      >
+                        <span className="truncate">{short}</span>
+                      </button>
+                    </Tooltip>
+                  );
+                })}
               </>
             )}
           </div>

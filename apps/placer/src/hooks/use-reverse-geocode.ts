@@ -1,3 +1,4 @@
+import { type NominatimAddress, formatAddress } from "@/lib/format-address";
 import { useEffect, useState } from "react";
 
 export function useReverseGeocode(
@@ -20,8 +21,8 @@ export function useReverseGeocode(
       signal: controller.signal,
     })
       .then((r) => r.json())
-      .then((data: { display_name?: string }) => {
-        if (data.display_name) setAddress(data.display_name);
+      .then((data: { address?: NominatimAddress }) => {
+        if (data.address) setAddress(formatAddress(data.address));
         setLoading(false);
       })
       .catch(() => {

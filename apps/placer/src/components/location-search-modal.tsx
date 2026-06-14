@@ -1,6 +1,7 @@
 "use client";
 
-import { ActionModal, TextInput } from "@jf/ui";
+import { type NominatimAddress, formatAddress } from "@/lib/format-address";
+import { ActionModal, TextInput, Tooltip } from "@jf/ui";
 import { useEffect, useState } from "react";
 
 type NominatimResult = {
@@ -8,6 +9,7 @@ type NominatimResult = {
   display_name: string;
   lat: string;
   lon: string;
+  address?: NominatimAddress;
 };
 
 export type SelectedLocation = {
@@ -43,7 +45,7 @@ export function LocationSearchModal({ isOpen, onClose, onSelect }: LocationSearc
       setIsLoading(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`
         );
         const data: NominatimResult[] = await res.json();
         setResults(data);
@@ -84,17 +86,22 @@ export function LocationSearchModal({ isOpen, onClose, onSelect }: LocationSearc
           {showNoResults && <p className="text-xs text-(--grey-500)">No results found.</p>}
           {results.length > 0 && (
             <ul className="flex flex-col gap-0.5">
-              {results.map((r) => (
-                <li key={r.place_id}>
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(r)}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
-                  >
-                    {r.display_name}
-                  </button>
-                </li>
-              ))}
+              {results.map((r) => {
+                const short = r.address ? formatAddress(r.address) : r.display_name;
+                return (
+                  <li key={r.place_id}>
+                    <Tooltip content={r.display_name} side="top">
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(r)}
+                        className="w-full rounded-lg px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                      >
+                        <span className="truncate">{short}</span>
+                      </button>
+                    </Tooltip>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

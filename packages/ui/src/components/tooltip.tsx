@@ -21,7 +21,7 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
         <TooltipPrimitive.Content
           side={side}
           sideOffset={6}
-          className="z-50 rounded-md bg-(--grey-900) px-2 py-1 text-xs text-white transition-opacity duration-150"
+          className="z-[9200] max-w-[280px] whitespace-normal rounded-md bg-(--grey-900) px-2 py-1 text-xs text-white transition-opacity duration-150"
         >
           {content}
         </TooltipPrimitive.Content>
