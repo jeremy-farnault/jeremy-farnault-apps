@@ -20,7 +20,10 @@ function SpotHoverBubble({ spot, x, y }: { spot: SpotRow; x: number; y: number }
       className="pointer-events-none absolute z-[3500] animate-[overlay-in_0.15s_ease-out]"
       style={{ left: x + 20, top: y, transform: "translateY(-50%)" }}
     >
-      <div className="w-[180px] overflow-hidden rounded-[12px] bg-(--card) shadow-[0_8px_24px_0_rgba(0,0,0,0.2)]">
+      <div
+        className="w-[180px] overflow-hidden rounded-[12px] bg-(--card) shadow-[0_8px_24px_0_rgba(0,0,0,0.2)]"
+        style={spot.category?.color ? { border: `2px solid ${spot.category.color}` } : undefined}
+      >
         <div className="px-3 py-2">
           <p className="truncate text-sm font-medium text-(--grey-900)">{spot.name}</p>
         </div>
