@@ -11,11 +11,14 @@ import { IncomeList } from "@/components/income-list";
 import { IncomeSourcesList } from "@/components/income-sources-list";
 import { MonthNav } from "@/components/month-nav";
 import { OverviewChart } from "@/components/overview-chart";
+import { SpendingCategoriesList } from "@/components/spending-categories-list";
 import { SpendingChart } from "@/components/spending-chart";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
+import { CATEGORY_COLORS, SPENDING_CATEGORY_COLORS } from "@/lib/constants";
 import {
+  type SpendingCategoryRow,
   getAssetEntriesForMonth,
   getAssetSources,
   getAssetsForMonth,
@@ -25,6 +28,7 @@ import {
   getIncomeForMonth,
   getIncomeSources,
   getMonthlyTotals,
+  getSpendingCategories,
   getSpendingEntriesForMonth,
   getSpendingForMonth,
   hasOpenAssetEntries,
@@ -71,7 +75,14 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const [spendingData, openEntries, spendingHomeCurrency, spendingRates, spendingEntries] =
+  const [
+    spendingData,
+    openEntries,
+    spendingHomeCurrency,
+    spendingRates,
+    spendingEntries,
+    spendingCategories,
+  ] =
     view === "spending"
       ? await Promise.all([
           getSpendingForMonth(userId, month),
@@ -79,8 +90,9 @@ export default async function FinancerPage({
           getHomeCurrency(userId),
           getExchangeRates(),
           getSpendingEntriesForMonth(userId, month),
+          getSpendingCategories(userId),
         ])
-      : [[], false, "USD", {}, []];
+      : [[], false, "USD", {}, [], []];
 
   const [
     assetsData,
@@ -129,6 +141,19 @@ export default async function FinancerPage({
         ])
       : [[], [], []];
 
+  const typedSpendingCategories = spendingCategories as SpendingCategoryRow[];
+  const categoryColors: Record<string, string> = {
+    ...CATEGORY_COLORS,
+    ...Object.fromEntries(
+      typedSpendingCategories.map((c, i) => [
+        c.name,
+        c.color ??
+          SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ??
+          "var(--grey-400)",
+      ])
+    ),
+  };
+
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-10 sm:gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -141,16 +166,23 @@ export default async function FinancerPage({
       </div>
       {view === "spending" && (
         <>
-          <SpendingChart data={spendingData} />
+          <SpendingChart data={spendingData} categoryColors={categoryColors} />
+          <SpendingCategoriesList categories={typedSpendingCategories} />
           <SpendingList
             data={spendingData}
             homeCurrency={spendingHomeCurrency}
             rates={spendingRates}
             isOpen={openEntries}
             entries={spendingEntries}
+            categoryColors={categoryColors}
+            customCategories={typedSpendingCategories}
           />
           {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
-          <SpendingCta viewedMonth={month} homeCurrency={spendingHomeCurrency} />
+          <SpendingCta
+            viewedMonth={month}
+            homeCurrency={spendingHomeCurrency}
+            customCategories={typedSpendingCategories}
+          />
         </>
       )}
       {view === "assets" && (

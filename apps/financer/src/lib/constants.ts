@@ -46,6 +46,18 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Other: "var(--beige-400)",
 };
 
+export const SPENDING_CATEGORY_COLORS = [
+  "var(--blue-400)",
+  "var(--green-400)",
+  "var(--teal-400)",
+  "var(--moss-400)",
+  "var(--beige-400)",
+  "var(--yellow-400)",
+  "var(--magenta-400)",
+  "var(--red-400)",
+  "var(--purple-400)",
+] as const;
+
 export const SPENDING_CATEGORIES = [
   "Entertainment",
   "Everyday",

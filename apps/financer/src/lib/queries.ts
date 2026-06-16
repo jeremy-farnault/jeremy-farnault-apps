@@ -8,6 +8,7 @@ import {
   financerIncomeEntries,
   financerIncomeSources,
   financerIncomeSummaries,
+  financerSpendingCategories,
   financerSummaries,
   financerUserSettings,
 } from "@jf/db";
@@ -68,6 +69,13 @@ export type IncomeSourceRow = {
   id: string;
   name: string;
   currency: string;
+  color: string | null;
+  hasEntries: boolean;
+};
+
+export type SpendingCategoryRow = {
+  id: string;
+  name: string;
   color: string | null;
   hasEntries: boolean;
 };
@@ -400,6 +408,41 @@ export async function getIncomeSources(userId: string): Promise<IncomeSourceRow[
   return sources
     .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     .map(({ createdAt: _, ...s }) => ({ ...s, hasEntries: sourceIdsWithEntries.has(s.id) }));
+}
+
+export async function getSpendingCategories(userId: string): Promise<SpendingCategoryRow[]> {
+  const categories = await db
+    .select({
+      id: financerSpendingCategories.id,
+      name: financerSpendingCategories.name,
+      color: financerSpendingCategories.color,
+      createdAt: financerSpendingCategories.createdAt,
+    })
+    .from(financerSpendingCategories)
+    .where(eq(financerSpendingCategories.userId, userId));
+
+  if (categories.length === 0) return [];
+
+  const names = categories.map((c) => c.name);
+  const [entriesUsing, summariesUsing] = await Promise.all([
+    db
+      .selectDistinct({ category: financerEntries.category })
+      .from(financerEntries)
+      .where(and(eq(financerEntries.userId, userId), inArray(financerEntries.category, names))),
+    db
+      .selectDistinct({ category: financerSummaries.category })
+      .from(financerSummaries)
+      .where(and(eq(financerSummaries.userId, userId), inArray(financerSummaries.category, names))),
+  ]);
+
+  const usedNames = new Set([
+    ...entriesUsing.map((r) => r.category),
+    ...summariesUsing.map((r) => r.category),
+  ]);
+
+  return categories
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    .map(({ createdAt: _, ...c }) => ({ ...c, hasEntries: usedNames.has(c.name) }));
 }
 
 export async function getAvailableMonths(userId: string): Promise<string[]> {

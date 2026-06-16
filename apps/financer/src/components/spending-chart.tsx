@@ -1,6 +1,5 @@
 "use client";
 
-import { CATEGORY_COLORS } from "@/lib/constants";
 import type { SpendingRow } from "@/lib/queries";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -8,7 +7,13 @@ function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function SpendingChart({ data }: { data: SpendingRow[] }) {
+export function SpendingChart({
+  data,
+  categoryColors,
+}: {
+  data: SpendingRow[];
+  categoryColors: Record<string, string>;
+}) {
   if (data.length === 0) return null;
 
   const tooltipStyle = {
@@ -35,7 +40,7 @@ export function SpendingChart({ data }: { data: SpendingRow[] }) {
             {data.map((entry) => (
               <Cell
                 key={`${entry.category}-${entry.currency}`}
-                fill={CATEGORY_COLORS[entry.category] ?? "var(--grey-400)"}
+                fill={categoryColors[entry.category] ?? "var(--grey-400)"}
               />
             ))}
           </Pie>
@@ -56,7 +61,7 @@ export function SpendingChart({ data }: { data: SpendingRow[] }) {
           <div key={`${entry.category}-${entry.currency}`} className="flex items-center gap-1.5">
             <div
               className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: CATEGORY_COLORS[entry.category] ?? "var(--grey-400)" }}
+              style={{ backgroundColor: categoryColors[entry.category] ?? "var(--grey-400)" }}
             />
             <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
               {entry.category}

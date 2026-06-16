@@ -1,15 +1,17 @@
 "use client";
 
-import { createSpendingEntry } from "@/lib/actions";
+import { createSpendingCategory, createSpendingEntry } from "@/lib/actions";
 import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
+import type { SpendingCategoryRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
-import { MinusIcon, PlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { MinusIcon, PlusCircleIcon, PlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface SpendingCtaProps {
   viewedMonth: string;
   homeCurrency: string;
+  customCategories: SpendingCategoryRow[];
 }
 
 type SpendingLogRow = { value: string; category: string; currency: string };
@@ -21,13 +23,39 @@ function formatMonth(month: string): string {
   });
 }
 
-export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
+export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: SpendingCtaProps) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<SpendingLogRow[]>([
     { value: "", category: "", currency: homeCurrency },
   ]);
   const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([undefined]);
   const [isPending, startTransition] = useTransition();
+
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isAddCategoryPending, startAddCategoryTransition] = useTransition();
+
+  const allCategories = [...SPENDING_CATEGORIES, ...customCategories.map((c) => c.name)].sort(
+    (a, b) => a.localeCompare(b)
+  );
+
+  function handleAddCategoryClose() {
+    setAddCategoryOpen(false);
+    setNewCategoryName("");
+  }
+
+  function handleAddCategorySubmit() {
+    if (!newCategoryName.trim()) return;
+    startAddCategoryTransition(async () => {
+      try {
+        await createSpendingCategory({ name: newCategoryName });
+        toast.success("Category added");
+        handleAddCategoryClose();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
+    });
+  }
 
   function handleOpen() {
     setOpen(true);
@@ -109,6 +137,14 @@ export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
       >
         <button
           type="button"
+          onClick={() => setAddCategoryOpen(true)}
+          aria-label="Add spending category"
+          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+        >
+          <PlusCircleIcon size={22} />
+        </button>
+        <button
+          type="button"
           onClick={handleOpen}
           aria-label="Log spending"
           className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
@@ -116,6 +152,24 @@ export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
           <PlusSquareIcon size={22} />
         </button>
       </div>
+
+      <ActionModal
+        isOpen={addCategoryOpen}
+        onClose={handleAddCategoryClose}
+        size="small"
+        title="Add category"
+        content={
+          <TextInput value={newCategoryName} onChange={setNewCategoryName} placeholder="Name" />
+        }
+        primaryButton={{
+          label: "Add",
+          loading: isAddCategoryPending,
+          onClick: handleAddCategorySubmit,
+        }}
+        secondaryButton={{ label: "Cancel", onClick: handleAddCategoryClose }}
+        closeOnBackdropClick={!isAddCategoryPending}
+        closeOnEscapeKeyDown={!isAddCategoryPending}
+      />
 
       <ActionModal
         isOpen={open}
@@ -143,7 +197,7 @@ export function SpendingCta({ viewedMonth, homeCurrency }: SpendingCtaProps) {
                         onValueChange={(v) => updateRow(idx, "category", v)}
                         placeholder="Category"
                       >
-                        {SPENDING_CATEGORIES.map((c) => (
+                        {allCategories.map((c) => (
                           <SelectItem key={c} value={c}>
                             {c}
                           </SelectItem>

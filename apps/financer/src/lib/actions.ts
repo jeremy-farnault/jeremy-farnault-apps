@@ -10,6 +10,7 @@ import {
   financerIncomeEntries,
   financerIncomeSources,
   financerIncomeSummaries,
+  financerSpendingCategories,
   financerSummaries,
   financerUserSettings,
   withTransaction,
@@ -70,6 +71,77 @@ export async function deleteSpendingEntry(id: string): Promise<void> {
   await db
     .delete(financerEntries)
     .where(and(eq(financerEntries.id, id), eq(financerEntries.userId, userId)));
+  revalidatePath("/", "layout");
+}
+
+// ─── Spending category actions ────────────────────────────────────────────────
+
+export async function createSpendingCategory(data: { name: string }): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  const userId = await getAuthUserId();
+  await db.insert(financerSpendingCategories).values({
+    userId,
+    name: data.name.trim(),
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function updateSpendingCategory(id: string, data: { name: string }): Promise<void> {
+  if (!data.name.trim()) throw new Error("Name is required");
+  const userId = await getAuthUserId();
+  const [existing] = await db
+    .select({ name: financerSpendingCategories.name })
+    .from(financerSpendingCategories)
+    .where(
+      and(eq(financerSpendingCategories.id, id), eq(financerSpendingCategories.userId, userId))
+    );
+  if (!existing) throw new Error("Category not found");
+  const newName = data.name.trim();
+  await withTransaction(async (tx) => {
+    await tx
+      .update(financerSpendingCategories)
+      .set({ name: newName, updatedAt: new Date() })
+      .where(
+        and(eq(financerSpendingCategories.id, id), eq(financerSpendingCategories.userId, userId))
+      );
+    if (existing.name !== newName) {
+      await tx
+        .update(financerEntries)
+        .set({ category: newName, updatedAt: new Date() })
+        .where(
+          and(eq(financerEntries.userId, userId), eq(financerEntries.category, existing.name))
+        );
+    }
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function deleteSpendingCategory(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  const [category] = await db
+    .select({ name: financerSpendingCategories.name })
+    .from(financerSpendingCategories)
+    .where(
+      and(eq(financerSpendingCategories.id, id), eq(financerSpendingCategories.userId, userId))
+    );
+  if (!category) throw new Error("Category not found");
+  const [entryUsing] = await db
+    .select({ id: financerEntries.id })
+    .from(financerEntries)
+    .where(and(eq(financerEntries.userId, userId), eq(financerEntries.category, category.name)))
+    .limit(1);
+  if (entryUsing) throw new Error("This category has transactions assigned to it");
+  const [summaryUsing] = await db
+    .select({ id: financerSummaries.id })
+    .from(financerSummaries)
+    .where(and(eq(financerSummaries.userId, userId), eq(financerSummaries.category, category.name)))
+    .limit(1);
+  if (summaryUsing) throw new Error("This category has transactions assigned to it");
+  await db
+    .delete(financerSpendingCategories)
+    .where(
+      and(eq(financerSpendingCategories.id, id), eq(financerSpendingCategories.userId, userId))
+    );
   revalidatePath("/", "layout");
 }
 

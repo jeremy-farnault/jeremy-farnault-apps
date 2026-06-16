@@ -1,8 +1,8 @@
 "use client";
 
 import { deleteSpendingEntry, updateSpendingEntry } from "@/lib/actions";
-import { CATEGORY_COLORS, CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
-import type { SpendingEntryRow, SpendingRow } from "@/lib/queries";
+import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
+import type { SpendingCategoryRow, SpendingEntryRow, SpendingRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -18,9 +18,22 @@ interface SpendingListProps {
   rates: Record<string, number>;
   isOpen: boolean;
   entries: SpendingEntryRow[];
+  categoryColors: Record<string, string>;
+  customCategories: SpendingCategoryRow[];
 }
 
-export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: SpendingListProps) {
+export function SpendingList({
+  data,
+  homeCurrency,
+  rates,
+  isOpen,
+  entries,
+  categoryColors,
+  customCategories,
+}: SpendingListProps) {
+  const allCategories = [...SPENDING_CATEGORIES, ...customCategories.map((c) => c.name)].sort(
+    (a, b) => a.localeCompare(b)
+  );
   const [editingEntry, setEditingEntry] = useState<SpendingEntryRow | null>(null);
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
   const [editCategory, setEditCategory] = useState("");
@@ -107,7 +120,7 @@ export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: Spe
               {entries.map((entry) => (
                 <li
                   key={entry.id}
-                  style={{ borderLeft: `4px solid ${CATEGORY_COLORS[entry.category]}` }}
+                  style={{ borderLeft: `4px solid ${categoryColors[entry.category]}` }}
                   className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
                 >
                   <span className="text-sm font-medium text-(--grey-900)">{entry.category}</span>
@@ -165,7 +178,7 @@ export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: Spe
           content={
             <div className="flex flex-col gap-3">
               <Select value={editCategory} onValueChange={setEditCategory} placeholder="Category">
-                {SPENDING_CATEGORIES.map((c) => (
+                {allCategories.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
                   </SelectItem>
@@ -251,7 +264,7 @@ export function SpendingList({ data, homeCurrency, rates, isOpen, entries }: Spe
         {rows.map(({ category, currency, displayAmount, prefix }) => (
           <li
             key={`${category}-${currency}`}
-            style={{ borderLeft: `4px solid ${CATEGORY_COLORS[category]}` }}
+            style={{ borderLeft: `4px solid ${categoryColors[category]}` }}
             className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
           >
             <span className="text-sm font-medium text-(--grey-900)">{category}</span>

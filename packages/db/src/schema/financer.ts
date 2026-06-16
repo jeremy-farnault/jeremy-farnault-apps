@@ -105,6 +105,17 @@ export const financerAssetSummaries = pgTable("financer_asset_summaries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const financerSpendingCategories = pgTable("financer_spending_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  color: text("color"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const financerUserSettings = pgTable("financer_user_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")
