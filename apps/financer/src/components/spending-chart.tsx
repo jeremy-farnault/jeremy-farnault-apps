@@ -39,7 +39,7 @@ export function SpendingChart({
           >
             {data.map((entry) => (
               <Cell
-                key={`${entry.category}-${entry.currency}`}
+                key={entry.category}
                 fill={categoryColors[entry.category] ?? "var(--grey-400)"}
               />
             ))}
@@ -58,7 +58,7 @@ export function SpendingChart({
       </ResponsiveContainer>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 px-2 mt-2">
         {data.map((entry) => (
-          <div key={`${entry.category}-${entry.currency}`} className="flex items-center gap-1.5">
+          <div key={entry.category} className="flex items-center gap-1.5">
             <div
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: categoryColors[entry.category] ?? "var(--grey-400)" }}

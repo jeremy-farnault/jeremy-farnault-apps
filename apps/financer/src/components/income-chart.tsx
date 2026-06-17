@@ -43,7 +43,7 @@ export function IncomeChart({
                 sources?.find((s) => s.name === entry.name)?.color ??
                 INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
                 "var(--grey-400)";
-              return <Cell key={`${entry.name}-${entry.currency}`} fill={color} />;
+              return <Cell key={entry.name} fill={color} />;
             })}
           </Pie>
           <Tooltip
@@ -65,7 +65,7 @@ export function IncomeChart({
             INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
             "var(--grey-400)";
           return (
-            <div key={`${entry.name}-${entry.currency}`} className="flex items-center gap-1.5">
+            <div key={entry.name} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
               <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
                 {entry.name}

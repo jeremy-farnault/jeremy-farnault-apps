@@ -18,7 +18,10 @@ import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
 import { CATEGORY_COLORS, SPENDING_CATEGORY_COLORS } from "@/lib/constants";
 import {
+  type AssetRow,
+  type IncomeRow,
   type SpendingCategoryRow,
+  type SpendingRow,
   getAssetEntriesForMonth,
   getAssetSources,
   getAssetsForMonth,
@@ -37,6 +40,81 @@ import {
 } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { headers } from "next/headers";
+
+function convertSpendingRows(
+  data: SpendingRow[],
+  rates: Record<string, number>,
+  homeCurrency: string
+): SpendingRow[] {
+  const rateTo = rates[homeCurrency];
+  const merged = new Map<string, number>();
+  for (const row of data) {
+    const rateFrom = rates[row.currency];
+    const converted = rateFrom && rateTo ? row.total * (rateTo / rateFrom) : row.total;
+    merged.set(row.category, (merged.get(row.category) ?? 0) + converted);
+  }
+  return Array.from(merged.entries()).map(([category, total]) => ({
+    category,
+    currency: homeCurrency,
+    total,
+  }));
+}
+
+function convertAssetRows(
+  data: AssetRow[],
+  rates: Record<string, number>,
+  homeCurrency: string
+): AssetRow[] {
+  const rateTo = rates[homeCurrency];
+  const merged = new Map<string, { sourceId?: string; total: number }>();
+  for (const row of data) {
+    const rateFrom = rates[row.currency];
+    const converted = rateFrom && rateTo ? row.total * (rateTo / rateFrom) : row.total;
+    const existing = merged.get(row.name);
+    if (existing) {
+      existing.total += converted;
+    } else {
+      merged.set(row.name, {
+        ...(row.sourceId !== undefined ? { sourceId: row.sourceId } : {}),
+        total: converted,
+      });
+    }
+  }
+  return Array.from(merged.entries()).map(([name, { sourceId, total }]) => ({
+    name,
+    ...(sourceId !== undefined ? { sourceId } : {}),
+    currency: homeCurrency,
+    total,
+  }));
+}
+
+function convertIncomeRows(
+  data: IncomeRow[],
+  rates: Record<string, number>,
+  homeCurrency: string
+): IncomeRow[] {
+  const rateTo = rates[homeCurrency];
+  const merged = new Map<string, { sourceId?: string; total: number }>();
+  for (const row of data) {
+    const rateFrom = rates[row.currency];
+    const converted = rateFrom && rateTo ? row.total * (rateTo / rateFrom) : row.total;
+    const existing = merged.get(row.name);
+    if (existing) {
+      existing.total += converted;
+    } else {
+      merged.set(row.name, {
+        ...(row.sourceId !== undefined ? { sourceId: row.sourceId } : {}),
+        total: converted,
+      });
+    }
+  }
+  return Array.from(merged.entries()).map(([name, { sourceId, total }]) => ({
+    name,
+    ...(sourceId !== undefined ? { sourceId } : {}),
+    currency: homeCurrency,
+    total,
+  }));
+}
 
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -166,7 +244,10 @@ export default async function FinancerPage({
       </div>
       {view === "spending" && (
         <>
-          <SpendingChart data={spendingData} categoryColors={categoryColors} />
+          <SpendingChart
+            data={convertSpendingRows(spendingData, spendingRates, spendingHomeCurrency)}
+            categoryColors={categoryColors}
+          />
           <SpendingCategoriesList categories={typedSpendingCategories} />
           <SpendingList
             data={spendingData}
@@ -187,7 +268,10 @@ export default async function FinancerPage({
       )}
       {view === "assets" && (
         <>
-          <AssetsChart data={assetsData} sources={assetSources} />
+          <AssetsChart
+            data={convertAssetRows(assetsData, assetsRates, assetsHomeCurrency)}
+            sources={assetSources}
+          />
           <AssetSourcesList
             sources={assetSources}
             month={month}
@@ -201,7 +285,10 @@ export default async function FinancerPage({
       )}
       {view === "income" && (
         <>
-          <IncomeChart data={incomeData} sources={incomeSources} />
+          <IncomeChart
+            data={convertIncomeRows(incomeData, incomeRates, incomeHomeCurrency)}
+            sources={incomeSources}
+          />
           <IncomeSourcesList
             sources={incomeSources}
             month={month}
