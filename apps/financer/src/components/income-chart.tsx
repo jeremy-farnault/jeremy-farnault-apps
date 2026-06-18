@@ -38,10 +38,14 @@ export function IncomeChart({
             outerRadius={90}
             strokeWidth={0}
           >
-            {data.map((entry, index) => {
+            {data.map((entry) => {
+              const sourceIndex = Math.max(
+                sources?.findIndex((s) => s.name === entry.name) ?? 0,
+                0
+              );
               const color =
-                sources?.find((s) => s.name === entry.name)?.color ??
-                INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
+                sources?.[sourceIndex]?.color ??
+                INCOME_SOURCE_COLORS[sourceIndex % INCOME_SOURCE_COLORS.length] ??
                 "var(--grey-400)";
               return <Cell key={entry.name} fill={color} />;
             })}
@@ -59,10 +63,11 @@ export function IncomeChart({
         </PieChart>
       </ResponsiveContainer>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 px-2 mt-2">
-        {data.map((entry, index) => {
+        {data.map((entry) => {
+          const sourceIndex = Math.max(sources?.findIndex((s) => s.name === entry.name) ?? 0, 0);
           const color =
-            sources?.find((s) => s.name === entry.name)?.color ??
-            INCOME_SOURCE_COLORS[index % INCOME_SOURCE_COLORS.length] ??
+            sources?.[sourceIndex]?.color ??
+            INCOME_SOURCE_COLORS[sourceIndex % INCOME_SOURCE_COLORS.length] ??
             "var(--grey-400)";
           return (
             <div key={entry.name} className="flex items-center gap-1.5">
