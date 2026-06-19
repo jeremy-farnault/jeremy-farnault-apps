@@ -1,5 +1,6 @@
 import type { Icon } from "@phosphor-icons/react";
 import {
+  BarbellIcon,
   ChecksIcon,
   CoinsIcon,
   MapPinIcon,
@@ -58,5 +59,12 @@ export const apps: AppDefinition[] = [
     icon: MapPinIcon,
     href: process.env.NEXT_PUBLIC_PLACER_URL ?? "#",
     accentColor: "--blue-400",
+  },
+  {
+    id: "gainer",
+    name: "Gainer",
+    icon: BarbellIcon,
+    href: process.env.NEXT_PUBLIC_GAINER_URL ?? "#",
+    accentColor: "--red-400",
   },
 ];

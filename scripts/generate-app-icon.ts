@@ -2,6 +2,9 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import sharp from "sharp";
 
+const BARBELL_PATH =
+  "M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z";
+
 const RANKING_PATH =
   "M112.41,102.53a8,8,0,0,1,5.06-10.12l12-4A8,8,0,0,1,140,96v40a8,8,0,0,1-16,0V107.1l-1.47.49A8,8,0,0,1,112.41,102.53ZM248,208a8,8,0,0,1-8,8H16a8,8,0,0,1,0-16h8V104A16,16,0,0,1,40,88H80V56A16,16,0,0,1,96,40h64a16,16,0,0,1,16,16v72h40a16,16,0,0,1,16,16v56h8A8,8,0,0,1,248,208Zm-72-64v56h40V144ZM96,200h64V56H96Zm-56,0H80V104H40Z";
 
@@ -52,7 +55,7 @@ function parseArgs(): { color: string; out: string; icon: string } {
   const out = get("--out");
   if (!color || !out) {
     console.error(
-      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon coins|ranking|map-pin]"
+      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin]"
     );
     process.exit(1);
   }
@@ -61,7 +64,14 @@ function parseArgs(): { color: string; out: string; icon: string } {
 
 async function generate() {
   const { color, out, icon } = parseArgs();
-  const iconPath = icon === "coins" ? COINS_PATH : icon === "map-pin" ? MAP_PIN_PATH : RANKING_PATH;
+  const iconPath =
+    icon === "barbell"
+      ? BARBELL_PATH
+      : icon === "coins"
+        ? COINS_PATH
+        : icon === "map-pin"
+          ? MAP_PIN_PATH
+          : RANKING_PATH;
   const iconsDir = resolve(out, "icons");
   const splashDir = resolve(iconsDir, "splash");
   await mkdir(splashDir, { recursive: true });
