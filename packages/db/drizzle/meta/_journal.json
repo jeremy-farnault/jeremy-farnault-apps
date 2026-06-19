@@ -127,6 +127,13 @@
       "when": 1781611638132,
       "tag": "0017_wealthy_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1781880102661,
+      "tag": "0018_clear_gladiator",
+      "breakpoints": true
     }
   ]
 }

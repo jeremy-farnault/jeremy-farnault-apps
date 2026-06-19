@@ -5,3 +5,4 @@ export * from "./routiner";
 export * from "./classer";
 export * from "./financer";
 export * from "./placer";
+export * from "./gainer";
