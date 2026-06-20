@@ -1,7 +1,6 @@
-import { AddExerciseCta } from "@/components/add-exercise-cta";
 import { ExerciseCard } from "@/components/exercise-card";
 import { FinishSessionButton } from "@/components/finish-session-button";
-import { RestTimer } from "@/components/rest-timer";
+import { LogCta } from "@/components/log-cta";
 import { StartSessionButton } from "@/components/start-session-button";
 import type { SessionExerciseWithSets } from "@/lib/queries";
 import type { gainerExercises, gainerSessions } from "@jf/db";
@@ -29,8 +28,6 @@ export function LogTab({ activeSession, exercises, sessionExercisesWithSets }: L
         <FinishSessionButton sessionId={activeSession.id} />
       </div>
 
-      <RestTimer />
-
       {sessionExercisesWithSets.length === 0 ? (
         <p className="text-(--grey-600) text-sm">No exercises yet. Add one to get started.</p>
       ) : (
@@ -41,7 +38,7 @@ export function LogTab({ activeSession, exercises, sessionExercisesWithSets }: L
         </div>
       )}
 
-      <AddExerciseCta sessionId={activeSession.id} exercises={exercises} />
+      <LogCta sessionId={activeSession.id} exercises={exercises} />
     </div>
   );
 }

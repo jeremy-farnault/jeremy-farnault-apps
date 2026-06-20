@@ -59,7 +59,7 @@ export function ExerciseCard({ data }: ExerciseCardProps) {
           onChange={(value) => setWeight(value)}
         />
         <TextInput placeholder="Reps" value={reps} onChange={(value) => setReps(value)} />
-        <Button variant="outline" onClick={handleLog} disabled={isPending}>
+        <Button onClick={handleLog} disabled={isPending}>
           {isPending ? "Logging…" : "Log set"}
         </Button>
       </div>

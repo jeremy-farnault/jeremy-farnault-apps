@@ -72,7 +72,7 @@ export default async function ExerciseDetailPage({
   const sessionGroups = [...sessionGroupMap.values()].reverse();
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-2xl px-4 py-6">
+    <div className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
       <Link
         href="/?view=data"
         className="inline-flex items-center gap-1 text-sm text-(--grey-500) hover:text-(--grey-900) transition-colors w-fit"

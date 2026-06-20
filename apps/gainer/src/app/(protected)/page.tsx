@@ -29,7 +29,7 @@ export default async function GainerPage({
   const loggedExercises = view === "data" ? await getLoggedExercises(userId) : [];
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-2xl px-4 py-6">
+    <div className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
       <ViewToggle view={view} />
       {view === "log" && (
         <LogTab

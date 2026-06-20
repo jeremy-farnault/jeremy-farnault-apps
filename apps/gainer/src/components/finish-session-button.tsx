@@ -26,9 +26,7 @@ export function FinishSessionButton({ sessionId }: FinishSessionButtonProps) {
 
   return (
     <>
-      <Button variant="outline" onClick={() => setModalOpen(true)}>
-        Finish session
-      </Button>
+      <Button onClick={() => setModalOpen(true)}>Finish session</Button>
       <ActionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
