@@ -19,27 +19,6 @@ export interface AppDefinition {
 
 export const apps: AppDefinition[] = [
   {
-    id: "noter",
-    name: "Noter",
-    icon: NotepadIcon,
-    href: process.env.NEXT_PUBLIC_NOTER_URL ?? "#",
-    accentColor: "--magenta-400",
-  },
-  {
-    id: "journaler",
-    name: "Journaler",
-    icon: StackIcon,
-    href: process.env.NEXT_PUBLIC_JOURNALER_URL ?? "#",
-    accentColor: "--teal-400",
-  },
-  {
-    id: "routiner",
-    name: "Routiner",
-    icon: ChecksIcon,
-    href: process.env.NEXT_PUBLIC_ROUTINER_URL ?? "#",
-    accentColor: "--yellow-400",
-  },
-  {
     id: "classer",
     name: "Classer",
     icon: RankingIcon,
@@ -54,6 +33,27 @@ export const apps: AppDefinition[] = [
     accentColor: "--purple-400",
   },
   {
+    id: "gainer",
+    name: "Gainer",
+    icon: BarbellIcon,
+    href: process.env.NEXT_PUBLIC_GAINER_URL ?? "#",
+    accentColor: "--red-400",
+  },
+  {
+    id: "journaler",
+    name: "Journaler",
+    icon: StackIcon,
+    href: process.env.NEXT_PUBLIC_JOURNALER_URL ?? "#",
+    accentColor: "--teal-400",
+  },
+  {
+    id: "noter",
+    name: "Noter",
+    icon: NotepadIcon,
+    href: process.env.NEXT_PUBLIC_NOTER_URL ?? "#",
+    accentColor: "--magenta-400",
+  },
+  {
     id: "placer",
     name: "Placer",
     icon: MapPinIcon,
@@ -61,10 +61,10 @@ export const apps: AppDefinition[] = [
     accentColor: "--blue-400",
   },
   {
-    id: "gainer",
-    name: "Gainer",
-    icon: BarbellIcon,
-    href: process.env.NEXT_PUBLIC_GAINER_URL ?? "#",
-    accentColor: "--red-400",
+    id: "routiner",
+    name: "Routiner",
+    icon: ChecksIcon,
+    href: process.env.NEXT_PUBLIC_ROUTINER_URL ?? "#",
+    accentColor: "--yellow-400",
   },
 ];
