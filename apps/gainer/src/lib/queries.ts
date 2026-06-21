@@ -18,11 +18,21 @@ export async function getExercises(userId: string) {
     .orderBy(asc(gainerExercises.name));
 }
 
+export type ExerciseType = "standard" | "pdc" | "duration" | "cardio";
+
 export type SessionExerciseWithSets = {
   id: string;
   position: number;
-  exercise: { id: string; name: string };
-  sets: { id: string; setNumber: number; weight: string; reps: number; createdAt: Date }[];
+  exercise: { id: string; name: string; type: ExerciseType };
+  sets: {
+    id: string;
+    setNumber: number;
+    weight: string | null;
+    reps: number | null;
+    durationSeconds: number | null;
+    distanceMeters: number | null;
+    createdAt: Date;
+  }[];
 };
 
 export async function getSessionExercisesWithSets(
@@ -35,6 +45,7 @@ export async function getSessionExercisesWithSets(
         position: gainerSessionExercises.position,
         exerciseId: gainerExercises.id,
         exerciseName: gainerExercises.name,
+        exerciseType: gainerExercises.type,
       })
       .from(gainerSessionExercises)
       .innerJoin(gainerExercises, eq(gainerSessionExercises.exerciseId, gainerExercises.id))
@@ -48,6 +59,8 @@ export async function getSessionExercisesWithSets(
         setNumber: gainerSets.setNumber,
         weight: gainerSets.weight,
         reps: gainerSets.reps,
+        durationSeconds: gainerSets.durationSeconds,
+        distanceMeters: gainerSets.distanceMeters,
         createdAt: gainerSets.createdAt,
       })
       .from(gainerSets)
@@ -62,7 +75,7 @@ export async function getSessionExercisesWithSets(
   return sessionExercises.map((se) => ({
     id: se.id,
     position: se.position,
-    exercise: { id: se.exerciseId, name: se.exerciseName },
+    exercise: { id: se.exerciseId, name: se.exerciseName, type: se.exerciseType as ExerciseType },
     sets: sets.filter((s) => s.sessionExerciseId === se.id),
   }));
 }
@@ -79,15 +92,17 @@ export type ExerciseSetRow = {
   sessionName: string;
   sessionDate: Date;
   setNumber: number;
-  weight: string;
-  reps: number;
+  weight: string | null;
+  reps: number | null;
+  durationSeconds: number | null;
+  distanceMeters: number | null;
 };
 
 export async function getExerciseWithSets(
   userId: string,
   exerciseId: string
 ): Promise<{
-  exercise: { id: string; name: string; isCustom: boolean };
+  exercise: { id: string; name: string; isCustom: boolean; type: ExerciseType };
   sets: ExerciseSetRow[];
 } | null> {
   const [exerciseRows, setRows] = await Promise.all([
@@ -96,6 +111,7 @@ export async function getExerciseWithSets(
         id: gainerExercises.id,
         name: gainerExercises.name,
         isCustom: gainerExercises.isCustom,
+        type: gainerExercises.type,
       })
       .from(gainerExercises)
       .where(eq(gainerExercises.id, exerciseId))
@@ -109,6 +125,8 @@ export async function getExerciseWithSets(
         setNumber: gainerSets.setNumber,
         weight: gainerSets.weight,
         reps: gainerSets.reps,
+        durationSeconds: gainerSets.durationSeconds,
+        distanceMeters: gainerSets.distanceMeters,
       })
       .from(gainerSets)
       .innerJoin(
@@ -124,7 +142,10 @@ export async function getExerciseWithSets(
 
   if (!exerciseRows[0] || setRows.length === 0) return null;
 
-  return { exercise: exerciseRows[0], sets: setRows as ExerciseSetRow[] };
+  return {
+    exercise: { ...exerciseRows[0], type: exerciseRows[0].type as ExerciseType },
+    sets: setRows as ExerciseSetRow[],
+  };
 }
 
 export async function getLoggedExercises(userId: string): Promise<LoggedExercise[]> {

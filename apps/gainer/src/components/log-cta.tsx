@@ -30,8 +30,13 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
 
   // Exercise state
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
+  const [exerciseStep, setExerciseStep] = useState<"search" | "type">("search");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState("");
+  const [isNewExercise, setIsNewExercise] = useState(false);
+  const [newExerciseType, setNewExerciseType] = useState<
+    "standard" | "pdc" | "duration" | "cardio"
+  >("standard");
   const [isExercisePending, setIsExercisePending] = useState(false);
 
   const selectedDuration = customInput ? Number.parseInt(customInput, 10) : selectedPreset;
@@ -91,15 +96,28 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
 
   function handleExerciseClose() {
     setExercisePickerOpen(false);
+    setExerciseStep("search");
     setQuery("");
     setSelected("");
+    setIsNewExercise(false);
+    setNewExerciseType("standard");
+  }
+
+  function handleSelectCustom() {
+    setSelected(query.trim());
+    setIsNewExercise(true);
+    setExerciseStep("type");
   }
 
   async function handleExerciseConfirm() {
     if (!selected) return;
+    if (isNewExercise && exerciseStep === "search") {
+      setExerciseStep("type");
+      return;
+    }
     setIsExercisePending(true);
     try {
-      await addExerciseToSession(sessionId, selected);
+      await addExerciseToSession(sessionId, selected, isNewExercise ? newExerciseType : undefined);
       handleExerciseClose();
     } catch {
       toast.error("Failed to add exercise");
@@ -204,57 +222,97 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
       <ActionModal
         isOpen={exercisePickerOpen}
         onClose={handleExerciseClose}
-        title="Add exercise"
+        title={exerciseStep === "type" ? `Type for "${selected}"` : "Add exercise"}
         size="large"
         primaryButton={{
-          label: "Add",
+          label: exerciseStep === "type" ? "Add" : "Add",
           loading: isExercisePending,
           onClick: handleExerciseConfirm,
-          disabled: !selected,
+          disabled: exerciseStep === "search" ? !selected : false,
         }}
-        secondaryButton={{ label: "Cancel", onClick: handleExerciseClose }}
+        secondaryButton={{
+          label: exerciseStep === "type" ? "Back" : "Cancel",
+          onClick:
+            exerciseStep === "type"
+              ? () => {
+                  setExerciseStep("search");
+                  setIsNewExercise(false);
+                }
+              : handleExerciseClose,
+        }}
         closeOnBackdropClick={!isExercisePending}
         closeOnEscapeKeyDown={!isExercisePending}
         content={
-          <div className="flex flex-col gap-3">
-            <TextInput
-              placeholder="Search exercises…"
-              value={query}
-              onChange={(value) => {
-                setQuery(value);
-                setSelected("");
-              }}
-            />
-            <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
-              {filtered.map((exercise) => (
+          exerciseStep === "search" ? (
+            <div className="flex flex-col gap-3">
+              <TextInput
+                placeholder="Search exercises…"
+                value={query}
+                onChange={(value) => {
+                  setQuery(value);
+                  setSelected("");
+                  setIsNewExercise(false);
+                }}
+              />
+              <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
+                {filtered.map((exercise) => (
+                  <button
+                    key={exercise.id}
+                    type="button"
+                    onClick={() => {
+                      setSelected(exercise.name);
+                      setIsNewExercise(false);
+                    }}
+                    className={`text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                      selected === exercise.name && !isNewExercise
+                        ? "bg-(--primary) text-white"
+                        : "hover:bg-(--surface-150) text-(--grey-900)"
+                    }`}
+                  >
+                    {exercise.name}
+                  </button>
+                ))}
+                {showCustomOption && (
+                  <button
+                    type="button"
+                    onClick={handleSelectCustom}
+                    className="text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer hover:bg-(--surface-150) text-(--grey-600)"
+                  >
+                    Add &quot;{query.trim()}&quot; as custom
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {(
+                [
+                  { value: "standard", label: "Standard", description: "Weight + reps" },
+                  { value: "pdc", label: "Bodyweight", description: "Reps only" },
+                  { value: "duration", label: "Duration", description: "Time only" },
+                  { value: "cardio", label: "Cardio", description: "Distance + time" },
+                ] as const
+              ).map((opt) => (
                 <button
-                  key={exercise.id}
+                  key={opt.value}
                   type="button"
-                  onClick={() => setSelected(exercise.name)}
-                  className={`text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
-                    selected === exercise.name
+                  onClick={() => setNewExerciseType(opt.value)}
+                  className={`text-left px-3 py-3 rounded-lg text-sm transition-colors cursor-pointer ${
+                    newExerciseType === opt.value
                       ? "bg-(--primary) text-white"
-                      : "hover:bg-(--surface-150) text-(--grey-900)"
+                      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-900)"
                   }`}
                 >
-                  {exercise.name}
+                  <span className="font-medium">{opt.label}</span>
+                  <span
+                    className={`ml-2 text-xs ${newExerciseType === opt.value ? "text-white/70" : "text-(--grey-500)"}`}
+                  >
+                    {opt.description}
+                  </span>
                 </button>
               ))}
-              {showCustomOption && (
-                <button
-                  type="button"
-                  onClick={() => setSelected(query.trim())}
-                  className={`text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
-                    selected === query.trim()
-                      ? "bg-(--primary) text-white"
-                      : "hover:bg-(--surface-150) text-(--grey-600)"
-                  }`}
-                >
-                  Add &quot;{query.trim()}&quot; as custom
-                </button>
-              )}
             </div>
-          </div>
+          )
         }
       />
     </>

@@ -10,18 +10,45 @@ import {
   YAxis,
 } from "recharts";
 
+type ChartType = "weight" | "reps" | "duration" | "pace";
+
 interface ExerciseProgressChartProps {
-  data: { date: Date; maxWeight: number }[];
+  data: { date: Date; value: number }[];
+  chartType: ChartType;
+  valueLabel: string;
 }
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-GB", { month: "short", day: "numeric" });
 }
 
-export function ExerciseProgressChart({ data }: ExerciseProgressChartProps) {
+function formatDuration(s: number): string {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
+function formatPace(secondsPerKm: number): string {
+  const m = Math.floor(secondsPerKm / 60);
+  const s = Math.round(secondsPerKm % 60);
+  return `${m}:${s.toString().padStart(2, "0")} /km`;
+}
+
+const formatters: Record<ChartType, (v: number) => string> = {
+  weight: (v) => `${v} kg`,
+  reps: (v) => String(v),
+  duration: formatDuration,
+  pace: formatPace,
+};
+
+export function ExerciseProgressChart({ data, chartType, valueLabel }: ExerciseProgressChartProps) {
+  const formatValue = formatters[chartType];
+
   const chartData = data.map((d) => ({
     dateStr: d.date.toISOString(),
-    maxWeight: d.maxWeight,
+    value: d.value,
   }));
 
   const interval = Math.max(0, Math.ceil(chartData.length / 6) - 1);
@@ -42,9 +69,9 @@ export function ExerciseProgressChart({ data }: ExerciseProgressChartProps) {
           tickFormatter={formatDate}
           {...commonAxisProps}
         />
-        <YAxis tickFormatter={(v) => `${v} kg`} {...commonAxisProps} />
+        <YAxis tickFormatter={formatValue} {...commonAxisProps} />
         <Tooltip
-          formatter={(value) => [`${value} kg`, "Max weight"]}
+          formatter={(v) => [formatValue(v as number), valueLabel]}
           labelFormatter={(label) => formatDate(label as string)}
           contentStyle={{
             fontSize: 11,
@@ -58,7 +85,7 @@ export function ExerciseProgressChart({ data }: ExerciseProgressChartProps) {
         />
         <Line
           type="monotone"
-          dataKey="maxWeight"
+          dataKey="value"
           stroke="var(--primary)"
           strokeWidth={2}
           dot={

@@ -1,13 +1,30 @@
-import { boolean, integer, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  numeric,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
 
 // ─── Gainer ───────────────────────────────────────────────────────────────────
 
+export const gainerExerciseType = pgEnum("gainer_exercise_type", [
+  "standard",
+  "pdc",
+  "duration",
+  "cardio",
+]);
+
 export const gainerExercises = pgTable("gainer_exercises", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  type: gainerExerciseType("type").notNull().default("standard"),
   isCustom: boolean("is_custom").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -40,7 +57,9 @@ export const gainerSets = pgTable("gainer_sets", {
     .notNull()
     .references(() => gainerSessionExercises.id, { onDelete: "cascade" }),
   setNumber: integer("set_number").notNull(),
-  weight: numeric("weight", { precision: 8, scale: 2 }).notNull(),
-  reps: integer("reps").notNull(),
+  weight: numeric("weight", { precision: 8, scale: 2 }),
+  reps: integer("reps"),
+  durationSeconds: integer("duration_seconds"),
+  distanceMeters: integer("distance_meters"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

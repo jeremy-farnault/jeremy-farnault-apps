@@ -17,6 +17,26 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function formatDistance(meters: number): string {
+  return meters >= 1000
+    ? `${(meters / 1000).toLocaleString("en-GB", { maximumFractionDigits: 2 })} km`
+    : `${meters} m`;
+}
+
+function formatPace(secondsPerKm: number): string {
+  const m = Math.floor(secondsPerKm / 60);
+  const s = Math.round(secondsPerKm % 60);
+  return `${m}:${s.toString().padStart(2, "0")} /km`;
+}
+
 export default async function ExerciseDetailPage({
   params,
 }: {
@@ -32,26 +52,133 @@ export default async function ExerciseDetailPage({
   if (!result) notFound();
 
   const { exercise, sets } = result;
+  const type = exercise.type;
 
-  const totalVolume = sets.reduce((s, r) => s + Number.parseFloat(r.weight) * r.reps, 0);
-  const maxWeight = Math.max(...sets.map((r) => Number.parseFloat(r.weight)));
-  const maxReps = Math.max(...sets.map((r) => r.reps));
+  // ── Per-type stats ────────────────────────────────────────────────────────
 
-  const sessionMap = new Map<string, { date: Date; name: string; maxWeight: number }>();
-  for (const row of sets) {
-    const w = Number.parseFloat(row.weight);
-    const cur = sessionMap.get(row.sessionId);
-    if (!cur || w > cur.maxWeight) {
-      sessionMap.set(row.sessionId, { date: row.sessionDate, name: row.sessionName, maxWeight: w });
+  type ChartPoint = { date: Date; value: number };
+
+  let statCards: { label: string; value: string }[] = [];
+  let chartData: ChartPoint[] = [];
+  let chartType: "weight" | "reps" | "duration" | "pace" = "weight";
+  let chartValueLabel = "";
+
+  if (type === "standard") {
+    const totalVolume = sets.reduce(
+      (s, r) => s + Number.parseFloat(r.weight ?? "0") * (r.reps ?? 0),
+      0
+    );
+    const maxWeight = Math.max(...sets.map((r) => Number.parseFloat(r.weight ?? "0")));
+    const maxReps = Math.max(...sets.map((r) => r.reps ?? 0));
+
+    statCards = [
+      {
+        label: "Total volume",
+        value: `${totalVolume.toLocaleString("en-GB", { maximumFractionDigits: 0 })} kg`,
+      },
+      { label: "Max weight", value: `${maxWeight} kg` },
+      { label: "Max reps", value: String(maxReps) },
+    ];
+
+    const sessionMap = new Map<string, { date: Date; name: string; maxWeight: number }>();
+    for (const row of sets) {
+      const w = Number.parseFloat(row.weight ?? "0");
+      const cur = sessionMap.get(row.sessionId);
+      if (!cur || w > cur.maxWeight) {
+        sessionMap.set(row.sessionId, {
+          date: row.sessionDate,
+          name: row.sessionName,
+          maxWeight: w,
+        });
+      }
     }
+    chartData = [...sessionMap.values()]
+      .sort((a, b) => +a.date - +b.date)
+      .map((d) => ({ date: d.date, value: d.maxWeight }));
+    chartType = "weight";
+    chartValueLabel = "Max weight";
+  } else if (type === "pdc") {
+    const totalReps = sets.reduce((s, r) => s + (r.reps ?? 0), 0);
+    const maxReps = Math.max(...sets.map((r) => r.reps ?? 0));
+
+    statCards = [
+      { label: "Total reps", value: String(totalReps) },
+      { label: "Max reps", value: String(maxReps) },
+    ];
+
+    const sessionMap = new Map<string, { date: Date; maxReps: number }>();
+    for (const row of sets) {
+      const reps = row.reps ?? 0;
+      const cur = sessionMap.get(row.sessionId);
+      if (!cur || reps > cur.maxReps) {
+        sessionMap.set(row.sessionId, { date: row.sessionDate, maxReps: reps });
+      }
+    }
+    chartData = [...sessionMap.values()]
+      .sort((a, b) => +a.date - +b.date)
+      .map((d) => ({ date: d.date, value: d.maxReps }));
+    chartType = "reps";
+    chartValueLabel = "Max reps";
+  } else if (type === "duration") {
+    const validSets = sets.filter((r) => r.durationSeconds != null);
+    const totalSeconds = validSets.reduce((s, r) => s + (r.durationSeconds ?? 0), 0);
+    const bestSeconds = Math.max(...validSets.map((r) => r.durationSeconds ?? 0));
+
+    statCards = [
+      { label: "Total time", value: formatDuration(totalSeconds) },
+      { label: "Best effort", value: formatDuration(bestSeconds) },
+    ];
+
+    const sessionMap = new Map<string, { date: Date; best: number }>();
+    for (const row of validSets) {
+      const dur = row.durationSeconds ?? 0;
+      const cur = sessionMap.get(row.sessionId);
+      if (!cur || dur > cur.best) {
+        sessionMap.set(row.sessionId, { date: row.sessionDate, best: dur });
+      }
+    }
+    chartData = [...sessionMap.values()]
+      .sort((a, b) => +a.date - +b.date)
+      .map((d) => ({ date: d.date, value: d.best }));
+    chartType = "duration";
+    chartValueLabel = "Best duration";
+  } else {
+    // cardio
+    const validSets = sets.filter((r) => r.distanceMeters != null && r.durationSeconds != null);
+    const totalMeters = validSets.reduce((s, r) => s + (r.distanceMeters ?? 0), 0);
+    const bestMeters = Math.max(...validSets.map((r) => r.distanceMeters ?? 0));
+    const bestPaceSeconds = Math.min(
+      ...validSets.map((r) => ((r.durationSeconds ?? 0) / (r.distanceMeters ?? 1)) * 1000)
+    );
+
+    statCards = [
+      { label: "Total distance", value: formatDistance(totalMeters) },
+      { label: "Best distance", value: formatDistance(bestMeters) },
+      { label: "Best pace", value: formatPace(bestPaceSeconds) },
+    ];
+
+    const sessionMap = new Map<string, { date: Date; bestPace: number }>();
+    for (const row of validSets) {
+      const pace = ((row.durationSeconds ?? 0) / (row.distanceMeters ?? 1)) * 1000;
+      const cur = sessionMap.get(row.sessionId);
+      if (!cur || pace < cur.bestPace) {
+        sessionMap.set(row.sessionId, { date: row.sessionDate, bestPace: pace });
+      }
+    }
+    chartData = [...sessionMap.values()]
+      .sort((a, b) => +a.date - +b.date)
+      .map((d) => ({ date: d.date, value: d.bestPace }));
+    chartType = "pace";
+    chartValueLabel = "Best pace";
   }
-  const chartData = [...sessionMap.values()].sort((a, b) => +a.date - +b.date);
+
+  // ── Session log ───────────────────────────────────────────────────────────
 
   type SessionGroup = {
     id: string;
     name: string;
     date: Date;
-    sets: { setNumber: number; weight: string; reps: number }[];
+    sets: typeof sets;
   };
   const sessionGroupMap = new Map<string, SessionGroup>();
   for (const row of sets) {
@@ -63,13 +190,21 @@ export default async function ExerciseDetailPage({
         sets: [],
       });
     }
-    sessionGroupMap.get(row.sessionId)?.sets.push({
-      setNumber: row.setNumber,
-      weight: row.weight,
-      reps: row.reps,
-    });
+    sessionGroupMap.get(row.sessionId)?.sets.push(row);
   }
   const sessionGroups = [...sessionGroupMap.values()].reverse();
+
+  function formatSetSummary(set: (typeof sets)[number]): string {
+    if (type === "pdc") return `${set.reps} reps`;
+    if (type === "duration")
+      return set.durationSeconds != null ? formatDuration(set.durationSeconds) : "—";
+    if (type === "cardio") {
+      const dist = set.distanceMeters != null ? formatDistance(set.distanceMeters) : "—";
+      const dur = set.durationSeconds != null ? formatDuration(set.durationSeconds) : "—";
+      return `${dist} in ${dur}`;
+    }
+    return `${set.weight} kg × ${set.reps}`;
+  }
 
   return (
     <div className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
@@ -83,19 +218,20 @@ export default async function ExerciseDetailPage({
 
       <h1 className="text-lg font-semibold text-(--grey-900)">{exercise.name}</h1>
 
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard
-          label="Total volume"
-          value={`${totalVolume.toLocaleString("en-GB", { maximumFractionDigits: 0 })} kg`}
-        />
-        <StatCard label="Max weight" value={`${maxWeight} kg`} />
-        <StatCard label="Max reps" value={String(maxReps)} />
+      <div className={`grid gap-3 ${statCards.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {statCards.map((card) => (
+          <StatCard key={card.label} label={card.label} value={card.value} />
+        ))}
       </div>
 
       {chartData.length > 1 && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-(--grey-600)">Max weight per session</h2>
-          <ExerciseProgressChart data={chartData} />
+          <h2 className="text-sm font-medium text-(--grey-600)">{chartValueLabel} per session</h2>
+          <ExerciseProgressChart
+            data={chartData}
+            chartType={chartType}
+            valueLabel={chartValueLabel}
+          />
         </div>
       )}
 
@@ -108,7 +244,7 @@ export default async function ExerciseDetailPage({
             </p>
             {group.sets.map((set) => (
               <p key={set.setNumber} className="text-sm text-(--grey-700) pl-2">
-                Set {set.setNumber} — {set.weight} kg × {set.reps}
+                Set {set.setNumber} — {formatSetSummary(set)}
               </p>
             ))}
           </div>

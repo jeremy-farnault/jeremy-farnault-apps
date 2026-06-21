@@ -28,7 +28,11 @@ export async function finishSession(sessionId: string): Promise<void> {
   revalidatePath("/", "layout");
 }
 
-export async function addExerciseToSession(sessionId: string, exerciseName: string): Promise<void> {
+export async function addExerciseToSession(
+  sessionId: string,
+  exerciseName: string,
+  exerciseType: "standard" | "pdc" | "duration" | "cardio" = "standard"
+): Promise<void> {
   const userId = await getAuthUserId();
 
   const trimmedName = exerciseName.trim();
@@ -52,7 +56,7 @@ export async function addExerciseToSession(sessionId: string, exerciseName: stri
   } else {
     const created = await db
       .insert(gainerExercises)
-      .values({ name: trimmedName, isCustom: true, userId })
+      .values({ name: trimmedName, isCustom: true, userId, type: exerciseType })
       .returning({ id: gainerExercises.id });
     if (!created[0]) throw new Error("Failed to create exercise");
     exerciseId = created[0].id;
@@ -71,8 +75,12 @@ export async function addExerciseToSession(sessionId: string, exerciseName: stri
 
 export async function logSet(
   sessionExerciseId: string,
-  weight: string,
-  reps: number
+  data: {
+    weight?: string;
+    reps?: number;
+    durationSeconds?: number;
+    distanceMeters?: number;
+  }
 ): Promise<void> {
   await getAuthUserId();
 
@@ -82,7 +90,14 @@ export async function logSet(
     .where(eq(gainerSets.sessionExerciseId, sessionExerciseId));
   const setNumber = (countResult[0]?.total ?? 0) + 1;
 
-  await db.insert(gainerSets).values({ sessionExerciseId, setNumber, weight, reps });
+  await db.insert(gainerSets).values({
+    sessionExerciseId,
+    setNumber,
+    weight: data.weight ?? null,
+    reps: data.reps ?? null,
+    durationSeconds: data.durationSeconds ?? null,
+    distanceMeters: data.distanceMeters ?? null,
+  });
 
   revalidatePath("/", "layout");
 }

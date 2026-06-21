@@ -134,6 +134,13 @@
       "when": 1781880102661,
       "tag": "0018_clear_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1781976858748,
+      "tag": "0019_real_vanisher",
+      "breakpoints": true
     }
   ]
 }
