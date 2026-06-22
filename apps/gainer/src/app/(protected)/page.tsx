@@ -4,6 +4,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import {
   getActiveSession,
   getExercises,
+  getLastCompletedSession,
   getLastSessionSummaries,
   getLoggedExercises,
   getSessionExercisesWithSets,
@@ -36,6 +37,12 @@ export default async function GainerPage({
         )
       : {};
 
+  const lastCompletedSession =
+    view === "log" && !activeSession ? await getLastCompletedSession(userId) : null;
+  const lastCompletedExercisesWithSets = lastCompletedSession
+    ? await getSessionExercisesWithSets(lastCompletedSession.id)
+    : [];
+
   const loggedExercises = view === "data" ? await getLoggedExercises(userId) : [];
 
   return (
@@ -47,6 +54,11 @@ export default async function GainerPage({
           exercises={exercises}
           sessionExercisesWithSets={sessionExercisesWithSets}
           lastSessionStats={lastSessionStats}
+          lastCompletedSession={
+            lastCompletedSession
+              ? { session: lastCompletedSession, exercisesWithSets: lastCompletedExercisesWithSets }
+              : null
+          }
         />
       )}
       {view === "data" && <DataTab exercises={loggedExercises} />}

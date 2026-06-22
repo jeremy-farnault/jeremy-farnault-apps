@@ -1,15 +1,23 @@
 import { ExerciseCard } from "@/components/exercise-card";
 import { FinishSessionButton } from "@/components/finish-session-button";
+import { LastSessionSummary } from "@/components/last-session-summary";
 import { LogCta } from "@/components/log-cta";
 import { StartSessionButton } from "@/components/start-session-button";
-import type { LastSessionSummary, SessionExerciseWithSets } from "@/lib/queries";
+import type {
+  LastSessionSummary as LastSessionSummaryType,
+  SessionExerciseWithSets,
+} from "@/lib/queries";
 import type { gainerExercises, gainerSessions } from "@jf/db";
 
 interface LogTabProps {
   activeSession: typeof gainerSessions.$inferSelect | null;
   exercises: (typeof gainerExercises.$inferSelect)[];
   sessionExercisesWithSets: SessionExerciseWithSets[];
-  lastSessionStats: Record<string, LastSessionSummary>;
+  lastSessionStats: Record<string, LastSessionSummaryType>;
+  lastCompletedSession: {
+    session: typeof gainerSessions.$inferSelect;
+    exercisesWithSets: SessionExerciseWithSets[];
+  } | null;
 }
 
 export function LogTab({
@@ -17,12 +25,23 @@ export function LogTab({
   exercises,
   sessionExercisesWithSets,
   lastSessionStats,
+  lastCompletedSession,
 }: LogTabProps) {
   if (!activeSession) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <p className="text-(--grey-600) text-sm">No active session. Start one to begin logging.</p>
-        <StartSessionButton />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <p className="text-(--grey-600) text-sm">
+            No active session. Start one to begin logging.
+          </p>
+          <StartSessionButton />
+        </div>
+        {lastCompletedSession && (
+          <LastSessionSummary
+            session={lastCompletedSession.session}
+            exercisesWithSets={lastCompletedSession.exercisesWithSets}
+          />
+        )}
       </div>
     );
   }

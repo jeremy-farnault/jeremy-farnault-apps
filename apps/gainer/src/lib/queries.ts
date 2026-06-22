@@ -10,6 +10,16 @@ export async function getActiveSession(userId: string) {
   return rows[0] ?? null;
 }
 
+export async function getLastCompletedSession(userId: string) {
+  const rows = await db
+    .select()
+    .from(gainerSessions)
+    .where(and(eq(gainerSessions.userId, userId), isNotNull(gainerSessions.finishedAt)))
+    .orderBy(desc(gainerSessions.finishedAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 export async function getExercises(userId: string) {
   return db
     .select()
