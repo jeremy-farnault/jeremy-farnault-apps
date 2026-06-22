@@ -60,13 +60,14 @@ export function ExerciseProgressChart({ data, chartType, valueLabel }: ExerciseP
   };
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
-      <LineChart data={chartData} margin={{ top: 4, right: 8, left: -28, bottom: 0 }}>
+    <ResponsiveContainer width="95%" height={180}>
+      <LineChart data={chartData} margin={{ top: 4, right: 24, left: -28, bottom: 8 }}>
         <CartesianGrid vertical={false} stroke="var(--grey-200)" />
         <XAxis
           dataKey="dateStr"
           interval={interval}
           tickFormatter={formatDate}
+          tickMargin={8}
           {...commonAxisProps}
         />
         <YAxis tickFormatter={formatValue} {...commonAxisProps} />
