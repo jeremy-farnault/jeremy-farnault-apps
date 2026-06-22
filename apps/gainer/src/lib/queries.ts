@@ -1,5 +1,5 @@
 import { db, gainerExercises, gainerSessionExercises, gainerSessions, gainerSets } from "@jf/db";
-import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne } from "drizzle-orm";
 
 export async function getActiveSession(userId: string) {
   const rows = await db
@@ -24,7 +24,7 @@ export async function getExercises(userId: string) {
   return db
     .select()
     .from(gainerExercises)
-    .where(or(isNull(gainerExercises.userId), eq(gainerExercises.userId, userId)))
+    .where(eq(gainerExercises.userId, userId))
     .orderBy(asc(gainerExercises.name));
 }
 

@@ -2,7 +2,7 @@
 
 import { auth } from "@jf/auth";
 import { db, gainerExercises, gainerSessionExercises, gainerSessions, gainerSets } from "@jf/db";
-import { and, count, eq, isNull, max, or, sql } from "drizzle-orm";
+import { and, count, eq, isNull, max, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -38,21 +38,35 @@ export async function addExerciseToSession(
   const trimmedName = exerciseName.trim();
   if (!trimmedName) throw new Error("Exercise name is required");
 
-  // Find existing exercise (seeded or user's own), case-insensitive
-  const existing = await db
+  // Prefer the user's own exercise; fall back to predefined (userId IS NULL)
+  const userOwned = await db
     .select()
     .from(gainerExercises)
     .where(
       and(
         sql`lower(${gainerExercises.name}) = lower(${trimmedName})`,
-        or(isNull(gainerExercises.userId), eq(gainerExercises.userId, userId))
+        eq(gainerExercises.userId, userId)
       )
     )
     .limit(1);
 
+  const existing =
+    userOwned[0] ??
+    (await db
+      .select()
+      .from(gainerExercises)
+      .where(
+        and(
+          sql`lower(${gainerExercises.name}) = lower(${trimmedName})`,
+          isNull(gainerExercises.userId)
+        )
+      )
+      .limit(1)
+      .then((r) => r[0]));
+
   let exerciseId: string;
-  if (existing[0]) {
-    exerciseId = existing[0].id;
+  if (existing) {
+    exerciseId = existing.id;
   } else {
     const created = await db
       .insert(gainerExercises)
