@@ -4,6 +4,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import {
   getActiveSession,
   getExercises,
+  getLastSessionSummaries,
   getLoggedExercises,
   getSessionExercisesWithSets,
 } from "@/lib/queries";
@@ -26,6 +27,15 @@ export default async function GainerPage({
     ? await Promise.all([getExercises(userId), getSessionExercisesWithSets(activeSession.id)])
     : [[], []];
 
+  const lastSessionStats =
+    activeSession && sessionExercisesWithSets.length > 0
+      ? await getLastSessionSummaries(
+          userId,
+          sessionExercisesWithSets.map((se) => se.exercise.id),
+          activeSession.id
+        )
+      : {};
+
   const loggedExercises = view === "data" ? await getLoggedExercises(userId) : [];
 
   return (
@@ -36,6 +46,7 @@ export default async function GainerPage({
           activeSession={activeSession}
           exercises={exercises}
           sessionExercisesWithSets={sessionExercisesWithSets}
+          lastSessionStats={lastSessionStats}
         />
       )}
       {view === "data" && <DataTab exercises={loggedExercises} />}

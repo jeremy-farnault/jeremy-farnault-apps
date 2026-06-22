@@ -1,13 +1,14 @@
 "use client";
 
 import { logSet } from "@/lib/actions";
-import type { ExerciseType, SessionExerciseWithSets } from "@/lib/queries";
+import type { ExerciseType, LastSessionSummary, SessionExerciseWithSets } from "@/lib/queries";
 import { Button, TextInput } from "@jf/ui";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface ExerciseCardProps {
   data: SessionExerciseWithSets;
+  lastSession?: LastSessionSummary;
 }
 
 function formatDuration(seconds: number): string {
@@ -50,7 +51,28 @@ function SetDisplay({
   );
 }
 
-export function ExerciseCard({ data }: ExerciseCardProps) {
+function formatLastSession(last: LastSessionSummary, type: ExerciseType): string {
+  if (type === "standard") {
+    const weight = last.maxWeight != null ? `${last.maxWeight} kg` : null;
+    const reps = last.maxReps != null ? `${last.maxReps}` : null;
+    if (weight && reps) return `${weight} × ${reps}`;
+    if (weight) return weight;
+    if (reps) return `${reps} reps`;
+  } else if (type === "pdc") {
+    if (last.maxReps != null) return `${last.maxReps} reps`;
+  } else if (type === "duration") {
+    if (last.maxDurationSeconds != null) return formatDuration(last.maxDurationSeconds);
+  } else if (type === "cardio") {
+    const dist = last.maxDistanceMeters != null ? formatDistance(last.maxDistanceMeters) : null;
+    const dur = last.maxDurationSeconds != null ? formatDuration(last.maxDurationSeconds) : null;
+    if (dist && dur) return `${dist} in ${dur}`;
+    if (dist) return dist;
+    if (dur) return dur;
+  }
+  return "";
+}
+
+export function ExerciseCard({ data, lastSession }: ExerciseCardProps) {
   const exerciseType = data.exercise.type;
   const [isPending, startTransition] = useTransition();
 
@@ -145,7 +167,14 @@ export function ExerciseCard({ data }: ExerciseCardProps) {
 
   return (
     <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--surface-100) border border-(--surface-200)">
-      <p className="text-sm font-semibold text-(--grey-900)">{data.exercise.name}</p>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-semibold text-(--grey-900)">{data.exercise.name}</p>
+        {lastSession && (
+          <p className="text-xs text-(--grey-500)">
+            Last · {formatLastSession(lastSession, exerciseType)}
+          </p>
+        )}
+      </div>
 
       {data.sets.length > 0 && (
         <div className="flex flex-col gap-1">

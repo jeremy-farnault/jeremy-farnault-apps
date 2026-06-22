@@ -1,5 +1,5 @@
 import { db, gainerExercises, gainerSessionExercises, gainerSessions, gainerSets } from "@jf/db";
-import { and, asc, eq, isNull, max, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne, or } from "drizzle-orm";
 
 export async function getActiveSession(userId: string) {
   const rows = await db
@@ -163,4 +163,75 @@ export async function getLoggedExercises(userId: string): Promise<LoggedExercise
     .where(eq(gainerSessions.userId, userId))
     .groupBy(gainerExercises.id, gainerExercises.name, gainerExercises.isCustom)
     .orderBy(asc(gainerExercises.name)) as Promise<LoggedExercise[]>;
+}
+
+export type LastSessionSummary = {
+  maxWeight: string | null;
+  maxReps: number | null;
+  maxDurationSeconds: number | null;
+  maxDistanceMeters: number | null;
+};
+
+export async function getLastSessionSummaries(
+  userId: string,
+  exerciseIds: string[],
+  currentSessionId: string
+): Promise<Record<string, LastSessionSummary>> {
+  if (exerciseIds.length === 0) return {};
+
+  const sessionExercises = await db
+    .select({
+      sessionExerciseId: gainerSessionExercises.id,
+      exerciseId: gainerSessionExercises.exerciseId,
+    })
+    .from(gainerSessionExercises)
+    .innerJoin(gainerSessions, eq(gainerSessionExercises.sessionId, gainerSessions.id))
+    .where(
+      and(
+        eq(gainerSessions.userId, userId),
+        isNotNull(gainerSessions.finishedAt),
+        ne(gainerSessions.id, currentSessionId),
+        inArray(gainerSessionExercises.exerciseId, exerciseIds)
+      )
+    )
+    .orderBy(desc(gainerSessions.startedAt));
+
+  // Keep only the most recent sessionExercise per exerciseId
+  const latestByExercise: Record<string, string> = {};
+  for (const row of sessionExercises) {
+    if (!latestByExercise[row.exerciseId]) {
+      latestByExercise[row.exerciseId] = row.sessionExerciseId;
+    }
+  }
+
+  const latestIds = Object.values(latestByExercise);
+  if (latestIds.length === 0) return {};
+
+  const stats = await db
+    .select({
+      sessionExerciseId: gainerSets.sessionExerciseId,
+      maxWeight: max(gainerSets.weight),
+      maxReps: max(gainerSets.reps),
+      maxDurationSeconds: max(gainerSets.durationSeconds),
+      maxDistanceMeters: max(gainerSets.distanceMeters),
+    })
+    .from(gainerSets)
+    .where(inArray(gainerSets.sessionExerciseId, latestIds))
+    .groupBy(gainerSets.sessionExerciseId);
+
+  const seIdToExerciseId = Object.fromEntries(
+    Object.entries(latestByExercise).map(([exerciseId, seId]) => [seId, exerciseId])
+  );
+
+  return Object.fromEntries(
+    stats.map((row) => [
+      seIdToExerciseId[row.sessionExerciseId],
+      {
+        maxWeight: row.maxWeight ?? null,
+        maxReps: row.maxReps ?? null,
+        maxDurationSeconds: row.maxDurationSeconds ?? null,
+        maxDistanceMeters: row.maxDistanceMeters ?? null,
+      },
+    ])
+  );
 }
