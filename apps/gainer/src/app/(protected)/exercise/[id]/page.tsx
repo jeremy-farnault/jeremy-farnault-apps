@@ -174,25 +174,62 @@ export default async function ExerciseDetailPage({
 
   // ── Session log ───────────────────────────────────────────────────────────
 
-  type SessionGroup = {
-    id: string;
-    name: string;
-    date: Date;
-    sets: typeof sets;
-  };
-  const sessionGroupMap = new Map<string, SessionGroup>();
+  type SessionGroupRaw = { id: string; date: Date; sets: typeof sets };
+  type SessionGroup = SessionGroupRaw & { sessionStats: { label: string; value: string }[] };
+  const sessionGroupMap = new Map<string, SessionGroupRaw>();
   for (const row of sets) {
     if (!sessionGroupMap.has(row.sessionId)) {
       sessionGroupMap.set(row.sessionId, {
         id: row.sessionId,
-        name: row.sessionName,
         date: row.sessionDate,
         sets: [],
       });
     }
     sessionGroupMap.get(row.sessionId)?.sets.push(row);
   }
-  const sessionGroups = [...sessionGroupMap.values()].reverse();
+  const sessionGroups: SessionGroup[] = [...sessionGroupMap.values()].reverse().map((group) => {
+    let sessionStats: { label: string; value: string }[] = [];
+    if (type === "standard") {
+      const volume = group.sets.reduce(
+        (s, r) => s + Number.parseFloat(r.weight ?? "0") * (r.reps ?? 0),
+        0
+      );
+      const maxW = Math.max(...group.sets.map((r) => Number.parseFloat(r.weight ?? "0")));
+      const maxR = Math.max(...group.sets.map((r) => r.reps ?? 0));
+      sessionStats = [
+        {
+          label: "Volume",
+          value: `${volume.toLocaleString("en-GB", { maximumFractionDigits: 0 })} kg`,
+        },
+        { label: "Max weight", value: `${maxW} kg` },
+        { label: "Max reps", value: String(maxR) },
+      ];
+    } else if (type === "pdc") {
+      const totalReps = group.sets.reduce((s, r) => s + (r.reps ?? 0), 0);
+      const maxR = Math.max(...group.sets.map((r) => r.reps ?? 0));
+      sessionStats = [
+        { label: "Total reps", value: String(totalReps) },
+        { label: "Max reps", value: String(maxR) },
+      ];
+    } else if (type === "duration") {
+      const valid = group.sets.filter((r) => r.durationSeconds != null);
+      const total = valid.reduce((s, r) => s + (r.durationSeconds ?? 0), 0);
+      const best = Math.max(...valid.map((r) => r.durationSeconds ?? 0));
+      sessionStats = [
+        { label: "Total time", value: formatDuration(total) },
+        { label: "Best", value: formatDuration(best) },
+      ];
+    } else {
+      const valid = group.sets.filter((r) => r.distanceMeters != null && r.durationSeconds != null);
+      const totalM = valid.reduce((s, r) => s + (r.distanceMeters ?? 0), 0);
+      const bestM = Math.max(...valid.map((r) => r.distanceMeters ?? 0));
+      sessionStats = [
+        { label: "Total dist.", value: formatDistance(totalM) },
+        { label: "Best dist.", value: formatDistance(bestM) },
+      ];
+    }
+    return { ...group, sessionStats };
+  });
 
   function formatSetSummary(set: (typeof sets)[number]): string {
     if (type === "pdc") return `${set.reps} reps`;
@@ -238,15 +275,27 @@ export default async function ExerciseDetailPage({
       <div className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-(--grey-600)">Set log</h2>
         {sessionGroups.map((group) => (
-          <div key={group.id} className="flex flex-col gap-1">
+          <div key={group.id} className="flex flex-col gap-2">
             <p className="text-xs text-(--grey-500)">
-              {group.name} — {group.date.toLocaleDateString("en-GB", { dateStyle: "long" })}
+              {group.date.toLocaleDateString("en-GB", { dateStyle: "long" })}
             </p>
-            {group.sets.map((set) => (
-              <p key={set.setNumber} className="text-sm text-(--grey-700) pl-2">
-                Set {set.setNumber} — {formatSetSummary(set)}
-              </p>
-            ))}
+            <div className="flex gap-3 items-start">
+              <div className="flex flex-col gap-1 flex-1">
+                {group.sets.map((set) => (
+                  <p key={set.setNumber} className="text-sm text-(--grey-700) pl-2">
+                    Set {set.setNumber} — {formatSetSummary(set)}
+                  </p>
+                ))}
+              </div>
+              <div className="flex flex-col gap-2 items-end shrink-0">
+                {group.sessionStats.map((stat) => (
+                  <div key={stat.label} className="flex flex-col items-end">
+                    <span className="text-xs font-semibold text-(--grey-900)">{stat.value}</span>
+                    <span className="text-[10px] text-(--grey-400)">{stat.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ))}
       </div>
