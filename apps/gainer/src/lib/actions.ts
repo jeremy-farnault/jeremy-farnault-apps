@@ -65,7 +65,7 @@ export async function addExerciseToSession(
       .then((r) => r[0]));
 
   let exerciseId: string;
-  if (existing) {
+  if (existing && !(exerciseType && existing.userId === null && existing.type !== exerciseType)) {
     exerciseId = existing.id;
   } else {
     const created = await db

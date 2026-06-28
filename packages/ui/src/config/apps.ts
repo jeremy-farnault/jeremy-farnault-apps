@@ -4,6 +4,7 @@ import {
   ChecksIcon,
   CoinsIcon,
   MapPinIcon,
+  MapTrifoldIcon,
   NotepadIcon,
   RankingIcon,
   StackIcon,
@@ -66,5 +67,12 @@ export const apps: AppDefinition[] = [
     icon: ChecksIcon,
     href: process.env.NEXT_PUBLIC_ROUTINER_URL ?? "#",
     accentColor: "--yellow-400",
+  },
+  {
+    id: "tracer",
+    name: "Tracer",
+    icon: MapTrifoldIcon,
+    href: process.env.NEXT_PUBLIC_TRACER_URL ?? "#",
+    accentColor: "--red-600",
   },
 ];
