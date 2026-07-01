@@ -1,7 +1,8 @@
 "use client";
 
-import { INITIAL_ZONE, MAP_INITIAL_VIEW, PLAYER_HOME, POIS, ZONE_STYLE } from "@/config/game";
+import { INITIAL_ZONE, MAP_INITIAL_VIEW, POIS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
+import { useTravel } from "@/hooks/use-travel";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
 import type { RouteResult } from "@/lib/directions";
 import { useState } from "react";
@@ -12,18 +13,31 @@ import { PoiMarkers } from "./poi-markers";
 import { TerritoryZone } from "./territory-zone";
 
 export function GameMap() {
+  const { characterPosition, isActive, startTravel } = useTravel();
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [routePoi, setRoutePoi] = useState<Poi | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleGoHere(poi: Poi) {
+    if (isActive) return;
     setSelectedPoi(null);
     setLoading(true);
-    const result = await fetchRoute(PLAYER_HOME, poi, process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "");
+    const result = await fetchRoute(
+      characterPosition,
+      poi,
+      process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ""
+    );
     setRoute(result);
     setRoutePoi(poi);
     setLoading(false);
+  }
+
+  function handleConfirmTravel() {
+    if (!route || !routePoi) return;
+    startTravel(routePoi, route);
+    setRoute(null);
+    setRoutePoi(null);
   }
 
   return (
@@ -61,14 +75,20 @@ export function GameMap() {
           selectedId={selectedPoi?.id ?? null}
           onSelect={setSelectedPoi}
           onGoHere={handleGoHere}
+          disabled={isActive}
         />
-        <CharacterMarker longitude={PLAYER_HOME.longitude} latitude={PLAYER_HOME.latitude} />
+        <CharacterMarker
+          longitude={characterPosition.longitude}
+          latitude={characterPosition.latitude}
+        />
       </MapGL>
 
-      {(route || loading) && (
+      {(route || loading || isActive) && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-80 rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-(--surface-300) p-3">
           {loading ? (
             <p className="text-xs text-(--grey-500)">Calculating route…</p>
+          ) : isActive ? (
+            <p className="text-xs text-(--grey-500)">Travelling…</p>
           ) : route && routePoi ? (
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -79,6 +99,7 @@ export function GameMap() {
               </div>
               <button
                 type="button"
+                onClick={handleConfirmTravel}
                 className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
               >
                 Go

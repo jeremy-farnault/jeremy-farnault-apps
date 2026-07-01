@@ -3,7 +3,7 @@ const BASE = "https://api.mapbox.com/directions/v5/mapbox/walking";
 type DirectionsRoute = {
   geometry: {
     type: "LineString";
-    coordinates: number[][];
+    coordinates: [number, number][];
   };
   duration: number;
   distance: number;

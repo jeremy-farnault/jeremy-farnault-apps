@@ -8,9 +8,10 @@ interface Props {
   selectedId: string | null;
   onSelect: (poi: Poi | null) => void;
   onGoHere: (poi: Poi) => void;
+  disabled?: boolean;
 }
 
-export function PoiMarkers({ pois, selectedId, onSelect, onGoHere }: Props) {
+export function PoiMarkers({ pois, selectedId, onSelect, onGoHere, disabled }: Props) {
   const selected = pois.find((p) => p.id === selectedId) ?? null;
 
   return (
@@ -46,8 +47,9 @@ export function PoiMarkers({ pois, selectedId, onSelect, onGoHere }: Props) {
             </div>
             <button
               type="button"
-              onClick={() => onGoHere(selected)}
-              className="w-full rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold py-1.5 transition-colors"
+              onClick={() => !disabled && onGoHere(selected)}
+              disabled={disabled}
+              className="w-full rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-1.5 transition-colors"
             >
               Go here
             </button>
