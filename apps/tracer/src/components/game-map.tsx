@@ -1,6 +1,6 @@
 "use client";
 
-import { INITIAL_ZONE, MAP_INITIAL_VIEW, POIS, ZONE_STYLE } from "@/config/game";
+import { INITIAL_ZONE, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { useTravel } from "@/hooks/use-travel";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
@@ -47,6 +47,7 @@ export function GameMap() {
         initialViewState={MAP_INITIAL_VIEW}
         style={{ width: "100%", height: "100%" }}
         mapStyle="mapbox://styles/mapbox/dark-v11"
+        maxBounds={TOKYO_BOUNDS}
       >
         <TerritoryZone
           data={INITIAL_ZONE}

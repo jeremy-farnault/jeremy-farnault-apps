@@ -44,6 +44,11 @@ export type Poi = {
   latitude: number;
 };
 
+export const TOKYO_BOUNDS: [[number, number], [number, number]] = [
+  [138.9, 35.18], // SW: west of Hachioji, south of Kamakura
+  [140.25, 36.05], // NE: eastern Chiba, northern Saitama
+];
+
 export const POIS: Poi[] = [
   {
     id: "konbini-1",
