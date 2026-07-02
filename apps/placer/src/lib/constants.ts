@@ -20,8 +20,10 @@ import {
 
 export const PLACER_COLOR_PALETTE = [
   { label: "Yellow", value: "var(--yellow-400)" },
+  { label: "Yellow Dark", value: "var(--yellow-600)" },
   { label: "Green", value: "var(--green-400)" },
   { label: "Red", value: "var(--red-400)" },
+  { label: "Red Dark", value: "var(--red-600)" },
   { label: "Magenta", value: "var(--magenta-400)" },
   { label: "Purple", value: "var(--purple-400)" },
   { label: "Blue", value: "var(--blue-400)" },

@@ -13,6 +13,7 @@ type Props = {
 };
 
 function getBorderColor(color: string): string {
+  if (color.includes("-600)")) return color.replace("-600)", "-800)");
   return color.replace("-400)", "-600)");
 }
 

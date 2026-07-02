@@ -10,6 +10,7 @@ import { FolderActionsMenu } from "./folder-actions-menu";
 
 function getBorderColor(color: string): string {
   if (color.includes("-200)")) return color.replace("-200)", "-100)");
+  if (color.includes("-600)")) return color.replace("-600)", "-800)");
   return color.replace("-400)", "-600)");
 }
 
