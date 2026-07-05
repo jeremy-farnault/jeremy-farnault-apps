@@ -29,9 +29,9 @@ export const INITIAL_ZONE: Feature<Polygon> = {
 };
 
 export const ZONE_STYLE = {
-  fillColor: "#b63a3a",
-  fillOpacity: 0.15,
-  lineColor: "#b63a3a",
+  fillColor: "#44a684",
+  fillOpacity: 0.4,
+  lineColor: "#44a684",
   lineWidth: 2,
 };
 
@@ -42,6 +42,15 @@ export type Poi = {
   emoji: string;
   longitude: number;
   latitude: number;
+};
+
+export const HOME_POI: Poi = {
+  id: "home",
+  label: "Home",
+  category: "home",
+  emoji: "🏠",
+  longitude: PLAYER_HOME.longitude,
+  latitude: PLAYER_HOME.latitude,
 };
 
 export const TOKYO_BOUNDS: [[number, number], [number, number]] = [
@@ -89,5 +98,13 @@ export const POIS: Poi[] = [
     emoji: "🍺",
     longitude: 139.72573081730215,
     latitude: 35.76925278459695,
+  },
+  {
+    id: "enoshima-1",
+    label: "Enoshima",
+    category: "goal",
+    emoji: "⭐",
+    longitude: 139.482599,
+    latitude: 35.298836,
   },
 ];

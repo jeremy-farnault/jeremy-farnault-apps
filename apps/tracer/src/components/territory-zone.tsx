@@ -17,12 +17,16 @@ export function TerritoryZone({ data, fillColor, fillOpacity, lineColor, lineWid
       <Layer
         id="territory-fill"
         type="fill"
-        paint={{ "fill-color": fillColor, "fill-opacity": fillOpacity }}
+        paint={{
+          "fill-color": fillColor,
+          "fill-opacity": fillOpacity,
+          "fill-emissive-strength": 1,
+        }}
       />
       <Layer
         id="territory-line"
         type="line"
-        paint={{ "line-color": lineColor, "line-width": lineWidth }}
+        paint={{ "line-color": lineColor, "line-width": lineWidth, "line-emissive-strength": 1 }}
       />
     </Source>
   );

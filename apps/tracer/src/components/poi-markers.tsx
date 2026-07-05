@@ -17,16 +17,17 @@ export function PoiMarkers({ pois, selectedId, onSelect, onGoHere, disabled }: P
   return (
     <>
       {pois.map((poi) => (
-        <Marker
-          key={poi.id}
-          longitude={poi.longitude}
-          latitude={poi.latitude}
-          anchor="bottom"
-          onClick={() => onSelect(poi)}
-        >
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-base select-none">
+        <Marker key={poi.id} longitude={poi.longitude} latitude={poi.latitude} anchor="bottom">
+          <button
+            type="button"
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-base select-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(poi);
+            }}
+          >
             {poi.emoji}
-          </div>
+          </button>
         </Marker>
       ))}
 
@@ -38,6 +39,7 @@ export function PoiMarkers({ pois, selectedId, onSelect, onGoHere, disabled }: P
           offset={40}
           onClose={() => onSelect(null)}
           closeButton={false}
+          closeOnClick={false}
           className="tracer-popup"
         >
           <div className="flex flex-col gap-2 p-1 min-w-32">
