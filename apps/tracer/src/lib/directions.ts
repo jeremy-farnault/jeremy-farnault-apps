@@ -25,7 +25,7 @@ export async function fetchRoute(
   token: string
 ): Promise<RouteResult | null> {
   const coords = `${from.longitude},${from.latitude};${to.longitude},${to.latitude}`;
-  const url = `${BASE}/${coords}?geometries=geojson&overview=full&access_token=${token}`;
+  const url = `${BASE}/${coords}?geometries=geojson&overview=full&exclude=ferry&access_token=${token}`;
   const res = await fetch(url);
   if (!res.ok) return null;
   const data: DirectionsResponse = await res.json();

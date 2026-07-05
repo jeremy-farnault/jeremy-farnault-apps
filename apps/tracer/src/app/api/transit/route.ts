@@ -30,12 +30,16 @@ export async function GET(request: NextRequest) {
   const apiKey = process.env.GOOGLE_MAPS_KEY;
   if (!apiKey) return NextResponse.json(null, { status: 503 });
 
-  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=transit&key=${apiKey}`;
+  const departureTime = Math.floor(Date.now() / 1000);
+  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&mode=transit&departure_time=${departureTime}&region=JP&key=${apiKey}`;
   const res = await fetch(url);
   if (!res.ok) return NextResponse.json(null);
 
   const data: GoogleDirectionsResponse = await res.json();
-  if (data.status !== "OK" || !data.routes[0]) return NextResponse.json(null);
+  if (data.status !== "OK" || !data.routes[0]) {
+    console.error("[transit] Google Directions status:", data.status);
+    return NextResponse.json(null);
+  }
 
   const route = data.routes[0];
   const leg = route?.legs[0];
