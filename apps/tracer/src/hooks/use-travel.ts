@@ -2,6 +2,7 @@
 
 import { PLAYER_HOME } from "@/config/game";
 import type { Poi } from "@/config/game";
+import { loadActionState } from "@/lib/action";
 import type { RouteResult } from "@/lib/directions";
 import {
   type CharacterPosition,
@@ -45,6 +46,7 @@ export function useTravel() {
   }, [travel]);
 
   function startTravel(poi: Poi, route: RouteResult) {
+    if (loadActionState()) return;
     const state = makeTravelState(poi, route);
     saveTravelState(state);
     setTravel(state);

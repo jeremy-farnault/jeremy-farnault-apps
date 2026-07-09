@@ -8,10 +8,22 @@ interface Props {
   selectedId: string | null;
   onSelect: (poi: Poi | null) => void;
   onGoHere: (poi: Poi) => void;
+  onShop?: (poi: Poi) => void;
+  onEat?: (poi: Poi) => void;
+  onWork?: (poi: Poi) => void;
   disabled?: boolean;
 }
 
-export function PoiMarkers({ pois, selectedId, onSelect, onGoHere, disabled }: Props) {
+export function PoiMarkers({
+  pois,
+  selectedId,
+  onSelect,
+  onGoHere,
+  onShop,
+  onEat,
+  onWork,
+  disabled,
+}: Props) {
   const selected = pois.find((p) => p.id === selectedId) ?? null;
 
   return (
@@ -47,6 +59,33 @@ export function PoiMarkers({ pois, selectedId, onSelect, onGoHere, disabled }: P
               <p className="text-sm font-semibold text-white">{selected.label}</p>
               <p className="text-xs text-white/50 capitalize">{selected.category}</p>
             </div>
+            {onShop && (
+              <button
+                type="button"
+                onClick={() => onShop(selected)}
+                className="w-full rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-1.5 transition-colors"
+              >
+                Shop
+              </button>
+            )}
+            {onEat && (
+              <button
+                type="button"
+                onClick={() => onEat(selected)}
+                className="w-full rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-1.5 transition-colors"
+              >
+                Eat
+              </button>
+            )}
+            {onWork && (
+              <button
+                type="button"
+                onClick={() => onWork(selected)}
+                className="w-full rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-1.5 transition-colors"
+              >
+                Work
+              </button>
+            )}
             <button
               type="button"
               onClick={() => !disabled && onGoHere(selected)}

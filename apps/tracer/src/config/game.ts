@@ -107,4 +107,20 @@ export const POIS: Poi[] = [
     longitude: 139.482599,
     latitude: 35.298836,
   },
+  {
+    id: "ramen-1",
+    label: "Ramen Shop",
+    category: "ramen",
+    emoji: "🍜",
+    longitude: 139.7295015281104,
+    latitude: 35.7680562405046,
+  },
+  {
+    id: "work-1",
+    label: "Work",
+    category: "work",
+    emoji: "💼",
+    longitude: 139.71261092278013,
+    latitude: 35.76842945297194,
+  },
 ];
