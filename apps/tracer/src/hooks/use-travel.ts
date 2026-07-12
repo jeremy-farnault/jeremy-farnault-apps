@@ -56,5 +56,6 @@ export function useTravel() {
     characterPosition,
     isActive: travel !== null,
     startTravel,
+    travel,
   };
 }

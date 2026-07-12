@@ -4,7 +4,6 @@ import { ITEM_CATALOGUE, MEAL_CONFIG, WORK_CONFIG } from "@/config/economy";
 import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { useAction } from "@/hooks/use-action";
-import { useStats } from "@/hooks/use-stats";
 import { useTravel } from "@/hooks/use-travel";
 import { useZone } from "@/hooks/use-zone";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
@@ -12,6 +11,7 @@ import type { RouteResult } from "@/lib/directions";
 import { addItem } from "@/lib/inventory";
 import { fetchTransitRoute } from "@/lib/transit";
 import type { TransitResult } from "@/lib/transit";
+import { useCharacterStore } from "@/stores/character-store";
 import { useState } from "react";
 import MapGL from "react-map-gl/mapbox";
 import { Layer, Source } from "react-map-gl/mapbox";
@@ -31,9 +31,6 @@ function formatMMSS(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-const KONBINI_POI = POIS.find((p) => p.category === "konbini");
-const RAMEN_POI = POIS.find((p) => p.category === "ramen");
-const WORK_POI = POIS.find((p) => p.category === "work");
 const PROXIMITY_THRESHOLD_M = 30;
 
 function isNearPoi(
@@ -52,9 +49,18 @@ function itemEffectLabel(hungerRestore: number, thirstRestore: number): string {
   return parts.join(" · ");
 }
 
-export function GameMap() {
-  const { characterPosition, isActive, startTravel } = useTravel();
-  const { stats, spendMoney, restoreStats, earnMoney } = useStats();
+interface GameMapProps {
+  characterSelected: boolean;
+  onToggleCharacter: () => void;
+  onCloseCharacter: () => void;
+}
+
+export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter }: GameMapProps) {
+  const { characterPosition, isActive, startTravel, travel } = useTravel();
+  const money = useCharacterStore((s) => s.money);
+  const spendMoney = useCharacterStore((s) => s.spendMoney);
+  const restoreStats = useCharacterStore((s) => s.restoreStats);
+  const earnMoney = useCharacterStore((s) => s.earnMoney);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
     if (state.type === "meal") {
       restoreStats(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
@@ -72,6 +78,19 @@ export function GameMap() {
   const [transitRoute, setTransitRoute] = useState<TransitResult | null>(null);
   const [transitLoading, setTransitLoading] = useState(false);
   const [transitUnavailable, setTransitUnavailable] = useState(false);
+
+  function clearRouteContext() {
+    setRoute(null);
+    setRoutePoi(null);
+    setTransitRoute(null);
+    setTransitUnavailable(false);
+    setTravelMode("walking");
+  }
+
+  function selectPoi(poi: Poi | null) {
+    if (poi?.id !== routePoi?.id) clearRouteContext();
+    setSelectedPoi(poi);
+  }
 
   async function handleGoHere(poi: Poi) {
     if (isActive || action) return;
@@ -137,15 +156,22 @@ export function GameMap() {
     const activeRoute = travelMode === "transit" && transitRoute ? transitRoute : route;
     if (!activeRoute) return;
     startTravel(routePoi, activeRoute);
-    setRoute(null);
-    setRoutePoi(null);
-    setTransitRoute(null);
-    setTransitUnavailable(false);
-    setTravelMode("walking");
+    clearRouteContext();
   }
 
   const activeGeometry =
     travelMode === "transit" && transitRoute ? transitRoute.geometry : (route?.geometry ?? null);
+
+  const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
+  const canAct = !isActive && !action && nearSelected && selectedPoi !== null;
+  const poiAction: { label: "Shop" | "Eat" | "Work"; handler: (p: Poi) => void } | null = (() => {
+    if (!canAct || !selectedPoi) return null;
+    if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
+    if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
+      return { label: "Eat", handler: handleEat };
+    if (selectedPoi.category === "work") return { label: "Work", handler: handleWork };
+    return null;
+  })();
 
   return (
     <div className="relative w-full h-full">
@@ -156,6 +182,7 @@ export function GameMap() {
         mapStyle="mapbox://styles/haskkor/cmr6k3di9006x01r2erpzdftb"
         config={{ basemap: { lightPreset: "night", showRoadLabels: false } }}
         maxBounds={TOKYO_BOUNDS}
+        onClick={onCloseCharacter}
       >
         {zone && (
           <TerritoryZone
@@ -186,30 +213,45 @@ export function GameMap() {
           </Source>
         )}
 
-        <HomeMarker poi={HOME_POI} onGoHere={handleGoHere} disabled={isActive || !!action} />
+        {characterSelected && travel?.routeGeometry && (
+          <Source
+            type="geojson"
+            data={{ type: "Feature", properties: {}, geometry: travel.routeGeometry }}
+          >
+            <Layer
+              id="active-travel-line"
+              type="line"
+              paint={{
+                "line-color": "#ffaf51",
+                "line-width": 4,
+                "line-opacity": 0.9,
+                "line-emissive-strength": 1,
+              }}
+              layout={{ "line-join": "round", "line-cap": "round" }}
+            />
+          </Source>
+        )}
+
+        <HomeMarker
+          poi={HOME_POI}
+          open={selectedPoi?.id === HOME_POI.id}
+          onToggle={() => selectPoi(selectedPoi?.id === HOME_POI.id ? null : HOME_POI)}
+          onClose={() => selectPoi(null)}
+          onGoHere={handleGoHere}
+          disabled={isActive || !!action}
+        />
         <PoiMarkers
           pois={POIS}
           selectedId={selectedPoi?.id ?? null}
-          onSelect={setSelectedPoi}
+          onSelect={selectPoi}
           onGoHere={handleGoHere}
-          {...(KONBINI_POI && !isActive && !action && isNearPoi(characterPosition, KONBINI_POI)
-            ? { onShop: handleShop }
-            : {})}
-          {...(RAMEN_POI &&
-          !isActive &&
-          !action &&
-          stats.money >= MEAL_CONFIG.cost &&
-          isNearPoi(characterPosition, RAMEN_POI)
-            ? { onEat: handleEat }
-            : {})}
-          {...(WORK_POI && !isActive && !action && isNearPoi(characterPosition, WORK_POI)
-            ? { onWork: handleWork }
-            : {})}
+          {...(poiAction ? { onAction: poiAction.handler, actionLabel: poiAction.label } : {})}
           disabled={isActive || !!action}
         />
         <CharacterMarker
           longitude={characterPosition.longitude}
           latitude={characterPosition.latitude}
+          onClick={onToggleCharacter}
         />
       </MapGL>
 
@@ -240,7 +282,7 @@ export function GameMap() {
                   </div>
                   <button
                     type="button"
-                    disabled={stats.money < item.price}
+                    disabled={money < item.price}
                     onClick={() => {
                       if (spendMoney(item.price)) addItem(item.id);
                     }}
@@ -252,7 +294,7 @@ export function GameMap() {
               ))}
             </div>
             <p className="text-xs text-(--grey-500) text-right tabular-nums">
-              Balance: ¥{stats.money.toLocaleString()}
+              Balance: ¥{money.toLocaleString()}
             </p>
           </div>
         </div>

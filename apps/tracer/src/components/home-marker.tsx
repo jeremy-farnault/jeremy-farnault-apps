@@ -1,18 +1,18 @@
 "use client";
 
 import type { Poi } from "@/config/game";
-import { useState } from "react";
 import { Marker, Popup } from "react-map-gl/mapbox";
 
 interface Props {
   poi: Poi;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
   onGoHere: (poi: Poi) => void;
   disabled?: boolean;
 }
 
-export function HomeMarker({ poi, onGoHere, disabled }: Props) {
-  const [open, setOpen] = useState(false);
-
+export function HomeMarker({ poi, open, onToggle, onClose, onGoHere, disabled }: Props) {
   return (
     <>
       <Marker longitude={poi.longitude} latitude={poi.latitude} anchor="bottom">
@@ -21,7 +21,7 @@ export function HomeMarker({ poi, onGoHere, disabled }: Props) {
           className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-base select-none"
           onClick={(e) => {
             e.stopPropagation();
-            setOpen(true);
+            onToggle();
           }}
         >
           🏠
@@ -34,9 +34,9 @@ export function HomeMarker({ poi, onGoHere, disabled }: Props) {
           latitude={poi.latitude}
           anchor="bottom"
           offset={40}
-          onClose={() => setOpen(false)}
+          onClose={onClose}
           closeButton={false}
-          closeOnClick={false}
+          closeOnClick={true}
           className="tracer-popup"
         >
           <div className="flex flex-col gap-2 p-1 min-w-32">
@@ -45,7 +45,7 @@ export function HomeMarker({ poi, onGoHere, disabled }: Props) {
               type="button"
               onClick={() => {
                 onGoHere(poi);
-                setOpen(false);
+                onClose();
               }}
               disabled={disabled}
               className="w-full rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-1.5 transition-colors"
