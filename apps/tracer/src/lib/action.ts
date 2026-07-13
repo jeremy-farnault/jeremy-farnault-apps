@@ -1,12 +1,15 @@
+import type { RegionId } from "@/config/game";
+
 const ACTION_KEY = "tracer:action";
 
 export type TimedActionState = {
-  type: "meal" | "work";
+  type: "meal" | "work" | "explore";
   startedAt: number; // wall timestamp
   duration: number; // seconds
   prepaidCost: number;
   maxStatA: number; // hunger (meal) or earnings (work)
   maxStatB: number; // thirst (meal) or 0 (work)
+  unlocksRegionId?: RegionId; // explore only
 };
 
 export function loadActionState(): TimedActionState | null {

@@ -27,3 +27,7 @@ export const WORK_CONFIG = {
   shiftDuration: 28800, // seconds (8 hours)
   maxEarnings: 9600,
 } as const;
+
+export const EXPLORE_CONFIG = {
+  duration: 7200, // seconds (2 hours)
+} as const;

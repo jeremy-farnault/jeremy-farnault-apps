@@ -9,7 +9,7 @@ interface Props {
   onSelect: (poi: Poi | null) => void;
   onGoHere: (poi: Poi) => void;
   onAction?: (poi: Poi) => void;
-  actionLabel?: "Shop" | "Eat" | "Work";
+  actionLabel?: "Shop" | "Eat" | "Work" | "Explore";
   disabled?: boolean;
 }
 

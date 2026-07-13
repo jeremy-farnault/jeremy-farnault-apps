@@ -1,6 +1,6 @@
 "use client";
 
-import { ITEM_CATALOGUE, MEAL_CONFIG, WORK_CONFIG } from "@/config/economy";
+import { EXPLORE_CONFIG, ITEM_CATALOGUE, MEAL_CONFIG, WORK_CONFIG } from "@/config/economy";
 import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { useAction } from "@/hooks/use-action";
@@ -12,6 +12,7 @@ import { addItem } from "@/lib/inventory";
 import { fetchTransitRoute } from "@/lib/transit";
 import type { TransitResult } from "@/lib/transit";
 import { useCharacterStore } from "@/stores/character-store";
+import { useRegionStore } from "@/stores/region-store";
 import { useState } from "react";
 import MapGL from "react-map-gl/mapbox";
 import { Layer, Source } from "react-map-gl/mapbox";
@@ -23,6 +24,7 @@ import { TerritoryZone } from "./territory-zone";
 const ACTION_LABELS: Record<string, string> = {
   meal: "Eating",
   work: "Working",
+  explore: "Exploring…",
 };
 
 function formatMMSS(seconds: number): string {
@@ -61,11 +63,14 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const spendMoney = useCharacterStore((s) => s.spendMoney);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const earnMoney = useCharacterStore((s) => s.earnMoney);
+  const discoveredRegionIds = useRegionStore((s) => s.discoveredRegionIds);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
     if (state.type === "meal") {
       restoreStats(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
     } else if (state.type === "work") {
       earnMoney(Math.floor(finalT * state.maxStatA));
+    } else if (state.type === "explore" && finalT === 1 && state.unlocksRegionId) {
+      useRegionStore.getState().discover(state.unlocksRegionId);
     }
   });
   const zone = useZone(process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "");
@@ -151,6 +156,19 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
     });
   }
 
+  function handleExplore(p: Poi) {
+    if (p.category !== "station") return;
+    setSelectedPoi(null);
+    startAction({
+      type: "explore",
+      duration: EXPLORE_CONFIG.duration,
+      prepaidCost: 0,
+      maxStatA: 0,
+      maxStatB: 0,
+      unlocksRegionId: p.unlocksRegionId,
+    });
+  }
+
   function handleConfirmTravel() {
     if (!routePoi) return;
     const activeRoute = travelMode === "transit" && transitRoute ? transitRoute : route;
@@ -162,14 +180,23 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const activeGeometry =
     travelMode === "transit" && transitRoute ? transitRoute.geometry : (route?.geometry ?? null);
 
+  const visiblePois = POIS.filter(
+    (p) =>
+      p.category === "station" || p.category === "goal" || discoveredRegionIds.includes(p.regionId)
+  );
+
   const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
   const canAct = !isActive && !action && nearSelected && selectedPoi !== null;
-  const poiAction: { label: "Shop" | "Eat" | "Work"; handler: (p: Poi) => void } | null = (() => {
+  const poiAction: {
+    label: "Shop" | "Eat" | "Work" | "Explore";
+    handler: (p: Poi) => void;
+  } | null = (() => {
     if (!canAct || !selectedPoi) return null;
     if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
     if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
       return { label: "Eat", handler: handleEat };
     if (selectedPoi.category === "work") return { label: "Work", handler: handleWork };
+    if (selectedPoi.category === "station") return { label: "Explore", handler: handleExplore };
     return null;
   })();
 
@@ -241,7 +268,7 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
           disabled={isActive || !!action}
         />
         <PoiMarkers
-          pois={POIS}
+          pois={visiblePois}
           selectedId={selectedPoi?.id ?? null}
           onSelect={selectPoi}
           onGoHere={handleGoHere}
