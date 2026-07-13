@@ -12,6 +12,7 @@ import { addItem } from "@/lib/inventory";
 import { fetchTransitRoute } from "@/lib/transit";
 import type { TransitResult } from "@/lib/transit";
 import { useCharacterStore } from "@/stores/character-store";
+import { useFilterStore } from "@/stores/filter-store";
 import { useRegionStore } from "@/stores/region-store";
 import { useState } from "react";
 import MapGL from "react-map-gl/mapbox";
@@ -64,6 +65,8 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const earnMoney = useCharacterStore((s) => s.earnMoney);
   const discoveredRegionIds = useRegionStore((s) => s.discoveredRegionIds);
+  const enabledCategories = useFilterStore((s) => s.enabledCategories);
+  const enabledLines = useFilterStore((s) => s.enabledLines);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
     if (state.type === "meal") {
       restoreStats(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
@@ -180,10 +183,21 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const activeGeometry =
     travelMode === "transit" && transitRoute ? transitRoute.geometry : (route?.geometry ?? null);
 
-  const visiblePois = POIS.filter(
-    (p) =>
-      p.category === "station" || p.category === "goal" || discoveredRegionIds.includes(p.regionId)
-  );
+  const visiblePois = POIS.filter((p) => {
+    // Home is rendered separately by HomeMarker.
+    if (p.category === "home") return false;
+    // Always show goal POIs (Enoshima).
+    if (p.category === "goal") return true;
+    // Non-station POIs require region discovery.
+    if (p.category !== "station" && !discoveredRegionIds.includes(p.regionId)) return false;
+    // Station filter: category gate, then line intersection.
+    if (p.category === "station") {
+      if (!enabledCategories.includes("station")) return false;
+      if (p.lines.length === 0) return true;
+      return p.lines.some((l) => enabledLines.includes(l));
+    }
+    return enabledCategories.includes(p.category);
+  });
 
   const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
   const canAct = !isActive && !action && nearSelected && selectedPoi !== null;

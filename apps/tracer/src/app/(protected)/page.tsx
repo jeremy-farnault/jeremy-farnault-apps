@@ -1,5 +1,6 @@
 "use client";
 
+import { FiltersPanel } from "@/components/filters-panel";
 import { GameMap } from "@/components/game-map";
 import { ITEM_CATALOGUE } from "@/config/economy";
 import { useCharacterDecay } from "@/hooks/use-character-decay";
@@ -69,6 +70,8 @@ export default function GamePage() {
 
       {/* Bottom-left panel stack */}
       <div className="absolute bottom-20 left-4 z-10 flex flex-col gap-2 w-56">
+        <FiltersPanel />
+
         {/* Inventory panel */}
         <button
           type="button"

@@ -1,4 +1,9 @@
+import type { LineId } from "@/config/lines";
+import { STATION_POIS } from "@/config/stations";
 import type { Feature, Polygon } from "geojson";
+export { REGIONS } from "@/config/regions";
+export type { Region, RegionId } from "@/config/regions";
+import type { RegionId } from "@/config/regions";
 
 export const PLAYER_HOME = {
   longitude: 139.72691,
@@ -35,19 +40,6 @@ export const ZONE_STYLE = {
   lineWidth: 2,
 };
 
-export type Region = {
-  id: string;
-  label: string;
-};
-
-export const REGIONS = [
-  { id: "home", label: "Home" },
-  { id: "enoshima", label: "Enoshima" },
-  { id: "akabane", label: "Akabane" },
-] as const satisfies readonly Region[];
-
-export type RegionId = (typeof REGIONS)[number]["id"];
-
 export type PoiCategory =
   | "konbini"
   | "school"
@@ -72,6 +64,7 @@ type PoiBase = {
 export type StationPoi = PoiBase & {
   category: "station";
   unlocksRegionId: RegionId;
+  lines: LineId[];
 };
 
 export type GenericPoi = PoiBase & {
@@ -169,16 +162,6 @@ export const POIS: Poi[] = [
     regionId: "home",
   },
   {
-    id: "station-akabane",
-    label: "Akabane Station",
-    category: "station",
-    emoji: "🚉",
-    longitude: 139.7197,
-    latitude: 35.7778,
-    regionId: "akabane",
-    unlocksRegionId: "akabane",
-  },
-  {
     id: "konbini-akabane",
     label: "Konbini",
     category: "konbini",
@@ -205,4 +188,5 @@ export const POIS: Poi[] = [
     latitude: 35.7785,
     regionId: "akabane",
   },
+  ...STATION_POIS,
 ];
