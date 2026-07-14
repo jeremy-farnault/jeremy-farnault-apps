@@ -14,9 +14,10 @@ import type { TransitResult } from "@/lib/transit";
 import { useCharacterStore } from "@/stores/character-store";
 import { useFilterStore } from "@/stores/filter-store";
 import { useRegionStore } from "@/stores/region-store";
-import { useState } from "react";
-import MapGL from "react-map-gl/mapbox";
-import { Layer, Source } from "react-map-gl/mapbox";
+import { useSelectionStore } from "@/stores/selection-store";
+import { useEffect, useRef, useState } from "react";
+import type { MapRef } from "react-map-gl/mapbox";
+import MapGL, { Layer, Source } from "react-map-gl/mapbox";
 import { CharacterMarker } from "./character-marker";
 import { HomeMarker } from "./home-marker";
 import { PoiMarkers } from "./poi-markers";
@@ -67,6 +68,9 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const discoveredRegionIds = useRegionStore((s) => s.discoveredRegionIds);
   const enabledCategories = useFilterStore((s) => s.enabledCategories);
   const enabledLines = useFilterStore((s) => s.enabledLines);
+  const pendingSelectionId = useSelectionStore((s) => s.pendingSelectionId);
+  const clearPending = useSelectionStore((s) => s.clearPending);
+  const mapRef = useRef<MapRef | null>(null);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
     if (state.type === "meal") {
       restoreStats(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
@@ -214,9 +218,28 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
     return null;
   })();
 
+  useEffect(() => {
+    if (!pendingSelectionId) return;
+    const poi = POIS.find((p) => p.id === pendingSelectionId);
+    if (!poi) {
+      clearPending();
+      return;
+    }
+    const map = mapRef.current;
+    if (map) {
+      map.flyTo({
+        center: [poi.longitude, poi.latitude],
+        zoom: Math.max(map.getZoom(), 16),
+      });
+    }
+    setSelectedPoi(poi);
+    clearPending();
+  }, [pendingSelectionId, clearPending]);
+
   return (
     <div className="relative w-full h-full">
       <MapGL
+        ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ""}
         initialViewState={MAP_INITIAL_VIEW}
         style={{ width: "100%", height: "100%" }}
