@@ -7,6 +7,7 @@ import { useCharacterDecay } from "@/hooks/use-character-decay";
 import { loadInventory, removeItem } from "@/lib/inventory";
 import type { InventoryItem } from "@/lib/inventory";
 import { useCharacterStore } from "@/stores/character-store";
+import { useSelectionStore } from "@/stores/selection-store";
 import { useEffect, useState } from "react";
 
 export default function GamePage() {
@@ -17,6 +18,7 @@ export default function GamePage() {
   const money = useCharacterStore((s) => s.money);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const resetStats = useCharacterStore((s) => s.reset);
+  const requestCharacterFocus = useSelectionStore((s) => s.requestCharacterFocus);
   const [characterSelected, setCharacterSelected] = useState(false);
   const [inventoryExpanded, setInventoryExpanded] = useState(false);
   const [inventory, setInventory] = useState<InventoryItem[]>(() => loadInventory());
@@ -48,11 +50,7 @@ export default function GamePage() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      <GameMap
-        characterSelected={characterSelected}
-        onToggleCharacter={() => setCharacterSelected((v) => !v)}
-        onCloseCharacter={() => setCharacterSelected(false)}
-      />
+      <GameMap characterSelected={characterSelected} />
 
       {/* Temporary dev reset button */}
       <button
@@ -68,10 +66,13 @@ export default function GamePage() {
         <p className="text-xs font-medium tabular-nums text-(--grey-200)">{time}</p>
       </div>
 
+      {/* Filters panel (top-right, below app header) */}
+      <div className="absolute top-20 right-4 z-10 w-56">
+        <FiltersPanel />
+      </div>
+
       {/* Bottom-left panel stack */}
       <div className="absolute bottom-20 left-4 z-10 flex flex-col gap-2 w-56">
-        <FiltersPanel />
-
         {/* Inventory panel */}
         <button
           type="button"
@@ -119,7 +120,10 @@ export default function GamePage() {
         <button
           type="button"
           className="rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-red-500 cursor-pointer select-none text-left w-full"
-          onClick={() => setCharacterSelected((v) => !v)}
+          onClick={() => {
+            setCharacterSelected((v) => !v);
+            requestCharacterFocus();
+          }}
         >
           <div className="flex items-center justify-between p-4">
             <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">

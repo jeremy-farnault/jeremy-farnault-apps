@@ -55,11 +55,9 @@ function itemEffectLabel(hungerRestore: number, thirstRestore: number): string {
 
 interface GameMapProps {
   characterSelected: boolean;
-  onToggleCharacter: () => void;
-  onCloseCharacter: () => void;
 }
 
-export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter }: GameMapProps) {
+export function GameMap({ characterSelected }: GameMapProps) {
   const { characterPosition, isActive, startTravel, travel } = useTravel();
   const money = useCharacterStore((s) => s.money);
   const spendMoney = useCharacterStore((s) => s.spendMoney);
@@ -69,6 +67,7 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
   const enabledCategories = useFilterStore((s) => s.enabledCategories);
   const enabledLines = useFilterStore((s) => s.enabledLines);
   const pendingSelectionId = useSelectionStore((s) => s.pendingSelectionId);
+  const pendingCharacterFocusNonce = useSelectionStore((s) => s.pendingCharacterFocusNonce);
   const clearPending = useSelectionStore((s) => s.clearPending);
   const mapRef = useRef<MapRef | null>(null);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
@@ -236,6 +235,16 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
     clearPending();
   }, [pendingSelectionId, clearPending]);
 
+  useEffect(() => {
+    if (pendingCharacterFocusNonce === 0) return;
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo({
+      center: [characterPosition.longitude, characterPosition.latitude],
+      zoom: Math.max(map.getZoom(), 16),
+    });
+  }, [pendingCharacterFocusNonce, characterPosition.longitude, characterPosition.latitude]);
+
   return (
     <div className="relative w-full h-full">
       <MapGL
@@ -246,7 +255,6 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
         mapStyle="mapbox://styles/haskkor/cmr6k3di9006x01r2erpzdftb"
         config={{ basemap: { lightPreset: "night", showRoadLabels: false } }}
         maxBounds={TOKYO_BOUNDS}
-        onClick={onCloseCharacter}
       >
         {zone && (
           <TerritoryZone
@@ -315,7 +323,6 @@ export function GameMap({ characterSelected, onToggleCharacter, onCloseCharacter
         <CharacterMarker
           longitude={characterPosition.longitude}
           latitude={characterPosition.latitude}
-          onClick={onToggleCharacter}
         />
       </MapGL>
 

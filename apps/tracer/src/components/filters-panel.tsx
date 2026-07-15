@@ -1,7 +1,8 @@
 "use client";
 
+import { LineBadge } from "@/components/line-badge";
 import { POIS } from "@/config/game";
-import { LINES } from "@/config/lines";
+import { LINES, type LineId, OPERATORS } from "@/config/lines";
 import { searchPois } from "@/lib/search";
 import { type FilterableCategory, useFilterStore } from "@/stores/filter-store";
 import { useRegionStore } from "@/stores/region-store";
@@ -46,6 +47,14 @@ export function FiltersPanel() {
   );
 
   const results = useMemo(() => searchPois(corpus, query), [corpus, query]);
+
+  const inGameLineIds = useMemo(() => {
+    const set = new Set<LineId>();
+    for (const p of POIS) {
+      if (p.category === "station") for (const l of p.lines) set.add(l);
+    }
+    return set;
+  }, []);
 
   function handleResultClick(id: string) {
     requestSelection(id);
@@ -122,24 +131,31 @@ export function FiltersPanel() {
           </div>
 
           {stationOn && (
-            <div className="flex flex-col gap-1.5 pt-2 border-t border-(--surface-300)">
+            <div className="flex flex-col gap-2 pt-2 border-t border-(--surface-300)">
               <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">
                 Lines
               </p>
-              {LINES.map((line) => {
-                const on = enabledLines.includes(line.id);
+              {OPERATORS.map((op) => {
+                const opLines = LINES.filter(
+                  (l) => l.operator === op.id && inGameLineIds.has(l.id)
+                );
+                if (opLines.length === 0) return null;
                 return (
-                  <button
-                    key={line.id}
-                    type="button"
-                    onClick={() => toggleLine(line.id)}
-                    className={`flex items-center justify-between text-xs transition-colors cursor-pointer ${
-                      on ? "text-(--grey-200)" : "text-(--grey-500)/50"
-                    }`}
-                  >
-                    <span>{line.label}</span>
-                    <span className="tabular-nums">{on ? "on" : "off"}</span>
-                  </button>
+                  <div key={op.id} className="flex flex-col gap-1">
+                    <p className="text-xs text-(--grey-500)">{op.label}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {opLines.map((line) => (
+                        <LineBadge
+                          key={line.id}
+                          code={line.code}
+                          color={line.color}
+                          enabled={enabledLines.includes(line.id)}
+                          title={line.label}
+                          onClick={() => toggleLine(line.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 );
               })}
             </div>
