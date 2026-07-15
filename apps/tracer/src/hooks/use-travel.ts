@@ -26,23 +26,25 @@ export function useTravel() {
 
   useEffect(() => {
     if (!travel) return;
+    let raf = 0;
 
-    function tick(state: TravelState) {
-      const elapsed = getElapsedSeconds(state);
-      const t = Math.min(elapsed / state.totalDuration, 1);
-      const pos = interpolateRoute(state.routeGeometry.coordinates, t);
+    const tick = () => {
+      const elapsed = getElapsedSeconds(travel);
+      const t = Math.min(elapsed / travel.totalDuration, 1);
+      const pos = interpolateRoute(travel.routeGeometry.coordinates, t);
       setCharacterPosition(pos);
 
       if (t >= 1) {
         saveCharacterPosition(pos);
         clearTravelState();
         setTravel(null);
+        return;
       }
-    }
+      raf = requestAnimationFrame(tick);
+    };
 
-    tick(travel);
-    const id = setInterval(() => tick(travel), 1000);
-    return () => clearInterval(id);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [travel]);
 
   function startTravel(poi: Poi, route: RouteResult) {

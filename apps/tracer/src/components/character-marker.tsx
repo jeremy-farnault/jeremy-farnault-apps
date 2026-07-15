@@ -10,7 +10,14 @@ interface Props {
 export function CharacterMarker({ longitude, latitude }: Props) {
   return (
     <Marker longitude={longitude} latitude={latitude} anchor="bottom">
-      <div className="pointer-events-none">
+      <div
+        className="pointer-events-none"
+        style={{
+          willChange: "transform",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+        }}
+      >
         <img
           src="/sprites/idle/frame-1.png"
           width={64}
