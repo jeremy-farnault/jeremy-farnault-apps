@@ -21,6 +21,7 @@ import MapGL, { Layer, Source } from "react-map-gl/mapbox";
 import { CharacterMarker } from "./character-marker";
 import { HomeMarker } from "./home-marker";
 import { PoiMarkers } from "./poi-markers";
+import { SelectionPopup } from "./selection-popup";
 import { TerritoryZone } from "./territory-zone";
 
 const ACTION_LABELS: Record<string, string> = {
@@ -304,26 +305,22 @@ export function GameMap({ characterSelected }: GameMapProps) {
           </Source>
         )}
 
-        <HomeMarker
-          poi={HOME_POI}
-          open={selectedPoi?.id === HOME_POI.id}
-          onToggle={() => selectPoi(selectedPoi?.id === HOME_POI.id ? null : HOME_POI)}
-          onClose={() => selectPoi(null)}
-          onGoHere={handleGoHere}
-          disabled={isActive || !!action}
-        />
-        <PoiMarkers
-          pois={visiblePois}
-          selectedId={selectedPoi?.id ?? null}
-          onSelect={selectPoi}
-          onGoHere={handleGoHere}
-          {...(poiAction ? { onAction: poiAction.handler, actionLabel: poiAction.label } : {})}
-          disabled={isActive || !!action}
-        />
+        <HomeMarker poi={HOME_POI} onSelect={selectPoi} />
+        <PoiMarkers pois={visiblePois} selectedId={selectedPoi?.id ?? null} onSelect={selectPoi} />
         <CharacterMarker
           longitude={characterPosition.longitude}
           latitude={characterPosition.latitude}
         />
+
+        {selectedPoi && (
+          <SelectionPopup
+            poi={selectedPoi}
+            onClose={() => selectPoi(null)}
+            onGoHere={handleGoHere}
+            disabled={isActive || !!action}
+            {...(poiAction ? { onAction: poiAction.handler, actionLabel: poiAction.label } : {})}
+          />
+        )}
       </MapGL>
 
       {shopOpen && (

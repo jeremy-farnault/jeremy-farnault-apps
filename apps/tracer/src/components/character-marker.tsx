@@ -1,5 +1,6 @@
 "use client";
 
+import { useMapViewport } from "@/hooks/use-map-viewport";
 import { Marker } from "react-map-gl/mapbox";
 
 interface Props {
@@ -7,7 +8,21 @@ interface Props {
   latitude: number;
 }
 
+const BASE_SIZE = 64;
+const REF_ZOOM = 15;
+const MIN_SIZE = 24;
+const MAX_SIZE = 64;
+
+function sizeForZoom(zoom: number): number {
+  if (zoom === 0) return BASE_SIZE; // sentinel: map not yet mounted
+  const raw = BASE_SIZE * 2 ** ((zoom - REF_ZOOM) * 0.5);
+  return Math.round(Math.min(MAX_SIZE, Math.max(MIN_SIZE, raw)));
+}
+
 export function CharacterMarker({ longitude, latitude }: Props) {
+  const { zoom } = useMapViewport();
+  const size = sizeForZoom(zoom);
+
   return (
     <Marker longitude={longitude} latitude={latitude} anchor="bottom">
       <div
@@ -20,8 +35,8 @@ export function CharacterMarker({ longitude, latitude }: Props) {
       >
         <img
           src="/sprites/idle/frame-1.png"
-          width={64}
-          height={64}
+          width={size}
+          height={size}
           style={{ imageRendering: "pixelated" }}
           alt=""
         />
