@@ -3,6 +3,7 @@
 import { EXPLORE_CONFIG, ITEM_CATALOGUE, MEAL_CONFIG, WORK_CONFIG } from "@/config/economy";
 import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
+import { LINES } from "@/config/lines";
 import { useAction } from "@/hooks/use-action";
 import { useTravel } from "@/hooks/use-travel";
 import { useZone } from "@/hooks/use-zone";
@@ -10,7 +11,8 @@ import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
 import type { RouteResult } from "@/lib/directions";
 import { addItem } from "@/lib/inventory";
 import { fetchTransitRoute } from "@/lib/transit";
-import type { TransitResult } from "@/lib/transit";
+import type { TransitLeg, TransitPlan } from "@/lib/transit";
+import type { TravelLeg } from "@/lib/travel";
 import { useCharacterStore } from "@/stores/character-store";
 import { useFilterStore } from "@/stores/filter-store";
 import { useRegionStore } from "@/stores/region-store";
@@ -29,6 +31,54 @@ const ACTION_LABELS: Record<string, string> = {
   work: "Working",
   explore: "Exploring…",
 };
+
+function formatYen(n: number): string {
+  return `¥${n.toLocaleString("ja-JP")}`;
+}
+
+function LineBadge({ lineId }: { lineId: string }) {
+  const line = LINES.find((l) => l.id === lineId);
+  if (!line) return null;
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-bold text-black"
+      style={{ backgroundColor: line.color }}
+    >
+      {line.code}
+    </span>
+  );
+}
+
+function renderTransitLeg(leg: TransitLeg, i: number) {
+  if (leg.kind === "walk") {
+    return (
+      <div key={i} className="flex items-center gap-2 text-xs text-(--grey-500)">
+        <span>🚶</span>
+        <span>Walk {formatDuration(leg.durationSec)}</span>
+      </div>
+    );
+  }
+  if (leg.kind === "transfer") {
+    return (
+      <div key={i} className="flex items-center gap-2 text-xs text-(--grey-500)">
+        <span>🔁</span>
+        <span>Transfer at {leg.from.label}</span>
+      </div>
+    );
+  }
+  const line = leg.line ? LINES.find((l) => l.id === leg.line) : undefined;
+  return (
+    <div key={i} className="flex items-center gap-2 text-xs text-white">
+      <span>🚉</span>
+      {leg.line && <LineBadge lineId={leg.line} />}
+      <span className="truncate">
+        {line?.label ?? "Transit"}
+        {typeof leg.stopCount === "number" &&
+          `, ${leg.stopCount} stop${leg.stopCount === 1 ? "" : "s"}`}
+      </span>
+    </div>
+  );
+}
 
 function formatMMSS(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -87,14 +137,18 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const [routePoi, setRoutePoi] = useState<Poi | null>(null);
   const [loading, setLoading] = useState(false);
   const [travelMode, setTravelMode] = useState<"walking" | "transit">("walking");
-  const [transitRoute, setTransitRoute] = useState<TransitResult | null>(null);
+  const [transitPlans, setTransitPlans] = useState<
+    { fastest: TransitPlan; cheapest: TransitPlan } | TransitPlan | null
+  >(null);
+  const [transitMode, setTransitMode] = useState<"fastest" | "cheapest">("fastest");
   const [transitLoading, setTransitLoading] = useState(false);
   const [transitUnavailable, setTransitUnavailable] = useState(false);
 
   function clearRouteContext() {
     setRoute(null);
     setRoutePoi(null);
-    setTransitRoute(null);
+    setTransitPlans(null);
+    setTransitMode("fastest");
     setTransitUnavailable(false);
     setTravelMode("walking");
   }
@@ -108,7 +162,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
     if (isActive || action) return;
     setSelectedPoi(null);
     setTravelMode("walking");
-    setTransitRoute(null);
+    setTransitPlans(null);
+    setTransitMode("fastest");
     setTransitUnavailable(false);
     setLoading(true);
     const result = await fetchRoute(
@@ -123,7 +178,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
   async function handleSelectTransit() {
     setTravelMode("transit");
-    if (transitRoute || transitUnavailable || !routePoi) return;
+    if (transitPlans || transitUnavailable || !routePoi) return;
     setTransitLoading(true);
     const result = await fetchTransitRoute(characterPosition, routePoi);
     setTransitLoading(false);
@@ -132,7 +187,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
       setTravelMode("walking");
       return;
     }
-    setTransitRoute(result);
+    setTransitPlans(result);
+    setTransitMode("fastest");
   }
 
   function handleShop(_poi: Poi) {
@@ -176,16 +232,48 @@ export function GameMap({ characterSelected }: GameMapProps) {
     });
   }
 
+  // Derived active transit plan: selected mode when both, else the single plan,
+  // else null.
+  const activePlan: TransitPlan | null =
+    transitPlans === null
+      ? null
+      : "fastest" in transitPlans
+        ? transitPlans[transitMode]
+        : transitPlans;
+
+  function routeToTravelLegs(r: RouteResult): TravelLeg[] {
+    return [{ coordinates: r.geometry.coordinates, durationSec: r.duration }];
+  }
+
+  function planToTravelLegs(plan: TransitPlan): TravelLeg[] {
+    return plan.legs.map((l) => ({
+      coordinates: l.coordinates,
+      durationSec: l.durationSec,
+    }));
+  }
+
+  function planGeometry(plan: TransitPlan): RouteResult["geometry"] {
+    return {
+      type: "LineString",
+      coordinates: plan.legs.flatMap((l) => l.coordinates),
+    };
+  }
+
   function handleConfirmTravel() {
     if (!routePoi) return;
-    const activeRoute = travelMode === "transit" && transitRoute ? transitRoute : route;
-    if (!activeRoute) return;
-    startTravel(routePoi, activeRoute);
+    const legs =
+      travelMode === "transit" && activePlan
+        ? planToTravelLegs(activePlan)
+        : route
+          ? routeToTravelLegs(route)
+          : null;
+    if (!legs) return;
+    startTravel(routePoi, legs);
     clearRouteContext();
   }
 
   const activeGeometry =
-    travelMode === "transit" && transitRoute ? transitRoute.geometry : (route?.geometry ?? null);
+    travelMode === "transit" && activePlan ? planGeometry(activePlan) : (route?.geometry ?? null);
 
   const visiblePois = POIS.filter((p) => {
     // Home is rendered separately by HomeMarker.
@@ -286,10 +374,17 @@ export function GameMap({ characterSelected }: GameMapProps) {
           </Source>
         )}
 
-        {characterSelected && travel?.routeGeometry && (
+        {characterSelected && travel && (
           <Source
             type="geojson"
-            data={{ type: "Feature", properties: {}, geometry: travel.routeGeometry }}
+            data={{
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "LineString",
+                coordinates: travel.legs.flatMap((l) => l.coordinates),
+              },
+            }}
           >
             <Layer
               id="active-travel-line"
@@ -435,30 +530,77 @@ export function GameMap({ characterSelected }: GameMapProps) {
                   </button>
                 )}
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-white">{routePoi.label}</p>
-                  {travelMode === "walking" ? (
-                    <p className="text-xs text-(--grey-500)">
-                      {formatDuration(route.duration)} · {formatDistance(route.distance)}
-                    </p>
-                  ) : transitRoute ? (
-                    <p className="text-xs text-(--grey-500)">
-                      {formatDuration(transitRoute.duration)}
-                      {transitRoute.fare != null && ` · ¥${transitRoute.fare}`}
-                      {transitRoute.departureTime && ` · departs ${transitRoute.departureTime}`}
-                    </p>
-                  ) : null}
+              <p className="text-xs font-semibold text-white">{routePoi.label}</p>
+              {travelMode === "walking" ? (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-(--grey-500)">
+                    {formatDuration(route.duration)} · {formatDistance(route.distance)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleConfirmTravel}
+                    className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
+                  >
+                    Go
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleConfirmTravel}
-                  disabled={travelMode === "transit" && !transitRoute}
-                  className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
-                >
-                  Go
-                </button>
-              </div>
+              ) : travelMode === "transit" && activePlan && transitPlans ? (
+                <div className="flex flex-col gap-2">
+                  {"fastest" in transitPlans ? (
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setTransitMode("fastest")}
+                        className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
+                          transitMode === "fastest"
+                            ? "bg-white/20 text-white"
+                            : "text-(--grey-500) hover:text-white"
+                        }`}
+                      >
+                        <div className="text-[10px] uppercase tracking-wide">Fastest</div>
+                        <div className="text-xs font-semibold">
+                          {formatDuration(transitPlans.fastest.totalDurationSec)} ·{" "}
+                          {formatYen(transitPlans.fastest.totalFareYen)}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTransitMode("cheapest")}
+                        className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
+                          transitMode === "cheapest"
+                            ? "bg-white/20 text-white"
+                            : "text-(--grey-500) hover:text-white"
+                        }`}
+                      >
+                        <div className="text-[10px] uppercase tracking-wide">Cheapest</div>
+                        <div className="text-xs font-semibold">
+                          {formatDuration(transitPlans.cheapest.totalDurationSec)} ·{" "}
+                          {formatYen(transitPlans.cheapest.totalFareYen)}
+                        </div>
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-(--grey-500)">
+                      {formatDuration(activePlan.totalDurationSec)} ·{" "}
+                      {formatYen(activePlan.totalFareYen)}
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-1 max-h-[40vh] overflow-y-auto">
+                    {activePlan.legs
+                      .filter(
+                        (l) => !(l.kind === "walk" && l.durationSec === 0 && l.distanceMeters === 0)
+                      )
+                      .map((l, i) => renderTransitLeg(l, i))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleConfirmTravel}
+                    className="self-end rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
+                  >
+                    Go
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>

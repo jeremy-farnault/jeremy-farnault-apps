@@ -1,13 +1,15 @@
 import type { Poi } from "@/config/game";
-import type { RouteResult } from "@/lib/directions";
+
+export type TravelLeg = {
+  coordinates: [number, number][];
+  durationSec: number;
+};
 
 export type TravelState = {
   destinationId: string;
-  routeGeometry: { type: "LineString"; coordinates: [number, number][] };
-  totalDuration: number; // seconds
+  legs: TravelLeg[];
   accumulatedSeconds: number; // banked progress — 0 for a fresh journey
   resumedAt: number; // wall timestamp when current run started
-  // Future pause: bank accumulatedSeconds, set resumedAt = null
 };
 
 export type CharacterPosition = {
@@ -21,7 +23,11 @@ const POSITION_KEY = "tracer:position";
 export function loadTravelState(): TravelState | null {
   try {
     const raw = localStorage.getItem(TRAVEL_KEY);
-    return raw ? (JSON.parse(raw) as TravelState) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<TravelState>;
+    // Reject stale/old-shape entries (pre-per-leg animation).
+    if (!Array.isArray(parsed.legs)) return null;
+    return parsed as TravelState;
   } catch {
     return null;
   }
@@ -52,9 +58,14 @@ export function getElapsedSeconds(state: TravelState): number {
   return state.accumulatedSeconds + (Date.now() - state.resumedAt) / 1000;
 }
 
-// Segment-by-segment interpolation along a LineString.
-// Uses Euclidean distance in coordinate space — sufficient for short walking routes.
-export function interpolateRoute(coordinates: [number, number][], t: number): CharacterPosition {
+export function totalDurationSeconds(legs: TravelLeg[]): number {
+  return legs.reduce((s, l) => s + l.durationSec, 0);
+}
+
+// Geometric interpolation within a single polyline. `t` is proportion of
+// total geometric length. Callers control how `t` maps to time — that's
+// what `interpolateLegs` does at the leg boundary layer.
+function interpolatePolyline(coordinates: [number, number][], t: number): CharacterPosition {
   const first = coordinates[0] ?? [0, 0];
   const last = coordinates[coordinates.length - 1] ?? first;
 
@@ -72,12 +83,14 @@ export function interpolateRoute(coordinates: [number, number][], t: number): Ch
     totalLength += lengths[lengths.length - 1] ?? 0;
   }
 
+  if (totalLength === 0) return { longitude: first[0], latitude: first[1] };
+
   const target = t * totalLength;
   let accumulated = 0;
   for (let i = 0; i < lengths.length; i++) {
     const segLen = lengths[i] ?? 0;
     if (accumulated + segLen >= target) {
-      const segT = (target - accumulated) / segLen;
+      const segT = segLen > 0 ? (target - accumulated) / segLen : 0;
       const a = coordinates[i] ?? [0, 0];
       const b = coordinates[i + 1] ?? [0, 0];
       return {
@@ -91,11 +104,40 @@ export function interpolateRoute(coordinates: [number, number][], t: number): Ch
   return { longitude: last[0], latitude: last[1] };
 }
 
-export function makeTravelState(poi: Poi, route: RouteResult): TravelState {
+// Time-aware interpolation across a leg chain. Each leg contributes exactly
+// `durationSec` seconds of animation time, and within a leg we interpolate
+// by geometric distance. This is what makes walking legs feel slow and
+// train legs feel fast at the same wall-clock rate.
+//
+// Empty-coord legs (e.g. transfer segments) hold the last known position
+// for the duration of the leg — the character visually pauses at the
+// transfer station.
+export function interpolateLegs(legs: TravelLeg[], elapsedSec: number): CharacterPosition {
+  let lastKnown: [number, number] = [0, 0];
+  let remaining = elapsedSec;
+
+  for (const leg of legs) {
+    const first = leg.coordinates[0];
+    if (first) lastKnown = first;
+    if (remaining <= leg.durationSec) {
+      if (leg.coordinates.length === 0) {
+        return { longitude: lastKnown[0], latitude: lastKnown[1] };
+      }
+      const subT = leg.durationSec > 0 ? remaining / leg.durationSec : 1;
+      return interpolatePolyline(leg.coordinates, subT);
+    }
+    remaining -= leg.durationSec;
+    const last = leg.coordinates[leg.coordinates.length - 1];
+    if (last) lastKnown = last;
+  }
+
+  return { longitude: lastKnown[0], latitude: lastKnown[1] };
+}
+
+export function makeTravelState(poi: Poi, legs: TravelLeg[]): TravelState {
   return {
     destinationId: poi.id,
-    routeGeometry: route.geometry,
-    totalDuration: route.duration,
+    legs,
     accumulatedSeconds: 0,
     resumedAt: Date.now(),
   };

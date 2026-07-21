@@ -3,18 +3,19 @@
 import { PLAYER_HOME } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { loadActionState } from "@/lib/action";
-import type { RouteResult } from "@/lib/directions";
 import {
   type CharacterPosition,
+  type TravelLeg,
   type TravelState,
   clearTravelState,
   getElapsedSeconds,
-  interpolateRoute,
+  interpolateLegs,
   loadCharacterPosition,
   loadTravelState,
   makeTravelState,
   saveCharacterPosition,
   saveTravelState,
+  totalDurationSeconds,
 } from "@/lib/travel";
 import { useEffect, useState } from "react";
 
@@ -27,14 +28,14 @@ export function useTravel() {
   useEffect(() => {
     if (!travel) return;
     let raf = 0;
+    const total = totalDurationSeconds(travel.legs);
 
     const tick = () => {
       const elapsed = getElapsedSeconds(travel);
-      const t = Math.min(elapsed / travel.totalDuration, 1);
-      const pos = interpolateRoute(travel.routeGeometry.coordinates, t);
+      const pos = interpolateLegs(travel.legs, elapsed);
       setCharacterPosition(pos);
 
-      if (t >= 1) {
+      if (elapsed >= total) {
         saveCharacterPosition(pos);
         clearTravelState();
         setTravel(null);
@@ -47,9 +48,9 @@ export function useTravel() {
     return () => cancelAnimationFrame(raf);
   }, [travel]);
 
-  function startTravel(poi: Poi, route: RouteResult) {
+  function startTravel(poi: Poi, legs: TravelLeg[]) {
     if (loadActionState()) return;
-    const state = makeTravelState(poi, route);
+    const state = makeTravelState(poi, legs);
     saveTravelState(state);
     setTravel(state);
   }
