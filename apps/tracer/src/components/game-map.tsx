@@ -119,6 +119,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const enabledLines = useFilterStore((s) => s.enabledLines);
   const pendingSelectionId = useSelectionStore((s) => s.pendingSelectionId);
   const pendingCharacterFocusNonce = useSelectionStore((s) => s.pendingCharacterFocusNonce);
+  const requestCharacterFocus = useSelectionStore((s) => s.requestCharacterFocus);
   const clearPending = useSelectionStore((s) => s.clearPending);
   const mapRef = useRef<MapRef | null>(null);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
@@ -269,6 +270,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
           : null;
     if (!legs) return;
     startTravel(routePoi, legs);
+    requestCharacterFocus();
     clearRouteContext();
   }
 
@@ -324,15 +326,25 @@ export function GameMap({ characterSelected }: GameMapProps) {
     clearPending();
   }, [pendingSelectionId, clearPending]);
 
+  // Track the latest character position via a ref so the flyTo effect below
+  // can read it without listing coordinate deps. Without this, the effect
+  // fires on every RAF tick during travel (60 Hz) and restarts flyTo each
+  // frame — visible pan grinds to a halt and user gestures get blocked.
+  const characterPositionRef = useRef(characterPosition);
+  useEffect(() => {
+    characterPositionRef.current = characterPosition;
+  }, [characterPosition]);
+
   useEffect(() => {
     if (pendingCharacterFocusNonce === 0) return;
     const map = mapRef.current;
     if (!map) return;
+    const { longitude, latitude } = characterPositionRef.current;
     map.flyTo({
-      center: [characterPosition.longitude, characterPosition.latitude],
+      center: [longitude, latitude],
       zoom: Math.max(map.getZoom(), 16),
     });
-  }, [pendingCharacterFocusNonce, characterPosition.longitude, characterPosition.latitude]);
+  }, [pendingCharacterFocusNonce]);
 
   return (
     <div className="relative w-full h-full">
