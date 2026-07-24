@@ -9,10 +9,21 @@ interface Props {
   onGoHere: (poi: Poi) => void;
   disabled?: boolean;
   onAction?: (poi: Poi) => void;
-  actionLabel?: "Shop" | "Eat" | "Work" | "Explore";
+  actionLabel?: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train";
+  actionDisabled?: boolean;
+  actionHint?: string;
 }
 
-export function SelectionPopup({ poi, onClose, onGoHere, disabled, onAction, actionLabel }: Props) {
+export function SelectionPopup({
+  poi,
+  onClose,
+  onGoHere,
+  disabled,
+  onAction,
+  actionLabel,
+  actionDisabled,
+  actionHint,
+}: Props) {
   const isHome = poi.category === "home";
   return (
     <Popup
@@ -31,13 +42,17 @@ export function SelectionPopup({ poi, onClose, onGoHere, disabled, onAction, act
           {!isHome && <p className="text-xs text-white/50 capitalize">{poi.category}</p>}
         </div>
         {onAction && actionLabel && (
-          <button
-            type="button"
-            onClick={() => onAction(poi)}
-            className="w-full rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-1.5 transition-colors"
-          >
-            {actionLabel}
-          </button>
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              onClick={() => !actionDisabled && onAction(poi)}
+              disabled={actionDisabled}
+              className="w-full rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-1.5 transition-colors"
+            >
+              {actionLabel}
+            </button>
+            {actionHint && <p className="text-[10px] text-white/50 text-center">{actionHint}</p>}
+          </div>
         )}
         <button
           type="button"

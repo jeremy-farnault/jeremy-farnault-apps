@@ -15,6 +15,9 @@ export default function GamePage() {
   const health = useCharacterStore((s) => s.health);
   const hunger = useCharacterStore((s) => s.hunger);
   const thirst = useCharacterStore((s) => s.thirst);
+  const knowledge = useCharacterStore((s) => s.knowledge);
+  const vigor = useCharacterStore((s) => s.vigor);
+  const might = useCharacterStore((s) => s.might);
   const money = useCharacterStore((s) => s.money);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const resetStats = useCharacterStore((s) => s.reset);
@@ -139,6 +142,9 @@ export default function GamePage() {
               <StatRow label="❤️ Health" value={`${Math.floor(health)}`} />
               <StatRow label="🍚 Hunger" value={`${Math.floor(hunger)}`} critical={hunger === 0} />
               <StatRow label="💧 Thirst" value={`${Math.floor(thirst)}`} critical={thirst === 0} />
+              <StatRow label="📚 Knowledge" value={`${knowledge}`} />
+              <StatRow label="🛡️ Vigor" value={`${vigor}`} />
+              <StatRow label="👊 Might" value={`${might}`} />
               <StatRow label="💴 Money" value={`¥${money.toLocaleString()}`} />
             </div>
           )}

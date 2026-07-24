@@ -23,7 +23,7 @@ export type TransitPlan = {
 };
 
 export type TransitApiResponse =
-  | { fastest: TransitPlan; cheapest: TransitPlan }
+  | { best: TransitPlan; alternative: TransitPlan }
   | TransitPlan
   | null;
 

@@ -30,7 +30,7 @@ type TransitPlan = {
   totalFareYen: number;
 };
 
-type ApiResponse = { fastest: TransitPlan; cheapest: TransitPlan } | TransitPlan | null;
+type ApiResponse = { best: TransitPlan; alternative: TransitPlan } | TransitPlan | null;
 
 function parseLatLng(s: string | null): { latitude: number; longitude: number } | null {
   if (!s) return null;
@@ -209,9 +209,16 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
   );
 
   if ("fastest" in chainResult) {
-    const fastest = buildPlan(chainResult.fastest, walkInLeg, walkOutLeg);
-    const cheapest = buildPlan(chainResult.cheapest, walkInLeg, walkOutLeg);
-    return NextResponse.json({ fastest, cheapest });
+    const best = buildPlan(chainResult.fastest, walkInLeg, walkOutLeg);
+    const alternative = buildPlan(chainResult.cheapest, walkInLeg, walkOutLeg);
+    // Only surface the alternative when it's strictly cheaper than best.
+    // Otherwise the "cheapest" Dijkstra approximation has produced a route
+    // that isn't actually cheaper — collapse to a single Best plan rather
+    // than lie in the UI.
+    if (alternative.totalFareYen < best.totalFareYen) {
+      return NextResponse.json({ best, alternative });
+    }
+    return NextResponse.json(best);
   }
 
   const plan = buildPlan(chainResult, walkInLeg, walkOutLeg);

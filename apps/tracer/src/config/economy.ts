@@ -22,12 +22,24 @@ export const MEAL_CONFIG = {
   maxThirstRestore: 50,
 } as const;
 
-export const WORK_CONFIG = {
-  ratePerHour: 1200,
-  shiftDuration: 28800, // seconds (8 hours)
-  maxEarnings: 9600,
-} as const;
-
 export const EXPLORE_CONFIG = {
   duration: 7200, // seconds (2 hours)
+} as const;
+
+export const STUDY_CONFIG = {
+  cost: 0,
+  duration: 28800, // seconds (8 hours)
+  maxAttributeGain: 5,
+} as const;
+
+export const TRAIN_VIGOR_CONFIG = {
+  cost: 800,
+  duration: 7200, // seconds (2 hours)
+  maxAttributeGain: 3,
+} as const;
+
+export const TRAIN_MIGHT_CONFIG = {
+  cost: 2000,
+  duration: 7200, // seconds (2 hours)
+  maxAttributeGain: 3,
 } as const;

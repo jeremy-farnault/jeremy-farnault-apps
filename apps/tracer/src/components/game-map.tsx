@@ -1,6 +1,13 @@
 "use client";
 
-import { EXPLORE_CONFIG, ITEM_CATALOGUE, MEAL_CONFIG, WORK_CONFIG } from "@/config/economy";
+import {
+  EXPLORE_CONFIG,
+  ITEM_CATALOGUE,
+  MEAL_CONFIG,
+  STUDY_CONFIG,
+  TRAIN_MIGHT_CONFIG,
+  TRAIN_VIGOR_CONFIG,
+} from "@/config/economy";
 import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { LINES } from "@/config/lines";
@@ -30,6 +37,9 @@ const ACTION_LABELS: Record<string, string> = {
   meal: "Eating",
   work: "Working",
   explore: "Exploring…",
+  study: "Studying…",
+  "train-vigor": "Training…",
+  "train-might": "Training…",
 };
 
 function formatYen(n: number): string {
@@ -111,9 +121,11 @@ interface GameMapProps {
 export function GameMap({ characterSelected }: GameMapProps) {
   const { characterPosition, isActive, startTravel, travel } = useTravel();
   const money = useCharacterStore((s) => s.money);
+  const knowledge = useCharacterStore((s) => s.knowledge);
   const spendMoney = useCharacterStore((s) => s.spendMoney);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const earnMoney = useCharacterStore((s) => s.earnMoney);
+  const gainAttribute = useCharacterStore((s) => s.gainAttribute);
   const discoveredRegionIds = useRegionStore((s) => s.discoveredRegionIds);
   const enabledCategories = useFilterStore((s) => s.enabledCategories);
   const enabledLines = useFilterStore((s) => s.enabledLines);
@@ -129,6 +141,12 @@ export function GameMap({ characterSelected }: GameMapProps) {
       earnMoney(Math.floor(finalT * state.maxStatA));
     } else if (state.type === "explore" && finalT === 1 && state.unlocksRegionId) {
       useRegionStore.getState().discover(state.unlocksRegionId);
+    } else if (state.type === "study") {
+      gainAttribute("knowledge", Math.round(finalT * state.maxStatA));
+    } else if (state.type === "train-vigor") {
+      gainAttribute("vigor", Math.round(finalT * state.maxStatA));
+    } else if (state.type === "train-might") {
+      gainAttribute("might", Math.round(finalT * state.maxStatA));
     }
   });
   const zone = useZone(process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "");
@@ -139,9 +157,9 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const [loading, setLoading] = useState(false);
   const [travelMode, setTravelMode] = useState<"walking" | "transit">("walking");
   const [transitPlans, setTransitPlans] = useState<
-    { fastest: TransitPlan; cheapest: TransitPlan } | TransitPlan | null
+    { best: TransitPlan; alternative: TransitPlan } | TransitPlan | null
   >(null);
-  const [transitMode, setTransitMode] = useState<"fastest" | "cheapest">("fastest");
+  const [transitMode, setTransitMode] = useState<"best" | "alternative">("best");
   const [transitLoading, setTransitLoading] = useState(false);
   const [transitUnavailable, setTransitUnavailable] = useState(false);
 
@@ -149,7 +167,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
     setRoute(null);
     setRoutePoi(null);
     setTransitPlans(null);
-    setTransitMode("fastest");
+    setTransitMode("best");
     setTransitUnavailable(false);
     setTravelMode("walking");
   }
@@ -164,7 +182,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
     setSelectedPoi(null);
     setTravelMode("walking");
     setTransitPlans(null);
-    setTransitMode("fastest");
+    setTransitMode("best");
     setTransitUnavailable(false);
     setLoading(true);
     const result = await fetchRoute(
@@ -189,7 +207,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
       return;
     }
     setTransitPlans(result);
-    setTransitMode("fastest");
+    setTransitMode("best");
   }
 
   function handleShop(_poi: Poi) {
@@ -197,13 +215,15 @@ export function GameMap({ characterSelected }: GameMapProps) {
     setShopOpen(true);
   }
 
-  function handleWork(_poi: Poi) {
+  function handleWork(poi: Poi) {
+    if (poi.category !== "work") return;
     setSelectedPoi(null);
+    const { shiftDuration, ratePerHour } = poi.job;
     startAction({
       type: "work",
-      duration: WORK_CONFIG.shiftDuration,
+      duration: shiftDuration,
       prepaidCost: 0,
-      maxStatA: WORK_CONFIG.maxEarnings,
+      maxStatA: ratePerHour * (shiftDuration / 3600),
       maxStatB: 0,
     });
   }
@@ -233,12 +253,47 @@ export function GameMap({ characterSelected }: GameMapProps) {
     });
   }
 
+  function handleStudy(_poi: Poi) {
+    setSelectedPoi(null);
+    startAction({
+      type: "study",
+      duration: STUDY_CONFIG.duration,
+      prepaidCost: 0,
+      maxStatA: STUDY_CONFIG.maxAttributeGain,
+      maxStatB: 0,
+    });
+  }
+
+  function handleTrainVigor(_poi: Poi) {
+    setSelectedPoi(null);
+    if (!spendMoney(TRAIN_VIGOR_CONFIG.cost)) return;
+    startAction({
+      type: "train-vigor",
+      duration: TRAIN_VIGOR_CONFIG.duration,
+      prepaidCost: TRAIN_VIGOR_CONFIG.cost,
+      maxStatA: TRAIN_VIGOR_CONFIG.maxAttributeGain,
+      maxStatB: 0,
+    });
+  }
+
+  function handleTrainMight(_poi: Poi) {
+    setSelectedPoi(null);
+    if (!spendMoney(TRAIN_MIGHT_CONFIG.cost)) return;
+    startAction({
+      type: "train-might",
+      duration: TRAIN_MIGHT_CONFIG.duration,
+      prepaidCost: TRAIN_MIGHT_CONFIG.cost,
+      maxStatA: TRAIN_MIGHT_CONFIG.maxAttributeGain,
+      maxStatB: 0,
+    });
+  }
+
   // Derived active transit plan: selected mode when both, else the single plan,
   // else null.
   const activePlan: TransitPlan | null =
     transitPlans === null
       ? null
-      : "fastest" in transitPlans
+      : "best" in transitPlans
         ? transitPlans[transitMode]
         : transitPlans;
 
@@ -296,15 +351,34 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
   const canAct = !isActive && !action && nearSelected && selectedPoi !== null;
   const poiAction: {
-    label: "Shop" | "Eat" | "Work" | "Explore";
+    label: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train";
     handler: (p: Poi) => void;
+    disabled?: boolean;
+    hint?: string;
   } | null = (() => {
     if (!canAct || !selectedPoi) return null;
     if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
     if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
       return { label: "Eat", handler: handleEat };
-    if (selectedPoi.category === "work") return { label: "Work", handler: handleWork };
+    if (selectedPoi.category === "work") {
+      const { knowledgeThreshold, ratePerHour, shiftDuration } = selectedPoi.job;
+      const earnings = ratePerHour * (shiftDuration / 3600);
+      if (knowledge < knowledgeThreshold) {
+        return {
+          label: "Work",
+          handler: handleWork,
+          disabled: true,
+          hint: `Requires Knowledge ≥ ${knowledgeThreshold}`,
+        };
+      }
+      return { label: "Work", handler: handleWork, hint: formatYen(earnings) };
+    }
     if (selectedPoi.category === "station") return { label: "Explore", handler: handleExplore };
+    if (selectedPoi.category === "school") return { label: "Study", handler: handleStudy };
+    if (selectedPoi.category === "gym" && money >= TRAIN_VIGOR_CONFIG.cost)
+      return { label: "Train", handler: handleTrainVigor };
+    if (selectedPoi.category === "dojo" && money >= TRAIN_MIGHT_CONFIG.cost)
+      return { label: "Train", handler: handleTrainMight };
     return null;
   })();
 
@@ -425,7 +499,14 @@ export function GameMap({ characterSelected }: GameMapProps) {
             onClose={() => selectPoi(null)}
             onGoHere={handleGoHere}
             disabled={isActive || !!action}
-            {...(poiAction ? { onAction: poiAction.handler, actionLabel: poiAction.label } : {})}
+            {...(poiAction
+              ? {
+                  onAction: poiAction.handler,
+                  actionLabel: poiAction.label,
+                  ...(poiAction.disabled !== undefined && { actionDisabled: poiAction.disabled }),
+                  ...(poiAction.hint !== undefined && { actionHint: poiAction.hint }),
+                }
+              : {})}
           />
         )}
       </MapGL>
@@ -494,7 +575,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
             </div>
             {action.type === "work" && (
               <p className="text-xs text-(--grey-500) tabular-nums">
-                ¥{Math.floor(t * WORK_CONFIG.maxEarnings).toLocaleString()} earned
+                ¥{Math.floor(t * action.maxStatA).toLocaleString()} earned
               </p>
             )}
             <button
@@ -558,36 +639,36 @@ export function GameMap({ characterSelected }: GameMapProps) {
                 </div>
               ) : travelMode === "transit" && activePlan && transitPlans ? (
                 <div className="flex flex-col gap-2">
-                  {"fastest" in transitPlans ? (
+                  {"best" in transitPlans ? (
                     <div className="flex gap-1">
                       <button
                         type="button"
-                        onClick={() => setTransitMode("fastest")}
+                        onClick={() => setTransitMode("best")}
                         className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
-                          transitMode === "fastest"
+                          transitMode === "best"
                             ? "bg-white/20 text-white"
                             : "text-(--grey-500) hover:text-white"
                         }`}
                       >
-                        <div className="text-[10px] uppercase tracking-wide">Fastest</div>
+                        <div className="text-[10px] uppercase tracking-wide">Best</div>
                         <div className="text-xs font-semibold">
-                          {formatDuration(transitPlans.fastest.totalDurationSec)} ·{" "}
-                          {formatYen(transitPlans.fastest.totalFareYen)}
+                          {formatDuration(transitPlans.best.totalDurationSec)} ·{" "}
+                          {formatYen(transitPlans.best.totalFareYen)}
                         </div>
                       </button>
                       <button
                         type="button"
-                        onClick={() => setTransitMode("cheapest")}
+                        onClick={() => setTransitMode("alternative")}
                         className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
-                          transitMode === "cheapest"
+                          transitMode === "alternative"
                             ? "bg-white/20 text-white"
                             : "text-(--grey-500) hover:text-white"
                         }`}
                       >
-                        <div className="text-[10px] uppercase tracking-wide">Cheapest</div>
+                        <div className="text-[10px] uppercase tracking-wide">Alternative</div>
                         <div className="text-xs font-semibold">
-                          {formatDuration(transitPlans.cheapest.totalDurationSec)} ·{" "}
-                          {formatYen(transitPlans.cheapest.totalFareYen)}
+                          {formatDuration(transitPlans.alternative.totalDurationSec)} ·{" "}
+                          {formatYen(transitPlans.alternative.totalFareYen)}
                         </div>
                       </button>
                     </div>

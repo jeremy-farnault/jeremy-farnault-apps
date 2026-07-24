@@ -1,7 +1,7 @@
 "use client";
 
-import { applyDecay, defaultStats } from "@/lib/stats";
-import type { CharacterStats } from "@/lib/stats";
+import { applyDecay, defaultStats, pumpAttribute } from "@/lib/stats";
+import type { Attributes, CharacterStats } from "@/lib/stats";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -9,6 +9,7 @@ type CharacterState = CharacterStats & {
   spendMoney: (amount: number) => boolean;
   earnMoney: (amount: number) => void;
   restoreStats: (hunger: number, thirst: number) => void;
+  gainAttribute: (name: keyof Attributes, delta: number) => void;
   applyDecayTick: () => void;
   reset: () => void;
 };
@@ -33,6 +34,8 @@ export const useCharacterStore = create<CharacterState>()(
           thirst: Math.min(100, get().thirst + thirst),
         }),
 
+      gainAttribute: (name, delta) => set(pumpAttribute(get(), name, delta)),
+
       applyDecayTick: () => set(applyDecay(get())),
 
       reset: () => set(defaultStats()),
@@ -43,6 +46,9 @@ export const useCharacterStore = create<CharacterState>()(
         health: state.health,
         hunger: state.hunger,
         thirst: state.thirst,
+        knowledge: state.knowledge,
+        vigor: state.vigor,
+        might: state.might,
         money: state.money,
         lastComputedAt: state.lastComputedAt,
       }),

@@ -18,6 +18,8 @@ const CATEGORY_LABELS: { id: FilterableCategory; emoji: string; label: string }[
   { id: "sento", emoji: "♨️", label: "Sento" },
   { id: "shrine", emoji: "⛩️", label: "Shrine" },
   { id: "school", emoji: "🏫", label: "School" },
+  { id: "gym", emoji: "💪", label: "Gym" },
+  { id: "dojo", emoji: "🥋", label: "Dojo" },
 ];
 
 export function FiltersPanel() {

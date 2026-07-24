@@ -50,7 +50,9 @@ export type PoiCategory =
   | "ramen"
   | "work"
   | "home"
-  | "station";
+  | "station"
+  | "gym"
+  | "dojo";
 
 type PoiBase = {
   id: string;
@@ -67,11 +69,22 @@ export type StationPoi = PoiBase & {
   lines: LineId[];
 };
 
-export type GenericPoi = PoiBase & {
-  category: Exclude<PoiCategory, "station">;
+export type Job = {
+  knowledgeThreshold: number;
+  ratePerHour: number;
+  shiftDuration: number; // seconds
 };
 
-export type Poi = StationPoi | GenericPoi;
+export type WorkPoi = PoiBase & {
+  category: "work";
+  job: Job;
+};
+
+export type GenericPoi = PoiBase & {
+  category: Exclude<PoiCategory, "station" | "work">;
+};
+
+export type Poi = StationPoi | WorkPoi | GenericPoi;
 
 export const HOME_POI: Poi = {
   id: "home",
@@ -160,6 +173,25 @@ export const POIS: Poi[] = [
     longitude: 139.71261092278013,
     latitude: 35.76842945297194,
     regionId: "home",
+    job: { knowledgeThreshold: 0, ratePerHour: 1200, shiftDuration: 28800 },
+  },
+  {
+    id: "gym-1",
+    label: "Gym",
+    category: "gym",
+    emoji: "💪",
+    longitude: 139.72661788819428,
+    latitude: 35.766232588642,
+    regionId: "home",
+  },
+  {
+    id: "dojo-1",
+    label: "Dojo",
+    category: "dojo",
+    emoji: "🥋",
+    longitude: 139.71089243818213,
+    latitude: 35.77094210736899,
+    regionId: "home",
   },
   {
     id: "konbini-akabane",
@@ -187,6 +219,7 @@ export const POIS: Poi[] = [
     longitude: 139.718,
     latitude: 35.7785,
     regionId: "akabane",
+    job: { knowledgeThreshold: 0, ratePerHour: 1200, shiftDuration: 28800 },
   },
   ...STATION_POIS,
 ];
