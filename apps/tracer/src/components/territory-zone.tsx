@@ -1,10 +1,10 @@
 "use client";
 
-import type { Feature, Polygon } from "geojson";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { Layer, Source } from "react-map-gl/mapbox";
 
 interface Props {
-  data: Feature<Polygon>;
+  data: Feature<Polygon | MultiPolygon>;
   fillColor: string;
   fillOpacity: number;
   lineColor: string;

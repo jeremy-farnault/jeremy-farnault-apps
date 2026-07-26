@@ -3,13 +3,14 @@ import type { RegionId } from "@/config/game";
 const ACTION_KEY = "tracer:action";
 
 export type TimedActionState = {
-  type: "meal" | "work" | "explore" | "study" | "train-vigor" | "train-might";
+  type: "meal" | "work" | "explore" | "study" | "train-vigor" | "train-might" | "rest" | "confront";
   startedAt: number; // wall timestamp
   duration: number; // seconds
   prepaidCost: number;
-  maxStatA: number; // hunger (meal), earnings (work), or attribute gain (training)
-  maxStatB: number; // thirst (meal) or 0 (work / training)
+  maxStatA: number; // hunger (meal), earnings (work), attribute gain (training), or shield restore (rest)
+  maxStatB: number; // thirst (meal), health restore (rest), or 0 (work / training / confront)
   unlocksRegionId?: RegionId; // explore only
+  npcId?: string; // confront only — which NPC is being fought
 };
 
 export function loadActionState(): TimedActionState | null {

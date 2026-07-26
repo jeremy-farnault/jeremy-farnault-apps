@@ -1,6 +1,5 @@
 import type { LineId } from "@/config/lines";
 import { STATION_POIS } from "@/config/stations";
-import type { Feature, Polygon } from "geojson";
 export { REGIONS } from "@/config/regions";
 export type { Region, RegionId } from "@/config/regions";
 import type { RegionId } from "@/config/regions";
@@ -15,31 +14,6 @@ export const MAP_INITIAL_VIEW = {
   zoom: 15,
 };
 
-// ~50m box around PLAYER_HOME
-export const INITIAL_ZONE: Feature<Polygon> = {
-  type: "Feature",
-  properties: {},
-  geometry: {
-    type: "Polygon",
-    coordinates: [
-      [
-        [139.72636, 35.76943],
-        [139.72746, 35.76943],
-        [139.72746, 35.77033],
-        [139.72636, 35.77033],
-        [139.72636, 35.76943],
-      ],
-    ],
-  },
-};
-
-export const ZONE_STYLE = {
-  fillColor: "#44a684",
-  fillOpacity: 0.4,
-  lineColor: "#44a684",
-  lineWidth: 2,
-};
-
 export type PoiCategory =
   | "konbini"
   | "school"
@@ -52,9 +26,10 @@ export type PoiCategory =
   | "home"
   | "station"
   | "gym"
-  | "dojo";
+  | "dojo"
+  | "npc";
 
-type PoiBase = {
+export type PoiBase = {
   id: string;
   label: string;
   emoji: string;

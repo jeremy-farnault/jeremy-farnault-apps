@@ -8,11 +8,16 @@ export type Attributes = {
   might: number;
 };
 
-// Depleting resources on an actor. Only vitals decay over time.
+// Depleting resources on an actor. Only hunger and thirst decay automatically
+// over time; health and shield are affected by other systems (combat) and
+// restored by Rest.
 export type Vitals = {
   health: number;
   hunger: number;
   thirst: number;
+  // Extra buffer HP on top of health. Effective max is always the current
+  // `vigor` attribute — no independent stored max.
+  shield: number;
 };
 
 export type CharacterStats = Attributes &
@@ -26,6 +31,7 @@ export function defaultStats(): CharacterStats {
     health: 100,
     hunger: 100,
     thirst: 100,
+    shield: 0,
     knowledge: 0,
     vigor: 0,
     might: 5,

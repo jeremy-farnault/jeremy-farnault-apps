@@ -9,6 +9,8 @@ type CharacterState = CharacterStats & {
   spendMoney: (amount: number) => boolean;
   earnMoney: (amount: number) => void;
   restoreStats: (hunger: number, thirst: number) => void;
+  rest: (shieldAmount: number, healthAmount: number) => void;
+  takeDamage: (amount: number) => void;
   gainAttribute: (name: keyof Attributes, delta: number) => void;
   applyDecayTick: () => void;
   reset: () => void;
@@ -34,6 +36,22 @@ export const useCharacterStore = create<CharacterState>()(
           thirst: Math.min(100, get().thirst + thirst),
         }),
 
+      rest: (shieldAmount, healthAmount) =>
+        set({
+          shield: Math.min(get().vigor, get().shield + shieldAmount),
+          health: Math.min(100, get().health + healthAmount),
+        }),
+
+      takeDamage: (amount) => {
+        const { shield, health } = get();
+        const shieldDamage = Math.min(shield, amount);
+        const healthDamage = amount - shieldDamage;
+        set({
+          shield: shield - shieldDamage,
+          health: Math.max(0, health - healthDamage),
+        });
+      },
+
       gainAttribute: (name, delta) => set(pumpAttribute(get(), name, delta)),
 
       applyDecayTick: () => set(applyDecay(get())),
@@ -46,6 +64,7 @@ export const useCharacterStore = create<CharacterState>()(
         health: state.health,
         hunger: state.hunger,
         thirst: state.thirst,
+        shield: state.shield,
         knowledge: state.knowledge,
         vigor: state.vigor,
         might: state.might,

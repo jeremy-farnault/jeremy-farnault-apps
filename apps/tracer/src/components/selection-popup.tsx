@@ -9,7 +9,7 @@ interface Props {
   onGoHere: (poi: Poi) => void;
   disabled?: boolean;
   onAction?: (poi: Poi) => void;
-  actionLabel?: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train";
+  actionLabel?: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train" | "Rest" | "Confront";
   actionDisabled?: boolean;
   actionHint?: string;
 }

@@ -43,3 +43,17 @@ export const TRAIN_MIGHT_CONFIG = {
   duration: 7200, // seconds (2 hours)
   maxAttributeGain: 3,
 } as const;
+
+export const REST_CONFIG = {
+  cost: 0,
+  duration: 28800, // seconds (8 hours — a full night)
+  maxShieldRestore: 100,
+  maxHealthRestore: 100,
+} as const;
+
+export const CONFRONT_CONFIG = {
+  cost: 0,
+  duration: 600, // seconds (10 min) — 1v1; multi-fighter duration is a future rule
+  minDamage: 15, // also the flat damage taken on a win or an early stop
+  maxDamage: 50,
+} as const;

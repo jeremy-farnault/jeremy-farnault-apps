@@ -1,19 +1,22 @@
 "use client";
 
 import {
+  CONFRONT_CONFIG,
   EXPLORE_CONFIG,
   ITEM_CATALOGUE,
   MEAL_CONFIG,
+  REST_CONFIG,
   STUDY_CONFIG,
   TRAIN_MIGHT_CONFIG,
   TRAIN_VIGOR_CONFIG,
 } from "@/config/economy";
-import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS, ZONE_STYLE } from "@/config/game";
+import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { LINES } from "@/config/lines";
+import { NPCS } from "@/config/npcs";
+import { ZONES, effectiveOwner, zoneStyle } from "@/config/zones";
 import { useAction } from "@/hooks/use-action";
 import { useTravel } from "@/hooks/use-travel";
-import { useZone } from "@/hooks/use-zone";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
 import type { RouteResult } from "@/lib/directions";
 import { addItem } from "@/lib/inventory";
@@ -24,11 +27,13 @@ import { useCharacterStore } from "@/stores/character-store";
 import { useFilterStore } from "@/stores/filter-store";
 import { useRegionStore } from "@/stores/region-store";
 import { useSelectionStore } from "@/stores/selection-store";
+import { useZoneStore } from "@/stores/zone-store";
 import { useEffect, useRef, useState } from "react";
 import type { MapRef } from "react-map-gl/mapbox";
 import MapGL, { Layer, Source } from "react-map-gl/mapbox";
 import { CharacterMarker } from "./character-marker";
 import { HomeMarker } from "./home-marker";
+import { NpcMarker } from "./npc-marker";
 import { PoiMarkers } from "./poi-markers";
 import { SelectionPopup } from "./selection-popup";
 import { TerritoryZone } from "./territory-zone";
@@ -40,6 +45,8 @@ const ACTION_LABELS: Record<string, string> = {
   study: "Studying…",
   "train-vigor": "Training…",
   "train-might": "Training…",
+  rest: "Resting…",
+  confront: "Confronting…",
 };
 
 function formatYen(n: number): string {
@@ -122,11 +129,17 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const { characterPosition, isActive, startTravel, travel } = useTravel();
   const money = useCharacterStore((s) => s.money);
   const knowledge = useCharacterStore((s) => s.knowledge);
+  const health = useCharacterStore((s) => s.health);
+  const might = useCharacterStore((s) => s.might);
   const spendMoney = useCharacterStore((s) => s.spendMoney);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
+  const rest = useCharacterStore((s) => s.rest);
+  const takeDamage = useCharacterStore((s) => s.takeDamage);
   const earnMoney = useCharacterStore((s) => s.earnMoney);
   const gainAttribute = useCharacterStore((s) => s.gainAttribute);
   const discoveredRegionIds = useRegionStore((s) => s.discoveredRegionIds);
+  const capturedZoneIds = useZoneStore((s) => s.capturedZoneIds);
+  const captureZone = useZoneStore((s) => s.capture);
   const enabledCategories = useFilterStore((s) => s.enabledCategories);
   const enabledLines = useFilterStore((s) => s.enabledLines);
   const pendingSelectionId = useSelectionStore((s) => s.pendingSelectionId);
@@ -147,9 +160,28 @@ export function GameMap({ characterSelected }: GameMapProps) {
       gainAttribute("vigor", Math.round(finalT * state.maxStatA));
     } else if (state.type === "train-might") {
       gainAttribute("might", Math.round(finalT * state.maxStatA));
+    } else if (state.type === "rest") {
+      rest(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
+    } else if (state.type === "confront") {
+      if (finalT < 1) {
+        // Fled mid-fight — no roll, no capture, but not free either.
+        takeDamage(CONFRONT_CONFIG.minDamage);
+      } else {
+        const npc = state.npcId ? NPCS.find((n) => n.id === state.npcId) : undefined;
+        if (npc) {
+          const winChance = might / (might + npc.might);
+          if (Math.random() < winChance) {
+            takeDamage(CONFRONT_CONFIG.minDamage);
+            const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
+            if (zone) captureZone(zone.id);
+          } else {
+            const range = CONFRONT_CONFIG.maxDamage - CONFRONT_CONFIG.minDamage + 1;
+            takeDamage(CONFRONT_CONFIG.minDamage + Math.floor(Math.random() * range));
+          }
+        }
+      }
     }
   });
-  const zone = useZone(process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "");
   const [shopOpen, setShopOpen] = useState(false);
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
   const [route, setRoute] = useState<RouteResult | null>(null);
@@ -288,6 +320,29 @@ export function GameMap({ characterSelected }: GameMapProps) {
     });
   }
 
+  function handleRest(_poi: Poi) {
+    setSelectedPoi(null);
+    startAction({
+      type: "rest",
+      duration: REST_CONFIG.duration,
+      prepaidCost: REST_CONFIG.cost,
+      maxStatA: REST_CONFIG.maxShieldRestore,
+      maxStatB: REST_CONFIG.maxHealthRestore,
+    });
+  }
+
+  function handleConfront(poi: Poi) {
+    setSelectedPoi(null);
+    startAction({
+      type: "confront",
+      duration: CONFRONT_CONFIG.duration,
+      prepaidCost: CONFRONT_CONFIG.cost,
+      maxStatA: 0,
+      maxStatB: 0,
+      npcId: poi.id,
+    });
+  }
+
   // Derived active transit plan: selected mode when both, else the single plan,
   // else null.
   const activePlan: TransitPlan | null =
@@ -348,15 +403,38 @@ export function GameMap({ characterSelected }: GameMapProps) {
     return enabledCategories.includes(p.category);
   });
 
+  const visibleNpcs = NPCS.filter((npc) => {
+    const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
+    if (!zone) return false;
+    const owner = effectiveOwner(zone, capturedZoneIds);
+    return (
+      typeof owner === "object" &&
+      owner.npcId === npc.id &&
+      discoveredRegionIds.includes(zone.region)
+    );
+  });
+
   const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
   const canAct = !isActive && !action && nearSelected && selectedPoi !== null;
   const poiAction: {
-    label: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train";
+    label: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train" | "Rest" | "Confront";
     handler: (p: Poi) => void;
     disabled?: boolean;
     hint?: string;
   } | null = (() => {
     if (!canAct || !selectedPoi) return null;
+    if (selectedPoi.category === "home") return { label: "Rest", handler: handleRest };
+    if (selectedPoi.category === "npc") {
+      if (health <= 0) {
+        return {
+          label: "Confront",
+          handler: handleConfront,
+          disabled: true,
+          hint: "Health too low — rest first",
+        };
+      }
+      return { label: "Confront", handler: handleConfront };
+    }
     if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
     if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
       return { label: "Eat", handler: handleEat };
@@ -431,15 +509,13 @@ export function GameMap({ characterSelected }: GameMapProps) {
         config={{ basemap: { lightPreset: "night", showRoadLabels: false } }}
         maxBounds={TOKYO_BOUNDS}
       >
-        {zone && (
+        {ZONES.filter((z) => discoveredRegionIds.includes(z.region)).map((z) => (
           <TerritoryZone
-            data={zone}
-            fillColor={ZONE_STYLE.fillColor}
-            fillOpacity={ZONE_STYLE.fillOpacity}
-            lineColor={ZONE_STYLE.lineColor}
-            lineWidth={ZONE_STYLE.lineWidth}
+            key={z.id}
+            data={z.boundary}
+            {...zoneStyle(effectiveOwner(z, capturedZoneIds))}
           />
-        )}
+        ))}
 
         {activeGeometry && (
           <Source
@@ -488,6 +564,9 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
         <HomeMarker poi={HOME_POI} onSelect={selectPoi} />
         <PoiMarkers pois={visiblePois} selectedId={selectedPoi?.id ?? null} onSelect={selectPoi} />
+        {visibleNpcs.map((npc) => (
+          <NpcMarker key={npc.id} npc={npc} onSelect={selectPoi} />
+        ))}
         <CharacterMarker
           longitude={characterPosition.longitude}
           latitude={characterPosition.latitude}
