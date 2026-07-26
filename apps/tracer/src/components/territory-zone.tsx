@@ -4,6 +4,7 @@ import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { Layer, Source } from "react-map-gl/mapbox";
 
 interface Props {
+  id: string;
   data: Feature<Polygon | MultiPolygon>;
   fillColor: string;
   fillOpacity: number;
@@ -11,11 +12,11 @@ interface Props {
   lineWidth: number;
 }
 
-export function TerritoryZone({ data, fillColor, fillOpacity, lineColor, lineWidth }: Props) {
+export function TerritoryZone({ id, data, fillColor, fillOpacity, lineColor, lineWidth }: Props) {
   return (
-    <Source type="geojson" data={data}>
+    <Source id={id} type="geojson" data={data}>
       <Layer
-        id="territory-fill"
+        id={`${id}-fill`}
         type="fill"
         paint={{
           "fill-color": fillColor,
@@ -24,7 +25,7 @@ export function TerritoryZone({ data, fillColor, fillOpacity, lineColor, lineWid
         }}
       />
       <Layer
-        id="territory-line"
+        id={`${id}-line`}
         type="line"
         paint={{ "line-color": lineColor, "line-width": lineWidth, "line-emissive-strength": 1 }}
       />

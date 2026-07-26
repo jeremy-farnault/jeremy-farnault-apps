@@ -1,7 +1,7 @@
 import type { RegionId } from "@/config/regions";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 
-export type ZoneId = "higashi-jujo";
+export type ZoneId = "higashi-jujo" | "home-turf";
 
 // "player" or a reference to the NPC currently holding the zone — reassignable
 // later (raids, other gangs) without a schema change.
@@ -31,9 +31,15 @@ export function effectiveOwner(zone: Zone, capturedZoneIds: ZoneId[]): ZoneOwner
   return capturedZoneIds.includes(zone.id) ? "player" : zone.owner;
 }
 
-// Real administrative boundary for Higashi-Jujo (東十条), Kita Ward, Tokyo —
-// sourced from OpenStreetMap (Nominatim, relation boundary=administrative).
+// Rendering order matters here: react-map-gl mounts each zone's Mapbox
+// layers in array order, and Mapbox stacks newly-added layers on top by
+// default (no `beforeId` is set anywhere). Zones meant to visually sit on
+// top of a larger overlapping zone (e.g. the player's small home turf,
+// nested inside the much larger Higashi-Jujo neighborhood) must be listed
+// AFTER that larger zone below.
 export const ZONES: Zone[] = [
+  // Real administrative boundary for Higashi-Jujo (東十条), Kita Ward, Tokyo —
+  // sourced from OpenStreetMap (Nominatim, relation boundary=administrative).
   {
     id: "higashi-jujo",
     region: "home",
@@ -178,19 +184,11 @@ export const ZONES: Zone[] = [
             [139.7283699, 35.7690323],
             [139.7282161, 35.7693052],
             [139.7280122, 35.7696693],
-            [139.7273692, 35.7694289],
-            [139.7272152, 35.7697043],
-            [139.7270809, 35.7699368],
-            [139.72692, 35.7702202],
-            [139.7268343, 35.7703738],
-            [139.7267963, 35.770442],
-            [139.7266796, 35.7706553],
-            [139.7265681, 35.7708577],
-            [139.7262413, 35.7713891],
-            [139.7261436, 35.7715669],
-            [139.7260142, 35.7717998],
-            [139.7258996, 35.7720133],
-            [139.7257612, 35.7722656],
+            [139.7280276552157, 35.76964766646365],
+            [139.72671432818353, 35.76915149114173],
+            [139.7261802427898, 35.77011464164656],
+            [139.7268319326449, 35.77038358108686],
+            [139.72577829045042, 35.77222699662802],
             [139.7257239, 35.7722774],
             [139.7257099, 35.7722788],
             [139.7257219, 35.7723555],
@@ -206,6 +204,35 @@ export const ZONES: Zone[] = [
             [139.722293, 35.7718536],
             [139.722233, 35.7718257],
             [139.7221663, 35.7718082],
+          ],
+        ],
+      },
+    },
+  },
+  // Small, permanent, always-player-owned zone around the player's home.
+  // Restored from the original INITIAL_ZONE (removed when the zone-control
+  // feature replaced it) — it represents the player's already-controlled
+  // personal turf, nested inside the much larger, not-yet-captured
+  // neighborhood zone above. Boundary traced along real streets by hand
+  // (Google Maps), not derived from any API.
+  {
+    id: "home-turf",
+    region: "home",
+    name: "Home Turf",
+    owner: "player",
+    boundary: {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [139.7262257714743, 35.770112909814536],
+            [139.7272082679706, 35.77049161043806],
+            [139.72760244515626, 35.77055412510718],
+            [139.72800255010924, 35.769683422822794],
+            [139.7267348013942, 35.769206931423206],
+            [139.7262257714743, 35.770112909814536],
           ],
         ],
       },

@@ -512,6 +512,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
         {ZONES.filter((z) => discoveredRegionIds.includes(z.region)).map((z) => (
           <TerritoryZone
             key={z.id}
+            id={z.id}
             data={z.boundary}
             {...zoneStyle(effectiveOwner(z, capturedZoneIds))}
           />
