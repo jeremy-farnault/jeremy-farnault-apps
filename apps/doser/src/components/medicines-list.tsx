@@ -47,9 +47,12 @@ export function MedicinesList({
 
   const days = monthViews[0]?.days.map((day) => ({ date: day.date, dayOfMonth: day.dayOfMonth }));
   const detailLog = detailDate ? symptomLogsByDate[detailDate] : undefined;
+  const editingTypes = editingMedicine
+    ? monthViews.find((view) => view.medicine.id === editingMedicine.id)?.types
+    : undefined;
 
   return (
-    <div className="flex w-full max-w-[900px] flex-col gap-4 px-4 pt-8 pb-24">
+    <div className="flex w-full flex-col gap-4 px-4 pt-8 pb-24">
       {monthViews.length === 0 || !days ? (
         <p className="py-16 text-center text-(--grey-700)">No medicines yet.</p>
       ) : (
@@ -66,13 +69,15 @@ export function MedicinesList({
             symptomLogsByDate={symptomLogsByDate}
             onSelectDay={setDetailDate}
           />
-          <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {monthViews.map(({ medicine, days: medicineDays }) => (
               <MedicineStrip
                 key={medicine.id}
                 medicine={medicine}
                 days={medicineDays}
                 today={today}
+                year={year}
+                month={month}
                 onEdit={() => openEdit(medicine)}
               />
             ))}
@@ -86,6 +91,7 @@ export function MedicinesList({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         {...(editingMedicine !== undefined ? { medicine: editingMedicine } : {})}
+        {...(editingTypes !== undefined ? { initialTypes: editingTypes } : {})}
       />
 
       {detailDate && (

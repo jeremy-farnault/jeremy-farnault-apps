@@ -3,16 +3,18 @@ import {
   doserDayOverrides,
   doserDoseLogs,
   doserMedicines,
+  doserPillTypes,
   doserSymptomLogEntries,
   doserSymptomLogs,
   doserSymptoms,
 } from "@jf/db";
 import { and, asc, between, eq, inArray, isNull, or } from "drizzle-orm";
-import { datesInRange, resolveOnOff } from "./cycle";
+import { type CyclePattern, datesInRange, resolveDay } from "./cycle";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Medicine = typeof doserMedicines.$inferSelect;
+export type PillType = typeof doserPillTypes.$inferSelect;
 export type Symptom = typeof doserSymptoms.$inferSelect;
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
@@ -46,52 +48,48 @@ export async function getMedicineForUser(
   return medicine;
 }
 
+async function getMedicinePillTypes(medicineId: string): Promise<PillType[]> {
+  return db
+    .select()
+    .from(doserPillTypes)
+    .where(eq(doserPillTypes.medicineId, medicineId))
+    .orderBy(asc(doserPillTypes.position));
+}
+
+async function getCyclePattern(medicine: Medicine): Promise<CyclePattern> {
+  const types = await getMedicinePillTypes(medicine.id);
+  return { cycleStartDate: medicine.cycleStartDate, daysOff: medicine.daysOff, types };
+}
+
 /** Resolves the final on/off state for a single day, letting a manual override win. */
 export async function resolveMedicineDay(medicineId: string, date: string): Promise<boolean> {
   const medicine = await getMedicineById(medicineId);
+  const pattern = await getCyclePattern(medicine);
   const [override] = await db
     .select()
     .from(doserDayOverrides)
     .where(and(eq(doserDayOverrides.medicineId, medicineId), eq(doserDayOverrides.date, date)));
-  return resolveOnOff(medicine, date, override);
-}
-
-/** Resolves on/off for every day in a range with a single overrides query (avoids N+1 per day). */
-export async function resolveMedicineDaysInRange(
-  medicineId: string,
-  startDate: string,
-  endDate: string
-): Promise<Record<string, boolean>> {
-  const medicine = await getMedicineById(medicineId);
-  const overrides = await db
-    .select()
-    .from(doserDayOverrides)
-    .where(
-      and(
-        eq(doserDayOverrides.medicineId, medicineId),
-        between(doserDayOverrides.date, startDate, endDate)
-      )
-    );
-  const overrideByDate = new Map(overrides.map((o) => [o.date, o]));
-
-  const result: Record<string, boolean> = {};
-  for (const date of datesInRange(startDate, endDate)) {
-    result[date] = resolveOnOff(medicine, date, overrideByDate.get(date));
-  }
-  return result;
+  return resolveDay(pattern, date, override).isOn;
 }
 
 // ─── Month view (tablet visualization) ────────────────────────────────────────
 
+export type ActiveType = {
+  id: string;
+  name: string | null;
+  color: string;
+};
+
 export type MedicineDayState = {
   date: string;
   dayOfMonth: number;
-  isOn: boolean;
+  activeType: ActiveType | null;
   taken: boolean;
 };
 
 export type MedicineMonthView = {
   medicine: Medicine;
+  types: PillType[];
   days: MedicineDayState[];
 };
 
@@ -107,10 +105,21 @@ function groupByMedicineAndDate<T extends { medicineId: string; date: string }>(
   return grouped;
 }
 
+function groupByMedicine<T extends { medicineId: string }>(rows: T[]): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.medicineId) ?? [];
+    list.push(row);
+    grouped.set(row.medicineId, list);
+  }
+  return grouped;
+}
+
 /**
  * Month view for every one of a user's Medicines in a single pass: one query for the medicines,
- * one for all their overrides in range, one for all their dose logs in range — regardless of how
- * many Medicines exist (same N+1-avoidance as resolveMedicineDaysInRange, extended across Medicines).
+ * one for all their pill types, one for all their overrides in range, one for all their dose logs
+ * in range — regardless of how many Medicines exist (same N+1-avoidance established in earlier
+ * tickets, extended to cover pill types too).
  */
 export async function getMedicinesMonthView(
   userId: string,
@@ -122,40 +131,61 @@ export async function getMedicinesMonthView(
 
   const medicineIds = medicines.map((m) => m.id);
 
-  const overrides = await db
-    .select()
-    .from(doserDayOverrides)
-    .where(
-      and(
-        inArray(doserDayOverrides.medicineId, medicineIds),
-        between(doserDayOverrides.date, startDate, endDate)
-      )
-    );
-  const doseLogs = await db
-    .select()
-    .from(doserDoseLogs)
-    .where(
-      and(
-        inArray(doserDoseLogs.medicineId, medicineIds),
-        between(doserDoseLogs.date, startDate, endDate)
-      )
-    );
+  const [types, overrides, doseLogs] = await Promise.all([
+    db
+      .select()
+      .from(doserPillTypes)
+      .where(inArray(doserPillTypes.medicineId, medicineIds))
+      .orderBy(asc(doserPillTypes.position)),
+    db
+      .select()
+      .from(doserDayOverrides)
+      .where(
+        and(
+          inArray(doserDayOverrides.medicineId, medicineIds),
+          between(doserDayOverrides.date, startDate, endDate)
+        )
+      ),
+    db
+      .select()
+      .from(doserDoseLogs)
+      .where(
+        and(
+          inArray(doserDoseLogs.medicineId, medicineIds),
+          between(doserDoseLogs.date, startDate, endDate)
+        )
+      ),
+  ]);
 
+  const typesByMedicine = groupByMedicine(types);
   const overridesByMedicine = groupByMedicineAndDate(overrides);
   const doseLogsByMedicine = groupByMedicineAndDate(doseLogs);
   const dates = datesInRange(startDate, endDate);
 
   return medicines.map((medicine) => {
+    const medicineTypes = typesByMedicine.get(medicine.id) ?? [];
+    const pattern: CyclePattern = {
+      cycleStartDate: medicine.cycleStartDate,
+      daysOff: medicine.daysOff,
+      types: medicineTypes,
+    };
     const medicineOverrides = overridesByMedicine.get(medicine.id);
     const medicineDoseLogs = doseLogsByMedicine.get(medicine.id);
 
     const days: MedicineDayState[] = dates.map((date) => {
-      const isOn = resolveOnOff(medicine, date, medicineOverrides?.get(date));
-      const taken = isOn ? (medicineDoseLogs?.get(date)?.taken ?? false) : false;
-      return { date, dayOfMonth: Number(date.slice(-2)), isOn, taken };
+      const resolved = resolveDay(pattern, date, medicineOverrides?.get(date));
+      const taken = resolved.isOn ? (medicineDoseLogs?.get(date)?.taken ?? false) : false;
+      return {
+        date,
+        dayOfMonth: Number(date.slice(-2)),
+        activeType: resolved.type
+          ? { id: resolved.type.id, name: resolved.type.name, color: resolved.type.color }
+          : null,
+        taken,
+      };
     });
 
-    return { medicine, days };
+    return { medicine, types: medicineTypes, days };
   });
 }
 

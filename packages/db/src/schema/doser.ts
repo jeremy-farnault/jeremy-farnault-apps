@@ -19,13 +19,27 @@ export const doserMedicines = pgTable("doser_medicines", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  daysOn: integer("days_on").notNull(),
   daysOff: integer("days_off").notNull(),
   cycleStartDate: date("cycle_start_date").notNull(),
-  color: text("color").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+export const doserPillTypes = pgTable(
+  "doser_pill_types",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    medicineId: uuid("medicine_id")
+      .notNull()
+      .references(() => doserMedicines.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    name: text("name"),
+    color: text("color").notNull(),
+    days: integer("days").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.medicineId, table.position)]
+);
 
 export const doserDayOverrides = pgTable(
   "doser_day_overrides",

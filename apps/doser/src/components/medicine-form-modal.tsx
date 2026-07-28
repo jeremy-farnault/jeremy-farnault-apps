@@ -1,24 +1,33 @@
 "use client";
 
 import { createMedicineAction, updateMedicineAction } from "@/lib/actions";
-import type { Medicine } from "@/lib/queries";
+import type { Medicine, PillType } from "@/lib/queries";
 import { ActionModal, DatePicker, TextInput } from "@jf/ui";
+import { XIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { ColorPicker, DEFAULT_MEDICINE_COLOR } from "./color-picker";
+import { ColorPicker, DEFAULT_PILL_TYPE_COLOR } from "./color-picker";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   medicine?: Medicine;
+  initialTypes?: PillType[];
   onCreated?: (medicine: Medicine) => void;
+};
+
+type TypeRow = {
+  key: string;
+  name: string;
+  color: string;
+  days: string;
 };
 
 type FormErrors = {
   name?: string;
-  daysOn?: string;
   daysOff?: string;
+  typeDays?: Record<string, string>;
 };
 
 const numberInputClass =
@@ -28,52 +37,89 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function MedicineFormModal({ isOpen, onClose, medicine, onCreated }: Props) {
+function makeEmptyType(): TypeRow {
+  return { key: crypto.randomUUID(), name: "", color: DEFAULT_PILL_TYPE_COLOR, days: "" };
+}
+
+export function MedicineFormModal({ isOpen, onClose, medicine, initialTypes, onCreated }: Props) {
   const isEditMode = !!medicine;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const [name, setName] = useState("");
-  const [daysOn, setDaysOn] = useState("");
-  const [daysOff, setDaysOff] = useState("");
   const [cycleStartDate, setCycleStartDate] = useState(todayIso());
-  const [color, setColor] = useState(DEFAULT_MEDICINE_COLOR);
+  const [daysOff, setDaysOff] = useState("");
+  const [types, setTypes] = useState<TypeRow[]>([makeEmptyType()]);
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     if (!isOpen) return;
     if (medicine) {
       setName(medicine.name);
-      setDaysOn(String(medicine.daysOn));
-      setDaysOff(String(medicine.daysOff));
       setCycleStartDate(medicine.cycleStartDate);
-      setColor(medicine.color);
+      setDaysOff(String(medicine.daysOff));
+      setTypes(
+        initialTypes && initialTypes.length > 0
+          ? initialTypes.map((type) => ({
+              key: crypto.randomUUID(),
+              name: type.name ?? "",
+              color: type.color,
+              days: String(type.days),
+            }))
+          : [makeEmptyType()]
+      );
     } else {
       setName("");
-      setDaysOn("");
-      setDaysOff("");
       setCycleStartDate(todayIso());
-      setColor(DEFAULT_MEDICINE_COLOR);
+      setDaysOff("");
+      setTypes([makeEmptyType()]);
     }
     setErrors({});
-  }, [isOpen, medicine]);
+  }, [isOpen, medicine, initialTypes]);
+
+  function updateType(key: string, patch: Partial<Omit<TypeRow, "key">>) {
+    setTypes((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+    if (errors.typeDays?.[key]) {
+      setErrors((prev) => {
+        if (!prev.typeDays) return prev;
+        const nextTypeDays = { ...prev.typeDays };
+        delete nextTypeDays[key];
+        return { ...prev, typeDays: nextTypeDays };
+      });
+    }
+  }
+
+  function addType() {
+    setTypes((prev) => [...prev, makeEmptyType()]);
+  }
+
+  function removeType(key: string) {
+    setTypes((prev) => (prev.length > 1 ? prev.filter((row) => row.key !== key) : prev));
+  }
 
   function validate(): boolean {
     const next: FormErrors = {};
     if (!name.trim()) next.name = "Name is required";
-    const daysOnNum = Number(daysOn);
-    if (!daysOn.trim() || !Number.isInteger(daysOnNum) || daysOnNum <= 0) {
-      next.daysOn = "Must be a positive integer";
-    }
+
     const daysOffNum = Number(daysOff);
     if (!daysOff.trim() || !Number.isInteger(daysOffNum) || daysOffNum < 0) {
       next.daysOff = "Must be zero or a positive integer";
     }
+
+    const typeDaysErrors: Record<string, string> = {};
+    for (const row of types) {
+      const daysNum = Number(row.days);
+      if (!row.days.trim() || !Number.isInteger(daysNum) || daysNum <= 0) {
+        typeDaysErrors[row.key] = "Must be a positive integer";
+      }
+    }
+    if (Object.keys(typeDaysErrors).length > 0) next.typeDays = typeDaysErrors;
+
     setErrors(next);
     return Object.keys(next).length === 0;
   }
 
-  function clearError(field: keyof FormErrors) {
+  function clearFieldError(field: "name" | "daysOff") {
     setErrors((prev) => {
       const next = { ...prev };
       delete next[field];
@@ -87,10 +133,13 @@ export function MedicineFormModal({ isOpen, onClose, medicine, onCreated }: Prop
       try {
         const input = {
           name: name.trim(),
-          daysOn: Number(daysOn),
-          daysOff: Number(daysOff),
           cycleStartDate,
-          color,
+          daysOff: Number(daysOff),
+          types: types.map((row) => ({
+            name: row.name.trim() || null,
+            color: row.color,
+            days: Number(row.days),
+          })),
         };
         if (isEditMode && medicine) {
           await updateMedicineAction({ id: medicine.id, ...input });
@@ -115,45 +164,79 @@ export function MedicineFormModal({ isOpen, onClose, medicine, onCreated }: Prop
           value={name}
           onChange={(v) => {
             setName(v);
-            if (errors.name) clearError("name");
+            if (errors.name) clearFieldError("name");
           }}
         />
         {errors.name && <p className="text-xs text-(--red-500)">{errors.name}</p>}
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex flex-col gap-1 flex-1">
-          <input
-            type="number"
-            value={daysOn}
-            onChange={(e) => {
-              setDaysOn(e.target.value);
-              if (errors.daysOn) clearError("daysOn");
-            }}
-            placeholder="Days on"
-            className={numberInputClass}
-          />
-          {errors.daysOn && <p className="text-xs text-(--red-500)">{errors.daysOn}</p>}
-        </div>
-
-        <div className="flex flex-col gap-1 flex-1">
-          <input
-            type="number"
-            value={daysOff}
-            onChange={(e) => {
-              setDaysOff(e.target.value);
-              if (errors.daysOff) clearError("daysOff");
-            }}
-            placeholder="Days off"
-            className={numberInputClass}
-          />
-          {errors.daysOff && <p className="text-xs text-(--red-500)">{errors.daysOff}</p>}
-        </div>
-      </div>
-
       <DatePicker value={cycleStartDate} onChange={setCycleStartDate} />
 
-      <ColorPicker value={color} onChange={setColor} />
+      <div className="flex flex-col gap-3">
+        {types.map((row, index) => (
+          <div key={row.key} className="flex flex-col gap-2 rounded-[10px] bg-(--surface-150) p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-(--grey-700)">Type {index + 1}</span>
+              {types.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeType(row.key)}
+                  aria-label={`Remove type ${index + 1}`}
+                  className="text-(--grey-500) hover:text-(--red-500)"
+                >
+                  <XIcon size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <TextInput
+                  placeholder={`Type ${index + 1} (optional)`}
+                  value={row.name}
+                  onChange={(v) => updateType(row.key, { name: v })}
+                />
+              </div>
+              <div className="w-24">
+                <input
+                  type="number"
+                  value={row.days}
+                  onChange={(e) => updateType(row.key, { days: e.target.value })}
+                  placeholder="Days"
+                  className={numberInputClass}
+                />
+              </div>
+            </div>
+            {errors.typeDays?.[row.key] && (
+              <p className="text-xs text-(--red-500)">{errors.typeDays[row.key]}</p>
+            )}
+
+            <ColorPicker value={row.color} onChange={(color) => updateType(row.key, { color })} />
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addType}
+          className="self-start text-sm font-medium text-(--grey-700) hover:text-(--grey-900)"
+        >
+          + Add type
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <input
+          type="number"
+          value={daysOff}
+          onChange={(e) => {
+            setDaysOff(e.target.value);
+            if (errors.daysOff) clearFieldError("daysOff");
+          }}
+          placeholder="Days off"
+          className={numberInputClass}
+        />
+        {errors.daysOff && <p className="text-xs text-(--red-500)">{errors.daysOff}</p>}
+      </div>
     </div>
   );
 

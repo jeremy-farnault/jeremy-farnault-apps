@@ -18,7 +18,7 @@ const MEDICINE_COLOR_PALETTE = [
   { label: "Red Dark", value: "var(--red-600)" },
 ] as const;
 
-export const DEFAULT_MEDICINE_COLOR = "var(--yellow-600)";
+export const DEFAULT_PILL_TYPE_COLOR = "var(--yellow-600)";
 
 type Props = {
   value: string;

@@ -1,13 +1,25 @@
 const MS_PER_DAY = 86_400_000;
 
+export type PillType = {
+  id: string;
+  name: string | null;
+  color: string;
+  days: number;
+};
+
 export type CyclePattern = {
   cycleStartDate: string;
-  daysOn: number;
+  types: PillType[];
   daysOff: number;
 };
 
 export type DayOverride = {
   isOn: boolean;
+};
+
+export type ResolvedDay = {
+  isOn: boolean;
+  type: PillType | null;
 };
 
 function toEpochDay(isoDate: string): number {
@@ -34,22 +46,56 @@ export function datesInRange(startDate: string, endDate: string): string[] {
   return dates;
 }
 
-/** Pure on/off computation from a Medicine's recurring cycle pattern — no overrides. */
-export function computeOnOff(pattern: CyclePattern, date: string): boolean {
-  const cycleLength = pattern.daysOn + pattern.daysOff;
-  const offset = toEpochDay(date) - toEpochDay(pattern.cycleStartDate);
-  const cycleDay = ((offset % cycleLength) + cycleLength) % cycleLength;
-  return cycleDay < pattern.daysOn;
+function totalOnDays(types: PillType[]): number {
+  return types.reduce((sum, type) => sum + type.days, 0);
 }
 
-/** Resolves the final on/off state for a day, letting a manual override win over the computed value. */
-export function resolveOnOff(
+/** Which type covers a given 0-based offset into the "on" rotation (0 <= onDayIndex < total on days). */
+function typeAtOnDayIndex(types: PillType[], onDayIndex: number): PillType {
+  let remaining = onDayIndex;
+  for (const type of types) {
+    if (remaining < type.days) return type;
+    remaining -= type.days;
+  }
+  throw new Error("onDayIndex out of range for the given pill types");
+}
+
+/** Pure computation of the active pill type for a date, or null on an off day — no overrides. */
+export function computeActiveType(pattern: CyclePattern, date: string): PillType | null {
+  const onLength = totalOnDays(pattern.types);
+  const cycleLength = onLength + pattern.daysOff;
+  const offset = toEpochDay(date) - toEpochDay(pattern.cycleStartDate);
+  const cycleDay = ((offset % cycleLength) + cycleLength) % cycleLength;
+  if (cycleDay >= onLength) return null;
+  return typeAtOnDayIndex(pattern.types, cycleDay);
+}
+
+/**
+ * Same type rotation, but wrapped within just the "on" portion regardless of daysOff. Used to pick
+ * a deterministic type when a normally-off day is manually overridden on — the type sequence keeps
+ * rotating independently of how many off days separate cycles.
+ */
+export function computeWrappedType(pattern: CyclePattern, date: string): PillType {
+  const onLength = totalOnDays(pattern.types);
+  const offset = toEpochDay(date) - toEpochDay(pattern.cycleStartDate);
+  const wrappedDay = ((offset % onLength) + onLength) % onLength;
+  return typeAtOnDayIndex(pattern.types, wrappedDay);
+}
+
+/** Resolves the final on/off + active-type state for a day, letting a manual override win. */
+export function resolveDay(
   pattern: CyclePattern,
   date: string,
   override: DayOverride | undefined
-): boolean {
-  if (override) return override.isOn;
-  return computeOnOff(pattern, date);
+): ResolvedDay {
+  if (override) {
+    return {
+      isOn: override.isOn,
+      type: override.isOn ? computeWrappedType(pattern, date) : null,
+    };
+  }
+  const type = computeActiveType(pattern, date);
+  return { isOn: type !== null, type };
 }
 
 /** ISO start/end dates (inclusive) for a given calendar month. Month is 1-indexed (1 = January). */
@@ -102,4 +148,37 @@ export function formatDateLabel(date: string): string {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+/** Monday-first weekday index for a date: 0 = Monday ... 6 = Sunday. */
+function mondayFirstWeekday(date: string): number {
+  const jsWeekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+  return (jsWeekday + 6) % 7;
+}
+
+export type GridPosition = {
+  row: number;
+  column: number;
+};
+
+/**
+ * Weekday row (0 = Monday .. 6 = Sunday) and week-of-month column for a date, for laying out a
+ * Monday-first calendar grid — column 0 is the week containing the 1st of the month.
+ */
+export function getGridPosition(date: string): GridPosition {
+  const dayOfMonth = Number(date.slice(-2));
+  const firstOfMonth = `${date.slice(0, 7)}-01`;
+  const firstWeekday = mondayFirstWeekday(firstOfMonth);
+  return {
+    row: mondayFirstWeekday(date),
+    column: Math.floor((dayOfMonth - 1 + firstWeekday) / 7),
+  };
+}
+
+/** Total grid columns (weeks) needed to lay out a calendar month, Monday-first. */
+export function getGridColumnCount(year: number, month: number): number {
+  const { endDate } = getMonthBounds(year, month);
+  const lastDayOfMonth = Number(endDate.slice(-2));
+  const firstWeekday = mondayFirstWeekday(`${endDate.slice(0, 7)}-01`);
+  return Math.floor((lastDayOfMonth - 1 + firstWeekday) / 7) + 1;
 }

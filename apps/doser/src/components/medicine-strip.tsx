@@ -1,6 +1,7 @@
 "use client";
 
 import { clearDayOverrideAction, setDayOverrideAction, setDoseTakenAction } from "@/lib/actions";
+import { getGridColumnCount, getGridPosition } from "@/lib/cycle";
 import type { Medicine, MedicineDayState } from "@/lib/queries";
 import { cn } from "@jf/ui";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
@@ -40,7 +41,6 @@ function OverrideOption({ label, selected, disabled, onSelect }: OverrideOptionP
 
 type PillProps = {
   day: MedicineDayState;
-  color: string;
   isToday: boolean;
   isPending: boolean;
   isOverrideOpen: boolean;
@@ -53,7 +53,6 @@ type PillProps = {
 
 function Pill({
   day,
-  color,
   isToday,
   isPending,
   isOverrideOpen,
@@ -107,11 +106,31 @@ function Pill({
     startRef.current = null;
   }
 
-  const style: CSSProperties = day.isOn
+  const style: CSSProperties = day.activeType
     ? day.taken
-      ? { backgroundColor: color, color: "white" }
-      : { borderWidth: 2, borderStyle: "solid", borderColor: color, color: "var(--grey-900)" }
-    : { backgroundColor: "var(--grey-200)", color: "var(--grey-500)" };
+      ? { backgroundColor: day.activeType.color, color: "white" }
+      : {
+          borderWidth: 2,
+          borderStyle: "solid",
+          borderColor: day.activeType.color,
+          color: "var(--grey-900)",
+        }
+    : {
+        backgroundColor: "var(--surface-200)",
+        color: "var(--grey-500)",
+        borderWidth: 1,
+        borderStyle: "solid",
+        borderColor: "var(--grey-300)",
+      };
+
+  // Today's digit is colored to match this pill's own border color (rather than a fixed accent
+  // color), since users can pick any color for a pill type — a fixed "today" color could collide
+  // with one they've already chosen. A filled (taken) pill is high-contrast enough as-is.
+  const todayTextColor = day.activeType
+    ? day.taken
+      ? undefined
+      : day.activeType.color
+    : "var(--grey-300)";
 
   return (
     <Popover.Root open={isOverrideOpen} onOpenChange={onOverrideOpenChange}>
@@ -124,15 +143,19 @@ function Pill({
           onPointerCancel={handlePointerCancel}
           onPointerLeave={handlePointerCancel}
           onContextMenu={(e) => e.preventDefault()}
-          aria-pressed={day.isOn ? day.taken : undefined}
+          aria-pressed={day.activeType ? day.taken : undefined}
           className={cn(
-            "flex h-9 w-9 flex-shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-full text-xs font-medium select-none",
-            isPending && "opacity-60",
-            isToday && "ring-2 ring-offset-2 ring-(--grey-900)"
+            "flex h-9 w-full cursor-pointer touch-manipulation items-center justify-center rounded-full text-xs font-medium select-none",
+            isPending && "opacity-60"
           )}
           style={style}
         >
-          {day.dayOfMonth}
+          <span
+            className={cn(isToday && "font-bold underline")}
+            style={isToday && todayTextColor ? { color: todayTextColor } : undefined}
+          >
+            {day.dayOfMonth}
+          </span>
         </button>
       </Popover.Anchor>
       <Popover.Portal>
@@ -143,18 +166,18 @@ function Pill({
         >
           <OverrideOption
             label="On"
-            selected={day.isOn}
+            selected={day.activeType !== null}
             disabled={isApplyingOverride}
             onSelect={() => onSelectOverride("on")}
           />
           <OverrideOption
             label="Off"
-            selected={!day.isOn}
+            selected={day.activeType === null}
             disabled={isApplyingOverride}
             onSelect={() => onSelectOverride("off")}
           />
           <OverrideOption
-            label={`Auto (currently ${day.isOn ? "on" : "off"})`}
+            label={`Auto (currently ${day.activeType ? "on" : "off"})`}
             selected={false}
             disabled={isApplyingOverride}
             onSelect={() => onSelectOverride("auto")}
@@ -165,14 +188,26 @@ function Pill({
   );
 }
 
+const WEEKDAYS = [
+  { key: "mon", label: "M" },
+  { key: "tue", label: "T" },
+  { key: "wed", label: "W" },
+  { key: "thu", label: "T" },
+  { key: "fri", label: "F" },
+  { key: "sat", label: "S" },
+  { key: "sun", label: "S" },
+] as const;
+
 type Props = {
   medicine: Medicine;
   days: MedicineDayState[];
   today: string;
+  year: number;
+  month: number;
   onEdit: () => void;
 };
 
-export function MedicineStrip({ medicine, days: initialDays, today, onEdit }: Props) {
+export function MedicineStrip({ medicine, days: initialDays, today, year, month, onEdit }: Props) {
   const router = useRouter();
   const [days, setDays] = useState(initialDays);
   const [pendingDates, setPendingDates] = useState<Set<string>>(new Set());
@@ -188,7 +223,7 @@ export function MedicineStrip({ medicine, days: initialDays, today, onEdit }: Pr
   }
 
   async function handleTap(day: MedicineDayState) {
-    if (!day.isOn || pendingDates.has(day.date)) return;
+    if (!day.activeType || pendingDates.has(day.date)) return;
 
     const previousTaken = day.taken;
     const nextTaken = !previousTaken;
@@ -231,16 +266,12 @@ export function MedicineStrip({ medicine, days: initialDays, today, onEdit }: Pr
     }
   }
 
+  const columnCount = getGridColumnCount(year, month);
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 rounded-[14px] border border-(--surface-200) bg-transparent p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span
-            className="h-3 w-3 flex-shrink-0 rounded-full"
-            style={{ backgroundColor: medicine.color }}
-          />
-          <span className="text-sm font-medium text-(--grey-900)">{medicine.name}</span>
-        </div>
+        <span className="text-sm font-medium text-(--grey-900)">{medicine.name}</span>
         <button
           type="button"
           onClick={onEdit}
@@ -251,22 +282,37 @@ export function MedicineStrip({ medicine, days: initialDays, today, onEdit }: Pr
         </button>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {days.map((day) => (
-          <Pill
-            key={day.date}
-            day={day}
-            color={medicine.color}
-            isToday={day.date === today}
-            isPending={pendingDates.has(day.date)}
-            isOverrideOpen={openOverrideDate === day.date}
-            isApplyingOverride={isApplyingOverride}
-            onOverrideOpenChange={(open) => setOpenOverrideDate(open ? day.date : null)}
-            onTap={() => handleTap(day)}
-            onLongPress={() => setOpenOverrideDate(day.date)}
-            onSelectOverride={(choice) => handleSelectOverride(day, choice)}
-          />
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: `1.25rem repeat(${columnCount}, 1fr)` }}
+      >
+        {WEEKDAYS.map((weekday, row) => (
+          <span
+            key={weekday.key}
+            style={{ gridRow: row + 1, gridColumn: 1 }}
+            className="flex h-9 w-5 items-center justify-center text-[10px] font-medium text-(--grey-400)"
+          >
+            {weekday.label}
+          </span>
         ))}
+        {days.map((day) => {
+          const { row, column } = getGridPosition(day.date);
+          return (
+            <div key={day.date} style={{ gridRow: row + 1, gridColumn: column + 2 }}>
+              <Pill
+                day={day}
+                isToday={day.date === today}
+                isPending={pendingDates.has(day.date)}
+                isOverrideOpen={openOverrideDate === day.date}
+                isApplyingOverride={isApplyingOverride}
+                onOverrideOpenChange={(open) => setOpenOverrideDate(open ? day.date : null)}
+                onTap={() => handleTap(day)}
+                onLongPress={() => setOpenOverrideDate(day.date)}
+                onSelectOverride={(choice) => handleSelectOverride(day, choice)}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -148,6 +148,13 @@
       "when": 1785158176616,
       "tag": "0020_zippy_namor",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1785243775771,
+      "tag": "0021_melted_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

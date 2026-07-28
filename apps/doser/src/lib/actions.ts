@@ -6,9 +6,11 @@ import {
   doserDayOverrides,
   doserDoseLogs,
   doserMedicines,
+  doserPillTypes,
   doserSymptomLogEntries,
   doserSymptomLogs,
   doserSymptoms,
+  withTransaction,
 } from "@jf/db";
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -21,28 +23,47 @@ async function getAuthUserId(): Promise<string> {
   return session.user.id;
 }
 
+type PillTypeInput = {
+  name: string | null;
+  color: string;
+  days: number;
+};
+
 // ─── Mutation actions ─────────────────────────────────────────────────────────
 
 export async function createMedicineAction(input: {
   name: string;
-  daysOn: number;
-  daysOff: number;
   cycleStartDate: string;
-  color: string;
+  daysOff: number;
+  types: PillTypeInput[];
 }): Promise<Medicine> {
   const userId = await getAuthUserId();
-  const [medicine] = await db
-    .insert(doserMedicines)
-    .values({
-      userId,
-      name: input.name,
-      daysOn: input.daysOn,
-      daysOff: input.daysOff,
-      cycleStartDate: input.cycleStartDate,
-      color: input.color,
-    })
-    .returning();
-  if (!medicine) throw new Error("Failed to create medicine");
+
+  const medicine = await withTransaction(async (tx) => {
+    const [medicine] = await tx
+      .insert(doserMedicines)
+      .values({
+        userId,
+        name: input.name,
+        cycleStartDate: input.cycleStartDate,
+        daysOff: input.daysOff,
+      })
+      .returning();
+    if (!medicine) throw new Error("Failed to create medicine");
+
+    await tx.insert(doserPillTypes).values(
+      input.types.map((type, index) => ({
+        medicineId: medicine.id,
+        position: index,
+        name: type.name,
+        color: type.color,
+        days: type.days,
+      }))
+    );
+
+    return medicine;
+  });
+
   revalidatePath("/", "layout");
   return medicine;
 }
@@ -50,23 +71,37 @@ export async function createMedicineAction(input: {
 export async function updateMedicineAction(input: {
   id: string;
   name: string;
-  daysOn: number;
-  daysOff: number;
   cycleStartDate: string;
-  color: string;
+  daysOff: number;
+  types: PillTypeInput[];
 }): Promise<void> {
   const userId = await getAuthUserId();
-  await db
-    .update(doserMedicines)
-    .set({
-      name: input.name,
-      daysOn: input.daysOn,
-      daysOff: input.daysOff,
-      cycleStartDate: input.cycleStartDate,
-      color: input.color,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(doserMedicines.id, input.id), eq(doserMedicines.userId, userId)));
+  const medicine = await getMedicineForUser(input.id, userId);
+  if (!medicine) throw new Error("Medicine not found");
+
+  await withTransaction(async (tx) => {
+    await tx
+      .update(doserMedicines)
+      .set({
+        name: input.name,
+        cycleStartDate: input.cycleStartDate,
+        daysOff: input.daysOff,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(doserMedicines.id, input.id), eq(doserMedicines.userId, userId)));
+
+    await tx.delete(doserPillTypes).where(eq(doserPillTypes.medicineId, input.id));
+    await tx.insert(doserPillTypes).values(
+      input.types.map((type, index) => ({
+        medicineId: input.id,
+        position: index,
+        name: type.name,
+        color: type.color,
+        days: type.days,
+      }))
+    );
+  });
+
   revalidatePath("/", "layout");
 }
 
