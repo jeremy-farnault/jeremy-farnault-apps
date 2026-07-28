@@ -12,6 +12,7 @@
     "generate:icon": "tsx scripts/generate-app-icon.ts",
     "generate:splash": "tsx scripts/generate-splash-screens.ts",
     "seed:gainer": "tsx scripts/seed-gainer-exercises.ts",
+    "seed:doser": "tsx scripts/seed-doser-symptoms.ts",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

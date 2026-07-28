@@ -6,6 +6,7 @@ import {
   MapPinIcon,
   MapTrifoldIcon,
   NotepadIcon,
+  PillIcon,
   RankingIcon,
   StackIcon,
 } from "@phosphor-icons/react";
@@ -25,6 +26,13 @@ export const apps: AppDefinition[] = [
     icon: RankingIcon,
     href: process.env.NEXT_PUBLIC_CLASSER_URL ?? "#",
     accentColor: "--green-400",
+  },
+  {
+    id: "doser",
+    name: "Doser",
+    icon: PillIcon,
+    href: process.env.NEXT_PUBLIC_DOSER_URL ?? "#",
+    accentColor: "--yellow-600",
   },
   {
     id: "financer",

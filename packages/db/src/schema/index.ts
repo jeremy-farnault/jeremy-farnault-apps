@@ -6,3 +6,4 @@ export * from "./classer";
 export * from "./financer";
 export * from "./placer";
 export * from "./gainer";
+export * from "./doser";
