@@ -131,7 +131,7 @@ export function DatePicker({
           align={calendarAlign}
           sideOffset={6}
           className={cn(
-            "z-50 w-[284px]",
+            "z-[9100] w-[284px]",
             "rounded-[16px] bg-(--card) p-4",
             "shadow-[0_24px_36px_0_rgba(0,0,0,0.25)]",
             "animate-[overlay-in_0.3s_ease-in-out]"
