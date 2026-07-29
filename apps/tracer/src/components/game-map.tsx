@@ -10,7 +10,7 @@ import {
   TRAIN_MIGHT_CONFIG,
   TRAIN_VIGOR_CONFIG,
 } from "@/config/economy";
-import { HOME_POI, MAP_INITIAL_VIEW, POIS, TOKYO_BOUNDS } from "@/config/game";
+import { HOME_POI, MAP_INITIAL_VIEW, POIS, REGIONS, TOKYO_BOUNDS } from "@/config/game";
 import type { Poi } from "@/config/game";
 import { LINES } from "@/config/lines";
 import { NPCS } from "@/config/npcs";
@@ -20,6 +20,7 @@ import { useTravel } from "@/hooks/use-travel";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
 import type { RouteResult } from "@/lib/directions";
 import { addItem } from "@/lib/inventory";
+import { log } from "@/lib/log";
 import { fetchTransitRoute } from "@/lib/transit";
 import type { TransitLeg, TransitPlan } from "@/lib/transit";
 import type { TravelLeg } from "@/lib/travel";
@@ -126,7 +127,13 @@ interface GameMapProps {
 }
 
 export function GameMap({ characterSelected }: GameMapProps) {
-  const { characterPosition, isActive, startTravel, travel } = useTravel();
+  const { characterPosition, isActive, startTravel, travel } = useTravel((arrived) => {
+    const label =
+      arrived.destinationLabel ??
+      [...POIS, HOME_POI, ...NPCS].find((p) => p.id === arrived.destinationId)?.label ??
+      "your destination";
+    log({ category: "arrival", message: `Arrived at ${label}`, toast: "default" });
+  });
   const money = useCharacterStore((s) => s.money);
   const knowledge = useCharacterStore((s) => s.knowledge);
   const health = useCharacterStore((s) => s.health);
@@ -148,24 +155,87 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const clearPending = useSelectionStore((s) => s.clearPending);
   const mapRef = useRef<MapRef | null>(null);
   const { action, t, startAction, stopAction } = useAction((finalT, state) => {
+    const cut = finalT < 1 ? " (cut short)" : "";
     if (state.type === "meal") {
+      const before = useCharacterStore.getState();
       restoreStats(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
+      const after = useCharacterStore.getState();
+      const gains = [
+        after.hunger - before.hunger >= 1
+          ? `+${Math.round(after.hunger - before.hunger)} hunger`
+          : null,
+        after.thirst - before.thirst >= 1
+          ? `+${Math.round(after.thirst - before.thirst)} thirst`
+          : null,
+      ].filter(Boolean);
+      const segments = [`Ate a meal${cut}`];
+      if (state.prepaidCost > 0) segments.push(`−${formatYen(state.prepaidCost)}`);
+      if (gains.length) segments.push(gains.join(", "));
+      log({ category: "meal", message: segments.join(" · ") });
     } else if (state.type === "work") {
-      earnMoney(Math.floor(finalT * state.maxStatA));
+      const earned = Math.floor(finalT * state.maxStatA);
+      earnMoney(earned);
+      log({ category: "work", message: `Worked a shift${cut} · +${formatYen(earned)}` });
     } else if (state.type === "explore" && finalT === 1 && state.unlocksRegionId) {
-      useRegionStore.getState().discover(state.unlocksRegionId);
+      const regionId = state.unlocksRegionId;
+      if (!useRegionStore.getState().discoveredRegionIds.includes(regionId)) {
+        useRegionStore.getState().discover(regionId);
+        const label = REGIONS.find((r) => r.id === regionId)?.label ?? regionId;
+        log({ category: "discovery", message: `Discovered ${label}`, toast: "default" });
+      }
     } else if (state.type === "study") {
+      const before = useCharacterStore.getState().knowledge;
       gainAttribute("knowledge", Math.round(finalT * state.maxStatA));
+      const gain = useCharacterStore.getState().knowledge - before;
+      const segments = [`Studied${cut}`];
+      if (gain > 0) segments.push(`+${gain} Knowledge`);
+      log({ category: "study", message: segments.join(" · ") });
     } else if (state.type === "train-vigor") {
+      const before = useCharacterStore.getState().vigor;
       gainAttribute("vigor", Math.round(finalT * state.maxStatA));
+      const gain = useCharacterStore.getState().vigor - before;
+      const segments = [`Trained at the gym${cut}`];
+      if (state.prepaidCost > 0) segments.push(`−${formatYen(state.prepaidCost)}`);
+      if (gain > 0) segments.push(`+${gain} Vigor`);
+      log({ category: "train", message: segments.join(" · ") });
     } else if (state.type === "train-might") {
+      const before = useCharacterStore.getState().might;
       gainAttribute("might", Math.round(finalT * state.maxStatA));
+      const gain = useCharacterStore.getState().might - before;
+      const segments = [`Trained at the dojo${cut}`];
+      if (state.prepaidCost > 0) segments.push(`−${formatYen(state.prepaidCost)}`);
+      if (gain > 0) segments.push(`+${gain} Might`);
+      log({ category: "train", message: segments.join(" · ") });
     } else if (state.type === "rest") {
+      const before = useCharacterStore.getState();
       rest(Math.floor(finalT * state.maxStatA), Math.floor(finalT * state.maxStatB));
+      const after = useCharacterStore.getState();
+      const gains = [
+        after.health - before.health >= 1
+          ? `+${Math.round(after.health - before.health)} health`
+          : null,
+        after.shield - before.shield >= 1
+          ? `+${Math.round(after.shield - before.shield)} shield`
+          : null,
+      ].filter(Boolean);
+      const segments = [`Rested${cut}`];
+      if (gains.length) segments.push(gains.join(", "));
+      log({ category: "rest", message: segments.join(" · ") });
     } else if (state.type === "confront") {
+      const before = useCharacterStore.getState();
+      const hpBefore = before.health + before.shield;
+      const lostSince = () => {
+        const after = useCharacterStore.getState();
+        return Math.round(hpBefore - (after.health + after.shield));
+      };
       if (finalT < 1) {
         // Fled mid-fight — no roll, no capture, but not free either.
         takeDamage(CONFRONT_CONFIG.minDamage);
+        log({
+          category: "confront",
+          message: `Fled the fight · −${lostSince()} HP`,
+          toast: "error",
+        });
       } else {
         const npc = state.npcId ? NPCS.find((n) => n.id === state.npcId) : undefined;
         if (npc) {
@@ -174,9 +244,20 @@ export function GameMap({ characterSelected }: GameMapProps) {
             takeDamage(CONFRONT_CONFIG.minDamage);
             const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
             if (zone) captureZone(zone.id);
+            const zoneName = zone?.name ?? "the zone";
+            log({
+              category: "confront",
+              message: `Won the fight for ${zoneName} · −${lostSince()} HP`,
+              toast: "success",
+            });
           } else {
             const range = CONFRONT_CONFIG.maxDamage - CONFRONT_CONFIG.minDamage + 1;
             takeDamage(CONFRONT_CONFIG.minDamage + Math.floor(Math.random() * range));
+            log({
+              category: "confront",
+              message: `Lost the fight · −${lostSince()} HP`,
+              toast: "error",
+            });
           }
         }
       }
@@ -372,6 +453,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
   function handleConfirmTravel() {
     if (!routePoi) return;
+    const dest = routePoi;
     const legs =
       travelMode === "transit" && activePlan
         ? planToTravelLegs(activePlan)
@@ -379,7 +461,17 @@ export function GameMap({ characterSelected }: GameMapProps) {
           ? routeToTravelLegs(route)
           : null;
     if (!legs) return;
-    startTravel(routePoi, legs);
+    const origin = [...POIS, HOME_POI, ...NPCS].find(
+      (p) => p.id !== dest.id && isNearPoi(characterPosition, p)
+    );
+    const mode = travelMode === "walking" ? "on foot" : "by transit";
+    log({
+      category: "travel",
+      message: origin
+        ? `Left ${origin.label}, heading to ${dest.label} (${mode})`
+        : `Set off for ${dest.label} (${mode})`,
+    });
+    startTravel(dest, legs);
     requestCharacterFocus();
     clearRouteContext();
   }
@@ -620,7 +712,13 @@ export function GameMap({ characterSelected }: GameMapProps) {
                     type="button"
                     disabled={money < item.price}
                     onClick={() => {
-                      if (spendMoney(item.price)) addItem(item.id);
+                      if (spendMoney(item.price)) {
+                        addItem(item.id);
+                        log({
+                          category: "purchase",
+                          message: `Bought ${item.name} · −${formatYen(item.price)}`,
+                        });
+                      }
                     }}
                     className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-1 transition-colors"
                   >

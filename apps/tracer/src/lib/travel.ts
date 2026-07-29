@@ -7,6 +7,7 @@ export type TravelLeg = {
 
 export type TravelState = {
   destinationId: string;
+  destinationLabel?: string; // display name captured at departure; optional — trips in-flight before this field existed won't have it
   legs: TravelLeg[];
   accumulatedSeconds: number; // banked progress — 0 for a fresh journey
   resumedAt: number; // wall timestamp when current run started
@@ -137,6 +138,7 @@ export function interpolateLegs(legs: TravelLeg[], elapsedSec: number): Characte
 export function makeTravelState(poi: Poi, legs: TravelLeg[]): TravelState {
   return {
     destinationId: poi.id,
+    destinationLabel: poi.label,
     legs,
     accumulatedSeconds: 0,
     resumedAt: Date.now(),

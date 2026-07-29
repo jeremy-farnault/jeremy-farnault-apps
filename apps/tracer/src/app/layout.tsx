@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         {children}
         <Toaster
-          position="bottom-right"
+          position="top-right"
           toastOptions={{ classNames: { toast: "!left-auto !right-8 !w-fit" } }}
         />
       </body>

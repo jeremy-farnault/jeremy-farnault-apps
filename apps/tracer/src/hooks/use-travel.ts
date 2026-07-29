@@ -17,9 +17,14 @@ import {
   saveTravelState,
   totalDurationSeconds,
 } from "@/lib/travel";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function useTravel() {
+export function useTravel(onArrive?: (state: TravelState) => void) {
+  const onArriveRef = useRef(onArrive);
+  useEffect(() => {
+    onArriveRef.current = onArrive;
+  }, [onArrive]);
+
   const [travel, setTravel] = useState<TravelState | null>(() => loadTravelState());
   const [characterPosition, setCharacterPosition] = useState<CharacterPosition>(
     () => loadCharacterPosition() ?? PLAYER_HOME
@@ -39,6 +44,7 @@ export function useTravel() {
         saveCharacterPosition(pos);
         clearTravelState();
         setTravel(null);
+        onArriveRef.current?.(travel);
         return;
       }
       raf = requestAnimationFrame(tick);

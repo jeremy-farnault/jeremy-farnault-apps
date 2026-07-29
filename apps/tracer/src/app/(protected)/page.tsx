@@ -2,10 +2,12 @@
 
 import { FiltersPanel } from "@/components/filters-panel";
 import { GameMap } from "@/components/game-map";
+import { LogPanel } from "@/components/log-panel";
 import { ITEM_CATALOGUE } from "@/config/economy";
 import { useCharacterDecay } from "@/hooks/use-character-decay";
 import { loadInventory, removeItem } from "@/lib/inventory";
 import type { InventoryItem } from "@/lib/inventory";
+import { log } from "@/lib/log";
 import { useCharacterStore } from "@/stores/character-store";
 import { useSelectionStore } from "@/stores/selection-store";
 import { useEffect, useState } from "react";
@@ -41,7 +43,20 @@ export default function GamePage() {
     if (!item) return;
     const updated = removeItem(itemId);
     setInventory(updated);
+    const before = useCharacterStore.getState();
     restoreStats(item.hungerRestore, item.thirstRestore);
+    const after = useCharacterStore.getState();
+    const gains = [
+      after.hunger - before.hunger >= 1
+        ? `+${Math.round(after.hunger - before.hunger)} hunger`
+        : null,
+      after.thirst - before.thirst >= 1
+        ? `+${Math.round(after.thirst - before.thirst)} thirst`
+        : null,
+    ].filter(Boolean);
+    const segments = [`Consumed ${item.name}`];
+    if (gains.length) segments.push(gains.join(", "));
+    log({ category: "consume", message: segments.join(" · ") });
   }
 
   function handleReset() {
@@ -149,6 +164,11 @@ export default function GamePage() {
             </div>
           )}
         </button>
+      </div>
+
+      {/* Bottom-right: activity log */}
+      <div className="absolute bottom-20 right-4 z-10 w-56">
+        <LogPanel />
       </div>
     </div>
   );
