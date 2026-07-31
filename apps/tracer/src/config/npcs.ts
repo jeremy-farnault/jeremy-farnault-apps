@@ -3,6 +3,8 @@ import type { PoiBase } from "@/config/game";
 export type Npc = PoiBase & {
   category: "npc";
   might: number;
+  detectionRadius: number; // meters — how close the player must be for the NPC to notice
+  movementSpeed: number; // m/s — pursuit speed (used from the pursuit-movement ticket onward)
 };
 
 // Ownership is derived, not stored here: an NPC currently controls whichever
@@ -19,5 +21,7 @@ export const NPCS: Npc[] = [
     regionId: "home",
     category: "npc",
     might: 15,
+    detectionRadius: 200,
+    movementSpeed: 1.4,
   },
 ];

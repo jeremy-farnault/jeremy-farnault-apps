@@ -10,22 +10,42 @@ import {
   TRAIN_MIGHT_CONFIG,
   TRAIN_VIGOR_CONFIG,
 } from "@/config/economy";
-import { HOME_POI, MAP_INITIAL_VIEW, POIS, REGIONS, TOKYO_BOUNDS } from "@/config/game";
+import {
+  HOME_POI,
+  MAP_INITIAL_VIEW,
+  PLAYER_HOME,
+  POIS,
+  REGIONS,
+  TOKYO_BOUNDS,
+} from "@/config/game";
 import type { Poi } from "@/config/game";
 import { LINES } from "@/config/lines";
 import { NPCS } from "@/config/npcs";
 import { ZONES, effectiveOwner, zoneStyle } from "@/config/zones";
 import { useAction } from "@/hooks/use-action";
+import { useNpcPursuit } from "@/hooks/use-npc-pursuit";
 import { useTravel } from "@/hooks/use-travel";
+import { loadActionState } from "@/lib/action";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
 import type { RouteResult } from "@/lib/directions";
+import { distanceMeters } from "@/lib/geo";
 import { addItem } from "@/lib/inventory";
 import { log } from "@/lib/log";
+import { detectsPlayer, isAtPoi, isInZone, npcZone } from "@/lib/pursuit";
 import { fetchTransitRoute } from "@/lib/transit";
 import type { TransitLeg, TransitPlan } from "@/lib/transit";
-import type { TravelLeg } from "@/lib/travel";
+import {
+  type CharacterPosition,
+  type TravelLeg,
+  getElapsedSeconds,
+  interpolateLegs,
+  loadCharacterPosition,
+  loadTravelState,
+  totalDurationSeconds,
+} from "@/lib/travel";
 import { useCharacterStore } from "@/stores/character-store";
 import { useFilterStore } from "@/stores/filter-store";
+import { usePursuitStore } from "@/stores/pursuit-store";
 import { useRegionStore } from "@/stores/region-store";
 import { useSelectionStore } from "@/stores/selection-store";
 import { useZoneStore } from "@/stores/zone-store";
@@ -110,9 +130,7 @@ function isNearPoi(
   pos: { longitude: number; latitude: number },
   poi: { longitude: number; latitude: number }
 ): boolean {
-  const dlat = (pos.latitude - poi.latitude) * 111_000;
-  const dlon = (pos.longitude - poi.longitude) * 91_000;
-  return Math.sqrt(dlat * dlat + dlon * dlon) < PROXIMITY_THRESHOLD_M;
+  return distanceMeters(pos, poi) < PROXIMITY_THRESHOLD_M;
 }
 
 function itemEffectLabel(hungerRestore: number, thirstRestore: number): string {
@@ -127,13 +145,15 @@ interface GameMapProps {
 }
 
 export function GameMap({ characterSelected }: GameMapProps) {
-  const { characterPosition, isActive, startTravel, travel } = useTravel((arrived) => {
-    const label =
-      arrived.destinationLabel ??
-      [...POIS, HOME_POI, ...NPCS].find((p) => p.id === arrived.destinationId)?.label ??
-      "your destination";
-    log({ category: "arrival", message: `Arrived at ${label}`, toast: "default" });
-  });
+  const { characterPosition, isActive, startTravel, stopTravel, teleport, travel } = useTravel(
+    (arrived) => {
+      const label =
+        arrived.destinationLabel ??
+        [...POIS, HOME_POI, ...NPCS].find((p) => p.id === arrived.destinationId)?.label ??
+        "your destination";
+      log({ category: "arrival", message: `Arrived at ${label}`, toast: "default" });
+    }
+  );
   const money = useCharacterStore((s) => s.money);
   const knowledge = useCharacterStore((s) => s.knowledge);
   const health = useCharacterStore((s) => s.health);
@@ -222,45 +242,71 @@ export function GameMap({ characterSelected }: GameMapProps) {
       if (gains.length) segments.push(gains.join(", "));
       log({ category: "rest", message: segments.join(" · ") });
     } else if (state.type === "confront") {
+      const npc = state.npcId ? NPCS.find((n) => n.id === state.npcId) : undefined;
       const before = useCharacterStore.getState();
       const hpBefore = before.health + before.shield;
       const lostSince = () => {
         const after = useCharacterStore.getState();
         return Math.round(hpBefore - (after.health + after.shield));
       };
+
+      const prefix = state.offline ? "While away — " : "";
+
+      let won = false;
       if (finalT < 1) {
         // Fled mid-fight — no roll, no capture, but not free either.
         takeDamage(CONFRONT_CONFIG.minDamage);
-        log({
-          category: "confront",
-          message: `Fled the fight · −${lostSince()} HP`,
-          toast: "error",
-        });
-      } else {
-        const npc = state.npcId ? NPCS.find((n) => n.id === state.npcId) : undefined;
-        if (npc) {
-          const winChance = might / (might + npc.might);
-          if (Math.random() < winChance) {
-            takeDamage(CONFRONT_CONFIG.minDamage);
-            const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
-            if (zone) captureZone(zone.id);
-            const zoneName = zone?.name ?? "the zone";
-            log({
-              category: "confront",
-              message: `Won the fight for ${zoneName} · −${lostSince()} HP`,
-              toast: "success",
-            });
-          } else {
-            const range = CONFRONT_CONFIG.maxDamage - CONFRONT_CONFIG.minDamage + 1;
-            takeDamage(CONFRONT_CONFIG.minDamage + Math.floor(Math.random() * range));
-            log({
-              category: "confront",
-              message: `Lost the fight · −${lostSince()} HP`,
-              toast: "error",
-            });
-          }
+      } else if (npc) {
+        won = Math.random() < might / (might + npc.might);
+        if (won) {
+          takeDamage(CONFRONT_CONFIG.minDamage);
+          const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
+          if (zone) captureZone(zone.id);
+          const zoneName = zone?.name ?? "the zone";
+          log({
+            category: "confront",
+            message: `${prefix}Won the fight for ${zoneName} · −${lostSince()} HP`,
+            toast: "success",
+          });
+        } else {
+          const range = CONFRONT_CONFIG.maxDamage - CONFRONT_CONFIG.minDamage + 1;
+          takeDamage(CONFRONT_CONFIG.minDamage + Math.floor(Math.random() * range));
         }
       }
+
+      const defeated = !won && useCharacterStore.getState().health === 0;
+
+      if (!won) {
+        log({
+          category: "confront",
+          message: defeated
+            ? `${prefix}Defeated — dragged back to home turf · −${lostSince()} HP`
+            : finalT < 1
+              ? `${prefix}Fled the fight · −${lostSince()} HP`
+              : `${prefix}Lost the fight · −${lostSince()} HP`,
+          toast: "error",
+        });
+      }
+
+      if (npc) {
+        if (won) {
+          // Zone captured — NPC leaves visibleNpcs; drop its pursuit state.
+          usePursuitStore.getState().clear(npc.id);
+        } else {
+          // Survived or defeated — NPC returns to its post and can't re-detect
+          // for the cooldown window.
+          usePursuitStore.getState().setCooldown(npc.id, Date.now() + CONFRONT_CONFIG.cooldownMs);
+          const live = usePursuitStore.getState().byId[npc.id]?.livePosition ?? {
+            longitude: npc.longitude,
+            latitude: npc.latitude,
+          };
+          usePursuitStore
+            .getState()
+            .set(npc.id, { status: "returning", livePosition: live, route: null, target: null });
+        }
+      }
+
+      if (defeated) teleport(PLAYER_HOME);
     }
   });
   const [shopOpen, setShopOpen] = useState(false);
@@ -506,8 +552,132 @@ export function GameMap({ characterSelected }: GameMapProps) {
     );
   });
 
-  const nearSelected = selectedPoi ? isNearPoi(characterPosition, selectedPoi) : false;
+  // A pursuing NPC reaching the player in the open fires this once → start the
+  // forced confront, interrupting travel first (startAction refuses during travel).
+  useNpcPursuit(visibleNpcs, (npcId) => {
+    const npc = NPCS.find((n) => n.id === npcId);
+    if (!npc) return;
+    if (isActive) stopTravel();
+    const started = startAction({
+      type: "confront",
+      duration: CONFRONT_CONFIG.duration,
+      prepaidCost: CONFRONT_CONFIG.cost,
+      maxStatA: 0,
+      maxStatB: 0,
+      npcId: npc.id,
+      forced: true,
+    });
+    if (started) {
+      const live = usePursuitStore.getState().byId[npc.id]?.livePosition ?? {
+        longitude: npc.longitude,
+        latitude: npc.latitude,
+      };
+      usePursuitStore.getState().set(npc.id, {
+        status: "confronting",
+        livePosition: live,
+        route: null,
+        target: null,
+      });
+    }
+  });
+  const pursuits = usePursuitStore((s) => s.byId);
+
+  // One-time offline reconciliation: an NPC that was chasing when the app closed
+  // may have caught the player during the gap. Runs once on mount (before the
+  // pursuit RAF's first frame), deriving the player's resume position from the
+  // persisted travel legs so it doesn't depend on the loop having ticked.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: one-time resume pass
+  useEffect(() => {
+    const now = Date.now();
+    const activeConfront =
+      loadActionState()?.type === "confront" ? loadActionState()?.npcId : undefined;
+
+    const tState = loadTravelState();
+    let playerPos: CharacterPosition;
+    let stillTraveling = false;
+    if (tState) {
+      const elapsed = getElapsedSeconds(tState);
+      const total = totalDurationSeconds(tState.legs);
+      stillTraveling = elapsed < total;
+      playerPos = interpolateLegs(tState.legs, Math.min(elapsed, total));
+    } else {
+      playerPos = loadCharacterPosition() ?? PLAYER_HOME;
+    }
+
+    for (const [npcId, rec] of Object.entries(usePursuitStore.getState().byId)) {
+      const alerted =
+        rec.status === "pursuing" ||
+        rec.status === "waiting" ||
+        rec.status === "caught" ||
+        rec.status === "confronting";
+      if (!alerted || npcId === activeConfront) continue;
+      const npc = NPCS.find((n) => n.id === npcId);
+      if (!npc) continue;
+
+      const routeEnd = rec.route
+        ? rec.route.resumedAt + totalDurationSeconds(rec.route.legs) * 1000
+        : now;
+      if (routeEnd > now || stillTraveling) continue; // not yet due / chase ongoing → live loop
+
+      const zone = npcZone(npc);
+      if (!zone || !isInZone(playerPos, zone)) {
+        usePursuitStore.getState().set(npcId, {
+          status: "returning",
+          livePosition: rec.livePosition,
+          route: null,
+          target: null,
+        });
+        continue;
+      }
+      if (isAtPoi(playerPos)) {
+        usePursuitStore
+          .getState()
+          .set(npcId, { status: "waiting", livePosition: playerPos, route: null, target: null });
+        continue;
+      }
+
+      // Exposed → resolve the offline catch. Finalize the arrival (clears travel
+      // so the confront can start) and back-date the fight to when it came due.
+      teleport(playerPos);
+      const playerArrival = tState
+        ? tState.resumedAt + totalDurationSeconds(tState.legs) * 1000
+        : routeEnd;
+      const started = startAction(
+        {
+          type: "confront",
+          duration: CONFRONT_CONFIG.duration,
+          prepaidCost: CONFRONT_CONFIG.cost,
+          maxStatA: 0,
+          maxStatB: 0,
+          npcId,
+          forced: true,
+          offline: true,
+        },
+        Math.max(routeEnd, playerArrival)
+      );
+      if (started) {
+        usePursuitStore.getState().set(npcId, {
+          status: "confronting",
+          livePosition: playerPos,
+          route: null,
+          target: null,
+        });
+      }
+    }
+  }, []);
+
+  // Opt-in confront targets the NPC's live (possibly moved) position.
+  const selectedLivePos =
+    selectedPoi && selectedPoi.category === "npc"
+      ? (pursuits[selectedPoi.id]?.livePosition ?? selectedPoi)
+      : selectedPoi;
+  const nearSelected = selectedLivePos ? isNearPoi(characterPosition, selectedLivePos) : false;
   const canAct = !isActive && !action && nearSelected && selectedPoi !== null;
+  // Anchor the selection popup to the NPC's live position too.
+  const popupPoi =
+    selectedPoi && selectedPoi.category === "npc" && selectedLivePos
+      ? { ...selectedPoi, longitude: selectedLivePos.longitude, latitude: selectedLivePos.latitude }
+      : selectedPoi;
   const poiAction: {
     label: "Shop" | "Eat" | "Work" | "Explore" | "Study" | "Train" | "Rest" | "Confront";
     handler: (p: Poi) => void;
@@ -657,9 +827,19 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
         <HomeMarker poi={HOME_POI} onSelect={selectPoi} />
         <PoiMarkers pois={visiblePois} selectedId={selectedPoi?.id ?? null} onSelect={selectPoi} />
-        {visibleNpcs.map((npc) => (
-          <NpcMarker key={npc.id} npc={npc} onSelect={selectPoi} />
-        ))}
+        {visibleNpcs.map((npc) => {
+          const live = pursuits[npc.id]?.livePosition;
+          return (
+            <NpcMarker
+              key={npc.id}
+              npc={npc}
+              longitude={live?.longitude ?? npc.longitude}
+              latitude={live?.latitude ?? npc.latitude}
+              detected={detectsPlayer(npc, characterPosition)}
+              onSelect={selectPoi}
+            />
+          );
+        })}
         <CharacterMarker
           longitude={characterPosition.longitude}
           latitude={characterPosition.latitude}
@@ -667,7 +847,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
         {selectedPoi && (
           <SelectionPopup
-            poi={selectedPoi}
+            poi={popupPoi ?? selectedPoi}
             onClose={() => selectPoi(null)}
             onGoHere={handleGoHere}
             disabled={isActive || !!action}

@@ -11,6 +11,8 @@ export type TimedActionState = {
   maxStatB: number; // thirst (meal), health restore (rest), or 0 (work / training / confront)
   unlocksRegionId?: RegionId; // explore only
   npcId?: string; // confront only — which NPC is being fought
+  forced?: boolean; // confront only — true when the NPC initiated it (caught the player), false/absent for player-initiated
+  offline?: boolean; // confront only — true when resolved from an offline catch (surfaced as "While away…")
 };
 
 export function loadActionState(): TimedActionState | null {

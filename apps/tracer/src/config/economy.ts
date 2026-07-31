@@ -56,4 +56,5 @@ export const CONFRONT_CONFIG = {
   duration: 600, // seconds (10 min) — 1v1; multi-fighter duration is a future rule
   minDamage: 15, // also the flat damage taken on a win or an early stop
   maxDamage: 50,
+  cooldownMs: 45_000, // after a survived/lost fight, the NPC can't re-detect for this long
 } as const;

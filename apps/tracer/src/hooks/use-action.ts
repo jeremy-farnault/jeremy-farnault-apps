@@ -43,10 +43,12 @@ export function useAction(onComplete?: (finalT: number, state: TimedActionState)
     return () => clearInterval(id);
   }, [action]);
 
-  function startAction(params: Omit<TimedActionState, "startedAt">): boolean {
+  // `startedAt` can be back-dated (e.g. resolving an offline catch) so the tick
+  // fast-forwards a fight that came due while the app was closed.
+  function startAction(params: Omit<TimedActionState, "startedAt">, startedAt?: number): boolean {
     if (loadTravelState()) return false;
     if (action) return false;
-    const state: TimedActionState = { ...params, startedAt: Date.now() };
+    const state: TimedActionState = { ...params, startedAt: startedAt ?? Date.now() };
     saveActionState(state);
     setAction(state);
     return true;

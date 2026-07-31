@@ -8,6 +8,8 @@ export type TravelLeg = {
 export type TravelState = {
   destinationId: string;
   destinationLabel?: string; // display name captured at departure; optional — trips in-flight before this field existed won't have it
+  destinationLng?: number; // destination coordinates captured at departure — for the committed-endpoint derivation
+  destinationLat?: number;
   legs: TravelLeg[];
   accumulatedSeconds: number; // banked progress — 0 for a fresh journey
   resumedAt: number; // wall timestamp when current run started
@@ -139,6 +141,8 @@ export function makeTravelState(poi: Poi, legs: TravelLeg[]): TravelState {
   return {
     destinationId: poi.id,
     destinationLabel: poi.label,
+    destinationLng: poi.longitude,
+    destinationLat: poi.latitude,
     legs,
     accumulatedSeconds: 0,
     resumedAt: Date.now(),
