@@ -18,8 +18,10 @@ export type EquipmentDef =
     };
 
 export const EQUIPMENT: EquipmentDef[] = [
+  { id: "stick", name: "Stick", emoji: "🪵", price: 100, kind: "weapon", might: 5 },
   { id: "bat", name: "Baseball Bat", emoji: "🏏", price: 1500, kind: "weapon", might: 3 },
   { id: "airgun", name: "Airgun", emoji: "🔫", price: 4000, kind: "weapon", might: 5 },
+  { id: "cb400n", name: "CB400N", emoji: "🏍️", price: 1000, kind: "vehicle", profile: "driving" },
   { id: "bike", name: "Bicycle", emoji: "🚲", price: 3000, kind: "vehicle", profile: "cycling" },
   {
     id: "motorbike",

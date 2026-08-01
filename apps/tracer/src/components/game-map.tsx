@@ -19,7 +19,7 @@ import {
   REGIONS,
   TOKYO_BOUNDS,
 } from "@/config/game";
-import type { Poi } from "@/config/game";
+import type { GenericPoi, Poi } from "@/config/game";
 import { LINES } from "@/config/lines";
 import { NPCS } from "@/config/npcs";
 import { ZONES, effectiveOwner, zoneStyle } from "@/config/zones";
@@ -317,7 +317,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
     }
   });
   const [shopOpen, setShopOpen] = useState(false);
-  const [equipmentShop, setEquipmentShop] = useState<"weapon" | "vehicle" | null>(null);
+  const [equipmentShop, setEquipmentShop] = useState<GenericPoi | null>(null);
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [routePoi, setRoutePoi] = useState<Poi | null>(null);
@@ -384,14 +384,10 @@ export function GameMap({ characterSelected }: GameMapProps) {
     setShopOpen(true);
   }
 
-  function handleWeaponShop(_poi: Poi) {
+  function handleEquipmentShop(poi: Poi) {
+    if (poi.category === "station" || poi.category === "work") return;
     setSelectedPoi(null);
-    setEquipmentShop("weapon");
-  }
-
-  function handleVehicleShop(_poi: Poi) {
-    setSelectedPoi(null);
-    setEquipmentShop("vehicle");
+    setEquipmentShop(poi);
   }
 
   function handleWork(poi: Poi) {
@@ -723,8 +719,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
       return { label: "Confront", handler: handleConfront };
     }
     if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
-    if (selectedPoi.category === "blackmarket") return { label: "Shop", handler: handleWeaponShop };
-    if (selectedPoi.category === "garage") return { label: "Shop", handler: handleVehicleShop };
+    if (selectedPoi.category === "blackmarket" || selectedPoi.category === "garage")
+      return { label: "Shop", handler: handleEquipmentShop };
     if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
       return { label: "Eat", handler: handleEat };
     if (selectedPoi.category === "work") {
@@ -891,7 +887,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
       </MapGL>
 
       {equipmentShop && (
-        <EquipmentShopModal kind={equipmentShop} onClose={() => setEquipmentShop(null)} />
+        <EquipmentShopModal poi={equipmentShop} onClose={() => setEquipmentShop(null)} />
       )}
 
       {shopOpen && (

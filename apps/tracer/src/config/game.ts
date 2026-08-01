@@ -59,6 +59,8 @@ export type WorkPoi = PoiBase & {
 
 export type GenericPoi = PoiBase & {
   category: Exclude<PoiCategory, "station" | "work">;
+  // Equipment definition ids this shop sells (blackmarket/garage only).
+  sells?: string[];
 };
 
 export type Poi = StationPoi | WorkPoi | GenericPoi;
@@ -175,18 +177,20 @@ export const POIS: Poi[] = [
     label: "Black Market",
     category: "blackmarket",
     emoji: "🗡️",
-    longitude: 139.72785,
-    latitude: 35.76935,
+    longitude: 139.72233215938172,
+    latitude: 35.78115562493732,
     regionId: "home",
+    sells: ["stick"],
   },
   {
     id: "garage-1",
     label: "Garage",
     category: "garage",
     emoji: "🛵",
-    longitude: 139.7264,
-    latitude: 35.7689,
+    longitude: 139.7085585445543,
+    latitude: 35.76190592559959,
     regionId: "home",
+    sells: ["cb400n"],
   },
   {
     id: "konbini-akabane",

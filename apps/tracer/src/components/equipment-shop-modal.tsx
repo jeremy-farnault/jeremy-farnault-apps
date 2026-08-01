@@ -1,6 +1,7 @@
 "use client";
 
 import { EQUIPMENT, profileLabel } from "@/config/equipment";
+import type { GenericPoi } from "@/config/game";
 import { log } from "@/lib/log";
 import { useCharacterStore } from "@/stores/character-store";
 import { useEquipmentStore } from "@/stores/equipment-store";
@@ -10,17 +11,18 @@ function formatYen(n: number): string {
 }
 
 interface Props {
-  kind: "weapon" | "vehicle";
+  poi: GenericPoi;
   onClose: () => void;
 }
 
-export function EquipmentShopModal({ kind, onClose }: Props) {
+export function EquipmentShopModal({ poi, onClose }: Props) {
   const money = useCharacterStore((s) => s.money);
   const spendMoney = useCharacterStore((s) => s.spendMoney);
   const acquire = useEquipmentStore((s) => s.acquire);
 
-  const title = kind === "weapon" ? "🗡️ Black Market" : "🛵 Garage";
-  const items = EQUIPMENT.filter((d) => d.kind === kind);
+  const title = `${poi.emoji} ${poi.label}`;
+  const forSale = poi.sells ?? [];
+  const items = EQUIPMENT.filter((d) => forSale.includes(d.id));
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center">

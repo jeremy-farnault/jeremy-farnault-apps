@@ -48,6 +48,24 @@ export const useFilterStore = create<FilterState>()(
     }),
     {
       name: "tracer:filter-store",
+      version: 1,
+      // v0 was persisted before some categories (e.g. blackmarket/garage) existed.
+      // Union in any default categories added since, so new shops aren't hidden by
+      // a stale persisted enabledCategories array.
+      migrate: (persisted, version) => {
+        const prev = (persisted ?? {}) as Partial<
+          Pick<FilterState, "enabledCategories" | "enabledLines">
+        >;
+        const existing = prev.enabledCategories ?? DEFAULT_CATEGORIES;
+        const enabledCategories =
+          version < 1
+            ? [...existing, ...DEFAULT_CATEGORIES.filter((c) => !existing.includes(c))]
+            : existing;
+        return {
+          enabledCategories,
+          enabledLines: prev.enabledLines ?? DEFAULT_LINES,
+        } as FilterState;
+      },
       partialize: (state) => ({
         enabledCategories: state.enabledCategories,
         enabledLines: state.enabledLines,
