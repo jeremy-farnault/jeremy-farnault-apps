@@ -20,6 +20,8 @@ const CATEGORY_LABELS: { id: FilterableCategory; emoji: string; label: string }[
   { id: "school", emoji: "🏫", label: "School" },
   { id: "gym", emoji: "💪", label: "Gym" },
   { id: "dojo", emoji: "🥋", label: "Dojo" },
+  { id: "blackmarket", emoji: "🗡️", label: "Black Market" },
+  { id: "garage", emoji: "🛵", label: "Garage" },
 ];
 
 export function FiltersPanel() {

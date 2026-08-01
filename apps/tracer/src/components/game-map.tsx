@@ -10,6 +10,7 @@ import {
   TRAIN_MIGHT_CONFIG,
   TRAIN_VIGOR_CONFIG,
 } from "@/config/economy";
+import { activeVehicle, activeWeaponMight } from "@/config/equipment";
 import {
   HOME_POI,
   MAP_INITIAL_VIEW,
@@ -27,7 +28,7 @@ import { useNpcPursuit } from "@/hooks/use-npc-pursuit";
 import { useTravel } from "@/hooks/use-travel";
 import { loadActionState } from "@/lib/action";
 import { fetchRoute, formatDistance, formatDuration } from "@/lib/directions";
-import type { RouteResult } from "@/lib/directions";
+import type { RouteProfile, RouteResult } from "@/lib/directions";
 import { distanceMeters } from "@/lib/geo";
 import { addItem } from "@/lib/inventory";
 import { log } from "@/lib/log";
@@ -44,6 +45,7 @@ import {
   totalDurationSeconds,
 } from "@/lib/travel";
 import { useCharacterStore } from "@/stores/character-store";
+import { PLAYER_ACTOR_ID, useEquipmentStore } from "@/stores/equipment-store";
 import { useFilterStore } from "@/stores/filter-store";
 import { usePursuitStore } from "@/stores/pursuit-store";
 import { useRegionStore } from "@/stores/region-store";
@@ -53,6 +55,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MapRef } from "react-map-gl/mapbox";
 import MapGL, { Layer, Source } from "react-map-gl/mapbox";
 import { CharacterMarker } from "./character-marker";
+import { EquipmentShopModal } from "./equipment-shop-modal";
 import { HomeMarker } from "./home-marker";
 import { NpcMarker } from "./npc-marker";
 import { PoiMarkers } from "./poi-markers";
@@ -158,6 +161,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
   const knowledge = useCharacterStore((s) => s.knowledge);
   const health = useCharacterStore((s) => s.health);
   const might = useCharacterStore((s) => s.might);
+  const equipmentItems = useEquipmentStore((s) => s.items);
+  const activeVeh = activeVehicle(equipmentItems, PLAYER_ACTOR_ID);
   const spendMoney = useCharacterStore((s) => s.spendMoney);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const rest = useCharacterStore((s) => s.rest);
@@ -257,7 +262,9 @@ export function GameMap({ characterSelected }: GameMapProps) {
         // Fled mid-fight — no roll, no capture, but not free either.
         takeDamage(CONFRONT_CONFIG.minDamage);
       } else if (npc) {
-        won = Math.random() < might / (might + npc.might);
+        const effectiveMight =
+          might + activeWeaponMight(useEquipmentStore.getState().items, PLAYER_ACTOR_ID);
+        won = Math.random() < effectiveMight / (effectiveMight + npc.might);
         if (won) {
           takeDamage(CONFRONT_CONFIG.minDamage);
           const zone = ZONES.find((z) => typeof z.owner === "object" && z.owner.npcId === npc.id);
@@ -310,6 +317,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
     }
   });
   const [shopOpen, setShopOpen] = useState(false);
+  const [equipmentShop, setEquipmentShop] = useState<"weapon" | "vehicle" | null>(null);
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [routePoi, setRoutePoi] = useState<Poi | null>(null);
@@ -344,11 +352,13 @@ export function GameMap({ characterSelected }: GameMapProps) {
     setTransitMode("best");
     setTransitUnavailable(false);
     setLoading(true);
-    const result = await fetchRoute(
-      characterPosition,
-      poi,
-      process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ""
-    );
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
+    const profile: RouteProfile = activeVeh?.profile ?? "walking";
+    let result = await fetchRoute(characterPosition, poi, token, profile);
+    // No route for the vehicle's profile → fall back to walking.
+    if (!result && profile !== "walking") {
+      result = await fetchRoute(characterPosition, poi, token, "walking");
+    }
     setRoute(result);
     setRoutePoi(poi);
     setLoading(false);
@@ -372,6 +382,16 @@ export function GameMap({ characterSelected }: GameMapProps) {
   function handleShop(_poi: Poi) {
     setSelectedPoi(null);
     setShopOpen(true);
+  }
+
+  function handleWeaponShop(_poi: Poi) {
+    setSelectedPoi(null);
+    setEquipmentShop("weapon");
+  }
+
+  function handleVehicleShop(_poi: Poi) {
+    setSelectedPoi(null);
+    setEquipmentShop("vehicle");
   }
 
   function handleWork(poi: Poi) {
@@ -510,7 +530,12 @@ export function GameMap({ characterSelected }: GameMapProps) {
     const origin = [...POIS, HOME_POI, ...NPCS].find(
       (p) => p.id !== dest.id && isNearPoi(characterPosition, p)
     );
-    const mode = travelMode === "walking" ? "on foot" : "by transit";
+    const mode =
+      travelMode === "walking"
+        ? activeVeh
+          ? `by ${activeVeh.name.toLowerCase()}`
+          : "on foot"
+        : "by transit";
     log({
       category: "travel",
       message: origin
@@ -698,6 +723,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
       return { label: "Confront", handler: handleConfront };
     }
     if (selectedPoi.category === "konbini") return { label: "Shop", handler: handleShop };
+    if (selectedPoi.category === "blackmarket") return { label: "Shop", handler: handleWeaponShop };
+    if (selectedPoi.category === "garage") return { label: "Shop", handler: handleVehicleShop };
     if (selectedPoi.category === "ramen" && money >= MEAL_CONFIG.cost)
       return { label: "Eat", handler: handleEat };
     if (selectedPoi.category === "work") {
@@ -863,6 +890,10 @@ export function GameMap({ characterSelected }: GameMapProps) {
         )}
       </MapGL>
 
+      {equipmentShop && (
+        <EquipmentShopModal kind={equipmentShop} onClose={() => setEquipmentShop(null)} />
+      )}
+
       {shopOpen && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
           <div className="w-80 rounded-xl bg-(--surface-200)/95 backdrop-blur-sm border border-(--surface-300) p-4 flex flex-col gap-3">
@@ -965,7 +996,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
                       : "text-(--grey-500) hover:text-white"
                   }`}
                 >
-                  On foot
+                  {activeVeh ? activeVeh.name : "On foot"}
                 </button>
                 {!transitUnavailable && (
                   <button

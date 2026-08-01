@@ -2,13 +2,16 @@
 
 import { FiltersPanel } from "@/components/filters-panel";
 import { GameMap } from "@/components/game-map";
+import { LoadoutPanel } from "@/components/loadout-panel";
 import { LogPanel } from "@/components/log-panel";
 import { ITEM_CATALOGUE } from "@/config/economy";
+import { activeWeaponMight } from "@/config/equipment";
 import { useCharacterDecay } from "@/hooks/use-character-decay";
 import { loadInventory, removeItem } from "@/lib/inventory";
 import type { InventoryItem } from "@/lib/inventory";
 import { log } from "@/lib/log";
 import { useCharacterStore } from "@/stores/character-store";
+import { PLAYER_ACTOR_ID, useEquipmentStore } from "@/stores/equipment-store";
 import { useSelectionStore } from "@/stores/selection-store";
 import { useEffect, useState } from "react";
 
@@ -21,6 +24,8 @@ export default function GamePage() {
   const vigor = useCharacterStore((s) => s.vigor);
   const might = useCharacterStore((s) => s.might);
   const money = useCharacterStore((s) => s.money);
+  const equipmentItems = useEquipmentStore((s) => s.items);
+  const weaponMight = activeWeaponMight(equipmentItems, PLAYER_ACTOR_ID);
   const restoreStats = useCharacterStore((s) => s.restoreStats);
   const resetStats = useCharacterStore((s) => s.reset);
   const requestCharacterFocus = useSelectionStore((s) => s.requestCharacterFocus);
@@ -159,11 +164,16 @@ export default function GamePage() {
               <StatRow label="💧 Thirst" value={`${Math.floor(thirst)}`} critical={thirst === 0} />
               <StatRow label="📚 Knowledge" value={`${knowledge}`} />
               <StatRow label="🛡️ Vigor" value={`${vigor}`} />
-              <StatRow label="👊 Might" value={`${might}`} />
+              <StatRow
+                label="👊 Might"
+                value={weaponMight > 0 ? `${might} (+${weaponMight})` : `${might}`}
+              />
               <StatRow label="💴 Money" value={`¥${money.toLocaleString()}`} />
             </div>
           )}
         </button>
+
+        <LoadoutPanel />
       </div>
 
       {/* Bottom-right: activity log */}

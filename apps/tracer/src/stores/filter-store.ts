@@ -18,6 +18,8 @@ const DEFAULT_CATEGORIES: FilterableCategory[] = [
   "station",
   "gym",
   "dojo",
+  "blackmarket",
+  "garage",
 ];
 
 const DEFAULT_LINES: LineId[] = LINES.map((l) => l.id);

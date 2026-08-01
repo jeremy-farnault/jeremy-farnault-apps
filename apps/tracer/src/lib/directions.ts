@@ -1,4 +1,6 @@
-const BASE = "https://api.mapbox.com/directions/v5/mapbox/walking";
+export type RouteProfile = "walking" | "cycling" | "driving";
+
+const BASE = "https://api.mapbox.com/directions/v5/mapbox";
 
 type DirectionsRoute = {
   geometry: {
@@ -22,10 +24,11 @@ export type RouteResult = {
 export async function fetchRoute(
   from: { longitude: number; latitude: number },
   to: { longitude: number; latitude: number },
-  token: string
+  token: string,
+  profile: RouteProfile = "walking"
 ): Promise<RouteResult | null> {
   const coords = `${from.longitude},${from.latitude};${to.longitude},${to.latitude}`;
-  const url = `${BASE}/${coords}?geometries=geojson&overview=full&exclude=ferry&access_token=${token}`;
+  const url = `${BASE}/${profile}/${coords}?geometries=geojson&overview=full&exclude=ferry&access_token=${token}`;
   const res = await fetch(url);
   if (!res.ok) return null;
   const data: DirectionsResponse = await res.json();

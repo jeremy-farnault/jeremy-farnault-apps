@@ -27,6 +27,8 @@ export type PoiCategory =
   | "station"
   | "gym"
   | "dojo"
+  | "blackmarket"
+  | "garage"
   | "npc";
 
 export type PoiBase = {
@@ -166,6 +168,24 @@ export const POIS: Poi[] = [
     emoji: "🥋",
     longitude: 139.71089243818213,
     latitude: 35.77094210736899,
+    regionId: "home",
+  },
+  {
+    id: "blackmarket-1",
+    label: "Black Market",
+    category: "blackmarket",
+    emoji: "🗡️",
+    longitude: 139.72785,
+    latitude: 35.76935,
+    regionId: "home",
+  },
+  {
+    id: "garage-1",
+    label: "Garage",
+    category: "garage",
+    emoji: "🛵",
+    longitude: 139.7264,
+    latitude: 35.7689,
     regionId: "home",
   },
   {
