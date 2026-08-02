@@ -17,6 +17,8 @@ interface DatePickerProps {
   disabled?: boolean;
   placeholder?: string;
   disablePast?: boolean;
+  minDate?: string;
+  maxDate?: string;
   accentColor?: string;
   calendarAlign?: "start" | "end";
 }
@@ -101,12 +103,22 @@ export function DatePicker({
   disabled,
   placeholder = "Select date",
   disablePast = false,
+  minDate,
+  maxDate,
   accentColor = "var(--yellow-400)",
   calendarAlign = "start",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = parseDate(value);
   const formatted = selected ? formatDisplay(selected) : null;
+
+  const min = minDate ? parseDate(minDate) : undefined;
+  const max = maxDate ? parseDate(maxDate) : undefined;
+  const disabledMatchers = [
+    ...(disablePast ? [{ before: new Date() }] : []),
+    ...(min ? [{ before: min }] : []),
+    ...(max ? [{ after: max }] : []),
+  ];
 
   return (
     <PopoverPrimitive.Root open={open && !disabled} onOpenChange={setOpen}>
@@ -131,7 +143,7 @@ export function DatePicker({
           align={calendarAlign}
           sideOffset={6}
           className={cn(
-            "z-[9100] w-[284px]",
+            "relative z-[9100] w-[284px]",
             "rounded-[16px] bg-(--card) p-4",
             "shadow-[0_24px_36px_0_rgba(0,0,0,0.25)]",
             "animate-[overlay-in_0.3s_ease-in-out]"
@@ -148,7 +160,7 @@ export function DatePicker({
                   setOpen(false);
                 }
               }}
-              disabled={disablePast ? { before: new Date() } : undefined}
+              disabled={disabledMatchers.length > 0 ? disabledMatchers : undefined}
               classNames={{
                 root: "w-full",
                 months: "w-full",

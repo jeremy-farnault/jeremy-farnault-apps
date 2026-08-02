@@ -2,7 +2,7 @@
 
 import { logHabitAction } from "@/lib/actions";
 import type { Habit, HabitLog } from "@/lib/queries";
-import { ActionModal, Switch, Textarea } from "@jf/ui";
+import { ActionModal, DatePicker, Switch, Textarea } from "@jf/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -15,26 +15,23 @@ type Props = {
   existingLog?: HabitLog;
 };
 
-function formatDate(dateStr: string): string {
-  return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  });
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [date, setDate] = useState(targetDate);
   const [value, setValue] = useState("");
   const [comment, setComment] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
+    setDate(targetDate);
     setValue(existingLog?.value ?? (habit.type === "boolean" ? "true" : ""));
     setComment(existingLog?.comment ?? "");
-  }, [isOpen, existingLog, habit.type]);
+  }, [isOpen, targetDate, existingLog, habit.type]);
 
   function handleSubmit() {
     startTransition(async () => {
@@ -42,7 +39,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
         const trimmedComment = comment.trim();
         await logHabitAction({
           habitId: habit.id,
-          date: targetDate,
+          date,
           value,
           ...(trimmedComment ? { comment: trimmedComment } : {}),
         });
@@ -61,6 +58,13 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
 
   const content = (
     <div className="flex flex-col gap-4">
+      <DatePicker
+        value={date}
+        onChange={setDate}
+        minDate={habit.startDate}
+        maxDate={todayIso()}
+        accentColor={habit.color}
+      />
       {habit.type === "boolean" && (
         <Switch
           checked={value === "true"}
@@ -95,7 +99,6 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       onClose={onClose}
       size="small"
       title={existingLog ? "Edit log" : "Log habit"}
-      paragraph={formatDate(targetDate)}
       content={content}
       primaryButton={{
         label: existingLog ? "Save" : "Log",
