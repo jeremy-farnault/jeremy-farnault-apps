@@ -163,6 +163,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       content={content}
       mobilePosition="top"
       fitMobileViewport
+      borderColor={color}
     />
   );
 }

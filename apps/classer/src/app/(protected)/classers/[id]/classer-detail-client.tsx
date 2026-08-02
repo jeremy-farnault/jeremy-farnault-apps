@@ -5,7 +5,7 @@ import { ItemCard } from "@/components/item-card";
 import type { ItemCardData } from "@/components/item-card";
 import { ItemFormModal } from "@/components/item-form-modal";
 import type { ItemForEdit } from "@/components/item-form-modal";
-import { updateItemAction } from "@/lib/actions";
+import { deleteItemAction, updateItemAction } from "@/lib/actions";
 import { FloatingCTA } from "@jf/ui";
 import { PlusSquareIcon } from "@phosphor-icons/react";
 import Image from "next/image";
@@ -40,6 +40,17 @@ export function ClasserDetailClient({ classer, items }: Props) {
         removeImage: false,
         itemCount: items.length,
       });
+      router.refresh();
+    } finally {
+      setMoving(null);
+    }
+  }
+
+  async function deleteItem(item: ItemCardData) {
+    if (moving) return;
+    setMoving(item.id);
+    try {
+      await deleteItemAction({ id: item.id, classerId: classer.id });
       router.refresh();
     } finally {
       setMoving(null);
@@ -102,7 +113,7 @@ export function ClasserDetailClient({ classer, items }: Props) {
                 onUp={() => moveItem(item, "up")}
                 onDown={() => moveItem(item, "down")}
                 onEdit={() => openEdit(item)}
-                onDelete={() => {}}
+                onDelete={() => deleteItem(item)}
               />
             ))}
           </ol>

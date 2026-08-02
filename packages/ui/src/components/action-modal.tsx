@@ -32,6 +32,7 @@ interface ActionModalProps {
   closeOnEscapeKeyDown?: boolean;
   mobilePosition?: "center" | "top";
   fitMobileViewport?: boolean;
+  borderColor?: string;
 }
 
 const SIZE_CLASSES = {
@@ -53,6 +54,7 @@ export function ActionModal({
   closeOnEscapeKeyDown = true,
   mobilePosition = "center",
   fitMobileViewport = false,
+  borderColor,
 }: ActionModalProps) {
   const hasButtons = primaryButton || secondaryButton;
 
@@ -103,10 +105,14 @@ export function ActionModal({
                 ? "w-full max-w-none sm:max-w-[calc(100vw-2rem)]"
                 : "w-full max-w-[calc(100vw-2rem)]",
               fitMobileViewport && "overflow-hidden sm:h-auto",
+              borderColor && "border-2",
               SIZE_CLASSES[size],
               "animate-[modal-in_0.3s_ease-in-out]"
             )}
-            style={mobileHeight !== undefined ? { height: `${mobileHeight}px` } : undefined}
+            style={{
+              ...(mobileHeight !== undefined ? { height: `${mobileHeight}px` } : {}),
+              ...(borderColor ? { borderColor } : {}),
+            }}
           >
             {!closeOnBackdropClick && (
               <button
