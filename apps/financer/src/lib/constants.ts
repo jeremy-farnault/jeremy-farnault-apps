@@ -1,5 +1,14 @@
 export const CURRENCIES = ["EUR", "GBP", "JPY", "NZD", "SEK", "USD"] as const;
 
+export const CURRENCY_FLAGS: Record<(typeof CURRENCIES)[number], string> = {
+  EUR: "🇪🇺",
+  GBP: "🇬🇧",
+  JPY: "🇯🇵",
+  NZD: "🇳🇿",
+  SEK: "🇸🇪",
+  USD: "🇺🇸",
+};
+
 export const FINANCER_COLOR_PALETTE = [
   { label: "Blue", value: "var(--blue-400)" },
   { label: "Green", value: "var(--green-400)" },

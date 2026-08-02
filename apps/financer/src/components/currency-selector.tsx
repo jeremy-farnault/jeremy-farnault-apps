@@ -1,7 +1,7 @@
 "use client";
 
 import { setHomeCurrency } from "@/lib/actions";
-import { CURRENCIES } from "@/lib/constants";
+import { CURRENCIES, CURRENCY_FLAGS } from "@/lib/constants";
 import { cn } from "@jf/ui";
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
@@ -42,12 +42,13 @@ export function CurrencySelector({ homeCurrency }: { homeCurrency: string }) {
               type="button"
               onClick={() => select(c)}
               className={cn(
-                "w-full rounded-[10px] px-3 py-2 text-left text-sm transition-colors",
+                "flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm transition-colors",
                 c === homeCurrency
                   ? "bg-(--primary) font-semibold text-white"
                   : "text-(--grey-700) hover:bg-(--surface-100)"
               )}
             >
+              <span aria-hidden="true">{CURRENCY_FLAGS[c]}</span>
               {c}
             </button>
           ))}

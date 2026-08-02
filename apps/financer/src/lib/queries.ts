@@ -510,79 +510,99 @@ export async function getExchangeRates(): Promise<Record<string, number>> {
 export async function getMonthlyTotals(userId: string, months: string[]): Promise<MonthlyTotals[]> {
   if (months.length === 0) return [];
 
-  const [summaries, entries, assetRows, assetSummaryRows, incomeRows, incomeSummaryRows] =
-    await Promise.all([
-      db
-        .select({
-          month: financerSummaries.month,
-          category: financerSummaries.category,
-          value: financerSummaries.value,
-        })
-        .from(financerSummaries)
-        .where(and(eq(financerSummaries.userId, userId), inArray(financerSummaries.month, months))),
-      db
-        .select({
-          month: financerEntries.month,
-          category: financerEntries.category,
-          value: financerEntries.value,
-        })
-        .from(financerEntries)
-        .where(and(eq(financerEntries.userId, userId), inArray(financerEntries.month, months))),
-      db
-        .select({
-          month: financerAssetEntries.month,
-          value: financerAssetEntries.value,
-          name: financerAssetSources.name,
-        })
-        .from(financerAssetEntries)
-        .innerJoin(financerAssetSources, eq(financerAssetEntries.sourceId, financerAssetSources.id))
-        .where(
-          and(eq(financerAssetEntries.userId, userId), inArray(financerAssetEntries.month, months))
-        ),
-      db
-        .select({
-          month: financerAssetSummaries.month,
-          value: financerAssetSummaries.value,
-          name: financerAssetSummaries.name,
-        })
-        .from(financerAssetSummaries)
-        .where(
-          and(
-            eq(financerAssetSummaries.userId, userId),
-            inArray(financerAssetSummaries.month, months)
-          )
-        ),
-      db
-        .select({
-          month: financerIncomeEntries.month,
-          value: financerIncomeEntries.value,
-          name: financerIncomeSources.name,
-        })
-        .from(financerIncomeEntries)
-        .innerJoin(
-          financerIncomeSources,
-          eq(financerIncomeEntries.sourceId, financerIncomeSources.id)
+  const [
+    summaries,
+    entries,
+    assetRows,
+    assetSummaryRows,
+    incomeRows,
+    incomeSummaryRows,
+    rates,
+    homeCurrency,
+  ] = await Promise.all([
+    db
+      .select({
+        month: financerSummaries.month,
+        category: financerSummaries.category,
+        value: financerSummaries.value,
+        currency: financerSummaries.currency,
+      })
+      .from(financerSummaries)
+      .where(and(eq(financerSummaries.userId, userId), inArray(financerSummaries.month, months))),
+    db
+      .select({
+        month: financerEntries.month,
+        category: financerEntries.category,
+        value: financerEntries.value,
+        currency: financerEntries.currency,
+      })
+      .from(financerEntries)
+      .where(and(eq(financerEntries.userId, userId), inArray(financerEntries.month, months))),
+    db
+      .select({
+        month: financerAssetEntries.month,
+        value: financerAssetEntries.value,
+        name: financerAssetSources.name,
+        currency: financerAssetSources.currency,
+      })
+      .from(financerAssetEntries)
+      .innerJoin(financerAssetSources, eq(financerAssetEntries.sourceId, financerAssetSources.id))
+      .where(
+        and(eq(financerAssetEntries.userId, userId), inArray(financerAssetEntries.month, months))
+      ),
+    db
+      .select({
+        month: financerAssetSummaries.month,
+        value: financerAssetSummaries.value,
+        name: financerAssetSummaries.name,
+        currency: financerAssetSummaries.currency,
+      })
+      .from(financerAssetSummaries)
+      .where(
+        and(
+          eq(financerAssetSummaries.userId, userId),
+          inArray(financerAssetSummaries.month, months)
         )
-        .where(
-          and(
-            eq(financerIncomeEntries.userId, userId),
-            inArray(financerIncomeEntries.month, months)
-          )
-        ),
-      db
-        .select({
-          month: financerIncomeSummaries.month,
-          value: financerIncomeSummaries.value,
-          name: financerIncomeSummaries.name,
-        })
-        .from(financerIncomeSummaries)
-        .where(
-          and(
-            eq(financerIncomeSummaries.userId, userId),
-            inArray(financerIncomeSummaries.month, months)
-          )
-        ),
-    ]);
+      ),
+    db
+      .select({
+        month: financerIncomeEntries.month,
+        value: financerIncomeEntries.value,
+        name: financerIncomeSources.name,
+        currency: financerIncomeSources.currency,
+      })
+      .from(financerIncomeEntries)
+      .innerJoin(
+        financerIncomeSources,
+        eq(financerIncomeEntries.sourceId, financerIncomeSources.id)
+      )
+      .where(
+        and(eq(financerIncomeEntries.userId, userId), inArray(financerIncomeEntries.month, months))
+      ),
+    db
+      .select({
+        month: financerIncomeSummaries.month,
+        value: financerIncomeSummaries.value,
+        name: financerIncomeSummaries.name,
+        currency: financerIncomeSummaries.currency,
+      })
+      .from(financerIncomeSummaries)
+      .where(
+        and(
+          eq(financerIncomeSummaries.userId, userId),
+          inArray(financerIncomeSummaries.month, months)
+        )
+      ),
+    getExchangeRates(),
+    getHomeCurrency(userId),
+  ]);
+
+  const rateTo = rates[homeCurrency];
+  const convert = (value: string | number, currency: string) => {
+    const amount = Number(value);
+    const rateFrom = rates[currency];
+    return rateFrom && rateTo ? amount * (rateTo / rateFrom) : amount;
+  };
 
   const result = new Map<string, MonthlyTotals>(
     months.map((m) => [
@@ -594,23 +614,24 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
   for (const row of [...summaries, ...entries]) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.spending += Number(row.value);
+      const converted = convert(row.value, row.currency);
+      entry.spending += converted;
       entry.spendingByCategory[row.category] =
-        (entry.spendingByCategory[row.category] ?? 0) + Number(row.value);
+        (entry.spendingByCategory[row.category] ?? 0) + converted;
     }
   }
 
   for (const row of [...assetRows, ...assetSummaryRows]) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.assets[row.name] = (entry.assets[row.name] ?? 0) + Number(row.value);
+      entry.assets[row.name] = (entry.assets[row.name] ?? 0) + convert(row.value, row.currency);
     }
   }
 
   for (const row of [...incomeRows, ...incomeSummaryRows]) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.income[row.name] = (entry.income[row.name] ?? 0) + Number(row.value);
+      entry.income[row.name] = (entry.income[row.name] ?? 0) + convert(row.value, row.currency);
     }
   }
 
