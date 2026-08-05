@@ -177,6 +177,26 @@ export async function hasOpenAssetEntries(userId: string, month: string): Promis
   return rows.length > 0;
 }
 
+export async function hasAssetSummaries(userId: string, month: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: financerAssetSummaries.id })
+    .from(financerAssetSummaries)
+    .where(and(eq(financerAssetSummaries.userId, userId), eq(financerAssetSummaries.month, month)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+export async function hasIncomeSummaries(userId: string, month: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: financerIncomeSummaries.id })
+    .from(financerIncomeSummaries)
+    .where(
+      and(eq(financerIncomeSummaries.userId, userId), eq(financerIncomeSummaries.month, month))
+    )
+    .limit(1);
+  return rows.length > 0;
+}
+
 export async function getAssetsForMonth(userId: string, month: string): Promise<AssetRow[]> {
   const [entryRows, summaryRows] = await Promise.all([
     db

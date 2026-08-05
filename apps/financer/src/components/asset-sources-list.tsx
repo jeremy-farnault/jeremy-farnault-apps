@@ -26,10 +26,10 @@ interface AssetSourcesListProps {
   sources: AssetSourceRow[];
   month: string;
   entries: AssetEntryRow[];
-  isOpen: boolean;
+  isClosed: boolean;
 }
 
-export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourcesListProps) {
+export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSourcesListProps) {
   const [editingSource, setEditingSource] = useState<AssetSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<AssetSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<AssetSourceRow | null>(null);
@@ -230,7 +230,7 @@ export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourc
                       maximumFractionDigits: 2,
                     })}
                   </span>
-                  {isOpen && (
+                  {!isClosed && (
                     <div className="flex items-center gap-0.5">
                       <button
                         type="button"
@@ -269,7 +269,7 @@ export function AssetSourcesList({ sources, month, entries, isOpen }: AssetSourc
                 >
                   <TrashIcon size={16} />
                 </button>
-                {isOpen && (
+                {!isClosed && (
                   <button
                     type="button"
                     onClick={() => openLog(source)}

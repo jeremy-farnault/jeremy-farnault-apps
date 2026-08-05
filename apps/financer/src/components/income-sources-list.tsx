@@ -26,10 +26,10 @@ interface IncomeSourcesListProps {
   sources: IncomeSourceRow[];
   month: string;
   entries: IncomeEntryRow[];
-  isOpen: boolean;
+  isClosed: boolean;
 }
 
-export function IncomeSourcesList({ sources, month, entries, isOpen }: IncomeSourcesListProps) {
+export function IncomeSourcesList({ sources, month, entries, isClosed }: IncomeSourcesListProps) {
   const [editingSource, setEditingSource] = useState<IncomeSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<IncomeSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<IncomeSourceRow | null>(null);
@@ -230,7 +230,7 @@ export function IncomeSourcesList({ sources, month, entries, isOpen }: IncomeSou
                       maximumFractionDigits: 2,
                     })}
                   </span>
-                  {isOpen && (
+                  {!isClosed && (
                     <div className="flex items-center gap-0.5">
                       <button
                         type="button"
@@ -269,7 +269,7 @@ export function IncomeSourcesList({ sources, month, entries, isOpen }: IncomeSou
                 >
                   <TrashIcon size={16} />
                 </button>
-                {isOpen && (
+                {!isClosed && (
                   <button
                     type="button"
                     onClick={() => openLog(source)}

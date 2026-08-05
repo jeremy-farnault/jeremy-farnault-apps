@@ -34,6 +34,8 @@ import {
   getSpendingCategories,
   getSpendingEntriesForMonth,
   getSpendingForMonth,
+  hasAssetSummaries,
+  hasIncomeSummaries,
   hasOpenAssetEntries,
   hasOpenEntries,
   hasOpenIncomeEntries,
@@ -179,6 +181,7 @@ export default async function FinancerPage({
     assetsRates,
     assetEntries,
     openAssetEntries,
+    closedAssetMonth,
   ] =
     view === "assets"
       ? await Promise.all([
@@ -188,8 +191,9 @@ export default async function FinancerPage({
           getExchangeRates(),
           getAssetEntriesForMonth(userId, month),
           hasOpenAssetEntries(userId, month),
+          hasAssetSummaries(userId, month),
         ])
-      : [[], [], "USD", {}, [], false];
+      : [[], [], "USD", {}, [], false, false];
 
   const [
     incomeData,
@@ -198,6 +202,7 @@ export default async function FinancerPage({
     incomeRates,
     incomeEntries,
     openIncomeEntries,
+    closedIncomeMonth,
   ] =
     view === "income"
       ? await Promise.all([
@@ -207,8 +212,9 @@ export default async function FinancerPage({
           getExchangeRates(),
           getIncomeEntriesForMonth(userId, month),
           hasOpenIncomeEntries(userId, month),
+          hasIncomeSummaries(userId, month),
         ])
-      : [[], [], "USD", {}, [], false];
+      : [[], [], "USD", {}, [], false, false];
 
   const [monthlyTotals, overviewAssetSources, overviewIncomeSources] =
     view === "overview"
@@ -276,7 +282,7 @@ export default async function FinancerPage({
             sources={assetSources}
             month={month}
             entries={assetEntries}
-            isOpen={!!openAssetEntries}
+            isClosed={!!closedAssetMonth}
           />
           <AssetsList data={assetsData} homeCurrency={assetsHomeCurrency} rates={assetsRates} />
           {openAssetEntries && <CloseAssetMonthButton month={month} assetsData={assetsData} />}
@@ -293,7 +299,7 @@ export default async function FinancerPage({
             sources={incomeSources}
             month={month}
             entries={incomeEntries}
-            isOpen={!!openIncomeEntries}
+            isClosed={!!closedIncomeMonth}
           />
           <IncomeList data={incomeData} homeCurrency={incomeHomeCurrency} rates={incomeRates} />
           {openIncomeEntries && <CloseIncomeMonthButton month={month} incomeData={incomeData} />}
