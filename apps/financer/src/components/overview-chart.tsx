@@ -175,7 +175,11 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
+            <Tooltip
+              content={<ChartTooltip />}
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 100 }}
+            />
             {allCategories.map((category, i) => (
               <Bar
                 key={category}
@@ -204,7 +208,11 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
+            <Tooltip
+              content={<ChartTooltip />}
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 100 }}
+            />
             {allIncomeSources.map((sourceName, i) => {
               const color =
                 incomeSources.find((s) => s.name === sourceName)?.color ??
@@ -239,7 +247,11 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip content={<ChartTooltip />} isAnimationActive={false} />
+            <Tooltip
+              content={<ChartTooltip />}
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 100 }}
+            />
             {allAssetSources.map((sourceName, i) => {
               const color =
                 assetSources.find((s) => s.name === sourceName)?.color ??
@@ -274,7 +286,11 @@ export function OverviewChart({
               tick={axisTickProps}
             />
             <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip content={<AllChartTooltip />} isAnimationActive={false} />
+            <Tooltip
+              content={<AllChartTooltip />}
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 100 }}
+            />
             {allCategories.map((category, i) => (
               <Bar
                 key={`all_spending_${category}`}
