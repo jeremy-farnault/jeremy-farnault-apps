@@ -240,6 +240,7 @@ export function DetailChart({
                 tick={axisTickProps}
               />
               <YAxis
+                domain={["auto", "auto"]}
                 tickLine={false}
                 axisLine={false}
                 tick={axisTickProps}
