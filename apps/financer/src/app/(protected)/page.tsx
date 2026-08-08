@@ -5,21 +5,29 @@ import { AssetsList } from "@/components/assets-list";
 import { CloseAssetMonthButton } from "@/components/close-asset-month-button";
 import { CloseIncomeMonthButton } from "@/components/close-income-month-button";
 import { CloseMonthButton } from "@/components/close-month-button";
+import { DetailChart, type DetailSeries } from "@/components/detail-chart";
 import { IncomeChart } from "@/components/income-chart";
 import { IncomeCta } from "@/components/income-cta";
 import { IncomeList } from "@/components/income-list";
 import { IncomeSourcesList } from "@/components/income-sources-list";
 import { MonthNav } from "@/components/month-nav";
 import { OverviewChart } from "@/components/overview-chart";
+import { type OverviewSub, OverviewSubToggle } from "@/components/overview-sub-toggle";
 import { SpendingCategoriesList } from "@/components/spending-categories-list";
 import { SpendingChart } from "@/components/spending-chart";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
-import { CATEGORY_COLORS, SPENDING_CATEGORY_COLORS } from "@/lib/constants";
+import {
+  ASSET_SOURCE_COLORS,
+  CATEGORY_COLORS,
+  INCOME_SOURCE_COLORS,
+  SPENDING_CATEGORY_COLORS,
+} from "@/lib/constants";
 import {
   type AssetRow,
   type IncomeRow,
+  type MonthlyTotals,
   type SpendingCategoryRow,
   type SpendingRow,
   getAssetEntriesForMonth,
@@ -139,9 +147,9 @@ function isValidMonth(s?: string): s is string {
 export default async function FinancerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; month?: string }>;
+  searchParams: Promise<{ view?: string; month?: string; sub?: string }>;
 }) {
-  const { view: viewParam, month: monthParam } = await searchParams;
+  const { view: viewParam, month: monthParam, sub: subParam } = await searchParams;
   const view =
     viewParam === "assets"
       ? "assets"
@@ -150,6 +158,8 @@ export default async function FinancerPage({
         : viewParam === "overview"
           ? "overview"
           : "spending";
+  const sub: OverviewSub =
+    subParam === "spending" || subParam === "assets" || subParam === "income" ? subParam : "global";
   const month = isValidMonth(monthParam) ? monthParam : getCurrentMonth();
 
   const session = await auth.api.getSession({ headers: await headers() });
@@ -216,14 +226,15 @@ export default async function FinancerPage({
         ])
       : [[], [], "USD", {}, [], false, false];
 
-  const [monthlyTotals, overviewAssetSources, overviewIncomeSources] =
+  const [monthlyTotals, overviewAssetSources, overviewIncomeSources, overviewSpendingCategories] =
     view === "overview"
       ? await Promise.all([
           getMonthlyTotals(userId, getLast12Months()),
           getAssetSources(userId),
           getIncomeSources(userId),
+          getSpendingCategories(userId),
         ])
-      : [[], [], []];
+      : [[], [], [], []];
 
   const typedSpendingCategories = spendingCategories as SpendingCategoryRow[];
   const categoryColors: Record<string, string> = {
@@ -238,6 +249,52 @@ export default async function FinancerPage({
     ),
   };
 
+  // Overview detail sub-tabs: pivot the 12-month totals into one series per item.
+  const overviewMonths = (monthlyTotals as MonthlyTotals[]).map((m) => m.month);
+  const overviewCategoryColors: Record<string, string> = {
+    ...CATEGORY_COLORS,
+    ...Object.fromEntries(
+      (overviewSpendingCategories as SpendingCategoryRow[]).map((c, i) => [
+        c.name,
+        c.color ??
+          SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ??
+          "var(--grey-400)",
+      ])
+    ),
+  };
+
+  function buildDetailSeries(
+    pick: (m: MonthlyTotals) => Record<string, number>,
+    colorFor: (name: string, index: number) => string
+  ): DetailSeries[] {
+    const totals = monthlyTotals as MonthlyTotals[];
+    const names = Array.from(new Set(totals.flatMap((m) => Object.keys(pick(m)))));
+    return names.map((name, i) => ({
+      name,
+      color: colorFor(name, i),
+      values: totals.map((m) => pick(m)[name] ?? 0),
+    }));
+  }
+
+  const spendingDetailSeries = buildDetailSeries(
+    (m) => m.spendingByCategory,
+    (name) => overviewCategoryColors[name] ?? "var(--grey-400)"
+  );
+  const assetDetailSeries = buildDetailSeries(
+    (m) => m.assets,
+    (name, i) =>
+      overviewAssetSources.find((s) => s.name === name)?.color ??
+      ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
+      "var(--grey-400)"
+  );
+  const incomeDetailSeries = buildDetailSeries(
+    (m) => m.income,
+    (name, i) =>
+      overviewIncomeSources.find((s) => s.name === name)?.color ??
+      INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
+      "var(--grey-400)"
+  );
+
   return (
     <main className="w-full px-4 pt-6 pb-24 flex flex-col gap-10 sm:gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -245,6 +302,11 @@ export default async function FinancerPage({
         {view !== "overview" && (
           <div className="flex justify-center sm:justify-end">
             <MonthNav month={month} />
+          </div>
+        )}
+        {view === "overview" && (
+          <div className="flex justify-center sm:justify-end">
+            <OverviewSubToggle sub={sub} />
           </div>
         )}
       </div>
@@ -310,12 +372,25 @@ export default async function FinancerPage({
           />
         </>
       )}
-      {view === "overview" && (
+      {view === "overview" && sub === "global" && (
         <OverviewChart
           data={monthlyTotals}
           assetSources={overviewAssetSources}
           incomeSources={overviewIncomeSources}
         />
+      )}
+      {view === "overview" && sub === "spending" && (
+        <DetailChart
+          title="Spending by category"
+          months={overviewMonths}
+          series={spendingDetailSeries}
+        />
+      )}
+      {view === "overview" && sub === "assets" && (
+        <DetailChart title="Assets by source" months={overviewMonths} series={assetDetailSeries} />
+      )}
+      {view === "overview" && sub === "income" && (
+        <DetailChart title="Income by source" months={overviewMonths} series={incomeDetailSeries} />
       )}
     </main>
   );

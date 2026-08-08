@@ -64,9 +64,9 @@ function ChartTooltip({
 const STACK_LABELS: Record<string, string> = {
   spending: "Spending",
   income: "Income",
-  assets: "Savings",
+  assets: "Assets",
 };
-const STACK_ORDER = ["income", "spending", "assets"];
+const STACK_ORDER = ["spending", "assets", "income"];
 
 function AllChartTooltip({
   active,
@@ -194,45 +194,6 @@ export function OverviewChart({
         </ResponsiveContainer>
       </div>
 
-      {/* Income by source */}
-      <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">Income</h3>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
-            <XAxis
-              dataKey="month"
-              tickFormatter={formatMonthLabel}
-              tickLine={false}
-              axisLine={false}
-              tick={axisTickProps}
-            />
-            <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
-            <Tooltip
-              content={<ChartTooltip />}
-              isAnimationActive={false}
-              wrapperStyle={{ zIndex: 100 }}
-            />
-            {allIncomeSources.map((sourceName, i) => {
-              const color =
-                incomeSources.find((s) => s.name === sourceName)?.color ??
-                INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
-              return (
-                <Bar
-                  key={sourceName}
-                  dataKey={`income_${sourceName}`}
-                  stackId="income"
-                  fill={color}
-                  name={sourceName}
-                  radius={i === allIncomeSources.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
-                />
-              );
-            })}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
       {/* Assets by source */}
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium text-(--grey-600)">Assets</h3>
@@ -265,6 +226,45 @@ export function OverviewChart({
                   fill={color}
                   name={sourceName}
                   radius={i === allAssetSources.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                />
+              );
+            })}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Income by source */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium text-(--grey-600)">Income</h3>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={chartData} barGap={4} barCategoryGap="30%">
+            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthLabel}
+              tickLine={false}
+              axisLine={false}
+              tick={axisTickProps}
+            />
+            <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
+            <Tooltip
+              content={<ChartTooltip />}
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 100 }}
+            />
+            {allIncomeSources.map((sourceName, i) => {
+              const color =
+                incomeSources.find((s) => s.name === sourceName)?.color ??
+                INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
+                "var(--grey-400)";
+              return (
+                <Bar
+                  key={sourceName}
+                  dataKey={`income_${sourceName}`}
+                  stackId="income"
+                  fill={color}
+                  name={sourceName}
+                  radius={i === allIncomeSources.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                 />
               );
             })}
