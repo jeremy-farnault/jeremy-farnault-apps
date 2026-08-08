@@ -1,8 +1,11 @@
 "use client";
 
+import { InfinityIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
 import { cn } from "../lib/utils";
+
+const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:3014";
 
 interface UserMenuProps {
   email: string;
@@ -51,6 +54,17 @@ export function UserMenu({ email, name, image, onLogout }: UserMenuProps) {
             "outline-none min-w-[140px]"
           )}
         >
+          <a
+            href={INDEXER_URL}
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--grey-900)",
+              "hover:bg-(--surface-150)"
+            )}
+          >
+            <InfinityIcon size={18} weight="bold" />
+            Indexer
+          </a>
           <button
             onClick={() => {
               setOpen(false);

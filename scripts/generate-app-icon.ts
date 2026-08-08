@@ -17,6 +17,9 @@ const MAP_PIN_PATH =
 const PILL_PATH =
   "M216.42,39.6a53.26,53.26,0,0,0-75.32,0L39.6,141.09a53.26,53.26,0,0,0,75.32,75.31h0L216.43,114.91A53.31,53.31,0,0,0,216.42,39.6ZM103.61,205.09h0a37.26,37.26,0,0,1-52.7-52.69L96,107.31,148.7,160ZM205.11,103.6,160,148.69,107.32,96l45.1-45.09a37.26,37.26,0,0,1,52.69,52.69ZM189.68,82.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,1,1-11.31-11.32l24-24A8,8,0,0,1,189.68,82.34Z";
 
+const INFINITY_PATH =
+  "M248,128a56,56,0,0,1-95.6,39.6l-.33-.35L92.12,99.55a40,40,0,1,0,0,56.9l8.52-9.62a8,8,0,1,1,12,10.61l-8.69,9.81-.33.35a56,56,0,1,1,0-79.2l.33.35,59.95,67.7a40,40,0,1,0,0-56.9l-8.52,9.62a8,8,0,1,1-12-10.61l8.69-9.81.33-.35A56,56,0,0,1,248,128Z";
+
 function buildSvg(color: string, iconPath: string, size: number): string {
   const padding = size * 0.2;
   const iconSize = size - padding * 2;
@@ -58,7 +61,7 @@ function parseArgs(): { color: string; out: string; icon: string } {
   const out = get("--out");
   if (!color || !out) {
     console.error(
-      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill]"
+      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill|infinity]"
     );
     process.exit(1);
   }
@@ -76,7 +79,9 @@ async function generate() {
           ? MAP_PIN_PATH
           : icon === "pill"
             ? PILL_PATH
-            : RANKING_PATH;
+            : icon === "infinity"
+              ? INFINITY_PATH
+              : RANKING_PATH;
   const iconsDir = resolve(out, "icons");
   const splashDir = resolve(iconsDir, "splash");
   await mkdir(splashDir, { recursive: true });

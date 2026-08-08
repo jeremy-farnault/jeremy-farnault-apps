@@ -1,4 +1,7 @@
 import type { Icon } from "@phosphor-icons/react";
+// Import the icon components from the SSR-safe entry so this registry can be
+// imported from React Server Components (the main barrel uses createContext,
+// which is client-only and crashes in RSC).
 import {
   BarbellIcon,
   ChecksIcon,
@@ -9,7 +12,7 @@ import {
   PillIcon,
   RankingIcon,
   StackIcon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/dist/ssr";
 
 export interface AppDefinition {
   id: string;
