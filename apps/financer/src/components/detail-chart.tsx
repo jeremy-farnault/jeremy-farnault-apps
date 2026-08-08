@@ -15,7 +15,7 @@ import {
 export type DetailSeries = {
   name: string;
   color: string;
-  values: number[];
+  values: (number | null)[];
 };
 
 function formatMonthLabel(month: string): string {
@@ -24,6 +24,13 @@ function formatMonthLabel(month: string): string {
 
 function formatAmount(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatAxisTick(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
+  return `${Math.round(value)}`;
 }
 
 type TooltipItem = { name?: string; value?: number; color?: string; dataKey?: string };
@@ -38,6 +45,8 @@ function DetailTooltip({
   label?: string;
 }) {
   if (!active || !payload?.length) return null;
+  const items = payload.filter((p) => p.value != null);
+  if (!items.length) return null;
 
   return (
     <div
@@ -49,7 +58,7 @@ function DetailTooltip({
       }}
     >
       <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
-      {payload.map((item) => (
+      {items.map((item) => (
         <div
           key={item.dataKey}
           style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}
@@ -75,19 +84,19 @@ function DetailTooltip({
 
 function pickDefaultSelection(series: DetailSeries[]): Set<string> {
   if (!series.length) return new Set();
-  // Most-recently-logged = greatest index of a non-zero month; tiebreak by higher value there.
+  // Most-recently-logged = greatest index of a logged (non-null) month; tiebreak by higher value.
   let bestName = series[0]?.name;
   let bestIdx = -1;
   let bestVal = Number.NEGATIVE_INFINITY;
   for (const s of series) {
     let lastIdx = -1;
     for (let i = s.values.length - 1; i >= 0; i--) {
-      if ((s.values[i] ?? 0) > 0) {
+      if (s.values[i] != null) {
         lastIdx = i;
         break;
       }
     }
-    const latestVal = lastIdx >= 0 ? (s.values[lastIdx] ?? 0) : -1;
+    const latestVal = lastIdx >= 0 ? (s.values[lastIdx] as number) : -1;
     if (lastIdx > bestIdx || (lastIdx === bestIdx && latestVal > bestVal)) {
       bestName = s.name;
       bestIdx = lastIdx;
@@ -97,13 +106,30 @@ function pickDefaultSelection(series: DetailSeries[]): Set<string> {
   return new Set(bestName ? [bestName] : []);
 }
 
-function computeStats(values: number[]): { min: number; max: number; avg: number; latest: number } {
-  const nonZero = values.filter((v) => v > 0);
-  const min = nonZero.length ? Math.min(...nonZero) : 0;
-  const max = values.length ? Math.max(...values) : 0;
-  const avg = nonZero.length ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length : 0;
-  const latest = values.length ? (values[values.length - 1] ?? 0) : 0;
+function computeStats(values: (number | null)[]): {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+  latest: number | null;
+} {
+  const present = values.filter((v): v is number => v != null);
+  if (!present.length) return { min: null, max: null, avg: null, latest: null };
+  const min = Math.min(...present);
+  const max = Math.max(...present);
+  const avg = present.reduce((a, b) => a + b, 0) / present.length;
+  let latest: number | null = null;
+  for (let i = values.length - 1; i >= 0; i--) {
+    const v = values[i];
+    if (v != null) {
+      latest = v;
+      break;
+    }
+  }
   return { min, max, avg, latest };
+}
+
+function formatStat(value: number | null): string {
+  return value == null ? "—" : formatAmount(value);
 }
 
 export function DetailChart({
@@ -136,9 +162,9 @@ export function DetailChart({
   }
 
   const rows = months.map((month, i) => {
-    const row: Record<string, string | number> = { month };
+    const row: Record<string, string | number | null> = { month };
     series.forEach((s, si) => {
-      row[`s${si}`] = s.values[i] ?? 0;
+      row[`s${si}`] = s.values[i] ?? null;
     });
     return row;
   });
@@ -148,7 +174,25 @@ export function DetailChart({
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-(--grey-600)">{title}</h3>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-medium text-(--grey-600)">{title}</h3>
+        <div className="flex items-center gap-3 text-xs">
+          <button
+            type="button"
+            onClick={() => setSelected(new Set(series.map((s) => s.name)))}
+            className="text-(--grey-500) hover:text-(--grey-800) transition-colors"
+          >
+            Select all
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="text-(--grey-500) hover:text-(--grey-800) transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
 
       {/* Toggle chips */}
       <div className="flex flex-wrap gap-2">
@@ -195,7 +239,13 @@ export function DetailChart({
                 axisLine={false}
                 tick={axisTickProps}
               />
-              <YAxis tickLine={false} axisLine={false} tick={axisTickProps} width={40} />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tick={axisTickProps}
+                width={52}
+                tickFormatter={formatAxisTick}
+              />
               <Tooltip
                 content={<DetailTooltip />}
                 isAnimationActive={false}
@@ -210,7 +260,7 @@ export function DetailChart({
                     name={s.name}
                     stroke={s.color}
                     strokeWidth={2}
-                    dot={false}
+                    dot={{ r: 2 }}
                     activeDot={{ r: 4 }}
                     isAnimationActive={false}
                   />
@@ -237,16 +287,16 @@ export function DetailChart({
                   </div>
                   <div className="flex gap-4 text-xs text-(--grey-600)">
                     <span>
-                      <span className="text-(--grey-400)">Min</span> {formatAmount(min)}
+                      <span className="text-(--grey-400)">Min</span> {formatStat(min)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Max</span> {formatAmount(max)}
+                      <span className="text-(--grey-400)">Max</span> {formatStat(max)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Avg</span> {formatAmount(avg)}
+                      <span className="text-(--grey-400)">Avg</span> {formatStat(avg)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Latest</span> {formatAmount(latest)}
+                      <span className="text-(--grey-400)">Latest</span> {formatStat(latest)}
                     </span>
                   </div>
                 </div>

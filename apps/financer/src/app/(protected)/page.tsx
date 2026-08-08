@@ -272,7 +272,7 @@ export default async function FinancerPage({
     return names.map((name, i) => ({
       name,
       color: colorFor(name, i),
-      values: totals.map((m) => pick(m)[name] ?? 0),
+      values: totals.map((m) => pick(m)[name] ?? null),
     }));
   }
 
