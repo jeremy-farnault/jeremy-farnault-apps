@@ -1,5 +1,6 @@
 {
   "buildCommand": "cd ../.. && pnpm turbo run build --filter=@jf/auth-app",
+  "ignoreCommand": "npx turbo-ignore @jf/auth-app",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs"
