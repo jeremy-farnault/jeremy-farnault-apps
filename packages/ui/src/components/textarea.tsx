@@ -3,18 +3,28 @@ import { cn } from "../lib/utils";
 interface TextareaProps {
   value: string;
   onChange: (value: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
   id?: string;
 }
 
-export function Textarea({ value, onChange, placeholder, disabled, className, id }: TextareaProps) {
+export function Textarea({
+  value,
+  onChange,
+  onKeyDown,
+  placeholder,
+  disabled,
+  className,
+  id,
+}: TextareaProps) {
   return (
     <textarea
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
       placeholder={placeholder}
       disabled={disabled}
       rows={3}

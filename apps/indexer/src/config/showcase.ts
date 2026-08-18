@@ -24,6 +24,8 @@ export interface ShowcaseApp {
 export const EXCLUDED_APP_IDS = new Set<string>(["tracer"]);
 
 export const descriptions: Record<string, string> = {
+  aider:
+    "Your private AI assistant. Chat with a locally-hosted model, or ask about your own data across the other @jf apps.",
   classer:
     "Rank anything. Build tier lists and ordered rankings for the things you care about — films, restaurants, ideas — and revisit them as your taste changes.",
   doser:

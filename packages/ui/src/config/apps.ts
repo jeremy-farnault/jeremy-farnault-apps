@@ -11,6 +11,7 @@ import {
   NotepadIcon,
   PillIcon,
   RankingIcon,
+  RobotIcon,
   StackIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
@@ -23,6 +24,13 @@ export interface AppDefinition {
 }
 
 export const apps: AppDefinition[] = [
+  {
+    id: "aider",
+    name: "Aider",
+    icon: RobotIcon,
+    href: process.env.NEXT_PUBLIC_AIDER_URL ?? "#",
+    accentColor: "--green-600",
+  },
   {
     id: "classer",
     name: "Classer",
