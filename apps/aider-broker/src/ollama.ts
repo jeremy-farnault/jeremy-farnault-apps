@@ -1,4 +1,4 @@
-import type { ChatMessage } from "./types";
+import type { ChatMessage, ToolCall, ToolDefinition } from "./types";
 
 export class OllamaError extends Error {}
 
@@ -48,4 +48,41 @@ export async function* streamOllamaChat(
       newlineIndex = buffer.indexOf("\n");
     }
   }
+}
+
+export interface OllamaToolDecision {
+  content: string;
+  toolCalls: ToolCall[];
+}
+
+interface OllamaChatResponse {
+  message?: { content?: string; tool_calls?: ToolCall[] };
+}
+
+// Non-streaming on purpose: how tool_calls interacts with `stream: true` is
+// unverified against the real Ollama instance, and a single JSON response is
+// simpler and safer to parse correctly than guessing at streamed chunk shape.
+export async function requestOllamaToolDecision(
+  baseUrl: string,
+  model: string,
+  messages: ChatMessage[],
+  tools: ToolDefinition[],
+  signal?: AbortSignal
+): Promise<OllamaToolDecision> {
+  const res = await fetch(`${baseUrl}/api/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ model, messages, tools, stream: false }),
+    ...(signal ? { signal } : {}),
+  });
+
+  if (!res.ok) {
+    throw new OllamaError(`Ollama responded ${res.status}`);
+  }
+
+  const body = (await res.json()) as OllamaChatResponse;
+  return {
+    content: body.message?.content ?? "",
+    toolCalls: body.message?.tool_calls ?? [],
+  };
 }

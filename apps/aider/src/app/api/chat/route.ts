@@ -32,13 +32,17 @@ interface ChatRequestMessage {
 }
 
 interface ChatRequestBody {
+  model: string;
   messages: ChatRequestMessage[];
 }
 
 function isChatRequestBody(value: unknown): value is ChatRequestBody {
   if (typeof value !== "object" || value === null) return false;
+  const model = (value as { model?: unknown }).model;
   const messages = (value as { messages?: unknown }).messages;
   return (
+    typeof model === "string" &&
+    model.length > 0 &&
     Array.isArray(messages) &&
     messages.length > 0 &&
     messages.every(

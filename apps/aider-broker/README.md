@@ -1,8 +1,10 @@
 # @jf/aider-broker
 
 Small backend service that runs on the Raspberry Pi behind the Cloudflare Tunnel from
-ticket 5. Receives chat requests from `apps/aider`'s `/api/chat` route, picks a local
-Ollama model based on the message content, and streams the reply back as NDJSON.
+ticket 5. Receives chat requests from `apps/aider`'s `/api/chat` route for whichever
+local Ollama model the client selected (fast or capable), optionally executes a curated
+Postgres-backed tool on the model's behalf when it asks for one (e.g. workout history),
+and streams the reply back as NDJSON.
 
 Replaces the throwaway `health.mjs` from ticket 5.
 

@@ -1,9 +1,10 @@
 import { type IncomingMessage, type Server, type ServerResponse, createServer } from "node:http";
 import { checkBearer, getTrustedUserId } from "./auth";
 import type { BrokerConfig } from "./config";
-import { streamOllamaChat } from "./ollama";
-import { classifyIntent } from "./routing";
-import type { BrokerStreamEvent, ChatMessage } from "./types";
+import { requestOllamaToolDecision, streamOllamaChat } from "./ollama";
+import { withPersona } from "./persona";
+import { AVAILABLE_TOOLS, GET_WORKOUTS_TOOL_NAME, executeGetWorkoutsInRange } from "./tools";
+import type { BrokerStreamEvent, ChatMessage, ChatRequestBody } from "./types";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -37,14 +38,22 @@ function isChatMessage(value: unknown): value is ChatMessage {
   const role = (value as { role?: unknown }).role;
   const content = (value as { content?: unknown }).content;
   return (
-    (role === "user" || role === "assistant" || role === "system") && typeof content === "string"
+    (role === "user" || role === "assistant" || role === "system" || role === "tool") &&
+    typeof content === "string"
   );
 }
 
-function isChatRequestBody(value: unknown): value is { messages: ChatMessage[] } {
+function isChatRequestBody(value: unknown): value is ChatRequestBody {
   if (typeof value !== "object" || value === null) return false;
+  const model = (value as { model?: unknown }).model;
   const messages = (value as { messages?: unknown }).messages;
-  return Array.isArray(messages) && messages.length > 0 && messages.every(isChatMessage);
+  return (
+    typeof model === "string" &&
+    model.length > 0 &&
+    Array.isArray(messages) &&
+    messages.length > 0 &&
+    messages.every(isChatMessage)
+  );
 }
 
 function readBody(req: IncomingMessage): Promise<Buffer> {
@@ -72,6 +81,46 @@ function writeEvent(res: ServerResponse, event: BrokerStreamEvent): void {
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, { "content-type": "application/json" });
   res.end(JSON.stringify(body));
+}
+
+async function resolveMessagesForFinalAnswer(
+  config: BrokerConfig,
+  model: string,
+  userId: string,
+  personaMessages: ChatMessage[],
+  signal: AbortSignal
+): Promise<{ messages: ChatMessage[]; toolUsed: string | null }> {
+  try {
+    const decision = await requestOllamaToolDecision(
+      config.ollamaUrl,
+      model,
+      personaMessages,
+      AVAILABLE_TOOLS,
+      signal
+    );
+
+    const toolCall = decision.toolCalls[0];
+    if (toolCall?.function.name === GET_WORKOUTS_TOOL_NAME) {
+      const toolResultContent = await executeGetWorkoutsInRange(
+        userId,
+        toolCall.function.arguments
+      );
+      return {
+        messages: [
+          ...personaMessages,
+          { role: "assistant", content: "", tool_calls: [toolCall] },
+          { role: "tool", content: toolResultContent },
+        ],
+        toolUsed: toolCall.function.name,
+      };
+    }
+  } catch {
+    // Tool-decision phase failed for any reason (Ollama error, e.g. the
+    // model doesn't support tools, network error, unexpected shape) — fall
+    // back to a normal answer rather than breaking the request.
+  }
+
+  return { messages: personaMessages, toolUsed: null };
 }
 
 async function handleChat(
@@ -106,19 +155,37 @@ async function handleChat(
   }
 
   if (!isChatRequestBody(parsedBody)) {
-    sendJson(res, 400, { error: "Body must be { messages: { role, content }[] }" });
+    sendJson(res, 400, { error: "Body must be { model: string, messages: { role, content }[] }" });
     return;
   }
 
-  const { messages } = parsedBody;
-  const decision = classifyIntent(messages, config.models);
-
-  console.log(JSON.stringify({ userId, route: decision.route, model: decision.model }));
+  const { model, messages } = parsedBody;
+  const allowedModels = Object.values(config.models);
+  if (!allowedModels.includes(model)) {
+    sendJson(res, 400, { error: `Unsupported model. Allowed: ${allowedModels.join(", ")}` });
+    return;
+  }
 
   const controller = new AbortController();
   res.on("close", () => controller.abort());
 
-  const iterator = streamOllamaChat(config.ollamaUrl, decision.model, messages, controller.signal);
+  const personaMessages = withPersona(messages);
+  const { messages: messagesForFinalAnswer, toolUsed } = await resolveMessagesForFinalAnswer(
+    config,
+    model,
+    userId,
+    personaMessages,
+    controller.signal
+  );
+
+  console.log(JSON.stringify({ userId, model, toolUsed }));
+
+  const iterator = streamOllamaChat(
+    config.ollamaUrl,
+    model,
+    messagesForFinalAnswer,
+    controller.signal
+  );
 
   let first: IteratorResult<string>;
   try {
@@ -132,7 +199,10 @@ async function handleChat(
     "content-type": "application/x-ndjson; charset=utf-8",
     "cache-control": "no-store",
   });
-  writeEvent(res, { type: "meta", route: decision.route, model: decision.model });
+  writeEvent(res, { type: "meta", model });
+  if (toolUsed) {
+    writeEvent(res, { type: "tool", name: toolUsed });
+  }
 
   try {
     let result = first;

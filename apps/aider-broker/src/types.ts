@@ -1,24 +1,38 @@
-export type ChatRole = "user" | "assistant" | "system";
+export type ChatRole = "user" | "assistant" | "system" | "tool";
+
+export interface ToolCall {
+  function: {
+    name: string;
+    // Ollama's wire format for this field is unverified against the real
+    // installed version — may come back as a JSON object or a JSON-encoded
+    // string. Kept as `unknown` so every call site normalizes it explicitly.
+    arguments: unknown;
+  };
+}
 
 export interface ChatMessage {
   role: ChatRole;
   content: string;
+  tool_calls?: ToolCall[];
 }
 
-export type RouteName = "curiosity" | "data";
-
-export interface RouteModels {
-  curiosity: string;
-  data: string;
-}
-
-export interface RouteDecision {
-  route: RouteName;
+export interface ChatRequestBody {
   model: string;
+  messages: ChatMessage[];
+}
+
+export interface ToolDefinition {
+  type: "function";
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+  };
 }
 
 export type BrokerStreamEvent =
-  | { type: "meta"; route: RouteName; model: string }
+  | { type: "meta"; model: string }
+  | { type: "tool"; name: string }
   | { type: "token"; content: string }
   | { type: "done" }
   | { type: "error"; message: string };

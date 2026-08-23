@@ -7,10 +7,10 @@ REMOTE_DIR="/opt/aider"
 echo "==> Building @jf/aider-broker"
 pnpm --filter @jf/aider-broker build
 
-echo "==> Installing bundle to ${REMOTE_DIR}/broker.mjs"
+echo "==> Installing bundle to ${REMOTE_DIR}/broker.cjs"
 sudo install -o jeremy -g jeremy -m 644 \
-  "${REPO_ROOT}/apps/aider-broker/dist/index.js" \
-  "${REMOTE_DIR}/broker.mjs"
+  "${REPO_ROOT}/apps/aider-broker/dist/index.cjs" \
+  "${REMOTE_DIR}/broker.cjs"
 
 echo "==> Restarting aider-broker"
 sudo systemctl restart aider-broker

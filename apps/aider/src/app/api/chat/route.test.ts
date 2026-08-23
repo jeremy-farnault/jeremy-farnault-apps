@@ -45,7 +45,9 @@ describe("GET /api/chat", () => {
 describe("POST /api/chat", () => {
   it("returns 401 when there is no session", async () => {
     mockedGetSession.mockResolvedValue(null);
-    const res = await POST(makeRequest({ messages: [{ role: "user", content: "hi" }] }));
+    const res = await POST(
+      makeRequest({ model: "fast-model", messages: [{ role: "user", content: "hi" }] })
+    );
     expect(res.status).toBe(401);
   });
 
@@ -64,6 +66,7 @@ describe("POST /api/chat", () => {
 
     await POST(
       makeRequest({
+        model: "fast-model",
         messages: [{ role: "user", content: "hi" }],
         userId: "attacker-supplied-id",
       })
@@ -85,7 +88,9 @@ describe("POST /api/chat", () => {
     mockedGetSession.mockResolvedValue(sessionWithUserId("user-1"));
     global.fetch = vi.fn().mockRejectedValue(new Error("network down")) as unknown as typeof fetch;
 
-    const res = await POST(makeRequest({ messages: [{ role: "user", content: "hi" }] }));
+    const res = await POST(
+      makeRequest({ model: "fast-model", messages: [{ role: "user", content: "hi" }] })
+    );
     expect(res.status).toBe(502);
   });
 
@@ -104,7 +109,9 @@ describe("POST /api/chat", () => {
       })
     ) as unknown as typeof fetch;
 
-    const res = await POST(makeRequest({ messages: [{ role: "user", content: "hi" }] }));
+    const res = await POST(
+      makeRequest({ model: "fast-model", messages: [{ role: "user", content: "hi" }] })
+    );
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/x-ndjson");
     const text = await res.text();

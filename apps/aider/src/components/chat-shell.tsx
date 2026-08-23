@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Textarea } from "@jf/ui";
+import { Button, Select, SelectContent, SelectItem, Textarea } from "@jf/ui";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useRef, useState } from "react";
 
@@ -14,37 +14,147 @@ interface ChatShellProps {
   userName?: string | null | undefined;
 }
 
+const MODEL_OPTIONS = [
+  { id: "qwen2.5:3b-instruct", label: "Fast" },
+  { id: "llama3.1:8b", label: "Capable" },
+] as const;
+
+const FALLBACK_ERROR_MESSAGE =
+  "Aider isn't reachable right now. The Pi might be offline or the model isn't loaded — try again in a bit.";
+
+interface ChatEvent {
+  type: "meta" | "token" | "done" | "error";
+  content?: string;
+  message?: string;
+}
+
+function isChatEvent(value: unknown): value is ChatEvent {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { type?: unknown }).type === "string"
+  );
+}
+
 export function ChatShell({ userName }: ChatShellProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [model, setModel] = useState<string>(MODEL_OPTIONS[0].id);
+  const [isSending, setIsSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally re-runs on every new message/token to keep the view scrolled to the bottom
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, []);
+  }, [messages]);
 
-  function handleSend() {
+  async function handleSend() {
     const content = input.trim();
-    if (!content) return;
+    if (!content || isSending) return;
 
-    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content }]);
+    const userMessage: Message = { id: crypto.randomUUID(), role: "user", content };
+    const history = [...messages, userMessage];
+    setMessages(history);
     setInput("");
+    setIsSending(true);
+
+    const assistantId = crypto.randomUUID();
+    let assistantStarted = false;
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          model,
+          messages: history.map(({ role, content: messageContent }) => ({
+            role,
+            content: messageContent,
+          })),
+        }),
+      });
+
+      if (!res.ok || !res.body) {
+        throw new Error("Backend error");
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        let newlineIndex = buffer.indexOf("\n");
+        while (newlineIndex >= 0) {
+          const line = buffer.slice(0, newlineIndex).trim();
+          buffer = buffer.slice(newlineIndex + 1);
+          newlineIndex = buffer.indexOf("\n");
+          if (!line) continue;
+
+          const event: unknown = JSON.parse(line);
+          if (!isChatEvent(event)) continue;
+
+          if (event.type === "token" && event.content) {
+            if (!assistantStarted) {
+              assistantStarted = true;
+              setMessages((prev) => [
+                ...prev,
+                { id: assistantId, role: "assistant", content: event.content ?? "" },
+              ]);
+            } else {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId ? { ...m, content: m.content + event.content } : m
+                )
+              );
+            }
+          }
+
+          if (event.type === "error") {
+            throw new Error(event.message ?? "Model backend error");
+          }
+        }
+      }
+
+      if (!assistantStarted) throw new Error("Empty response");
+    } catch {
+      setMessages((prev) => {
+        if (assistantStarted) return prev;
+        return [...prev, { id: assistantId, role: "assistant", content: FALLBACK_ERROR_MESSAGE }];
+      });
+    } finally {
+      setIsSending(false);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   }
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto">
+      <div className="flex justify-end pt-4">
+        <Select value={model} onValueChange={setModel} disabled={isSending} className="w-auto">
+          <SelectContent>
+            {MODEL_OPTIONS.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto py-4 flex flex-col gap-3">
         {messages.length === 0 ? (
           <p className="m-auto text-center text-sm text-(--grey-400)">
-            {userName ? `Hi ${userName}, ask` : "Ask"} me anything — no model is wired up yet, but
-            the chat is ready.
+            {userName ? `Hi ${userName}, ask` : "Ask"} me anything.
           </p>
         ) : (
           messages.map((message) => (
@@ -69,8 +179,14 @@ export function ChatShell({ userName }: ChatShellProps) {
           onKeyDown={handleKeyDown}
           placeholder="Message Aider..."
           className="flex-1"
+          disabled={isSending}
         />
-        <Button size="icon" onClick={handleSend} disabled={!input.trim()} aria-label="Send message">
+        <Button
+          size="icon"
+          onClick={() => void handleSend()}
+          disabled={!input.trim() || isSending}
+          aria-label="Send message"
+        >
           <PaperPlaneRightIcon size={18} />
         </Button>
       </div>
