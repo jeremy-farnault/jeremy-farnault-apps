@@ -43,3 +43,23 @@ export async function appendMessage(
     await tx.insert(aiderMessages).values({ conversationId, role, content });
   });
 }
+
+/**
+ * Rename a conversation the caller owns. Sets `title` only — deliberately not
+ * touching `updatedAt`, so a rename does not reorder the sidebar.
+ */
+export async function updateConversationTitle(id: string, title: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .update(aiderConversations)
+    .set({ title })
+    .where(and(eq(aiderConversations.id, id), eq(aiderConversations.userId, userId)));
+}
+
+/** Hard-delete a conversation the caller owns; messages are removed via the FK cascade. */
+export async function deleteConversation(id: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await db
+    .delete(aiderConversations)
+    .where(and(eq(aiderConversations.id, id), eq(aiderConversations.userId, userId)));
+}

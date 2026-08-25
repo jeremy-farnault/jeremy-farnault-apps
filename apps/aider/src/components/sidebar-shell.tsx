@@ -1,12 +1,13 @@
 "use client";
 
+import { ConversationRow } from "@/components/conversation-row";
 import { useSidebar } from "@/components/sidebar-provider";
 import { cn } from "@jf/ui";
 import { NotePencilIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 
 function ConversationList() {
-  const { conversations, activeId, setActiveId, setMobileOpen } = useSidebar();
+  const { conversations, setActiveId, setMobileOpen } = useSidebar();
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -29,18 +30,7 @@ function ConversationList() {
           <p className="px-3 py-2 text-sm text-(--grey-400)">No conversations yet</p>
         ) : (
           conversations.map((conversation) => (
-            <Link
-              key={conversation.id}
-              href={`/chat/${conversation.id}`}
-              onClick={() => setMobileOpen(false)}
-              aria-current={conversation.id === activeId ? "page" : undefined}
-              className={cn(
-                "block truncate rounded-[10px] px-3 py-2 text-sm text-(--grey-900) hover:bg-(--surface-150) transition-colors",
-                conversation.id === activeId && "bg-(--surface-150)"
-              )}
-            >
-              {conversation.title || "Untitled"}
-            </Link>
+            <ConversationRow key={conversation.id} conversation={conversation} />
           ))
         )}
       </div>

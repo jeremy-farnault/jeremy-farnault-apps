@@ -11,6 +11,8 @@ interface TextInputProps {
   name?: string;
   id?: string;
   autoFocus?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
 }
 
 export function TextInput({
@@ -24,6 +26,8 @@ export function TextInput({
   name,
   id,
   autoFocus,
+  onKeyDown,
+  onBlur,
 }: TextInputProps) {
   return (
     <input
@@ -33,6 +37,8 @@ export function TextInput({
       autoFocus={autoFocus}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
+      onBlur={onBlur}
       placeholder={placeholder}
       disabled={disabled}
       required={required}

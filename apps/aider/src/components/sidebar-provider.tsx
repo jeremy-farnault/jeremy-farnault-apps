@@ -12,6 +12,10 @@ interface SidebarContextValue {
   setActiveId: (id: string | undefined) => void;
   /** Insert the conversation at the top if missing (title required), else move it to the front. */
   upsertToTop: (id: string, title?: string) => void;
+  /** Update a conversation's title in place (keeps its position). */
+  renameInList: (id: string, title: string) => void;
+  /** Remove a conversation from the list. */
+  removeFromList: (id: string) => void;
   collapsed: boolean;
   toggleCollapsed: () => void;
   mobileOpen: boolean;
@@ -61,18 +65,37 @@ export function SidebarProvider({
     });
   }, []);
 
+  const renameInList = useCallback((id: string, title: string) => {
+    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
+  }, []);
+
+  const removeFromList = useCallback((id: string) => {
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+  }, []);
+
   const value = useMemo<SidebarContextValue>(
     () => ({
       conversations,
       activeId,
       setActiveId,
       upsertToTop,
+      renameInList,
+      removeFromList,
       collapsed,
       toggleCollapsed,
       mobileOpen,
       setMobileOpen,
     }),
-    [conversations, activeId, upsertToTop, collapsed, toggleCollapsed, mobileOpen]
+    [
+      conversations,
+      activeId,
+      upsertToTop,
+      renameInList,
+      removeFromList,
+      collapsed,
+      toggleCollapsed,
+      mobileOpen,
+    ]
   );
 
   return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
