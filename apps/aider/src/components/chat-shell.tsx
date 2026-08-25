@@ -1,5 +1,6 @@
 "use client";
 
+import { useSidebar } from "@/components/sidebar-provider";
 import { appendMessage, createConversation } from "@/lib/actions";
 import { Button, Select, SelectContent, SelectItem, Textarea } from "@jf/ui";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
@@ -52,11 +53,17 @@ export function ChatShell({
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
   const [isSending, setIsSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const { setActiveId, upsertToTop } = useSidebar();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally re-runs on every new message/token to keep the view scrolled to the bottom
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // Drive the sidebar's active highlight from the current conversation.
+  useEffect(() => {
+    setActiveId(conversationId);
+  }, [conversationId, setActiveId]);
 
   async function handleSend() {
     const content = input.trim();
@@ -77,14 +84,19 @@ export function ChatShell({
       let activeConversationId = conversationId;
       if (!activeConversationId) {
         const newId = crypto.randomUUID();
-        await createConversation(newId, content.slice(0, 50), model);
+        const title = content.slice(0, 50);
+        await createConversation(newId, title, model);
         await appendMessage(newId, "user", content, model);
         activeConversationId = newId;
         setConversationId(newId);
         // Shallow URL update — flips to /chat/[id] without remounting mid-stream.
         window.history.replaceState(null, "", `/chat/${newId}`);
+        // Reflect the new conversation in the sidebar (top of the list).
+        upsertToTop(newId, title);
       } else {
         await appendMessage(activeConversationId, "user", content, model);
+        // Bump the existing conversation to the top of the sidebar.
+        upsertToTop(activeConversationId);
       }
 
       const res = await fetch("/api/chat", {

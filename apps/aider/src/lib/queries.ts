@@ -1,12 +1,25 @@
 import { aiderConversations, aiderMessages, db } from "@jf/db";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type AiderConversation = typeof aiderConversations.$inferSelect;
 export type AiderMessage = typeof aiderMessages.$inferSelect;
 
+export interface ConversationListItem {
+  id: string;
+  title: string;
+}
+
 // ─── Queries ─────────────────────────────────────────────────────────────────
+
+export async function listConversations(userId: string): Promise<ConversationListItem[]> {
+  return db
+    .select({ id: aiderConversations.id, title: aiderConversations.title })
+    .from(aiderConversations)
+    .where(eq(aiderConversations.userId, userId))
+    .orderBy(desc(aiderConversations.updatedAt));
+}
 
 export async function getConversationWithMessages(
   userId: string,
