@@ -209,6 +209,20 @@ export function ChatShell({
             </div>
           ))
         )}
+        {isSending && messages.at(-1)?.role === "user" && (
+          <output
+            className="self-start flex items-center gap-1 max-w-[80%] rounded-[12px] bg-(--surface-150) px-3 py-2"
+            aria-label="Aider is thinking"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-(--primary) animate-[typing-bounce_1.2s_ease-in-out_infinite]"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </output>
+        )}
       </div>
 
       <div className="flex items-end gap-2 pb-4 pt-2">
