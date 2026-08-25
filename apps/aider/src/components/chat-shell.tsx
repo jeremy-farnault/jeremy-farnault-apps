@@ -2,7 +2,7 @@
 
 import { useSidebar } from "@/components/sidebar-provider";
 import { appendMessage, createConversation } from "@/lib/actions";
-import { Button, Select, SelectContent, SelectItem, Textarea } from "@jf/ui";
+import { Button, Select, SelectItem, Textarea } from "@jf/ui";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useRef, useState } from "react";
 
@@ -182,13 +182,11 @@ export function ChatShell({
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto">
       <div className="flex justify-end pt-4">
         <Select value={model} onValueChange={setModel} disabled={isSending} className="w-auto">
-          <SelectContent>
-            {MODEL_OPTIONS.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
+          {MODEL_OPTIONS.map((option) => (
+            <SelectItem key={option.id} value={option.id}>
+              {option.label}
+            </SelectItem>
+          ))}
         </Select>
       </div>
 
