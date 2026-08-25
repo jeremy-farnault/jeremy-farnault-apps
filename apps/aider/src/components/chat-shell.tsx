@@ -1,5 +1,6 @@
 "use client";
 
+import { appendMessage, createConversation } from "@/lib/actions";
 import { Button, Select, SelectContent, SelectItem, Textarea } from "@jf/ui";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +13,9 @@ interface Message {
 
 interface ChatShellProps {
   userName?: string | null | undefined;
+  initialConversationId?: string;
+  initialMessages?: Message[];
+  initialModel?: string;
 }
 
 const MODEL_OPTIONS = [
@@ -36,10 +40,16 @@ function isChatEvent(value: unknown): value is ChatEvent {
   );
 }
 
-export function ChatShell({ userName }: ChatShellProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function ChatShell({
+  userName,
+  initialConversationId,
+  initialMessages,
+  initialModel,
+}: ChatShellProps) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
   const [input, setInput] = useState("");
-  const [model, setModel] = useState<string>(MODEL_OPTIONS[0].id);
+  const [model, setModel] = useState<string>(initialModel ?? MODEL_OPTIONS[0].id);
+  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
   const [isSending, setIsSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -60,8 +70,23 @@ export function ChatShell({ userName }: ChatShellProps) {
 
     const assistantId = crypto.randomUUID();
     let assistantStarted = false;
+    let assistantContent = "";
 
     try {
+      // Persist the user message, creating the conversation on the first send.
+      let activeConversationId = conversationId;
+      if (!activeConversationId) {
+        const newId = crypto.randomUUID();
+        await createConversation(newId, content.slice(0, 50), model);
+        await appendMessage(newId, "user", content, model);
+        activeConversationId = newId;
+        setConversationId(newId);
+        // Shallow URL update — flips to /chat/[id] without remounting mid-stream.
+        window.history.replaceState(null, "", `/chat/${newId}`);
+      } else {
+        await appendMessage(activeConversationId, "user", content, model);
+      }
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -98,6 +123,7 @@ export function ChatShell({ userName }: ChatShellProps) {
           if (!isChatEvent(event)) continue;
 
           if (event.type === "token" && event.content) {
+            assistantContent += event.content;
             if (!assistantStarted) {
               assistantStarted = true;
               setMessages((prev) => [
@@ -120,6 +146,9 @@ export function ChatShell({ userName }: ChatShellProps) {
       }
 
       if (!assistantStarted) throw new Error("Empty response");
+
+      // Persist the assistant reply now that streaming is complete.
+      await appendMessage(activeConversationId, "assistant", assistantContent);
     } catch {
       setMessages((prev) => {
         if (assistantStarted) return prev;
