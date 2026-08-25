@@ -35,6 +35,9 @@ importers:
       '@jf/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@jf/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@jf/ui':
         specifier: workspace:*
         version: link:../../packages/ui
