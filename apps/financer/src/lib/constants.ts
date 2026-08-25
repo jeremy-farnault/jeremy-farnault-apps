@@ -12,6 +12,7 @@ export const CURRENCY_FLAGS: Record<(typeof CURRENCIES)[number], string> = {
 export const FINANCER_COLOR_PALETTE = [
   { label: "Blue", value: "var(--blue-400)" },
   { label: "Green", value: "var(--green-400)" },
+  { label: "Green Dark", value: "var(--green-600)" },
   { label: "Teal", value: "var(--teal-400)" },
   { label: "Moss", value: "var(--moss-400)" },
   { label: "Beige", value: "var(--beige-400)" },

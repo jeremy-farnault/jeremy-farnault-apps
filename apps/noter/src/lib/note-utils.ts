@@ -5,6 +5,7 @@ export const COLOR_PALETTE = [
   { label: "Yellow", value: "var(--yellow-400)" },
   { label: "Yellow Dark", value: "var(--yellow-600)" },
   { label: "Green", value: "var(--green-400)" },
+  { label: "Green Dark", value: "var(--green-600)" },
   { label: "Moss", value: "var(--moss-400)" },
   { label: "Teal", value: "var(--teal-400)" },
   { label: "Blue", value: "var(--blue-400)" },
