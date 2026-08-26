@@ -23,3 +23,20 @@ export const TOOL_REGISTRY: ReadonlyMap<string, RegisteredTool> = new Map(
 );
 
 export const AVAILABLE_TOOLS: ToolDefinition[] = REGISTERED_TOOLS.map((tool) => tool.definition);
+
+/**
+ * Narrow the toolset offered to the model for a given user message. Small local
+ * models (llama3.1:8b) reliably call a tool when shown one or two, but stop
+ * calling any when shown the whole set, so we offer only the tools whose
+ * keywords appear in the message. When nothing matches — a casual, non-data
+ * question, or a domain we don't have keywords for — we fall back to offering
+ * every tool (the model then simply answers normally, as before).
+ */
+export function selectToolsForMessage(message: string): ToolDefinition[] {
+  const text = message.toLowerCase();
+  const matched = REGISTERED_TOOLS.filter((tool) =>
+    tool.keywords.some((keyword) => text.includes(keyword))
+  );
+  const chosen = matched.length > 0 ? matched : REGISTERED_TOOLS;
+  return chosen.map((tool) => tool.definition);
+}

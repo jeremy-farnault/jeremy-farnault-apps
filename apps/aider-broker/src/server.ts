@@ -3,7 +3,7 @@ import { checkBearer, getTrustedUserId } from "./auth";
 import type { BrokerConfig } from "./config";
 import { requestOllamaToolDecision, streamOllamaChat } from "./ollama";
 import { withPersona } from "./persona";
-import { AVAILABLE_TOOLS, TOOL_REGISTRY } from "./tools";
+import { TOOL_REGISTRY, selectToolsForMessage } from "./tools";
 import type { BrokerStreamEvent, ChatMessage, ChatRequestBody } from "./types";
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -87,6 +87,15 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
+// The most recent user turn, used to decide which tools to offer the model.
+function latestUserMessage(messages: ChatMessage[]): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message && message.role === "user") return message.content;
+  }
+  return "";
+}
+
 async function resolveMessagesForFinalAnswer(
   config: BrokerConfig,
   model: string,
@@ -98,21 +107,25 @@ async function resolveMessagesForFinalAnswer(
   toolUsed: string | null;
   toolArguments: string | null;
 }> {
+  // Offer only the tools relevant to this message; handing the small local
+  // model the whole set makes it stop calling any tool at all.
+  const offeredTools = selectToolsForMessage(latestUserMessage(personaMessages));
+
   try {
     const decision = await requestOllamaToolDecision(
       config.ollamaUrl,
       model,
       personaMessages,
-      AVAILABLE_TOOLS,
+      offeredTools,
       signal
     );
 
-    // Diagnostic: how many tool calls the model emitted and their names, so we
-    // can tell "model chose no tool" from "tool-decision request errored".
+    // Diagnostic: which tools were offered and which the model chose, so we can
+    // tell "model chose no tool" from "tool-decision request errored".
     console.log(
       JSON.stringify({
         toolDecision: {
-          offered: AVAILABLE_TOOLS.length,
+          offered: offeredTools.map((tool) => tool.function.name),
           returned: decision.toolCalls.map((call) => call.function.name),
         },
       })

@@ -73,4 +73,20 @@ export async function executeGetMediaInRange(userId: string, rawArgs: unknown): 
 export const journalerMediaTool: RegisteredTool = {
   definition: GET_MEDIA_TOOL,
   execute: executeGetMediaInRange,
+  keywords: [
+    "watch",
+    "watched",
+    "movie",
+    "movies",
+    "show",
+    "shows",
+    "book",
+    "books",
+    "read",
+    "game",
+    "games",
+    "manga",
+    "play",
+    "played",
+  ],
 };

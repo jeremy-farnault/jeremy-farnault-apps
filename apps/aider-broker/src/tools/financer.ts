@@ -75,4 +75,5 @@ export async function executeGetCurrentAssets(userId: string, _rawArgs: unknown)
 export const financerAssetsTool: RegisteredTool = {
   definition: GET_CURRENT_ASSETS_TOOL,
   execute: executeGetCurrentAssets,
+  keywords: ["asset", "assets", "net worth", "networth", "savings", "portfolio", "worth", "wealth"],
 };

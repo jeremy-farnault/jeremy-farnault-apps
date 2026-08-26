@@ -60,9 +60,23 @@ export async function executeGetWorkoutsInRange(userId: string, rawArgs: unknown
   }
 }
 
+const GAINER_KEYWORDS = [
+  "workout",
+  "work out",
+  "train",
+  "training",
+  "trained",
+  "gym",
+  "exercise",
+  "exercises",
+  "lift",
+  "session",
+];
+
 export const gainerWorkoutsTool: RegisteredTool = {
   definition: GET_WORKOUTS_TOOL,
   execute: executeGetWorkoutsInRange,
+  keywords: GAINER_KEYWORDS,
 };
 
 // ─── get_exercises_on_day ───────────────────────────────────────────────────────
@@ -200,4 +214,5 @@ export async function executeGetExercisesOnDay(userId: string, rawArgs: unknown)
 export const gainerExercisesTool: RegisteredTool = {
   definition: GET_EXERCISES_TOOL,
   execute: executeGetExercisesOnDay,
+  keywords: GAINER_KEYWORDS,
 };

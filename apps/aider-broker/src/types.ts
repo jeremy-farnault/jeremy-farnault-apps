@@ -36,6 +36,10 @@ export interface ToolDefinition {
 export interface RegisteredTool {
   definition: ToolDefinition;
   execute: (userId: string, rawArgs: unknown) => Promise<string>;
+  // Lowercase substrings that, when found in the user's message, mark this tool
+  // as relevant. Used to narrow the toolset offered to the model per request —
+  // small local models stop calling tools reliably when handed too many at once.
+  keywords: string[];
 }
 
 export type BrokerStreamEvent =

@@ -14,15 +14,16 @@ vi.mock("./tools/gainer", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./tools/gainer")>();
   return {
     ...actual,
-    gainerWorkoutsTool: { definition: actual.GET_WORKOUTS_TOOL, execute: mockExecute },
+    // Keep the real definition + keywords (needed for tool-narrowing), swap only
+    // the executor for a spy.
+    gainerWorkoutsTool: { ...actual.gainerWorkoutsTool, execute: mockExecute },
   };
 });
 
 import { requestOllamaToolDecision, streamOllamaChat } from "./ollama";
 import { PERSONA_SYSTEM_PROMPT } from "./persona";
 import { createBrokerServer } from "./server";
-import { AVAILABLE_TOOLS } from "./tools";
-import { GET_WORKOUTS_TOOL_NAME } from "./tools/gainer";
+import { GET_EXERCISES_TOOL, GET_WORKOUTS_TOOL, GET_WORKOUTS_TOOL_NAME } from "./tools/gainer";
 
 const mockedStreamOllamaChat = vi.mocked(streamOllamaChat);
 const mockedRequestOllamaToolDecision = vi.mocked(requestOllamaToolDecision);
@@ -293,6 +294,8 @@ describe("POST /v1/chat", () => {
     // message — confirmed against the real Pi-hosted llama3.1:8b that a
     // second, later system message makes it roleplay a fake tool call in
     // plain text instead of emitting a real one.
+    // "train" narrows the offered toolset to just the two Gainer tools, rather
+    // than the whole set (which the small model won't reliably call from).
     expect(mockedRequestOllamaToolDecision).toHaveBeenCalledWith(
       config.ollamaUrl,
       "capable-model",
@@ -300,7 +303,7 @@ describe("POST /v1/chat", () => {
         { role: "system", content: PERSONA_WITH_DATE },
         { role: "user", content: "how many times did I train this week?" },
       ],
-      AVAILABLE_TOOLS,
+      [GET_WORKOUTS_TOOL, GET_EXERCISES_TOOL],
       expect.anything()
     );
 

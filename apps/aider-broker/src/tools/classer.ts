@@ -89,4 +89,5 @@ export async function executeGetTopItemsInList(userId: string, rawArgs: unknown)
 export const classerTopItemsTool: RegisteredTool = {
   definition: GET_TOP_ITEMS_TOOL,
   execute: executeGetTopItemsInList,
+  keywords: ["top", "best", "favourite", "favorite", "ranking", "ranked", "rank", "list"],
 };

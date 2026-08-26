@@ -77,4 +77,5 @@ export async function executeGetHabitLogCount(userId: string, rawArgs: unknown):
 export const routinerLogCountTool: RegisteredTool = {
   definition: GET_HABIT_LOG_COUNT_TOOL,
   execute: executeGetHabitLogCount,
+  keywords: ["habit", "habits", "routine", "routines", "streak", "consistent", "consistency"],
 };
