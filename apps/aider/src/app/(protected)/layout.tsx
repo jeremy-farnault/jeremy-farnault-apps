@@ -1,6 +1,5 @@
 import { SidebarProvider } from "@/components/sidebar-provider";
 import { SidebarShell } from "@/components/sidebar-shell";
-import { SidebarToggle } from "@/components/sidebar-toggle";
 import { UserMenuConnected } from "@/components/user-menu-connected";
 import { listConversations } from "@/lib/queries";
 import { auth } from "@jf/auth";
@@ -20,7 +19,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           appName="Aider"
           currentAppId="aider"
           titleHref="/"
-          startSlot={<SidebarToggle />}
           rightSlot={<UserMenuConnected />}
         >
           <SidebarShell>{children}</SidebarShell>

@@ -3,7 +3,7 @@
 import { ConversationRow } from "@/components/conversation-row";
 import { useSidebar } from "@/components/sidebar-provider";
 import { cn } from "@jf/ui";
-import { NotePencilIcon, XIcon } from "@phosphor-icons/react";
+import { ListIcon, NotePencilIcon, SidebarSimpleIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 
 function ConversationList() {
@@ -39,18 +39,44 @@ function ConversationList() {
 }
 
 export function SidebarShell({ children }: { children: React.ReactNode }) {
-  const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
+  const { collapsed, toggleCollapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <div className="flex flex-1 min-h-0 w-full">
-      {/* Desktop rail */}
+      {/* Always-visible rail: thin strip on mobile / collapsed desktop, full on expanded desktop */}
       <aside
         className={cn(
-          "hidden md:flex md:flex-col w-[260px] shrink-0 border-r border-(--surface-200)",
-          collapsed && "md:hidden"
+          "flex flex-col shrink-0 border-r border-(--surface-200) w-12",
+          collapsed ? "md:w-12" : "md:w-[260px]"
         )}
       >
-        <ConversationList />
+        <div className="flex items-center p-2">
+          {/* Mobile: open the overlay drawer */}
+          <button
+            type="button"
+            aria-label="Open conversations"
+            onClick={() => setMobileOpen(true)}
+            className="md:hidden rounded-[10px] p-1.5 text-(--grey-700) hover:bg-(--surface-150) transition-colors"
+          >
+            <ListIcon size={20} />
+          </button>
+          {/* Desktop: collapse/expand the rail */}
+          <button
+            type="button"
+            aria-label="Toggle sidebar"
+            onClick={toggleCollapsed}
+            className="hidden md:inline-flex rounded-[10px] p-1.5 text-(--grey-700) hover:bg-(--surface-150) transition-colors"
+          >
+            <SidebarSimpleIcon size={20} />
+          </button>
+        </div>
+
+        {/* Conversation list: desktop only, expanded only */}
+        {!collapsed && (
+          <div className="hidden md:flex md:flex-col flex-1 min-h-0">
+            <ConversationList />
+          </div>
+        )}
       </aside>
 
       {/* Mobile drawer */}

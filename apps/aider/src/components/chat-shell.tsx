@@ -255,16 +255,6 @@ export function ChatShell({
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto">
-      <div className="flex justify-end pt-4">
-        <Select value={model} onValueChange={setModel} disabled={isSending} className="w-auto">
-          {MODEL_OPTIONS.map((option) => (
-            <SelectItem key={option.id} value={option.id}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </Select>
-      </div>
-
       <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto py-4 flex flex-col gap-3">
         {messages.length === 0 ? (
           <p className="m-auto text-center text-sm text-(--grey-400)">
@@ -300,7 +290,7 @@ export function ChatShell({
         )}
         {isSending && messages.at(-1)?.role === "user" && (
           <output
-            className="self-start flex items-center gap-1 max-w-[80%] rounded-[12px] bg-(--surface-150) px-3 py-2"
+            className="self-start flex items-center gap-1 h-9 max-w-[80%] rounded-[12px] bg-(--surface-150) px-3"
             aria-label="Aider is thinking"
           >
             {[0, 1, 2].map((i) => (
@@ -312,6 +302,21 @@ export function ChatShell({
             ))}
           </output>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <Select
+          value={model}
+          onValueChange={setModel}
+          disabled={isSending}
+          className="w-auto h-9 text-xs"
+        >
+          {MODEL_OPTIONS.map((option) => (
+            <SelectItem key={option.id} value={option.id}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </Select>
       </div>
 
       <div className="flex items-end gap-2 pb-4 pt-2">
