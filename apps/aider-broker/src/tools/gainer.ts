@@ -1,5 +1,5 @@
-import type { ToolDefinition } from "./types";
-import { getWorkoutsInRange } from "./workouts-query";
+import type { RegisteredTool, ToolDefinition } from "../types";
+import { getWorkoutsInRange } from "./gainer-query";
 
 export const GET_WORKOUTS_TOOL_NAME = "get_workouts_in_range";
 
@@ -42,8 +42,6 @@ export const GET_WORKOUTS_TOOL: ToolDefinition = {
     },
   },
 };
-
-export const AVAILABLE_TOOLS: ToolDefinition[] = [GET_WORKOUTS_TOOL];
 
 const MAX_RANGE_DAYS = 366;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -205,3 +203,8 @@ export async function executeGetWorkoutsInRange(userId: string, rawArgs: unknown
     return JSON.stringify({ error: "lookup_failed" });
   }
 }
+
+export const gainerWorkoutsTool: RegisteredTool = {
+  definition: GET_WORKOUTS_TOOL,
+  execute: executeGetWorkoutsInRange,
+};

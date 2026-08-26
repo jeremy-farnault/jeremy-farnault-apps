@@ -3,7 +3,7 @@ import { checkBearer, getTrustedUserId } from "./auth";
 import type { BrokerConfig } from "./config";
 import { requestOllamaToolDecision, streamOllamaChat } from "./ollama";
 import { withPersona } from "./persona";
-import { AVAILABLE_TOOLS, GET_WORKOUTS_TOOL_NAME, executeGetWorkoutsInRange } from "./tools";
+import { AVAILABLE_TOOLS, TOOL_REGISTRY } from "./tools";
 import type { BrokerStreamEvent, ChatMessage, ChatRequestBody } from "./types";
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -108,11 +108,9 @@ async function resolveMessagesForFinalAnswer(
     );
 
     const toolCall = decision.toolCalls[0];
-    if (toolCall?.function.name === GET_WORKOUTS_TOOL_NAME) {
-      const toolResultContent = await executeGetWorkoutsInRange(
-        userId,
-        toolCall.function.arguments
-      );
+    const tool = toolCall ? TOOL_REGISTRY.get(toolCall.function.name) : undefined;
+    if (toolCall && tool) {
+      const toolResultContent = await tool.execute(userId, toolCall.function.arguments);
       return {
         messages: [
           ...personaMessages,

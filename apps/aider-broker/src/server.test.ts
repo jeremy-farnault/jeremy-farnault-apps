@@ -7,19 +7,25 @@ vi.mock("./ollama", () => ({
   requestOllamaToolDecision: vi.fn(),
 }));
 
-vi.mock("./tools", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./tools")>();
-  return { ...actual, executeGetWorkoutsInRange: vi.fn() };
+// Mock the Gainer tool's executor at its module seam so the registry (built in
+// ./tools/index) dispatches to this spy, while keeping the real tool definition.
+const { mockExecute } = vi.hoisted(() => ({ mockExecute: vi.fn() }));
+vi.mock("./tools/gainer", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./tools/gainer")>();
+  return {
+    ...actual,
+    gainerWorkoutsTool: { definition: actual.GET_WORKOUTS_TOOL, execute: mockExecute },
+  };
 });
 
 import { requestOllamaToolDecision, streamOllamaChat } from "./ollama";
 import { PERSONA_SYSTEM_PROMPT } from "./persona";
 import { createBrokerServer } from "./server";
-import { AVAILABLE_TOOLS, GET_WORKOUTS_TOOL_NAME, executeGetWorkoutsInRange } from "./tools";
+import { AVAILABLE_TOOLS } from "./tools";
+import { GET_WORKOUTS_TOOL_NAME } from "./tools/gainer";
 
 const mockedStreamOllamaChat = vi.mocked(streamOllamaChat);
 const mockedRequestOllamaToolDecision = vi.mocked(requestOllamaToolDecision);
-const mockedExecuteGetWorkoutsInRange = vi.mocked(executeGetWorkoutsInRange);
 
 const PERSONA_WITH_DATE = `${PERSONA_SYSTEM_PROMPT} Today's date is 2026-08-23.`;
 
@@ -40,7 +46,7 @@ beforeEach(async () => {
   mockedStreamOllamaChat.mockReset();
   mockedRequestOllamaToolDecision.mockReset();
   mockedRequestOllamaToolDecision.mockResolvedValue({ content: "", toolCalls: [] });
-  mockedExecuteGetWorkoutsInRange.mockReset();
+  mockExecute.mockReset();
   server = createBrokerServer(config);
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address() as AddressInfo;
@@ -165,7 +171,7 @@ describe("POST /v1/chat", () => {
     expect(events[events.length - 1]).toEqual({ type: "done" });
     expect(events).not.toContainEqual(expect.objectContaining({ type: "tool" }));
 
-    expect(mockedExecuteGetWorkoutsInRange).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
     expect(mockedStreamOllamaChat).toHaveBeenCalledWith(
       config.ollamaUrl,
       "capable-model",
@@ -194,13 +200,48 @@ describe("POST /v1/chat", () => {
     expect(res.status).toBe(200);
     const events = await readNdjsonLines(res);
     expect(events).toContainEqual({ type: "token", content: "fine either way" });
-    expect(mockedExecuteGetWorkoutsInRange).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
     expect(mockedStreamOllamaChat).toHaveBeenCalledWith(
       config.ollamaUrl,
       "fast-model",
       [
         { role: "system", content: PERSONA_WITH_DATE },
         { role: "user", content: "hi" },
+      ],
+      expect.anything()
+    );
+  });
+
+  it("falls back to a normal answer when the tool-decision names an unknown tool", async () => {
+    // Registry dispatch is by name: a tool call for a name not in the registry
+    // resolves to no executor and must fall back to a plain streamed answer.
+    mockedRequestOllamaToolDecision.mockResolvedValue({
+      content: "",
+      toolCalls: [{ function: { name: "no_such_tool", arguments: {} } }],
+    });
+    mockedStreamOllamaChat.mockImplementation(async function* () {
+      yield "no tool for that";
+    });
+
+    const res = await authedFetch("/v1/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        model: "fast-model",
+        messages: [{ role: "user", content: "do something unmapped" }],
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const events = await readNdjsonLines(res);
+    expect(events).toContainEqual({ type: "token", content: "no tool for that" });
+    expect(events).not.toContainEqual(expect.objectContaining({ type: "tool" }));
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(mockedStreamOllamaChat).toHaveBeenCalledWith(
+      config.ollamaUrl,
+      "fast-model",
+      [
+        { role: "system", content: PERSONA_WITH_DATE },
+        { role: "user", content: "do something unmapped" },
       ],
       expect.anything()
     );
@@ -214,7 +255,7 @@ describe("POST /v1/chat", () => {
       },
     };
     mockedRequestOllamaToolDecision.mockResolvedValue({ content: "", toolCalls: [toolCall] });
-    mockedExecuteGetWorkoutsInRange.mockResolvedValue('{"count":1,"sessions":[]}');
+    mockExecute.mockResolvedValue('{"count":1,"sessions":[]}');
     mockedStreamOllamaChat.mockImplementation(async function* () {
       yield "You trained once.";
     });
@@ -243,7 +284,7 @@ describe("POST /v1/chat", () => {
     });
     expect(events).toContainEqual({ type: "token", content: "You trained once." });
 
-    expect(mockedExecuteGetWorkoutsInRange).toHaveBeenCalledWith("user-42", {
+    expect(mockExecute).toHaveBeenCalledWith("user-42", {
       start_date: "2026-08-17",
       end_date: "2026-08-23",
     });
@@ -285,7 +326,7 @@ describe("POST /v1/chat", () => {
         },
       ],
     });
-    mockedExecuteGetWorkoutsInRange.mockRejectedValue(new Error("db down"));
+    mockExecute.mockRejectedValue(new Error("db down"));
     mockedStreamOllamaChat.mockImplementation(async function* () {
       yield "sorry, something went wrong";
     });

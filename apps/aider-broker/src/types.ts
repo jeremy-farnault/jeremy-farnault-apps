@@ -30,6 +30,14 @@ export interface ToolDefinition {
   };
 }
 
+// A self-describing tool unit: its model-facing definition paired with the
+// executor the registry dispatches to. `execute` returns a JSON string so the
+// server's message-assembly and streaming loop stay tool-agnostic.
+export interface RegisteredTool {
+  definition: ToolDefinition;
+  execute: (userId: string, rawArgs: unknown) => Promise<string>;
+}
+
 export type BrokerStreamEvent =
   | { type: "meta"; model: string }
   // `arguments` is the raw JSON the model passed to the tool (stringified), so

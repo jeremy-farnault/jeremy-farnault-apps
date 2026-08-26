@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./workouts-query", () => ({
+vi.mock("./gainer-query", () => ({
   getWorkoutsInRange: vi.fn(),
 }));
 
-import { executeGetWorkoutsInRange, parseWorkoutsDateRangeArgs } from "./tools";
-import { getWorkoutsInRange } from "./workouts-query";
+import { executeGetWorkoutsInRange, parseWorkoutsDateRangeArgs } from "./gainer";
+import { getWorkoutsInRange } from "./gainer-query";
 
 const mockedGetWorkoutsInRange = vi.mocked(getWorkoutsInRange);
 

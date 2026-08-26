@@ -18,7 +18,7 @@ vi.mock("@jf/db", () => ({
   },
 }));
 
-import { getWorkoutsInRange } from "./workouts-query";
+import { getWorkoutsInRange } from "./gainer-query";
 
 describe("getWorkoutsInRange", () => {
   beforeEach(() => {
