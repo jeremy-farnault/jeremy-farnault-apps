@@ -107,6 +107,17 @@ async function resolveMessagesForFinalAnswer(
       signal
     );
 
+    // Diagnostic: how many tool calls the model emitted and their names, so we
+    // can tell "model chose no tool" from "tool-decision request errored".
+    console.log(
+      JSON.stringify({
+        toolDecision: {
+          offered: AVAILABLE_TOOLS.length,
+          returned: decision.toolCalls.map((call) => call.function.name),
+        },
+      })
+    );
+
     const toolCall = decision.toolCalls[0];
     const tool = toolCall ? TOOL_REGISTRY.get(toolCall.function.name) : undefined;
     if (toolCall && tool) {
@@ -121,10 +132,17 @@ async function resolveMessagesForFinalAnswer(
         toolArguments: stringifyToolArguments(toolCall.function.arguments),
       };
     }
-  } catch {
+  } catch (error) {
     // Tool-decision phase failed for any reason (Ollama error, e.g. the
     // model doesn't support tools, network error, unexpected shape) — fall
-    // back to a normal answer rather than breaking the request.
+    // back to a normal answer rather than breaking the request. Log the reason
+    // so a hard failure (e.g. Ollama rejecting the tools payload) is visible
+    // instead of silently degrading every request to no-tool.
+    console.log(
+      JSON.stringify({
+        toolDecisionError: error instanceof Error ? error.message : String(error),
+      })
+    );
   }
 
   return { messages: personaMessages, toolUsed: null, toolArguments: null };
