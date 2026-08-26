@@ -69,6 +69,65 @@ describe("parseWorkoutsDateRangeArgs", () => {
   });
 });
 
+// Deterministic period resolution — the reason the model no longer computes
+// dates itself. "Now" is Wednesday 2026-08-26 (Monday of that week is the 24th).
+describe("parseWorkoutsDateRangeArgs period resolution", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-26T12:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const dateOnly = (d: Date) => d.toISOString().slice(0, 10);
+  function resolvedRange(raw: unknown): { startDate: Date; endDate: Date } {
+    const result = parseWorkoutsDateRangeArgs(raw);
+    if (!result) throw new Error("expected a resolved range");
+    return result;
+  }
+
+  it("resolves this_week to Monday-through-now", () => {
+    const range = resolvedRange({ period: "this_week" });
+    expect(dateOnly(range.startDate)).toBe("2026-08-24"); // Monday
+    expect(dateOnly(range.endDate)).toBe("2026-08-26"); // now
+  });
+
+  it("resolves last_week to the prior Monday-through-Sunday", () => {
+    const range = resolvedRange({ period: "last_week" });
+    expect(dateOnly(range.startDate)).toBe("2026-08-17");
+    expect(dateOnly(range.endDate)).toBe("2026-08-23");
+  });
+
+  it("resolves this_month from the 1st through now", () => {
+    const range = resolvedRange({ period: "this_month" });
+    expect(dateOnly(range.startDate)).toBe("2026-08-01");
+    expect(dateOnly(range.endDate)).toBe("2026-08-26");
+  });
+
+  it("resolves last_month to its full span", () => {
+    const range = resolvedRange({ period: "last_month" });
+    expect(dateOnly(range.startDate)).toBe("2026-07-01");
+    expect(dateOnly(range.endDate)).toBe("2026-07-31");
+  });
+
+  it("resolves a specific calendar month to its full span", () => {
+    const range = resolvedRange({ month: "2026-07" });
+    expect(dateOnly(range.startDate)).toBe("2026-07-01");
+    expect(dateOnly(range.endDate)).toBe("2026-07-31");
+  });
+
+  it("returns null for a malformed month", () => {
+    expect(parseWorkoutsDateRangeArgs({ month: "August" })).toBeNull();
+    expect(parseWorkoutsDateRangeArgs({ month: "2026-13" })).toBeNull();
+  });
+
+  it("returns null for an unknown period", () => {
+    expect(parseWorkoutsDateRangeArgs({ period: "last_decade" })).toBeNull();
+  });
+});
+
 describe("executeGetWorkoutsInRange", () => {
   beforeEach(() => {
     mockedGetWorkoutsInRange.mockReset();
@@ -93,7 +152,7 @@ describe("executeGetWorkoutsInRange", () => {
     );
   });
 
-  it("returns count and sessions on success", async () => {
+  it("returns the resolved range, count and sessions on success", async () => {
     mockedGetWorkoutsInRange.mockResolvedValue([
       {
         name: "Push Day",
@@ -108,6 +167,7 @@ describe("executeGetWorkoutsInRange", () => {
     });
 
     expect(JSON.parse(result)).toEqual({
+      range: { start_date: "2026-08-17", end_date: "2026-08-23" },
       count: 1,
       sessions: [
         {

@@ -32,7 +32,10 @@ export interface ToolDefinition {
 
 export type BrokerStreamEvent =
   | { type: "meta"; model: string }
-  | { type: "tool"; name: string }
+  // `arguments` is the raw JSON the model passed to the tool (stringified), so
+  // the client can show what was actually requested — the direct antidote to
+  // "did it use my data or make it up?". Generic across all tools.
+  | { type: "tool"; name: string; arguments?: string }
   | { type: "token"; content: string }
   | { type: "done" }
   | { type: "error"; message: string };

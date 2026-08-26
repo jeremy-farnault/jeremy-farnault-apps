@@ -1,6 +1,11 @@
 import { auth } from "@jf/auth";
 import { type NextRequest, NextResponse } from "next/server";
 
+// The Pi can be slow to first byte on a cold model load. The broker now starts
+// streaming (meta + heartbeats) immediately, so this is a safety net rather than
+// the primary defense against a mid-stream cutoff.
+export const maxDuration = 300;
+
 // BFF proxy to the Pi broker behind the Cloudflare Tunnel. The session is
 // validated here on Vercel before the Pi is ever contacted; the Pi is reached
 // server-to-server with a shared bearer secret plus a trusted X-Aider-User-Id

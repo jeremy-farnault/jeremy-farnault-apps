@@ -35,7 +35,13 @@ describe("requestOllamaToolDecision", () => {
       "http://ollama.invalid/api/chat",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ model: "capable-model", messages: [], tools, stream: false }),
+        body: JSON.stringify({
+          model: "capable-model",
+          messages: [],
+          tools,
+          stream: false,
+          keep_alive: "30m",
+        }),
       })
     );
   });

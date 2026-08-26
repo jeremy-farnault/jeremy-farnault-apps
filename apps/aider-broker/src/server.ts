@@ -8,6 +8,10 @@ import type { BrokerStreamEvent, ChatMessage, ChatRequestBody } from "./types";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
+// How often to emit a blank-line keepalive while waiting for the model's first
+// token, so no downstream hop times out during a cold model load.
+const HEARTBEAT_MS = 10_000;
+
 export function createBrokerServer(config: BrokerConfig): Server {
   return createServer((req, res) => {
     if (req.method === "GET" && req.url === "/health") {
@@ -89,7 +93,11 @@ async function resolveMessagesForFinalAnswer(
   userId: string,
   personaMessages: ChatMessage[],
   signal: AbortSignal
-): Promise<{ messages: ChatMessage[]; toolUsed: string | null }> {
+): Promise<{
+  messages: ChatMessage[];
+  toolUsed: string | null;
+  toolArguments: string | null;
+}> {
   try {
     const decision = await requestOllamaToolDecision(
       config.ollamaUrl,
@@ -112,6 +120,7 @@ async function resolveMessagesForFinalAnswer(
           { role: "tool", content: toolResultContent },
         ],
         toolUsed: toolCall.function.name,
+        toolArguments: stringifyToolArguments(toolCall.function.arguments),
       };
     }
   } catch {
@@ -120,7 +129,19 @@ async function resolveMessagesForFinalAnswer(
     // back to a normal answer rather than breaking the request.
   }
 
-  return { messages: personaMessages, toolUsed: null };
+  return { messages: personaMessages, toolUsed: null, toolArguments: null };
+}
+
+// Generic (tool-agnostic) rendering of the model's raw arguments for the client
+// `tool` event. Ollama may hand back arguments as an object or a JSON string.
+function stringifyToolArguments(raw: unknown): string | null {
+  if (raw == null) return null;
+  if (typeof raw === "string") return raw;
+  try {
+    return JSON.stringify(raw);
+  } catch {
+    return null;
+  }
 }
 
 async function handleChat(
@@ -167,45 +188,63 @@ async function handleChat(
   }
 
   const controller = new AbortController();
-  res.on("close", () => controller.abort());
 
-  const personaMessages = withPersona(messages);
-  const { messages: messagesForFinalAnswer, toolUsed } = await resolveMessagesForFinalAnswer(
-    config,
-    model,
-    userId,
-    personaMessages,
-    controller.signal
-  );
-
-  console.log(JSON.stringify({ userId, model, toolUsed }));
-
-  const iterator = streamOllamaChat(
-    config.ollamaUrl,
-    model,
-    messagesForFinalAnswer,
-    controller.signal
-  );
-
-  let first: IteratorResult<string>;
-  try {
-    first = await iterator.next();
-  } catch {
-    sendJson(res, 502, { error: "Model backend unreachable" });
-    return;
-  }
-
+  // Open the response and emit `meta` up front, before any (potentially slow,
+  // cold-loading) Ollama call. This keeps time-to-first-byte near-instant so no
+  // idle/TTFB timeout on Vercel or the tunnel fires while the Pi loads a model;
+  // the whole slow phase now happens inside an already-live stream. A blank-line
+  // heartbeat keeps bytes flowing until real content arrives (the client and the
+  // Vercel proxy both skip empty NDJSON lines). Committing to a 200 means a later
+  // failure is reported as an `error` event rather than an HTTP status — which the
+  // client already handles.
   res.writeHead(200, {
     "content-type": "application/x-ndjson; charset=utf-8",
     "cache-control": "no-store",
   });
   writeEvent(res, { type: "meta", model });
-  if (toolUsed) {
-    writeEvent(res, { type: "tool", name: toolUsed });
-  }
+
+  const heartbeat = setInterval(() => {
+    if (!res.writableEnded) res.write("\n");
+  }, HEARTBEAT_MS);
+  const stopHeartbeat = () => clearInterval(heartbeat);
+  res.on("close", () => {
+    controller.abort();
+    stopHeartbeat();
+  });
 
   try {
-    let result = first;
+    const personaMessages = withPersona(messages);
+    const {
+      messages: messagesForFinalAnswer,
+      toolUsed,
+      toolArguments,
+    } = await resolveMessagesForFinalAnswer(
+      config,
+      model,
+      userId,
+      personaMessages,
+      controller.signal
+    );
+
+    console.log(JSON.stringify({ userId, model, toolUsed }));
+
+    if (toolUsed) {
+      writeEvent(res, {
+        type: "tool",
+        name: toolUsed,
+        ...(toolArguments ? { arguments: toolArguments } : {}),
+      });
+    }
+
+    const iterator = streamOllamaChat(
+      config.ollamaUrl,
+      model,
+      messagesForFinalAnswer,
+      controller.signal
+    );
+
+    let result = await iterator.next();
+    stopHeartbeat(); // real tokens are flowing now
     while (!result.done) {
       writeEvent(res, { type: "token", content: result.value });
       result = await iterator.next();
@@ -214,6 +253,7 @@ async function handleChat(
   } catch {
     writeEvent(res, { type: "error", message: "Model backend error" });
   } finally {
+    stopHeartbeat();
     res.end();
   }
 }

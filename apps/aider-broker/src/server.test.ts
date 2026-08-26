@@ -234,7 +234,13 @@ describe("POST /v1/chat", () => {
     expect(res.status).toBe(200);
     const events = await readNdjsonLines(res);
     expect(events[0]).toEqual({ type: "meta", model: "capable-model" });
-    expect(events).toContainEqual({ type: "tool", name: GET_WORKOUTS_TOOL_NAME });
+    // The tool event carries the model's raw arguments (stringified) so the
+    // client can show exactly what was requested.
+    expect(events).toContainEqual({
+      type: "tool",
+      name: GET_WORKOUTS_TOOL_NAME,
+      arguments: JSON.stringify({ start_date: "2026-08-17", end_date: "2026-08-23" }),
+    });
     expect(events).toContainEqual({ type: "token", content: "You trained once." });
 
     expect(mockedExecuteGetWorkoutsInRange).toHaveBeenCalledWith("user-42", {
@@ -324,7 +330,10 @@ describe("POST /v1/chat", () => {
     );
   });
 
-  it("returns 502 when Ollama is unreachable before any bytes stream", async () => {
+  it("streams a 200 with an in-band error event when Ollama is unreachable before any bytes", async () => {
+    // The response commits to 200 + `meta` up front (so time-to-first-byte never
+    // trips a downstream timeout during a cold model load), so an upstream failure
+    // with no tokens surfaces as a terminal `error` event rather than a 502 status.
     // biome-ignore lint/correctness/useYield: simulates an immediate upstream failure with no tokens
     mockedStreamOllamaChat.mockImplementation(async function* () {
       throw new Error("connection refused");
@@ -335,7 +344,14 @@ describe("POST /v1/chat", () => {
       body: JSON.stringify({ model: "fast-model", messages: [{ role: "user", content: "hi" }] }),
     });
 
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(200);
+    const events = await readNdjsonLines(res);
+    expect(events[0]).toEqual({ type: "meta", model: "fast-model" });
+    expect(events).not.toContainEqual(expect.objectContaining({ type: "token" }));
+    expect(events[events.length - 1]).toEqual({
+      type: "error",
+      message: "Model backend error",
+    });
   });
 
   it("emits an in-band error event and still terminates if Ollama fails mid-stream", async () => {

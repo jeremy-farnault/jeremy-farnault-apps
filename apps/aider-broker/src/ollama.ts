@@ -2,6 +2,11 @@ import type { ChatMessage, ToolCall, ToolDefinition } from "./types";
 
 export class OllamaError extends Error {}
 
+// Keep a model resident for 30 minutes after each request so repeat prompts to
+// the same model skip the (very slow, on Pi hardware) cold load. RAM only fits
+// one model at a time, so switching fast<->capable still reloads.
+const OLLAMA_KEEP_ALIVE = "30m";
+
 interface OllamaChatLine {
   message?: { content?: string };
   done?: boolean;
@@ -16,7 +21,7 @@ export async function* streamOllamaChat(
   const res = await fetch(`${baseUrl}/api/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ model, messages, stream: true }),
+    body: JSON.stringify({ model, messages, stream: true, keep_alive: OLLAMA_KEEP_ALIVE }),
     ...(signal ? { signal } : {}),
   });
 
@@ -72,7 +77,7 @@ export async function requestOllamaToolDecision(
   const res = await fetch(`${baseUrl}/api/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ model, messages, tools, stream: false }),
+    body: JSON.stringify({ model, messages, tools, stream: false, keep_alive: OLLAMA_KEEP_ALIVE }),
     ...(signal ? { signal } : {}),
   });
 

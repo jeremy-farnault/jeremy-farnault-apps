@@ -6,10 +6,68 @@ import { Button, Select, SelectItem, Textarea } from "@jf/ui";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react/dist/ssr";
 import { useEffect, useRef, useState } from "react";
 
+interface ToolUse {
+  name: string;
+  arguments?: string;
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  // Present when the assistant fetched real data via a tool for this reply, so
+  // the user can tell a grounded answer from one spoken from memory.
+  tool?: ToolUse;
+}
+
+// Friendly labels for known tools; unknown tools fall back to their raw name.
+const TOOL_LABELS: Record<string, string> = {
+  get_workouts_in_range: "Looked up your workouts",
+};
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+// Turn the raw tool arguments into a short human phrase for the chip, so the
+// user can see exactly what the model requested (e.g. a wrong date range).
+function describeToolArgs(rawArguments: string | undefined): string | null {
+  if (!rawArguments) return null;
+  try {
+    const args = JSON.parse(rawArguments) as Record<string, unknown>;
+    if (typeof args.period === "string") return args.period.replace(/_/g, " ");
+    if (typeof args.month === "string") {
+      const match = /^(\d{4})-(\d{2})$/.exec(args.month);
+      if (match) {
+        const name = MONTH_NAMES[Number(match[2]) - 1];
+        if (name) return `${name} ${match[1]}`;
+      }
+      return args.month;
+    }
+    if (typeof args.start_date === "string" && typeof args.end_date === "string") {
+      return `${args.start_date} → ${args.end_date}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function toolChipText(tool: ToolUse): string {
+  const label = TOOL_LABELS[tool.name] ?? tool.name;
+  const detail = describeToolArgs(tool.arguments);
+  return detail ? `${label} · ${detail}` : label;
 }
 
 interface ChatShellProps {
@@ -28,9 +86,11 @@ const FALLBACK_ERROR_MESSAGE =
   "Aider isn't reachable right now. The Pi might be offline or the model isn't loaded — try again in a bit.";
 
 interface ChatEvent {
-  type: "meta" | "token" | "done" | "error";
+  type: "meta" | "tool" | "token" | "done" | "error";
   content?: string;
   message?: string;
+  name?: string;
+  arguments?: string;
 }
 
 function isChatEvent(value: unknown): value is ChatEvent {
@@ -78,6 +138,9 @@ export function ChatShell({
     const assistantId = crypto.randomUUID();
     let assistantStarted = false;
     let assistantContent = "";
+    // A `tool` event arrives before the first token; hold it until the assistant
+    // message is created so the chip attaches to the right reply.
+    let pendingTool: ToolUse | undefined;
 
     try {
       // Persist the user message, creating the conversation on the first send.
@@ -134,13 +197,25 @@ export function ChatShell({
           const event: unknown = JSON.parse(line);
           if (!isChatEvent(event)) continue;
 
+          if (event.type === "tool" && event.name) {
+            pendingTool = {
+              name: event.name,
+              ...(event.arguments ? { arguments: event.arguments } : {}),
+            };
+          }
+
           if (event.type === "token" && event.content) {
             assistantContent += event.content;
             if (!assistantStarted) {
               assistantStarted = true;
               setMessages((prev) => [
                 ...prev,
-                { id: assistantId, role: "assistant", content: event.content ?? "" },
+                {
+                  id: assistantId,
+                  role: "assistant",
+                  content: event.content ?? "",
+                  ...(pendingTool ? { tool: pendingTool } : {}),
+                },
               ]);
             } else {
               setMessages((prev) =>
@@ -201,11 +276,25 @@ export function ChatShell({
               key={message.id}
               className={
                 message.role === "user"
-                  ? "self-end max-w-[80%] rounded-[12px] bg-(--primary) px-3 py-2 text-sm"
-                  : "self-start max-w-[80%] rounded-[12px] bg-(--surface-150) px-3 py-2 text-sm"
+                  ? "self-end max-w-[80%] flex flex-col items-end gap-1"
+                  : "self-start max-w-[80%] flex flex-col items-start gap-1"
               }
             >
-              {message.content}
+              {message.tool && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--grey-500)">
+                  <span aria-hidden>🔧</span>
+                  {toolChipText(message.tool)}
+                </span>
+              )}
+              <div
+                className={
+                  message.role === "user"
+                    ? "rounded-[12px] bg-(--primary) px-3 py-2 text-sm"
+                    : "rounded-[12px] bg-(--surface-150) px-3 py-2 text-sm"
+                }
+              >
+                {message.content}
+              </div>
             </div>
           ))
         )}
