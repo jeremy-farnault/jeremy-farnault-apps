@@ -8,3 +8,4 @@ export * from "./placer";
 export * from "./gainer";
 export * from "./doser";
 export * from "./aider";
+export * from "./exposer";
