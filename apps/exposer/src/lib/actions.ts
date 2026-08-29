@@ -6,6 +6,8 @@ import { db, user } from "@jf/db";
 import { and, eq, ne } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { type FeedCursor, type FeedPage, getFeedPage, getUserByHandle } from "./queries";
+import { getSessionUser } from "./user";
 
 /**
  * Persist the current user's handle after re-validating server-side, then route them to
@@ -39,6 +41,24 @@ export async function setHandle(rawHandle: string): Promise<{ error: string } | 
   }
 
   redirect(`/${handle}`);
+}
+
+/**
+ * Load-more for the portfolio feed. Re-resolves the owner and recomputes draft visibility
+ * from the session on every call so access control is never client-controlled. Returns an
+ * empty page for an unknown handle.
+ */
+export async function fetchFeedPageAction(
+  handle: string,
+  cursor: FeedCursor | null
+): Promise<FeedPage> {
+  const owner = await getUserByHandle(handle);
+  if (!owner) return { items: [], nextCursor: null };
+
+  const me = await getSessionUser();
+  const isOwner = me?.id === owner.id;
+
+  return getFeedPage(owner.id, isOwner, cursor);
 }
 
 function isUniqueViolation(err: unknown): boolean {
