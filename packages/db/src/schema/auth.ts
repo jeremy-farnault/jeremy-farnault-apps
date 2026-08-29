@@ -8,6 +8,9 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").notNull(),
   image: text("image"),
+  // Nullable until the user picks one; stored lowercase (see @jf/auth/handle) so the
+  // unique constraint enforces case-insensitive uniqueness in practice.
+  handle: text("handle").unique(),
   createdAt: timestamp("createdAt").notNull(),
   updatedAt: timestamp("updatedAt").notNull(),
 });

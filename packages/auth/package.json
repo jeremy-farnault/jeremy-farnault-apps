@@ -10,6 +10,10 @@
     "./client": {
       "types": "./src/client.ts",
       "import": "./src/client.ts"
+    },
+    "./handle": {
+      "types": "./src/handle.ts",
+      "import": "./src/handle.ts"
     }
   },
   "scripts": {

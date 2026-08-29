@@ -169,6 +169,13 @@
       "when": 1787999585225,
       "tag": "0023_bouncy_triton",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1788010441493,
+      "tag": "0024_naive_boomer",
+      "breakpoints": true
     }
   ]
 }
