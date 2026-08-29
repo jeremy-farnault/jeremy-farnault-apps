@@ -1,7 +1,6 @@
 "use client";
 
-import { COLOR_PALETTE } from "@/lib/note-utils";
-import { ColorPicker as BaseColorPicker } from "@jf/ui";
+import { ColorPicker as BaseColorPicker, COLOR_PALETTE } from "@jf/ui";
 
 type Props = {
   value: string;

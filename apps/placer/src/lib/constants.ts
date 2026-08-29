@@ -27,6 +27,7 @@ export const PLACER_COLOR_PALETTE = [
   { label: "Red Dark", value: "var(--red-600)" },
   { label: "Magenta", value: "var(--magenta-400)" },
   { label: "Purple", value: "var(--purple-400)" },
+  { label: "Purple Dark", value: "var(--purple-600)" },
   { label: "Blue", value: "var(--blue-400)" },
   { label: "Teal", value: "var(--teal-400)" },
   { label: "Moss", value: "var(--moss-400)" },

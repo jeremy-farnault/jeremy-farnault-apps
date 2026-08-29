@@ -22,6 +22,7 @@ export const FINANCER_COLOR_PALETTE = [
   { label: "Red", value: "var(--red-400)" },
   { label: "Red Dark", value: "var(--red-600)" },
   { label: "Purple", value: "var(--purple-400)" },
+  { label: "Purple Dark", value: "var(--purple-600)" },
 ] as const;
 
 export const ASSET_SOURCE_COLORS = [

@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-
-type PaletteItem = { value: string; label?: string };
+import type { PaletteItem } from "../lib/color-palette";
 
 type Props = {
   palette: ReadonlyArray<PaletteItem>;
