@@ -1,10 +1,11 @@
 import type { FeedItem as FeedItemData } from "@/lib/queries";
+import { PencilSimpleIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 
-export function FeedItem({ item }: { item: FeedItemData }) {
+export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => void }) {
   return (
     <article className="flex flex-col gap-2">
-      {(item.title || item.isDraft) && (
+      {(item.title || item.isDraft || onEdit) && (
         <div className="flex items-center gap-2">
           {item.title && (
             <h2 className="text-base font-semibold text-(--grey-900)">{item.title}</h2>
@@ -13,6 +14,16 @@ export function FeedItem({ item }: { item: FeedItemData }) {
             <span className="rounded-full bg-(--surface-300) px-2 py-0.5 text-xs font-medium text-(--grey-600)">
               Draft
             </span>
+          )}
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label="Edit post"
+              className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+            >
+              <PencilSimpleIcon size={16} />
+            </button>
           )}
         </div>
       )}
