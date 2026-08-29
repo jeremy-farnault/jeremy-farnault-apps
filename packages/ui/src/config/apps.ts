@@ -3,6 +3,7 @@ import type { Icon } from "@phosphor-icons/react";
 // imported from React Server Components (the main barrel uses createContext,
 // which is client-only and crashes in RSC).
 import {
+  ApertureIcon,
   BarbellIcon,
   ChecksIcon,
   CoinsIcon,
@@ -44,6 +45,13 @@ export const apps: AppDefinition[] = [
     icon: PillIcon,
     href: process.env.NEXT_PUBLIC_DOSER_URL ?? "#",
     accentColor: "--yellow-600",
+  },
+  {
+    id: "exposer",
+    name: "Exposer",
+    icon: ApertureIcon,
+    href: process.env.NEXT_PUBLIC_EXPOSER_URL ?? "#",
+    accentColor: "--purple-600",
   },
   {
     id: "financer",

@@ -30,6 +30,8 @@ export const descriptions: Record<string, string> = {
     "Rank anything. Build tier lists and ordered rankings for the things you care about — films, restaurants, ideas — and revisit them as your taste changes.",
   doser:
     "Track medications and symptoms. Log your doses, note how you feel over time, and see the patterns between the two.",
+  exposer:
+    "A public-by-link photo portfolio. Publish curated, dated collections of your visual work as a chronological showcase anyone can browse.",
   financer:
     "Keep an eye on your money. Follow balances, income and spending across accounts, with charts that show where it all goes.",
   gainer:
