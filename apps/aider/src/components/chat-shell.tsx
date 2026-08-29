@@ -1,5 +1,6 @@
 "use client";
 
+import { Markdown } from "@/components/markdown";
 import { useSidebar } from "@/components/sidebar-provider";
 import { appendMessage, createConversation } from "@/lib/actions";
 import { Button, Select, SelectItem, Textarea } from "@jf/ui";
@@ -23,6 +24,11 @@ interface Message {
 // Friendly labels for known tools; unknown tools fall back to their raw name.
 const TOOL_LABELS: Record<string, string> = {
   get_workouts_in_range: "Looked up your workouts",
+  get_exercises_on_day: "Looked up your exercises",
+  get_top_items_in_list: "Checked your rankings",
+  get_current_assets: "Checked your assets",
+  get_media_in_range: "Looked up your journal",
+  get_habit_log_count: "Checked your habits",
 };
 
 const MONTH_NAMES = [
@@ -234,8 +240,15 @@ export function ChatShell({
 
       if (!assistantStarted) throw new Error("Empty response");
 
-      // Persist the assistant reply now that streaming is complete.
-      await appendMessage(activeConversationId, "assistant", assistantContent);
+      // Persist the assistant reply now that streaming is complete, keeping the
+      // tool metadata so the chip survives a reload.
+      await appendMessage(
+        activeConversationId,
+        "assistant",
+        assistantContent,
+        undefined,
+        pendingTool
+      );
     } catch {
       setMessages((prev) => {
         if (assistantStarted) return prev;
@@ -283,7 +296,11 @@ export function ChatShell({
                     : "rounded-[12px] bg-(--surface-150) px-3 py-2 text-sm"
                 }
               >
-                {message.content}
+                {message.role === "assistant" ? (
+                  <Markdown>{message.content}</Markdown>
+                ) : (
+                  message.content
+                )}
               </div>
             </div>
           ))

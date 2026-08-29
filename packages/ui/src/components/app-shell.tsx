@@ -9,6 +9,10 @@ interface AppShellProps {
   startSlot?: ReactNode;
   rightSlot?: ReactNode;
   titleHref?: string;
+  // Pin the shell to the viewport (h-dvh + overflow-hidden) so inner regions own
+  // their own scroll instead of the whole document scrolling. Opt-in: most apps
+  // want normal page scroll; chat-style apps (aider) want a fixed frame.
+  fullHeight?: boolean;
 }
 
 export function AppShell({
@@ -19,9 +23,14 @@ export function AppShell({
   startSlot,
   rightSlot,
   titleHref,
+  fullHeight = false,
 }: AppShellProps) {
   return (
-    <div className="relative flex flex-col items-center justify-start w-full max-w-[1024px] min-h-screen pb-16 md:pb-0">
+    <div
+      className={`relative flex flex-col items-center justify-start w-full max-w-[1024px] pb-16 md:pb-0 ${
+        fullHeight ? "h-dvh overflow-hidden" : "min-h-screen"
+      }`}
+    >
       <header className="sticky top-0 z-[4000] flex h-14 items-center justify-between px-4 w-full pt-3">
         {titleHref ? (
           <a

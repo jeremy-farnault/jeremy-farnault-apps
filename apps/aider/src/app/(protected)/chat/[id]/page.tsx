@@ -26,6 +26,14 @@ export default async function ConversationPage({
           id: m.id,
           role: m.role as "user" | "assistant",
           content: m.content,
+          ...(m.toolName
+            ? {
+                tool: {
+                  name: m.toolName,
+                  ...(m.toolArguments ? { arguments: m.toolArguments } : {}),
+                },
+              }
+            : {}),
         }))}
       />
     </main>

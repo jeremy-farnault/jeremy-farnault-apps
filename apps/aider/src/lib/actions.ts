@@ -30,7 +30,8 @@ export async function appendMessage(
   conversationId: string,
   role: "user" | "assistant",
   content: string,
-  model?: string
+  model?: string,
+  tool?: { name: string; arguments?: string }
 ): Promise<void> {
   const userId = await getAuthUserId();
   await withTransaction(async (tx) => {
@@ -40,7 +41,12 @@ export async function appendMessage(
       .where(and(eq(aiderConversations.id, conversationId), eq(aiderConversations.userId, userId)))
       .returning({ id: aiderConversations.id });
     if (!owned) throw new Error("Unauthorized");
-    await tx.insert(aiderMessages).values({ conversationId, role, content });
+    await tx.insert(aiderMessages).values({
+      conversationId,
+      role,
+      content,
+      ...(tool ? { toolName: tool.name, toolArguments: tool.arguments ?? null } : {}),
+    });
   });
 }
 

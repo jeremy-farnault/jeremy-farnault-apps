@@ -20,6 +20,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           currentAppId="aider"
           titleHref="/"
           rightSlot={<UserMenuConnected />}
+          fullHeight
         >
           <SidebarShell>{children}</SidebarShell>
         </AppShell>
