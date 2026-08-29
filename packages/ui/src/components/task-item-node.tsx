@@ -1,8 +1,9 @@
 "use client";
 
-import { Checkbox, cn } from "@jf/ui";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
+import { cn } from "../lib/utils";
+import { Checkbox } from "./checkbox";
 
 export function TaskItemNode({ node, updateAttributes }: NodeViewProps) {
   const checked: boolean = node.attrs.checked ?? false;
