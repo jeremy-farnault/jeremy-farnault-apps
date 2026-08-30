@@ -37,6 +37,26 @@ export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => 
       )}
 
       <PhotoCarousel photos={item.photos} alt={item.title ?? ""} />
+
+      {item.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {item.tags.map((tag) => (
+            <span
+              key={tag.name}
+              className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--grey-700)"
+            >
+              {tag.color && (
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: tag.color }}
+                  aria-hidden
+                />
+              )}
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      )}
     </article>
   );
 }

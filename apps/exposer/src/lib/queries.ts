@@ -1,7 +1,7 @@
 import "server-only";
 
-import { db, exposerItems, exposerPhotos, user } from "@jf/db";
-import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
+import { db, exposerItemTags, exposerItems, exposerPhotos, exposerTags, user } from "@jf/db";
+import { and, asc, desc, eq, inArray, lt, or } from "drizzle-orm";
 import { renderDescriptionHtml } from "./description";
 import { getPublicImageUrl } from "./s3-url";
 
@@ -10,6 +10,8 @@ const PAGE_SIZE = 12;
 export type FeedCursor = { date: string; createdAt: string; id: string };
 
 export type FeedPhoto = { url: string; width: number; height: number };
+
+export type FeedTag = { name: string; color: string | null };
 
 export type FeedItem = {
   id: string;
@@ -20,6 +22,7 @@ export type FeedItem = {
   date: string;
   isDraft: boolean;
   photos: FeedPhoto[];
+  tags: FeedTag[];
 };
 
 export type FeedPage = { items: FeedItem[]; nextCursor: FeedCursor | null };
@@ -85,7 +88,11 @@ export async function getFeedPage(
       ? { date: last.date, createdAt: last.createdAt.toISOString(), id: last.id }
       : null;
 
-  const photosByItem = await getPhotosByItem(pageRows.map((r) => r.id));
+  const itemIds = pageRows.map((r) => r.id);
+  const [photosByItem, tagsByItem] = await Promise.all([
+    getPhotosByItem(itemIds),
+    getTagsByItem(itemIds),
+  ]);
 
   const items: FeedItem[] = pageRows.map((r) => ({
     id: r.id,
@@ -94,6 +101,7 @@ export async function getFeedPage(
     date: r.date,
     isDraft: r.visibility === "draft",
     photos: photosByItem.get(r.id) ?? [],
+    tags: tagsByItem.get(r.id) ?? [],
   }));
 
   return { items, nextCursor };
@@ -124,6 +132,32 @@ async function getPhotosByItem(itemIds: string[]): Promise<Map<string, FeedPhoto
     const existing = byItem.get(row.itemId);
     if (existing) existing.push(photo);
     else byItem.set(row.itemId, [photo]);
+  }
+
+  return byItem;
+}
+
+/** Fetch all tags for the given item ids in one query, grouped and ordered by name. */
+async function getTagsByItem(itemIds: string[]): Promise<Map<string, FeedTag[]>> {
+  const byItem = new Map<string, FeedTag[]>();
+  if (itemIds.length === 0) return byItem;
+
+  const rows = await db
+    .select({
+      itemId: exposerItemTags.itemId,
+      name: exposerTags.name,
+      color: exposerTags.color,
+    })
+    .from(exposerItemTags)
+    .innerJoin(exposerTags, eq(exposerItemTags.tagId, exposerTags.id))
+    .where(inArray(exposerItemTags.itemId, itemIds))
+    .orderBy(asc(exposerTags.name));
+
+  for (const row of rows) {
+    const tag: FeedTag = { name: row.name, color: row.color };
+    const existing = byItem.get(row.itemId);
+    if (existing) existing.push(tag);
+    else byItem.set(row.itemId, [tag]);
   }
 
   return byItem;

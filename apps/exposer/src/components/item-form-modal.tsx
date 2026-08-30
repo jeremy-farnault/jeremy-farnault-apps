@@ -1,6 +1,7 @@
 "use client";
 
 import { DescriptionEditor } from "@/components/description-editor";
+import { TagField } from "@/components/tag-field";
 import { ACCEPT_ATTR, MAX_PHOTOS, getImageDimensions, validatePhotoFile } from "@/lib/image";
 import {
   type PhotoInput,
@@ -10,6 +11,7 @@ import {
   getItemForEdit,
   updateItemAction,
 } from "@/lib/item-actions";
+import { type Tag, getUserTags } from "@/lib/tag-actions";
 import { ActionModal, DatePicker, Switch, TextInput } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
 import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
@@ -54,6 +56,8 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
   const [date, setDate] = useState(today());
   const [isPublic, setIsPublic] = useState(false); // new posts default to Draft
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +69,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
     if (!isOpen) return;
     setError(null);
     setConfirmingDelete(false);
+    getUserTags().then(setAvailableTags);
 
     if (itemId === null) {
       setTitle("");
@@ -72,6 +77,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
       setDate(today());
       setIsPublic(false);
       setPhotos([]);
+      setSelectedTags([]);
       return;
     }
 
@@ -86,6 +92,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
         setDescription(item.description ?? "");
         setDate(item.date);
         setIsPublic(item.visibility === "public");
+        setSelectedTags(item.tags);
         setPhotos(
           item.photos.map((p) => ({
             kind: "existing" as const,
@@ -201,6 +208,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
         date,
         visibility: isPublic ? ("public" as const) : ("draft" as const),
         photos: uploaded,
+        tags: selectedTags,
       };
 
       if (isEdit && itemId) {
@@ -340,6 +348,14 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
                 label={isPublic ? "Public" : "Draft"}
               />
             </div>
+
+            {/* Tags */}
+            <TagField
+              available={availableTags}
+              selected={selectedTags}
+              onChange={setSelectedTags}
+              disabled={busy}
+            />
 
             {error && <p className="text-xs text-(--red-500)">{error}</p>}
 

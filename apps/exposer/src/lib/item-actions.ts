@@ -1,11 +1,19 @@
 "use server";
 
 import { auth } from "@jf/auth";
-import { db, exposerItems, exposerPhotos, withTransaction } from "@jf/db";
+import {
+  db,
+  exposerItemTags,
+  exposerItems,
+  exposerPhotos,
+  exposerTags,
+  withTransaction,
+} from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
 import { getPublicImageUrl } from "./s3-url";
+import { resolveTagIds } from "./tags";
 
 type Visibility = "public" | "draft";
 
@@ -27,6 +35,7 @@ export type EditItem = {
   date: string;
   visibility: Visibility;
   photos: EditPhoto[];
+  tags: string[];
 };
 
 async function requireUserId(): Promise<string> {
@@ -47,9 +56,13 @@ export async function createItemAction(input: {
   date: string;
   visibility: Visibility;
   photos: PhotoInput[];
+  tags: string[];
 }): Promise<void> {
   const userId = await requireUserId();
   if (input.photos.length === 0) throw new Error("An item needs at least one photo.");
+
+  // Tags are resolved (create-or-reuse) up front; independent of the item transaction.
+  const tagIds = await resolveTagIds(userId, input.tags);
 
   await withTransaction(async (tx) => {
     const [item] = await tx
@@ -73,6 +86,10 @@ export async function createItemAction(input: {
         height: p.height,
       }))
     );
+
+    if (tagIds.length > 0) {
+      await tx.insert(exposerItemTags).values(tagIds.map((tagId) => ({ itemId: item.id, tagId })));
+    }
   });
 }
 
@@ -83,6 +100,7 @@ export async function updateItemAction(input: {
   date: string;
   visibility: Visibility;
   photos: PhotoInput[];
+  tags: string[];
 }): Promise<void> {
   const userId = await requireUserId();
   if (input.photos.length === 0) throw new Error("An item needs at least one photo.");
@@ -94,6 +112,8 @@ export async function updateItemAction(input: {
     .where(and(eq(exposerItems.id, input.id), eq(exposerItems.userId, userId)))
     .limit(1);
   if (!existing) throw new Error("Item not found.");
+
+  const tagIds = await resolveTagIds(userId, input.tags);
 
   const existingKeys = (
     await db
@@ -125,6 +145,12 @@ export async function updateItemAction(input: {
         height: p.height,
       }))
     );
+
+    // Replace-all the tag assignments.
+    await tx.delete(exposerItemTags).where(eq(exposerItemTags.itemId, input.id));
+    if (tagIds.length > 0) {
+      await tx.insert(exposerItemTags).values(tagIds.map((tagId) => ({ itemId: input.id, tagId })));
+    }
   });
 
   // Delete bucket objects only for photos that were removed (kept keys stay).
@@ -185,6 +211,14 @@ export async function getItemForEdit(id: string): Promise<EditItem | null> {
     .where(eq(exposerPhotos.itemId, id))
     .orderBy(exposerPhotos.position);
 
+  const tags = (
+    await db
+      .select({ name: exposerTags.name })
+      .from(exposerItemTags)
+      .innerJoin(exposerTags, eq(exposerItemTags.tagId, exposerTags.id))
+      .where(eq(exposerItemTags.itemId, id))
+  ).map((t) => t.name);
+
   return {
     id: item.id,
     title: item.title,
@@ -198,5 +232,6 @@ export async function getItemForEdit(id: string): Promise<EditItem | null> {
       width: p.width,
       height: p.height,
     })),
+    tags,
   };
 }
