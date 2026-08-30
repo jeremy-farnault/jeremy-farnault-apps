@@ -1,13 +1,17 @@
 import "server-only";
 
 import { db, exposerItemTags, exposerItems, exposerPhotos, exposerTags, user } from "@jf/db";
-import { and, asc, desc, eq, inArray, lt, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lt, lte, or, sql } from "drizzle-orm";
 import { renderDescriptionHtml } from "./description";
 import { getPublicImageUrl } from "./s3-url";
 
 const PAGE_SIZE = 12;
 
 export type FeedCursor = { date: string; createdAt: string; id: string };
+
+export type FeedFilters = { tags: string[]; from: string | null; to: string | null };
+
+export const NO_FILTERS: FeedFilters = { tags: [], from: null, to: null };
 
 export type FeedPhoto = { url: string; width: number; height: number };
 
@@ -42,6 +46,7 @@ export async function getFeedPage(
   ownerId: string,
   includeDrafts: boolean,
   cursor: FeedCursor | null,
+  filters: FeedFilters = NO_FILTERS,
   limit = PAGE_SIZE
 ): Promise<FeedPage> {
   const cursorCondition = cursor
@@ -59,6 +64,31 @@ export async function getFeedPage(
       )
     : undefined;
 
+  // Tag AND: resolve the selected names to this owner's tag ids. If any name doesn't
+  // resolve, the AND is unsatisfiable → return an empty page.
+  let tagCondition: ReturnType<typeof inArray> | undefined;
+  if (filters.tags.length > 0) {
+    const tagIds = (
+      await db
+        .select({ id: exposerTags.id })
+        .from(exposerTags)
+        .where(and(eq(exposerTags.userId, ownerId), inArray(exposerTags.name, filters.tags)))
+    ).map((t) => t.id);
+
+    if (tagIds.length < new Set(filters.tags).size) {
+      return { items: [], nextCursor: null };
+    }
+
+    const matchingItemIds = db
+      .select({ id: exposerItemTags.itemId })
+      .from(exposerItemTags)
+      .where(inArray(exposerItemTags.tagId, tagIds))
+      .groupBy(exposerItemTags.itemId)
+      .having(sql`count(distinct ${exposerItemTags.tagId}) = ${tagIds.length}`);
+
+    tagCondition = inArray(exposerItems.id, matchingItemIds);
+  }
+
   const rows = await db
     .select({
       id: exposerItems.id,
@@ -73,6 +103,9 @@ export async function getFeedPage(
       and(
         eq(exposerItems.userId, ownerId),
         includeDrafts ? undefined : eq(exposerItems.visibility, "public"),
+        filters.from ? gte(exposerItems.date, filters.from) : undefined,
+        filters.to ? lte(exposerItems.date, filters.to) : undefined,
+        tagCondition,
         cursorCondition
       )
     )
@@ -161,4 +194,27 @@ async function getTagsByItem(itemIds: string[]): Promise<Map<string, FeedTag[]>>
   }
 
   return byItem;
+}
+
+/**
+ * Distinct tags that appear on the owner's *visible* items — the set offered by the feed
+ * filter. Scoping to visible items keeps the list filterable and avoids leaking tag names
+ * that only appear on drafts to visitors.
+ */
+export async function getFilterableTags(
+  ownerId: string,
+  includeDrafts: boolean
+): Promise<FeedTag[]> {
+  return db
+    .selectDistinct({ name: exposerTags.name, color: exposerTags.color })
+    .from(exposerTags)
+    .innerJoin(exposerItemTags, eq(exposerItemTags.tagId, exposerTags.id))
+    .innerJoin(exposerItems, eq(exposerItems.id, exposerItemTags.itemId))
+    .where(
+      and(
+        eq(exposerTags.userId, ownerId),
+        includeDrafts ? undefined : eq(exposerItems.visibility, "public")
+      )
+    )
+    .orderBy(asc(exposerTags.name));
 }

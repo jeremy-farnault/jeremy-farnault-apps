@@ -6,7 +6,13 @@ import { db, user } from "@jf/db";
 import { and, eq, ne } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { type FeedCursor, type FeedPage, getFeedPage, getUserByHandle } from "./queries";
+import {
+  type FeedCursor,
+  type FeedFilters,
+  type FeedPage,
+  getFeedPage,
+  getUserByHandle,
+} from "./queries";
 import { getSessionUser } from "./user";
 
 /**
@@ -50,7 +56,8 @@ export async function setHandle(rawHandle: string): Promise<{ error: string } | 
  */
 export async function fetchFeedPageAction(
   handle: string,
-  cursor: FeedCursor | null
+  cursor: FeedCursor | null,
+  filters: FeedFilters
 ): Promise<FeedPage> {
   const owner = await getUserByHandle(handle);
   if (!owner) return { items: [], nextCursor: null };
@@ -58,7 +65,7 @@ export async function fetchFeedPageAction(
   const me = await getSessionUser();
   const isOwner = me?.id === owner.id;
 
-  return getFeedPage(owner.id, isOwner, cursor);
+  return getFeedPage(owner.id, isOwner, cursor, filters);
 }
 
 function isUniqueViolation(err: unknown): boolean {

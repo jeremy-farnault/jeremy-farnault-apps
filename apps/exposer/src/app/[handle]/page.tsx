@@ -1,5 +1,5 @@
 import { PortfolioFeed } from "@/components/portfolio-feed";
-import { getFeedPage, getUserByHandle } from "@/lib/queries";
+import { getFeedPage, getFilterableTags, getUserByHandle } from "@/lib/queries";
 import { getSessionUser } from "@/lib/user";
 import { notFound } from "next/navigation";
 
@@ -16,7 +16,10 @@ export default async function HandlePage({
   const me = await getSessionUser();
   const isOwner = me?.id === owner.id;
 
-  const { items, nextCursor } = await getFeedPage(owner.id, isOwner, null);
+  const [{ items, nextCursor }, availableTags] = await Promise.all([
+    getFeedPage(owner.id, isOwner, null),
+    getFilterableTags(owner.id, isOwner),
+  ]);
 
   return (
     <PortfolioFeed
@@ -24,6 +27,7 @@ export default async function HandlePage({
       isOwner={isOwner}
       initialItems={items}
       initialCursor={nextCursor}
+      availableTags={availableTags}
     />
   );
 }
