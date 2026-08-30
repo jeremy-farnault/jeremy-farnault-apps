@@ -28,6 +28,14 @@ export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => 
         </div>
       )}
 
+      {item.descriptionHtml && (
+        <div
+          className="exposer-description text-sm text-(--grey-700)"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: server-sanitized rich text (see lib/description.ts)
+          dangerouslySetInnerHTML={{ __html: item.descriptionHtml }}
+        />
+      )}
+
       {/* Basic sequential photo display; swipe carousel + lightbox come in ticket 10. */}
       <div className="flex flex-col gap-2">
         {item.photos.map((photo, i) => (

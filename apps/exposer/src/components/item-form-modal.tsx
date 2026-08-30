@@ -1,5 +1,6 @@
 "use client";
 
+import { DescriptionEditor } from "@/components/description-editor";
 import { ACCEPT_ATTR, MAX_PHOTOS, getImageDimensions, validatePhotoFile } from "@/lib/image";
 import {
   type PhotoInput,
@@ -10,6 +11,7 @@ import {
   updateItemAction,
 } from "@/lib/item-actions";
 import { ActionModal, DatePicker, Switch, TextInput } from "@jf/ui";
+import { extractPlainText } from "@jf/ui/rich-text";
 import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -31,6 +33,11 @@ function revokePending(photos: PhotoDraft[]) {
   }
 }
 
+/** Editor JSON with no visible text collapses to null so nothing is stored/rendered. */
+function normalizeDescription(json: string): string | null {
+  return extractPlainText(json).trim() ? json : null;
+}
+
 type Props = {
   isOpen: boolean;
   /** null = create, otherwise edit that item. */
@@ -43,6 +50,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
   const isEdit = itemId !== null;
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState(today());
   const [isPublic, setIsPublic] = useState(false); // new posts default to Draft
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
@@ -60,6 +68,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
 
     if (itemId === null) {
       setTitle("");
+      setDescription("");
       setDate(today());
       setIsPublic(false);
       setPhotos([]);
@@ -74,6 +83,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
           return;
         }
         setTitle(item.title ?? "");
+        setDescription(item.description ?? "");
         setDate(item.date);
         setIsPublic(item.visibility === "public");
         setPhotos(
@@ -187,6 +197,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
 
       const payload = {
         title: title.trim() ? title.trim() : null,
+        description: normalizeDescription(description),
         date,
         visibility: isPublic ? ("public" as const) : ("draft" as const),
         photos: uploaded,
@@ -309,6 +320,15 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
               placeholder="Title (optional)"
               disabled={busy}
             />
+
+            {/* Description */}
+            {!loadingEdit && (
+              <DescriptionEditor
+                key={itemId ?? "new"}
+                initialContent={description}
+                onChange={setDescription}
+              />
+            )}
 
             {/* Date + visibility */}
             <div className="flex items-center justify-between gap-4">

@@ -23,6 +23,7 @@ export type EditPhoto = {
 export type EditItem = {
   id: string;
   title: string | null;
+  description: string | null;
   date: string;
   visibility: Visibility;
   photos: EditPhoto[];
@@ -42,6 +43,7 @@ export async function generatePresignedUploadUrlAction(
 
 export async function createItemAction(input: {
   title: string | null;
+  description: string | null;
   date: string;
   visibility: Visibility;
   photos: PhotoInput[];
@@ -55,6 +57,7 @@ export async function createItemAction(input: {
       .values({
         userId,
         title: input.title,
+        description: input.description,
         date: input.date,
         visibility: input.visibility,
       })
@@ -76,6 +79,7 @@ export async function createItemAction(input: {
 export async function updateItemAction(input: {
   id: string;
   title: string | null;
+  description: string | null;
   date: string;
   visibility: Visibility;
   photos: PhotoInput[];
@@ -103,6 +107,7 @@ export async function updateItemAction(input: {
       .update(exposerItems)
       .set({
         title: input.title,
+        description: input.description,
         date: input.date,
         visibility: input.visibility,
         updatedAt: new Date(),
@@ -160,6 +165,7 @@ export async function getItemForEdit(id: string): Promise<EditItem | null> {
     .select({
       id: exposerItems.id,
       title: exposerItems.title,
+      description: exposerItems.description,
       date: exposerItems.date,
       visibility: exposerItems.visibility,
     })
@@ -182,6 +188,7 @@ export async function getItemForEdit(id: string): Promise<EditItem | null> {
   return {
     id: item.id,
     title: item.title,
+    description: item.description,
     date: item.date,
     visibility: item.visibility,
     photos: photos.map((p) => ({

@@ -2,6 +2,7 @@ import "server-only";
 
 import { db, exposerItems, exposerPhotos, user } from "@jf/db";
 import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
+import { renderDescriptionHtml } from "./description";
 import { getPublicImageUrl } from "./s3-url";
 
 const PAGE_SIZE = 12;
@@ -13,6 +14,8 @@ export type FeedPhoto = { url: string; width: number; height: number };
 export type FeedItem = {
   id: string;
   title: string | null;
+  /** Server-sanitized HTML of the description, or null when empty. */
+  descriptionHtml: string | null;
   /** "YYYY-MM-DD" — used for day-header grouping. */
   date: string;
   isDraft: boolean;
@@ -57,6 +60,7 @@ export async function getFeedPage(
     .select({
       id: exposerItems.id,
       title: exposerItems.title,
+      description: exposerItems.description,
       date: exposerItems.date,
       createdAt: exposerItems.createdAt,
       visibility: exposerItems.visibility,
@@ -86,6 +90,7 @@ export async function getFeedPage(
   const items: FeedItem[] = pageRows.map((r) => ({
     id: r.id,
     title: r.title,
+    descriptionHtml: renderDescriptionHtml(r.description),
     date: r.date,
     isDraft: r.visibility === "draft",
     photos: photosByItem.get(r.id) ?? [],
