@@ -1,6 +1,6 @@
+import { PhotoCarousel } from "@/components/photo-carousel";
 import type { FeedItem as FeedItemData } from "@/lib/queries";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
-import Image from "next/image";
 
 export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => void }) {
   return (
@@ -36,21 +36,7 @@ export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => 
         />
       )}
 
-      {/* Basic sequential photo display; swipe carousel + lightbox come in ticket 10. */}
-      <div className="flex flex-col gap-2">
-        {item.photos.map((photo, i) => (
-          <Image
-            key={photo.url}
-            src={photo.url}
-            alt={item.title ?? ""}
-            width={photo.width}
-            height={photo.height}
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            priority={i === 0}
-            className="h-auto w-full rounded-xl bg-(--surface-200)"
-          />
-        ))}
-      </div>
+      <PhotoCarousel photos={item.photos} alt={item.title ?? ""} />
     </article>
   );
 }
