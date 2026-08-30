@@ -113,7 +113,15 @@ In the IAM user → **Permissions** tab → **Add permissions → Create inline 
 }
 ```
 
-Name the policy `exposer-s3-inline` → **Save**.
+Name the policy `Uncaught Exception: TypeError: b.mask is not a function
+    at a.exports.mask (/var/task/apps/exposer/.next/server/chunks/830.js:908:13452)
+    at r.frame (/var/task/apps/exposer/.next/server/chunks/830.js:885:7079)
+    at r.dispatch (/var/task/apps/exposer/.next/server/chunks/830.js:885:9908)
+    at r.send (/var/task/apps/exposer/.next/server/chunks/830.js:885:9441)
+    at J.send (/var/task/apps/exposer/.next/server/chunks/830.js:435:142787)
+    at Timeout._onTimeout (/var/task/apps/exposer/.next/server/chunks/830.js:900:957)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)` → **Save**.
 
 This scopes the credentials to only `PutObject`, `DeleteObject`, and `GetObject` within the
 `exposer/` prefix. No access to any other app's prefix.
