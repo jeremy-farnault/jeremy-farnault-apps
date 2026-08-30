@@ -55,6 +55,19 @@ function computeMedian(sorted: number[]): number {
     : (sorted[mid] ?? 0);
 }
 
+// Parse a log value to a comparable number. Time logs ("HH:MM") become total
+// minutes so the full time (not just the hour) drives the shade.
+function parseLogValue(type: HabitType, value: string): number {
+  if (type === "time") {
+    const [h, m] = value.split(":");
+    const hours = Number.parseInt(h ?? "", 10);
+    const minutes = Number.parseInt(m ?? "", 10);
+    if (Number.isNaN(hours)) return Number.NaN;
+    return hours * 60 + (Number.isNaN(minutes) ? 0 : minutes);
+  }
+  return Number.parseFloat(value);
+}
+
 function getNumericStep(value: number, min: number, median: number, max: number): number {
   if (min === max) return 400;
   if (value === median) return 400;
@@ -164,7 +177,7 @@ export function HabitHeatmap({
 
   if (type !== "boolean") {
     const values = logs
-      .map((l) => Number.parseFloat(l.value))
+      .map((l) => parseLogValue(type, l.value))
       .filter((v) => !Number.isNaN(v))
       .sort((a, b) => a - b);
 
@@ -186,7 +199,7 @@ export function HabitHeatmap({
     }
 
     if (logValue === undefined) return "var(--grey-200)";
-    const v = Number.parseFloat(logValue);
+    const v = parseLogValue(type, logValue);
     if (Number.isNaN(v)) return "var(--grey-200)";
     const step = getNumericStep(v, numericMin, numericMedian, numericMax);
     return `var(--${colorBase}-${step})`;
