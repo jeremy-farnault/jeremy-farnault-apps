@@ -2,7 +2,7 @@
 
 import { CalendarBlankIcon, CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import {
   type DayButtonProps,
   DayPicker,
@@ -21,6 +21,7 @@ interface DatePickerProps {
   maxDate?: string;
   accentColor?: string;
   calendarAlign?: "start" | "end";
+  className?: string;
 }
 
 function parseDate(value: string): Date | undefined {
@@ -37,8 +38,29 @@ function toISODate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-function formatDisplay(date: Date): string {
-  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function formatInput(date: Date): string {
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const y = String(date.getFullYear()).padStart(4, "0");
+  return `${d}/${m}/${y}`;
+}
+
+// Parse a typed date in DD/MM/YYYY (tolerating - or . separators).
+function parseTypedDate(text: string): Date | undefined {
+  const parts = text
+    .trim()
+    .split(/[/.\-\s]+/)
+    .map(Number);
+  if (parts.length !== 3) return undefined;
+  const [d, m, y] = parts as [number, number, number];
+  if (!Number.isInteger(d) || !Number.isInteger(m) || !Number.isInteger(y)) return undefined;
+  if (y < 1000 || m < 1 || m > 12 || d < 1 || d > 31) return undefined;
+  const date = new Date(y, m - 1, d);
+  // Reject overflow like 31/02 which JS would roll into March.
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
+    return undefined;
+  }
+  return date;
 }
 
 function CustomMonthCaption({ calendarMonth }: MonthCaptionProps) {
@@ -107,10 +129,17 @@ export function DatePicker({
   maxDate,
   accentColor = "var(--yellow-400)",
   calendarAlign = "start",
+  className,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = parseDate(value);
-  const formatted = selected ? formatDisplay(selected) : null;
+
+  // Local text for the typeable field, kept in sync with the external value.
+  const [text, setText] = useState(selected ? formatInput(selected) : "");
+  useEffect(() => {
+    const d = parseDate(value);
+    setText(d ? formatInput(d) : "");
+  }, [value]);
 
   const min = minDate ? parseDate(minDate) : undefined;
   const max = maxDate ? parseDate(maxDate) : undefined;
@@ -120,24 +149,83 @@ export function DatePicker({
     ...(max ? [{ after: max }] : []),
   ];
 
+  function isWithinBounds(date: Date): boolean {
+    if (min && date < min) return false;
+    if (max && date > max) return false;
+    if (disablePast) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (date < today) return false;
+    }
+    return true;
+  }
+
+  function commitText() {
+    const trimmed = text.trim();
+    if (trimmed === "") {
+      if (value) onChange("");
+      setText("");
+      return;
+    }
+    const parsed = parseTypedDate(trimmed);
+    if (parsed && isWithinBounds(parsed)) {
+      onChange(toISODate(parsed));
+      setText(formatInput(parsed));
+    } else {
+      // Revert to the last valid value.
+      setText(selected ? formatInput(selected) : "");
+    }
+  }
+
   return (
     <PopoverPrimitive.Root open={open && !disabled} onOpenChange={setOpen}>
-      <PopoverPrimitive.Trigger asChild>
-        <button
-          type="button"
+      <div
+        className={cn(
+          "flex h-11 w-full items-center gap-1 rounded-[10px]",
+          "bg-(--surface-150) pl-3 pr-1 text-sm",
+          "focus-within:bg-(--surface-200)",
+          disabled && "pointer-events-none cursor-not-allowed opacity-50",
+          className
+        )}
+      >
+        <input
+          type="text"
+          inputMode="numeric"
           disabled={disabled}
+          value={text}
+          placeholder={placeholder}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={commitText}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              commitText();
+            } else if (e.key === "Escape") {
+              setText(selected ? formatInput(selected) : "");
+              e.currentTarget.blur();
+            }
+          }}
           className={cn(
-            "flex h-11 w-full items-center justify-between rounded-[10px]",
-            "bg-(--surface-150) px-3 text-sm",
-            "hover:bg-(--surface-200) focus:outline-none focus:ring-0",
-            "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-            formatted ? "text-(--grey-900)" : "text-(--grey-500)"
+            "min-w-0 flex-1 bg-transparent outline-none",
+            "placeholder:text-(--grey-500)",
+            text ? "text-(--grey-900)" : "text-(--grey-500)"
           )}
-        >
-          <span>{formatted ?? placeholder}</span>
-          <CalendarBlankIcon size={16} className="shrink-0 text-(--grey-700)" />
-        </button>
-      </PopoverPrimitive.Trigger>
+        />
+        <PopoverPrimitive.Trigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label="Open calendar"
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+              "text-(--grey-700) hover:bg-(--surface-300) focus:outline-none",
+              "disabled:pointer-events-none"
+            )}
+          >
+            <CalendarBlankIcon size={16} />
+          </button>
+        </PopoverPrimitive.Trigger>
+      </div>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           align={calendarAlign}
@@ -157,6 +245,7 @@ export function DatePicker({
               onSelect={(date) => {
                 if (date) {
                   onChange(toISODate(date));
+                  setText(formatInput(date));
                   setOpen(false);
                 }
               }}

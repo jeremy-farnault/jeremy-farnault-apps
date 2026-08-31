@@ -2,7 +2,6 @@
 
 import { signOut, useSession } from "@jf/auth/client";
 import { Button, UserMenu } from "@jf/ui";
-import { GearSixIcon } from "@phosphor-icons/react";
 
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
 const EXPOSER_URL = process.env.NEXT_PUBLIC_EXPOSER_URL ?? "http://localhost:3016";
@@ -22,21 +21,13 @@ export function HeaderAuth() {
     }
 
     return (
-      <div className="flex items-center gap-1">
-        <a
-          href="/settings"
-          aria-label="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
-        >
-          <GearSixIcon size={20} />
-        </a>
-        <UserMenu
-          email={session.user.email}
-          name={session.user.name ?? undefined}
-          {...(session.user.image ? { image: session.user.image } : {})}
-          onLogout={handleLogout}
-        />
-      </div>
+      <UserMenu
+        email={session.user.email}
+        name={session.user.name ?? undefined}
+        settingsHref="/settings"
+        {...(session.user.image ? { image: session.user.image } : {})}
+        onLogout={handleLogout}
+      />
     );
   }
 

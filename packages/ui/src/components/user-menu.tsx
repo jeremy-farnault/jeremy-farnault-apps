@@ -1,6 +1,6 @@
 "use client";
 
-import { InfinityIcon } from "@phosphor-icons/react";
+import { GearSixIcon, InfinityIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
 import { cn } from "../lib/utils";
@@ -11,10 +11,11 @@ interface UserMenuProps {
   email: string;
   name?: string;
   image?: string;
+  settingsHref?: string;
   onLogout: () => void;
 }
 
-export function UserMenu({ email, name, image, onLogout }: UserMenuProps) {
+export function UserMenu({ email, name, image, settingsHref, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
 
@@ -54,6 +55,19 @@ export function UserMenu({ email, name, image, onLogout }: UserMenuProps) {
             "outline-none min-w-[140px]"
           )}
         >
+          {settingsHref && (
+            <a
+              href={settingsHref}
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--grey-900)",
+                "hover:bg-(--surface-150)"
+              )}
+            >
+              <GearSixIcon size={18} weight="bold" />
+              Settings
+            </a>
+          )}
           <a
             href={INDEXER_URL}
             onClick={() => setOpen(false)}

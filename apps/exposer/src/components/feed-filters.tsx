@@ -99,19 +99,23 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium text-(--grey-500)">Date range</span>
             <div className="flex flex-wrap items-center gap-2">
-              <DatePicker
-                value={value.from ?? ""}
-                onChange={(from) => onChange({ ...value, from: from || null })}
-                placeholder="From"
-                {...(value.to ? { maxDate: value.to } : {})}
-              />
+              <div className="min-w-0 flex-1">
+                <DatePicker
+                  value={value.from ?? ""}
+                  onChange={(from) => onChange({ ...value, from: from || null })}
+                  placeholder="From"
+                  {...(value.to ? { maxDate: value.to } : {})}
+                />
+              </div>
               <span className="text-sm text-(--grey-500)">–</span>
-              <DatePicker
-                value={value.to ?? ""}
-                onChange={(to) => onChange({ ...value, to: to || null })}
-                placeholder="To"
-                {...(value.from ? { minDate: value.from } : {})}
-              />
+              <div className="min-w-0 flex-1">
+                <DatePicker
+                  value={value.to ?? ""}
+                  onChange={(to) => onChange({ ...value, to: to || null })}
+                  placeholder="To"
+                  {...(value.from ? { minDate: value.from } : {})}
+                />
+              </div>
             </div>
           </div>
         </div>
