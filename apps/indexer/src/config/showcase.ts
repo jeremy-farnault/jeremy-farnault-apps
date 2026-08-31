@@ -25,23 +25,23 @@ export const EXCLUDED_APP_IDS = new Set<string>(["tracer"]);
 
 export const descriptions: Record<string, string> = {
   aider:
-    "Your private AI assistant. Chat with a locally-hosted model, or ask about your own data across the other @jf apps.",
+    "AI assistant, running at home on a Raspberry Pi, so it's slow, but nothing ever leaves the house. Chat with a local model, or ask it questions about your data across the other apps.",
   classer:
-    "Rank anything. Build tier lists and ordered rankings for the things you care about — films, restaurants, ideas — and revisit them as your taste changes.",
+    "Rank anything. Build ordered rankings for the things you care about (films, restaurants, games...) and revisit them as your taste changes.",
   doser:
     "Track medications and symptoms. Log your doses, note how you feel over time, and see the patterns between the two.",
   exposer:
-    "A public-by-link photo portfolio. Publish curated, dated collections of your visual work as a chronological showcase anyone can browse.",
+    "A photo portfolio that you can share publicly. Publish chronological collections of your visual work as a showcase.",
   financer:
-    "Keep an eye on your money. Follow balances, income and spending across accounts, with charts that show where it all goes.",
+    "Track your finances. Follow assets, income and spending, with charts that show where it all goes and how it evolves over time.",
   gainer:
-    "Plan and log your workouts. Build routines, record sets and reps, and watch your strength climb over time.",
+    "Log your workouts. Record sets and reps, cardio sessions or bodyweight exercises, and visualize how your strength evolves over time.",
   journaler:
-    "A daily journal. Capture how your days go with quick entries, and look back to see how things have changed.",
+    "Log the media you consume, describe and rank it. Movies, TV shows, books, games or manga: keep track of everything you've been through.",
   noter:
-    "Notes that stay out of your way. Organise thoughts into folders, format them richly, and set reminders so nothing slips.",
+    "Organize your thoughts into folders, format them the way you need, pin the important ones and set reminders for key dates.",
   placer:
     "Save the places that matter. Pin spots on the map and keep lists of where you've been and where you want to go.",
   routiner:
-    "Build routines that stick. Set up daily checklists and habits, and keep your streaks alive.",
+    "Build routines that fit you: done or not, amount of time achieved, or time-based. Set up your daily checklist and keep your streaks strong.",
 };
