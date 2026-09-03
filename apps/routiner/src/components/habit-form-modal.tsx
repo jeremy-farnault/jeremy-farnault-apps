@@ -154,7 +154,7 @@ export function HabitFormModal({ isOpen, onClose, habit, onCreated }: Props) {
               </div>
             </Tooltip>
           ) : (
-            <DatePicker value={startDate} onChange={setStartDate} disablePast />
+            <DatePicker value={startDate} onChange={setStartDate} />
           )}
         </div>
       </div>

@@ -18,6 +18,19 @@ type Props = {
   sort: SortOption;
 };
 
+// Insert a freshly created habit at the position matching the active sort,
+// so the optimistic UI matches what a refresh from the server would show.
+function insertSorted(habits: Habit[], habit: Habit, sort: SortOption): Habit[] {
+  if (sort === "name") {
+    const index = habits.findIndex((h) => h.name.localeCompare(habit.name) > 0);
+    if (index === -1) return [...habits, habit];
+    return [...habits.slice(0, index), habit, ...habits.slice(index)];
+  }
+  // "lastLogged" sorts logged habits first with never-logged (like a new one)
+  // last; "createdAt" is newest-first. Both put a brand-new habit at an end.
+  return sort === "lastLogged" ? [...habits, habit] : [habit, ...habits];
+}
+
 export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -63,7 +76,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
   }
 
   function handleCreated(habit: Habit) {
-    setLocalHabits((prev) => [habit, ...prev]);
+    setLocalHabits((prev) => insertSorted(prev, habit, sort));
   }
 
   async function handleArchive(id: string) {
