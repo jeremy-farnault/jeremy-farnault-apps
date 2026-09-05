@@ -10,6 +10,8 @@ export interface SearchInputProps {
   debounceMs?: number;
   className?: string;
   onDebouncedChange: (value: string) => void;
+  /** Fires synchronously on every keystroke, before the debounce elapses. */
+  onImmediateChange?: (value: string) => void;
 }
 
 export function SearchInput({
@@ -17,6 +19,7 @@ export function SearchInput({
   debounceMs = 300,
   className,
   onDebouncedChange,
+  onImmediateChange,
 }: SearchInputProps) {
   const [value, setValue] = useState("");
 
@@ -29,12 +32,20 @@ export function SearchInput({
 
   return (
     <div className={cn("relative", className)}>
-      <TextInput value={value} onChange={setValue} placeholder={placeholder} />
+      <TextInput
+        value={value}
+        onChange={(v) => {
+          setValue(v);
+          onImmediateChange?.(v);
+        }}
+        placeholder={placeholder}
+      />
       {value && (
         <button
           type="button"
           onClick={() => {
             setValue("");
+            onImmediateChange?.("");
             onDebouncedChange("");
           }}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-(--grey-400) hover:text-(--grey-700)"

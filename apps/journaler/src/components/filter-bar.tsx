@@ -22,9 +22,10 @@ const RATING_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 type Props = {
   filters: FilterParams;
   onSearch?: (query: string) => void;
+  onSearchImmediate?: (query: string) => void;
 };
 
-export function FilterBar({ filters, onSearch }: Props) {
+export function FilterBar({ filters, onSearch, onSearchImmediate }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -91,6 +92,7 @@ export function FilterBar({ filters, onSearch }: Props) {
           <SearchInput
             placeholder="Search entries…"
             onDebouncedChange={onSearch}
+            {...(onSearchImmediate && { onImmediateChange: onSearchImmediate })}
             className="w-full sm:w-[250px]"
           />
         )}
