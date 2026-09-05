@@ -241,6 +241,7 @@ export function DatePicker({
             <DayPicker
               mode="single"
               hideNavigation
+              showOutsideDays
               selected={selected}
               onSelect={(date) => {
                 if (date) {
