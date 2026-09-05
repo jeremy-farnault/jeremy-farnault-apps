@@ -15,6 +15,7 @@ export const COLOR_PALETTE = [
   { label: "Moss", value: "var(--moss-400)" },
   { label: "Teal", value: "var(--teal-400)" },
   { label: "Blue", value: "var(--blue-400)" },
+  { label: "Blue Dark", value: "var(--blue-600)" },
   { label: "Purple", value: "var(--purple-400)" },
   { label: "Purple Dark", value: "var(--purple-600)" },
   { label: "Magenta", value: "var(--magenta-400)" },

@@ -40,6 +40,8 @@ export const descriptions: Record<string, string> = {
     "Log the media you consume, describe and rank it. Movies, TV shows, books, games or manga: keep track of everything you've been through.",
   noter:
     "Organize your thoughts into folders, format them the way you need, pin the important ones and set reminders for key dates.",
+  organiser:
+    "Organise your todos on a personal kanban board. Drag cards across columns, tag them, set deadlines, and see everything you're working on at a glance.",
   placer:
     "Save the places that matter. Pin spots on the map and keep lists of where you've been and where you want to go.",
   routiner:

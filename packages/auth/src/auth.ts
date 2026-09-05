@@ -55,6 +55,7 @@ export const auth = betterAuth({
     process.env.NEXT_PUBLIC_ROUTINER_URL ?? "http://localhost:3007",
     process.env.NEXT_PUBLIC_CLASSER_URL ?? "http://localhost:3008",
     process.env.NEXT_PUBLIC_EXPOSER_URL ?? "http://localhost:3016",
+    process.env.NEXT_PUBLIC_ORGANISER_URL ?? "http://localhost:3017",
   ],
 });
 

@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@jf/organiser",
+  "ignoreCommand": "npx turbo-ignore @jf/organiser",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
+}

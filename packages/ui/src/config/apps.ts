@@ -7,6 +7,7 @@ import {
   BarbellIcon,
   ChecksIcon,
   CoinsIcon,
+  KanbanIcon,
   MapPinIcon,
   MapTrifoldIcon,
   NotepadIcon,
@@ -80,6 +81,13 @@ export const apps: AppDefinition[] = [
     icon: NotepadIcon,
     href: process.env.NEXT_PUBLIC_NOTER_URL ?? "#",
     accentColor: "--magenta-400",
+  },
+  {
+    id: "organiser",
+    name: "Organiser",
+    icon: KanbanIcon,
+    href: process.env.NEXT_PUBLIC_ORGANISER_URL ?? "#",
+    accentColor: "--blue-600",
   },
   {
     id: "placer",
