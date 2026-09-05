@@ -32,7 +32,7 @@ export function PhotoCarousel({ photos, alt }: Props) {
   return (
     <>
       <div
-        className="relative mx-auto w-full max-h-[80vh] overflow-hidden rounded-xl bg-(--surface-200) transition-[aspect-ratio] duration-200"
+        className="relative mx-auto w-full max-w-md max-h-[80vh] overflow-hidden rounded-xl bg-(--surface-200) transition-[aspect-ratio] duration-200"
         style={{ aspectRatio: `${active.width} / ${active.height}` }}
         onTouchStart={(e) => {
           touchStartX.current = e.touches[0]?.clientX ?? null;

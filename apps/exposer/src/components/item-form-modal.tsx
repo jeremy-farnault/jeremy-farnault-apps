@@ -14,7 +14,13 @@ import {
 import { type Tag, getUserTags } from "@/lib/tag-actions";
 import { ActionModal, DatePicker, Switch, TextInput } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
-import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CircleNotchIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 type PhotoDraft =
@@ -71,13 +77,17 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
     setConfirmingDelete(false);
     getUserTags().then(setAvailableTags);
 
+    // Always start from a clean slate so state from a previously opened post
+    // never flashes while the current one loads.
+    setTitle("");
+    setDescription("");
+    setDate(today());
+    setIsPublic(false);
+    setPhotos([]);
+    setSelectedTags([]);
+
     if (itemId === null) {
-      setTitle("");
-      setDescription("");
-      setDate(today());
-      setIsPublic(false);
-      setPhotos([]);
-      setSelectedTags([]);
+      setLoadingEdit(false);
       return;
     }
 
@@ -250,126 +260,136 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
         title={isEdit ? "Edit post" : "New post"}
         closeOnBackdropClick={!busy}
         closeOnEscapeKeyDown={!busy}
-        content={
-          <div className="flex flex-col gap-4">
-            {/* Photos */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-(--grey-500)">
-                  Photos ({photos.length}/{MAX_PHOTOS})
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {photos.map((photo, index) => (
-                  <div
-                    key={previewUrlOf(photo)}
-                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-(--surface-200)"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrlOf(photo)} alt="" className="h-full w-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[rgba(0,0,0,0.45)] px-1 py-0.5">
-                      <button
-                        type="button"
-                        aria-label="Move left"
-                        disabled={index === 0 || busy}
-                        onClick={() => movePhoto(index, -1)}
-                        className="text-white disabled:opacity-30"
-                      >
-                        <ArrowLeftIcon size={12} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Remove photo"
-                        disabled={busy}
-                        onClick={() => removePhoto(index)}
-                        className="text-white disabled:opacity-30"
-                      >
-                        <TrashIcon size={12} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Move right"
-                        disabled={index === photos.length - 1 || busy}
-                        onClick={() => movePhoto(index, 1)}
-                        className="text-white disabled:opacity-30"
-                      >
-                        <ArrowRightIcon size={12} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                {photos.length < MAX_PHOTOS && (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-(--grey-300) text-(--grey-500) hover:text-(--grey-900) disabled:opacity-50"
-                  >
-                    <PlusIcon size={18} />
-                    <span className="text-[10px]">Add</span>
-                  </button>
-                )}
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ACCEPT_ATTR}
-                multiple
-                hidden
-                onChange={(e) => handleAddFiles(e.target.files)}
-              />
-            </div>
-
-            {/* Title */}
-            <TextInput
-              value={title}
-              onChange={setTitle}
-              placeholder="Title (optional)"
+        headerActions={
+          isEdit ? (
+            <button
+              type="button"
+              aria-label="Delete post"
               disabled={busy}
-            />
+              onClick={() => setConfirmingDelete(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-(--red-500) hover:text-(--red-600) disabled:opacity-50"
+            >
+              <TrashIcon size={16} weight="bold" />
+            </button>
+          ) : undefined
+        }
+        content={
+          loadingEdit ? (
+            <div className="flex min-h-[280px] items-center justify-center">
+              <CircleNotchIcon size={28} className="animate-spin text-(--grey-400)" />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {/* Photos */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-(--grey-500)">
+                    Photos ({photos.length}/{MAX_PHOTOS})
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {photos.map((photo, index) => (
+                    <div
+                      key={previewUrlOf(photo)}
+                      className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-(--surface-200)"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewUrlOf(photo)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[rgba(0,0,0,0.45)] px-1 py-0.5">
+                        <button
+                          type="button"
+                          aria-label="Move left"
+                          disabled={index === 0 || busy}
+                          onClick={() => movePhoto(index, -1)}
+                          className="text-white disabled:opacity-30"
+                        >
+                          <ArrowLeftIcon size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Remove photo"
+                          disabled={busy}
+                          onClick={() => removePhoto(index)}
+                          className="text-white disabled:opacity-30"
+                        >
+                          <TrashIcon size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Move right"
+                          disabled={index === photos.length - 1 || busy}
+                          onClick={() => movePhoto(index, 1)}
+                          className="text-white disabled:opacity-30"
+                        >
+                          <ArrowRightIcon size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
 
-            {/* Description */}
-            {!loadingEdit && (
+                  {photos.length < MAX_PHOTOS && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-(--grey-300) text-(--grey-500) hover:text-(--grey-900) disabled:opacity-50"
+                    >
+                      <PlusIcon size={18} />
+                      <span className="text-[10px]">Add</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPT_ATTR}
+                  multiple
+                  hidden
+                  onChange={(e) => handleAddFiles(e.target.files)}
+                />
+              </div>
+
+              {/* Title */}
+              <TextInput
+                value={title}
+                onChange={setTitle}
+                placeholder="Title (optional)"
+                disabled={busy}
+              />
+
+              {/* Description */}
               <DescriptionEditor
                 key={itemId ?? "new"}
                 initialContent={description}
                 onChange={setDescription}
               />
-            )}
 
-            {/* Date + visibility */}
-            <div className="flex items-center justify-between gap-4">
-              <DatePicker value={date} onChange={setDate} disabled={busy} calendarAlign="start" />
-              <Switch
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
+              {/* Date + visibility */}
+              <div className="flex items-center justify-between gap-4">
+                <DatePicker value={date} onChange={setDate} disabled={busy} calendarAlign="start" />
+                <Switch
+                  checked={isPublic}
+                  onCheckedChange={setIsPublic}
+                  disabled={busy}
+                  label={isPublic ? "Public" : "Draft"}
+                />
+              </div>
+
+              {/* Tags */}
+              <TagField
+                available={availableTags}
+                selected={selectedTags}
+                onChange={setSelectedTags}
                 disabled={busy}
-                label={isPublic ? "Public" : "Draft"}
               />
+
+              {error && <p className="text-xs text-(--red-500)">{error}</p>}
             </div>
-
-            {/* Tags */}
-            <TagField
-              available={availableTags}
-              selected={selectedTags}
-              onChange={setSelectedTags}
-              disabled={busy}
-            />
-
-            {error && <p className="text-xs text-(--red-500)">{error}</p>}
-
-            {isEdit && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setConfirmingDelete(true)}
-                className="flex items-center gap-1.5 self-start text-xs font-medium text-(--red-500) hover:text-(--red-600) disabled:opacity-50"
-              >
-                <XIcon size={12} weight="bold" /> Delete post
-              </button>
-            )}
-          </div>
+          )
         }
         primaryButton={{
           label: isEdit ? "Save" : "Create",

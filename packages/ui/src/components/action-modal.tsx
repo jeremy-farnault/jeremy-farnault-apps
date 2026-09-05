@@ -25,6 +25,12 @@ interface ActionModalProps {
   paragraph?: string;
   icon?: ReactNode;
   content?: ReactNode;
+  /**
+   * Extra controls rendered in the top-right corner, left of the close button.
+   * Passing this also forces the close (X) button to stay visible at all
+   * breakpoints regardless of `closeOnBackdropClick`.
+   */
+  headerActions?: ReactNode;
   primaryButton?: PrimaryButton;
   secondaryButton?: SecondaryButton;
   size: "small" | "large";
@@ -47,6 +53,7 @@ export function ActionModal({
   paragraph,
   icon,
   content,
+  headerActions,
   primaryButton,
   secondaryButton,
   size,
@@ -57,6 +64,15 @@ export function ActionModal({
   borderColor,
 }: ActionModalProps) {
   const hasButtons = primaryButton || secondaryButton;
+
+  // Close (X) button visibility. It shows at all breakpoints when the backdrop
+  // can't dismiss the modal or when header actions are present; otherwise it's a
+  // mobile-only affordance for the fit-viewport variant. Preserves prior behaviour
+  // for callers that don't pass `headerActions`.
+  const showCloseAllBreakpoints = !closeOnBackdropClick || !!headerActions;
+  const showCloseMobileOnly = !showCloseAllBreakpoints && fitMobileViewport && closeOnBackdropClick;
+  const showCloseButton = showCloseAllBreakpoints || showCloseMobileOnly;
+  const showHeaderCluster = showCloseButton || !!headerActions;
 
   // Track the visual viewport height (accounts for soft keyboard on mobile).
   // dvh alone is unreliable in iOS Safari standalone/PWA mode.
@@ -114,26 +130,25 @@ export function ActionModal({
               ...(borderColor ? { borderColor } : {}),
             }}
           >
-            {!closeOnBackdropClick && (
-              <button
-                onClick={onClose}
-                aria-label="Close dialog"
-                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
-                type="button"
+            {showHeaderCluster && (
+              <div
+                className={cn(
+                  "absolute top-4 right-4 z-10 flex items-center gap-1",
+                  showCloseMobileOnly && "sm:hidden"
+                )}
               >
-                <XIcon size={16} weight="bold" />
-              </button>
-            )}
-
-            {fitMobileViewport && closeOnBackdropClick && (
-              <button
-                onClick={onClose}
-                aria-label="Close dialog"
-                className="sm:hidden absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
-                type="button"
-              >
-                <XIcon size={16} weight="bold" />
-              </button>
+                {headerActions}
+                {showCloseButton && (
+                  <button
+                    onClick={onClose}
+                    aria-label="Close dialog"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
+                    type="button"
+                  >
+                    <XIcon size={16} weight="bold" />
+                  </button>
+                )}
+              </div>
             )}
 
             <div className={cn("flex flex-col gap-4", fitMobileViewport && "flex-1 min-h-0")}>
