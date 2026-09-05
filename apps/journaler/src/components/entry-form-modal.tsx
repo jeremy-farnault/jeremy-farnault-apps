@@ -216,8 +216,8 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
               </div>
 
               {/* Category + Date row */}
-              <div className="flex gap-3">
-                <div className="flex flex-1 flex-col gap-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium text-(--grey-700)">Category</p>
                   <Select
                     value={form.category}
@@ -234,7 +234,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                   {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
                 </div>
 
-                <div className="flex flex-1 flex-col gap-1">
+                <div className="flex flex-col gap-1">
                   <label htmlFor="entry-date" className="text-sm font-medium text-(--grey-700)">
                     Date
                   </label>

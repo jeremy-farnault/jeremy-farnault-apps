@@ -199,7 +199,8 @@ export async function deleteAssetSource(id: string): Promise<void> {
 
 export async function addAssetEntry(sourceId: string, month: string, value: string): Promise<void> {
   const numericValue = Number(value);
-  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  if (!value.trim() || Number.isNaN(numericValue) || numericValue < 0)
+    throw new Error("Value must be a valid number");
   const userId = await getAuthUserId();
   await db.insert(financerAssetEntries).values({ userId, sourceId, value, month });
   revalidatePath("/", "layout");
@@ -207,7 +208,8 @@ export async function addAssetEntry(sourceId: string, month: string, value: stri
 
 export async function updateAssetEntry(id: string, value: string): Promise<void> {
   const numericValue = Number(value);
-  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+  if (!value.trim() || Number.isNaN(numericValue) || numericValue < 0)
+    throw new Error("Value must be a valid number");
   const userId = await getAuthUserId();
   await db
     .update(financerAssetEntries)

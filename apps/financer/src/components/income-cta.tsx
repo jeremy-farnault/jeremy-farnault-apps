@@ -254,7 +254,7 @@ export function IncomeCta({ viewedMonth, homeCurrency, sources }: IncomeCtaProps
         }
         primaryButton={{ label: "Save", loading: isBulkPending, onClick: handleBulkSave }}
         secondaryButton={{ label: "Cancel", onClick: handleBulkClose }}
-        closeOnBackdropClick={!isBulkPending}
+        closeOnBackdropClick={false}
         closeOnEscapeKeyDown={!isBulkPending}
       />
     </>

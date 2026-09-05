@@ -110,8 +110,8 @@ export function SavingsCta({ viewedMonth, homeCurrency, sources }: SavingsCtaPro
       if (!row.sourceId) {
         newErrors[idx] = "Select a source";
         hasErrors = true;
-      } else if (!Number(row.value) || Number(row.value) <= 0) {
-        newErrors[idx] = "Enter a positive number";
+      } else if (!row.value.trim() || Number.isNaN(Number(row.value)) || Number(row.value) < 0) {
+        newErrors[idx] = "Enter a valid amount";
         hasErrors = true;
       }
     }
@@ -254,7 +254,7 @@ export function SavingsCta({ viewedMonth, homeCurrency, sources }: SavingsCtaPro
         }
         primaryButton={{ label: "Save", loading: isBulkPending, onClick: handleBulkSave }}
         secondaryButton={{ label: "Cancel", onClick: handleBulkClose }}
-        closeOnBackdropClick={!isBulkPending}
+        closeOnBackdropClick={false}
         closeOnEscapeKeyDown={!isBulkPending}
       />
     </>

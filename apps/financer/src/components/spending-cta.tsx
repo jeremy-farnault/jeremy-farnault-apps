@@ -242,7 +242,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
         }
         primaryButton={{ label: "Save", loading: isPending, onClick: handleSave }}
         secondaryButton={{ label: "Cancel", onClick: handleClose }}
-        closeOnBackdropClick={!isPending}
+        closeOnBackdropClick={false}
         closeOnEscapeKeyDown={!isPending}
       />
     </>

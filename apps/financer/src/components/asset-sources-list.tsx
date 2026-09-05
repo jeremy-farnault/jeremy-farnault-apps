@@ -102,8 +102,8 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
 
   function handleLogSubmit() {
     if (!loggingSource) return;
-    if (!Number(logValue) || Number(logValue) <= 0) {
-      setLogValueError("Enter a positive number");
+    if (!logValue.trim() || Number.isNaN(Number(logValue)) || Number(logValue) < 0) {
+      setLogValueError("Enter a valid amount");
       return;
     }
     startTransition(async () => {
@@ -130,8 +130,12 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
 
   function handleEditEntrySubmit() {
     if (!editingEntry) return;
-    if (!Number(editEntryValue) || Number(editEntryValue) <= 0) {
-      setEditEntryValueError("Enter a positive number");
+    if (
+      !editEntryValue.trim() ||
+      Number.isNaN(Number(editEntryValue)) ||
+      Number(editEntryValue) < 0
+    ) {
+      setEditEntryValueError("Enter a valid amount");
       return;
     }
     startTransition(async () => {
