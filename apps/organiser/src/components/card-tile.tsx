@@ -1,5 +1,5 @@
 import type { CardRow, TagRow } from "@/lib/queries";
-import { cn } from "@jf/ui";
+import { cn, getColorForeground } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
 import { TextAlignLeftIcon } from "@phosphor-icons/react";
 
@@ -63,8 +63,8 @@ export function CardTile({
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium text-(--grey-900)"
-              style={{ backgroundColor: tag.color }}
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+              style={{ backgroundColor: tag.color, color: getColorForeground(tag.color) }}
             >
               {tag.name}
             </span>

@@ -490,17 +490,21 @@ export function BoardClient({
             </div>
           </div>
 
+          {/* Edge blur: columns dissolve into a light blur as they scroll off, like
+              the aerospace landing calendar. Strongest at the edge, tapering inward. */}
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-(--surface-300) to-transparent transition-opacity duration-200",
+              "pointer-events-none absolute inset-y-0 left-0 w-16 backdrop-blur-[3px] transition-opacity duration-300",
+              "[mask-image:linear-gradient(to_right,black,transparent)] [-webkit-mask-image:linear-gradient(to_right,black,transparent)]",
               canScrollLeft ? "opacity-100" : "opacity-0"
             )}
           />
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-(--surface-300) to-transparent transition-opacity duration-200",
+              "pointer-events-none absolute inset-y-0 right-0 w-16 backdrop-blur-[3px] transition-opacity duration-300",
+              "[mask-image:linear-gradient(to_left,black,transparent)] [-webkit-mask-image:linear-gradient(to_left,black,transparent)]",
               canScrollRight ? "opacity-100" : "opacity-0"
             )}
           />

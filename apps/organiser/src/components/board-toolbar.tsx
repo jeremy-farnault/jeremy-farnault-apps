@@ -51,7 +51,7 @@ export function BoardToolbar({
 
   return (
     <div className="flex flex-col gap-2 px-4 pt-4">
-      {/* Row 1: search + deadline */}
+      {/* Row 1: search + deadline (+ manage tags on desktop) */}
       <div className="flex items-center gap-2">
         <SearchInput
           key={searchKey}
@@ -65,7 +65,7 @@ export function BoardToolbar({
           value={deadlineBucket ?? "any"}
           onValueChange={(v) => onDeadlineChange(v === "any" ? null : (v as DeadlineBucket))}
           placeholder="Deadline"
-          className="w-40 shrink-0"
+          className="min-w-0 flex-1 sm:w-40 sm:flex-none"
         >
           <SelectItem value="any">Any deadline</SelectItem>
           {(Object.keys(DEADLINE_LABELS) as DeadlineBucket[]).map((bucket) => (
@@ -74,6 +74,8 @@ export function BoardToolbar({
             </SelectItem>
           ))}
         </Select>
+
+        <ManageTagsButton onClick={onManageTags} className="ml-auto hidden sm:inline-flex" />
       </div>
 
       {/* Row 2: tags + colours */}
@@ -188,16 +190,7 @@ export function BoardToolbar({
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={onManageTags}
-          className={cn(
-            "ml-auto inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm",
-            "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
-          )}
-        >
-          <TagIcon size={16} /> Manage tags
-        </button>
+        <ManageTagsButton onClick={onManageTags} className="ml-auto sm:hidden" />
       </div>
     </div>
   );
@@ -231,5 +224,22 @@ function Count({ children }: { children: React.ReactNode }) {
     <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-(--blue-600) px-1 text-[10px] font-semibold text-white">
       {children}
     </span>
+  );
+}
+
+// Plain button (noter archive style): subtle surface, darker on hover.
+function ManageTagsButton({ onClick, className }: { onClick: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm",
+        "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)",
+        className
+      )}
+    >
+      <TagIcon size={16} /> Manage tags
+    </button>
   );
 }
