@@ -3,7 +3,7 @@
 import { deleteNote, restoreNote } from "@/lib/actions";
 import { renderToHtml } from "@/lib/note-body-utils";
 import type { Note } from "@/lib/queries";
-import { ActionModal } from "@jf/ui";
+import { ActionModal, cn, isDarkSurface } from "@jf/ui";
 import { ArrowCounterClockwiseIcon, DotsThreeVerticalIcon, TrashIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -25,6 +25,9 @@ export function ArchivedNoteCard({ note }: Props) {
 
   const bgColor = note.backgroundColor ?? "var(--grey-400)";
   const borderColor = getBorderColor(bgColor);
+  const isDark = isDarkSurface(bgColor);
+  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
+  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -47,8 +50,12 @@ export function ArchivedNoteCard({ note }: Props) {
     });
   }
 
-  const iconBtnClass =
-    "flex h-7 w-7 items-center justify-center rounded-lg bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)";
+  const iconBtnClass = cn(
+    "flex h-7 w-7 items-center justify-center rounded-lg",
+    isDark
+      ? "bg-white/15 hover:bg-white/25 text-(--grey-100)"
+      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)"
+  );
 
   return (
     <>
@@ -62,14 +69,18 @@ export function ArchivedNoteCard({ note }: Props) {
         >
           {note.title && (
             <div className="mb-1 min-w-0 w-full">
-              <span className="text-base font-semibold text-(--grey-900) truncate block">
+              <span
+                className="text-base font-semibold truncate block"
+                style={{ color: textStrong }}
+              >
                 {note.title}
               </span>
             </div>
           )}
           {note.body && (
             <div
-              className="note-card-body text-sm text-(--grey-700)"
+              className="note-card-body text-sm"
+              style={{ color: textSoft }}
               dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
             />
           )}
@@ -84,7 +95,11 @@ export function ArchivedNoteCard({ note }: Props) {
                 setMenuOpen((o) => !o);
               }}
               aria-label="Note actions"
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
+              style={{ color: textSoft }}
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-lg",
+                isDark ? "hover:bg-white/15" : "hover:bg-(--surface-150)"
+              )}
             >
               <DotsThreeVerticalIcon size={16} />
             </button>

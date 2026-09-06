@@ -2,6 +2,7 @@
 
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder as FolderRow } from "@/lib/queries";
+import { isDarkSurface } from "@jf/ui";
 import { FolderIcon } from "@phosphor-icons/react/dist/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -26,6 +27,9 @@ export function FolderCard({ folder, allFolders }: Props) {
 
   const bgColor = folder.color ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
+  const isDark = isDarkSurface(bgColor);
+  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
+  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) setMenuVisible(true);
@@ -54,8 +58,10 @@ export function FolderCard({ folder, allFolders }: Props) {
 
       <div className="relative flex flex-1 flex-col pointer-events-none">
         <div className="flex items-center gap-2">
-          <FolderIcon size={20} className="shrink-0 text-(--grey-700)" />
-          <span className="text-sm font-semibold text-(--grey-900) truncate">{folder.name}</span>
+          <FolderIcon size={20} className="shrink-0" style={{ color: textSoft }} />
+          <span className="text-sm font-semibold truncate" style={{ color: textStrong }}>
+            {folder.name}
+          </span>
         </div>
       </div>
 
@@ -65,6 +71,7 @@ export function FolderCard({ folder, allFolders }: Props) {
           allFolders={allFolders}
           menuVisible={menuVisible}
           hideDelete
+          isDark={isDark}
         />
       </div>
     </div>

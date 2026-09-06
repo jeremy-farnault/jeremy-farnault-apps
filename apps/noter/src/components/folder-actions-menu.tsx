@@ -22,9 +22,10 @@ type Props = {
   allFolders: Folder[];
   menuVisible?: boolean;
   hideDelete?: boolean;
+  isDark?: boolean;
 };
 
-export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete }: Props) {
+export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete, isDark }: Props) {
   const [modal, setModal] = useState<"rename" | "move" | "color" | "archive" | "delete" | null>(
     null
   );
@@ -67,8 +68,12 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete 
     });
   }
 
-  const iconBtnClass =
-    "flex h-7 w-7 items-center justify-center rounded-lg bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)";
+  const iconBtnClass = cn(
+    "flex h-7 w-7 items-center justify-center rounded-lg",
+    isDark
+      ? "bg-white/15 hover:bg-white/25 text-(--grey-100)"
+      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)"
+  );
 
   return (
     <>

@@ -3,7 +3,7 @@
 import { renderToHtml } from "@/lib/note-body-utils";
 import { DEFAULT_COLOR } from "@/lib/note-utils.ts";
 import type { Folder, Note } from "@/lib/queries";
-import { cn } from "@jf/ui";
+import { cn, isDarkSurface } from "@jf/ui";
 import { FolderIcon, PushPinIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -34,6 +34,9 @@ export function NoteCard({
 }: Props) {
   const bgColor = note.backgroundColor ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
+  const isDark = isDarkSurface(bgColor);
+  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
+  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
   const pointerDownOnCard = useRef(false);
   const isTouchDevice = useRef(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -77,21 +80,31 @@ export function NoteCard({
         style={{ maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)" }}
       >
         {note.title && (
-          <div className="mb-1 flex items-center gap-1 min-w-0 w-full">
+          <div
+            className="mb-1 flex items-center gap-1 min-w-0 w-full"
+            style={{ color: textStrong }}
+          >
             {note.pinned && <PushPinIcon size={14} className="shrink-0" />}
-            <span className="text-base font-semibold text-(--grey-900) truncate">{note.title}</span>
+            <span className="text-base font-semibold truncate">{note.title}</span>
           </div>
         )}
         {note.body && (
           <div
-            className="note-card-body text-sm text-(--grey-700)"
+            className="note-card-body text-sm"
+            style={{ color: textSoft }}
             dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
           />
         )}
       </div>
 
       <div className="relative flex items-center justify-end gap-1">
-        <NoteActionsMenu note={note} allFolders={allFolders} menuVisible={menuVisible} hideDelete />
+        <NoteActionsMenu
+          note={note}
+          allFolders={allFolders}
+          menuVisible={menuVisible}
+          hideDelete
+          isDark={isDark}
+        />
         {showFolderLink && (
           <Link
             href={parentFolderId ? `/${parentFolderId}` : "/"}
@@ -100,7 +113,11 @@ export function NoteCard({
               onFolderLinkClick?.();
             }}
             aria-label="Go to folder"
-            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-150) text-(--grey-700)"
+            style={{ color: textSoft }}
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-lg",
+              isDark ? "hover:bg-white/15" : "hover:bg-(--surface-150)"
+            )}
           >
             <FolderIcon size={16} />
           </Link>
