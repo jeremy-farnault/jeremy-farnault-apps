@@ -136,7 +136,13 @@ export function CardDetailModal({
         }
         content={
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
-            <TextInput value={title} onChange={setTitle} placeholder="Card title" autoFocus />
+            <TextInput
+              value={title}
+              onChange={setTitle}
+              placeholder="Card title"
+              autoFocus
+              className="shrink-0"
+            />
 
             <div className="flex flex-col gap-2">
               <span className="text-xs text-(--grey-500)">Description</span>

@@ -38,7 +38,7 @@ import {
 import { TextInput, cn } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
 import { PlusIcon } from "@phosphor-icons/react";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { BoardColumn } from "./board-column";
 import { BoardToolbar, type DeadlineBucket } from "./board-toolbar";
@@ -103,6 +103,25 @@ export function BoardClient({
     setFilterColor(null);
     setSearchKey((k) => k + 1);
   }
+
+  // ─── Edge fades for the horizontally-scrolling column row ──────────
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollFades = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth - 1);
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: columns/cards are triggers — a change to the set alters the scrollable width, so re-measure.
+  useEffect(() => {
+    updateScrollFades();
+    window.addEventListener("resize", updateScrollFades);
+    return () => window.removeEventListener("resize", updateScrollFades);
+  }, [updateScrollFades, columns, cards]);
 
   const tagsById = useMemo(() => new Map(tags.map((t) => [t.id, t])), [tags]);
 
@@ -407,63 +426,84 @@ export function BoardClient({
           onManageTags={() => setManagingTags(true)}
         />
 
-        <div className="flex min-h-0 w-full flex-1 snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 pt-3 sm:snap-none">
-          <SortableContext
-            items={orderedColumns.map((c) => c.id)}
-            strategy={horizontalListSortingStrategy}
+        <div className="relative flex min-h-0 w-full flex-1">
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollFades}
+            className="flex h-full w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 pt-3 sm:snap-none"
           >
-            {orderedColumns.map((column) => (
-              <BoardColumn
-                key={column.id}
-                column={column}
-                cards={cardsForColumn(cards, column.id).filter(matchesFilters)}
-                isOnlyColumn={columns.length <= 1}
-                otherColumns={orderedColumns
-                  .filter((c) => c.id !== column.id)
-                  .map((c) => ({ id: c.id, name: c.name }))}
-                tagsForCard={tagsForCard}
-                onAddCard={handleAddCard}
-                onCardClick={(card) => setSelectedCardId(card.id)}
-                onUpdate={handleUpdateColumn}
-                onToggleCollapsed={handleToggleCollapsed}
-                onDelete={handleDeleteColumn}
-              />
-            ))}
-          </SortableContext>
+            <SortableContext
+              items={orderedColumns.map((c) => c.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {orderedColumns.map((column) => (
+                <BoardColumn
+                  key={column.id}
+                  column={column}
+                  cards={cardsForColumn(cards, column.id).filter(matchesFilters)}
+                  isOnlyColumn={columns.length <= 1}
+                  otherColumns={orderedColumns
+                    .filter((c) => c.id !== column.id)
+                    .map((c) => ({ id: c.id, name: c.name }))}
+                  tagsForCard={tagsForCard}
+                  onAddCard={handleAddCard}
+                  onCardClick={(card) => setSelectedCardId(card.id)}
+                  onUpdate={handleUpdateColumn}
+                  onToggleCollapsed={handleToggleCollapsed}
+                  onDelete={handleDeleteColumn}
+                />
+              ))}
+            </SortableContext>
 
-          <div className="min-w-[85vw] max-w-[85vw] snap-start p-2 sm:min-w-[280px] sm:max-w-[280px] sm:snap-align-none">
-            {addingColumn ? (
-              <TextInput
-                value={columnName}
-                onChange={setColumnName}
-                placeholder="Column name"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    void handleCreateColumn();
-                  } else if (e.key === "Escape") {
-                    setColumnName("");
-                    setAddingColumn(false);
-                  }
-                }}
-                onBlur={() => {
-                  if (!columnName.trim()) setAddingColumn(false);
-                }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setAddingColumn(true)}
-                className={cn(
-                  "flex w-full items-center gap-1 rounded-[16px] px-3 py-3 text-sm text-(--grey-500)",
-                  "bg-(--surface-100) hover:bg-(--surface-150) hover:text-(--grey-800)"
-                )}
-              >
-                <PlusIcon size={16} /> Add column
-              </button>
-            )}
+            <div className="min-w-[85vw] max-w-[85vw] snap-start px-2 pb-2 sm:min-w-[280px] sm:max-w-[280px] sm:snap-align-none">
+              {addingColumn ? (
+                <TextInput
+                  value={columnName}
+                  onChange={setColumnName}
+                  placeholder="Column name"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void handleCreateColumn();
+                    } else if (e.key === "Escape") {
+                      setColumnName("");
+                      setAddingColumn(false);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (!columnName.trim()) setAddingColumn(false);
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAddingColumn(true)}
+                  className={cn(
+                    "flex w-full items-center gap-1 rounded-[16px] px-3 py-3 text-sm text-(--grey-500)",
+                    "bg-(--surface-100) hover:bg-(--surface-150) hover:text-(--grey-800)"
+                  )}
+                >
+                  <PlusIcon size={16} /> Add column
+                </button>
+              )}
+            </div>
           </div>
+
+          <div
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-(--surface-300) to-transparent transition-opacity duration-200",
+              canScrollLeft ? "opacity-100" : "opacity-0"
+            )}
+          />
+          <div
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-(--surface-300) to-transparent transition-opacity duration-200",
+              canScrollRight ? "opacity-100" : "opacity-0"
+            )}
+          />
         </div>
       </div>
 

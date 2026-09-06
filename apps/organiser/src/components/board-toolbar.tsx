@@ -1,7 +1,7 @@
 "use client";
 
 import type { TagRow } from "@/lib/queries";
-import { Button, COLOR_PALETTE, SearchInput, Select, SelectItem, cn } from "@jf/ui";
+import { COLOR_PALETTE, SearchInput, Select, SelectItem, cn } from "@jf/ui";
 import { CheckIcon, PaletteIcon, TagIcon, XIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
@@ -50,143 +50,154 @@ export function BoardToolbar({
   const selectedColor = COLOR_PALETTE.find((c) => c.value === filterColor);
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 pt-4">
-      <SearchInput
-        key={searchKey}
-        className="w-full sm:w-64"
-        placeholder="Search cards…"
-        onDebouncedChange={onSearchChange}
-      />
+    <div className="flex flex-col gap-2 px-4 pt-4">
+      {/* Row 1: search + deadline */}
+      <div className="flex items-center gap-2">
+        <SearchInput
+          key={searchKey}
+          className="min-w-0 flex-1 sm:w-64 sm:flex-none"
+          placeholder="Search cards…"
+          onDebouncedChange={onSearchChange}
+        />
 
-      {/* Tag filter */}
-      <Popover.Root>
-        <Popover.Trigger asChild>
-          <FilterButton active={filterTagIds.length > 0}>
-            <TagIcon size={16} />
-            Tags
-            {filterTagIds.length > 0 && <Count>{filterTagIds.length}</Count>}
-          </FilterButton>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content
-            align="start"
-            sideOffset={4}
-            className={cn(popoverContentClass, "max-w-[280px]")}
-          >
-            {allTags.length === 0 ? (
-              <span className="px-1 text-xs text-(--grey-500)">No tags yet.</span>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {allTags.map((tag) => {
-                  const on = filterTagIds.includes(tag.id);
-                  return (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => onToggleTag(tag.id)}
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
-                        on
-                          ? "border-(--blue-600) text-(--grey-900)"
-                          : "border-(--grey-300) text-(--grey-600) hover:border-(--grey-400)"
-                      )}
-                    >
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: tag.color }}
-                        aria-hidden
-                      />
-                      {tag.name}
-                      {on && <CheckIcon size={11} weight="bold" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+        {/* Deadline filter */}
+        <Select
+          value={deadlineBucket ?? "any"}
+          onValueChange={(v) => onDeadlineChange(v === "any" ? null : (v as DeadlineBucket))}
+          placeholder="Deadline"
+          className="w-40 shrink-0"
+        >
+          <SelectItem value="any">Any deadline</SelectItem>
+          {(Object.keys(DEADLINE_LABELS) as DeadlineBucket[]).map((bucket) => (
+            <SelectItem key={bucket} value={bucket}>
+              {DEADLINE_LABELS[bucket]}
+            </SelectItem>
+          ))}
+        </Select>
+      </div>
 
-      {/* Deadline filter */}
-      <Select
-        value={deadlineBucket ?? "any"}
-        onValueChange={(v) => onDeadlineChange(v === "any" ? null : (v as DeadlineBucket))}
-        placeholder="Deadline"
-        className="w-40"
-      >
-        <SelectItem value="any">Any deadline</SelectItem>
-        {(Object.keys(DEADLINE_LABELS) as DeadlineBucket[]).map((bucket) => (
-          <SelectItem key={bucket} value={bucket}>
-            {DEADLINE_LABELS[bucket]}
-          </SelectItem>
-        ))}
-      </Select>
+      {/* Row 2: tags + colours */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Tag filter */}
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <FilterButton active={filterTagIds.length > 0}>
+              <TagIcon size={16} />
+              Tags
+              {filterTagIds.length > 0 && <Count>{filterTagIds.length}</Count>}
+            </FilterButton>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              align="start"
+              sideOffset={4}
+              className={cn(popoverContentClass, "max-w-[280px]")}
+            >
+              {allTags.length === 0 ? (
+                <span className="px-1 text-xs text-(--grey-500)">No tags yet.</span>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {allTags.map((tag) => {
+                    const on = filterTagIds.includes(tag.id);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => onToggleTag(tag.id)}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
+                          on
+                            ? "border-(--blue-600) text-(--grey-900)"
+                            : "border-(--grey-300) text-(--grey-600) hover:border-(--grey-400)"
+                        )}
+                      >
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                          aria-hidden
+                        />
+                        {tag.name}
+                        {on && <CheckIcon size={11} weight="bold" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
 
-      {/* Colour filter */}
-      <Popover.Root>
-        <Popover.Trigger asChild>
-          <FilterButton active={filterColor !== null}>
-            {filterColor ? (
-              <span
-                className="h-3.5 w-3.5 rounded-full"
-                style={{ backgroundColor: filterColor }}
-                aria-hidden
-              />
-            ) : (
-              <PaletteIcon size={16} />
-            )}
-            {selectedColor?.label ?? "Colour"}
-          </FilterButton>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content
-            align="start"
-            sideOffset={4}
-            className={cn(popoverContentClass, "w-[220px]")}
-          >
-            <div className="flex flex-wrap gap-2">
-              {COLOR_PALETTE.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  title={c.label}
-                  onClick={() => onColorChange(c.value)}
-                  className="h-6 w-6 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: c.value,
-                    outline: filterColor === c.value ? "2px solid var(--grey-900)" : "none",
-                    outlineOffset: 2,
-                  }}
+        {/* Colour filter */}
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <FilterButton active={filterColor !== null}>
+              {filterColor ? (
+                <span
+                  className="h-3.5 w-3.5 rounded-full"
+                  style={{ backgroundColor: filterColor }}
+                  aria-hidden
                 />
-              ))}
-            </div>
-            {filterColor && (
-              <button
-                type="button"
-                onClick={() => onColorChange(null)}
-                className="self-start text-xs text-(--grey-500) hover:text-(--grey-900)"
-              >
-                Any colour
-              </button>
-            )}
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+              ) : (
+                <PaletteIcon size={16} />
+              )}
+              {selectedColor?.label ?? "Colour"}
+            </FilterButton>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              align="start"
+              sideOffset={4}
+              className={cn(popoverContentClass, "w-[220px]")}
+            >
+              <div className="flex flex-wrap gap-2">
+                {COLOR_PALETTE.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    title={c.label}
+                    onClick={() => onColorChange(c.value)}
+                    className="h-6 w-6 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: c.value,
+                      outline: filterColor === c.value ? "2px solid var(--grey-900)" : "none",
+                      outlineOffset: 2,
+                    }}
+                  />
+                ))}
+              </div>
+              {filterColor && (
+                <button
+                  type="button"
+                  onClick={() => onColorChange(null)}
+                  className="self-start text-xs text-(--grey-500) hover:text-(--grey-900)"
+                >
+                  Any colour
+                </button>
+              )}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
 
-      {hasActiveFilters && (
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex items-center gap-1 text-xs text-(--grey-500) hover:text-(--grey-900)"
+          >
+            <XIcon size={12} weight="bold" /> Clear
+          </button>
+        )}
+
         <button
           type="button"
-          onClick={onClear}
-          className="inline-flex items-center gap-1 text-xs text-(--grey-500) hover:text-(--grey-900)"
+          onClick={onManageTags}
+          className={cn(
+            "ml-auto inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm",
+            "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
+          )}
         >
-          <XIcon size={12} weight="bold" /> Clear
-        </button>
-      )}
-
-      <div className="ml-auto">
-        <Button variant="outline" onClick={onManageTags}>
           <TagIcon size={16} /> Manage tags
-        </Button>
+        </button>
       </div>
     </div>
   );

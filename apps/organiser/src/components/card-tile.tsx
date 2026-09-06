@@ -39,7 +39,10 @@ export function CardTile({
             }
           : undefined
       }
-      className="relative overflow-hidden rounded-[12px] bg-(--card) p-3 pl-4 text-sm text-(--card-foreground) shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-(--blue-600)"
+      className={cn(
+        "relative overflow-hidden rounded-[12px] bg-(--card) p-3 pl-4 text-sm text-(--card-foreground) shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-(--blue-600)",
+        onClick && "cursor-pointer"
+      )}
     >
       {card.color && (
         <span
