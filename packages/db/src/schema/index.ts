@@ -9,3 +9,4 @@ export * from "./gainer";
 export * from "./doser";
 export * from "./aider";
 export * from "./exposer";
+export * from "./organiser";
