@@ -3,6 +3,7 @@
 import { ClockIcon } from "@phosphor-icons/react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { getColorForeground } from "../lib/color-palette";
 import { cn } from "../lib/utils";
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => i);
@@ -52,7 +53,14 @@ function TimeScrollPanel({
   return (
     <div
       className="flex flex-row"
-      style={accentColor ? ({ "--dt-accent": accentColor } as CSSProperties) : undefined}
+      style={
+        accentColor
+          ? ({
+              "--dt-accent": accentColor,
+              "--dt-accent-fg": getColorForeground(accentColor),
+            } as CSSProperties)
+          : undefined
+      }
     >
       <div
         ref={hourScrollRef}
@@ -71,7 +79,12 @@ function TimeScrollPanel({
                 "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
             )}
           >
-            <span className="text-xs font-medium text-(--grey-850)">
+            <span
+              className={cn(
+                "text-xs font-medium",
+                h === hour ? "text-(--dt-accent-fg)" : "text-(--grey-850)"
+              )}
+            >
               {h.toString().padStart(2, "0")}
             </span>
           </button>
@@ -96,7 +109,12 @@ function TimeScrollPanel({
                 "hover:[background-color:color-mix(in_srgb,var(--dt-accent)_17%,transparent)]"
             )}
           >
-            <span className="text-xs font-medium text-(--grey-850)">
+            <span
+              className={cn(
+                "text-xs font-medium",
+                m === minute ? "text-(--dt-accent-fg)" : "text-(--grey-850)"
+              )}
+            >
               {m.toString().padStart(2, "0")}
             </span>
           </button>

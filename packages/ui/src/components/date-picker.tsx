@@ -9,6 +9,7 @@ import {
   type MonthCaptionProps,
   useDayPicker,
 } from "react-day-picker";
+import { getColorForeground } from "../lib/color-palette";
 import { cn } from "../lib/utils";
 
 interface DatePickerProps {
@@ -108,7 +109,8 @@ function CustomDayButton({ day, modifiers, ...props }: DayButtonProps) {
         "flex h-9 w-9 items-center justify-center rounded-full",
         "text-xs font-medium text-(--grey-700)",
         "hover:bg-(--surface-200) focus:outline-none",
-        modifiers.selected && "bg-(--picker-accent) text-(--grey-900) hover:bg-(--picker-accent)",
+        modifiers.selected &&
+          "bg-(--picker-accent) text-(--picker-accent-fg) hover:bg-(--picker-accent)",
         modifiers.today && !modifiers.selected && "bg-(--grey-300)",
         modifiers.outside && "opacity-40",
         modifiers.disabled && "pointer-events-none opacity-30"
@@ -237,7 +239,14 @@ export function DatePicker({
             "animate-[overlay-in_0.3s_ease-in-out]"
           )}
         >
-          <div style={{ "--picker-accent": accentColor } as CSSProperties}>
+          <div
+            style={
+              {
+                "--picker-accent": accentColor,
+                "--picker-accent-fg": getColorForeground(accentColor),
+              } as CSSProperties
+            }
+          >
             <DayPicker
               mode="single"
               hideNavigation

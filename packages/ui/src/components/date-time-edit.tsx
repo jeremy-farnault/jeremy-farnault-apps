@@ -15,6 +15,7 @@ import {
   useDayPicker,
 } from "react-day-picker";
 import type { DayPickerLocale } from "react-day-picker/locale";
+import { getColorForeground } from "../lib/color-palette";
 import { cn } from "../lib/utils";
 import { TimePickerPanel } from "./time-input";
 
@@ -101,7 +102,7 @@ function DayButton({ day, modifiers, ...props }: DayButtonProps) {
         "flex h-9 w-9 items-center justify-center rounded-full",
         "text-xs font-medium text-(--grey-700)",
         "hover:bg-(--surface-200) focus:outline-none",
-        modifiers.selected && "bg-(--dt-accent) text-(--grey-900) hover:bg-(--dt-accent)",
+        modifiers.selected && "bg-(--dt-accent) text-(--dt-accent-fg) hover:bg-(--dt-accent)",
         modifiers.today && !modifiers.selected && "bg-(--grey-300)",
         modifiers.outside && "opacity-40",
         modifiers.disabled && "pointer-events-none opacity-30"
@@ -161,7 +162,14 @@ export function DateTimeEdit({
   };
 
   return (
-    <div style={{ "--dt-accent": accentColor } as CSSProperties}>
+    <div
+      style={
+        {
+          "--dt-accent": accentColor,
+          "--dt-accent-fg": getColorForeground(accentColor),
+        } as CSSProperties
+      }
+    >
       <div className="relative flex flex-col">
         {/* Top section: calendar + time picker */}
         <div className="flex flex-row gap-6 border-b border-(--grey-200)">
@@ -193,7 +201,7 @@ export function DateTimeEdit({
                       className={cn(
                         "rounded-[10px] px-2 py-1.5 text-sm font-medium focus:outline-none",
                         year === currentYear
-                          ? "text-(--grey-900)"
+                          ? "text-(--dt-accent-fg)"
                           : "text-(--grey-600) hover:bg-(--surface-150)"
                       )}
                     >
