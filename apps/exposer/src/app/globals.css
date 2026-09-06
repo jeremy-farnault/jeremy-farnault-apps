@@ -1,6 +1,7 @@
 :root,
 .dark {
   --primary: var(--purple-600);
+  --primary-foreground: var(--grey-100);
   --secondary: var(--purple-800);
 }
 

@@ -44,7 +44,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
           <FunnelIcon size={15} weight={activeCount > 0 ? "fill" : "regular"} />
           Filter
           {activeCount > 0 && (
-            <span className="ml-0.5 rounded-full bg-(--primary) px-1.5 text-xs text-(--grey-900)">
+            <span className="ml-0.5 rounded-full bg-(--primary) px-1.5 text-xs text-(--primary-foreground)">
               {activeCount}
             </span>
           )}
@@ -77,7 +77,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
                       onClick={() => toggleTag(tag.name)}
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors ${
                         selected
-                          ? "bg-(--primary) text-(--grey-900)"
+                          ? "bg-(--primary) text-(--primary-foreground)"
                           : "bg-(--surface-200) text-(--grey-700) hover:bg-(--surface-300)"
                       }`}
                     >

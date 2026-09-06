@@ -1,5 +1,6 @@
 :root,
 .dark {
   --primary: var(--blue-600);
+  --primary-foreground: var(--grey-100);
   --secondary: var(--blue-800);
 }

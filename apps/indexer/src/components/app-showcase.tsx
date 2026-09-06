@@ -1,10 +1,12 @@
 import type { ShowcaseApp } from "@/config/showcase";
+import { getColorForeground } from "@jf/ui/color-palette";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import { ShowcaseCarousel } from "./showcase-carousel";
 
 export function AppShowcase({ app }: { app: ShowcaseApp }) {
   const accent = `var(${app.accentColor})`;
+  const accentForeground = getColorForeground(accent);
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col md:flex-row">
@@ -40,8 +42,8 @@ export function AppShowcase({ app }: { app: ShowcaseApp }) {
         <div className="p-4 md:px-7 md:pb-7">
           <a
             href={app.href}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] font-medium text-(--grey-900) transition-opacity hover:opacity-90 md:ml-auto md:w-fit md:px-7"
-            style={{ backgroundColor: accent }}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] font-medium transition-opacity hover:opacity-90 md:ml-auto md:w-fit md:px-7"
+            style={{ backgroundColor: accent, color: accentForeground }}
           >
             Go to app
             <ArrowSquareOutIcon size={18} weight="bold" />

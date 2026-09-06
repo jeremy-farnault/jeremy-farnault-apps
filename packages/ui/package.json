@@ -15,6 +15,10 @@
       "types": "./src/config/apps.ts",
       "import": "./src/config/apps.ts"
     },
+    "./color-palette": {
+      "types": "./src/lib/color-palette.ts",
+      "import": "./src/lib/color-palette.ts"
+    },
     "./rich-text": {
       "types": "./src/lib/rich-text.ts",
       "import": "./src/lib/rich-text.ts"
