@@ -7,7 +7,15 @@ export default async function OrganiserPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const { columns, cards } = await getOrCreateBoard(userId);
+  const { boardId, columns, cards, tags, cardTagIds } = await getOrCreateBoard(userId);
 
-  return <BoardClient columns={columns} cards={cards} />;
+  return (
+    <BoardClient
+      boardId={boardId}
+      columns={columns}
+      cards={cards}
+      tags={tags}
+      cardTagIds={cardTagIds}
+    />
+  );
 }
