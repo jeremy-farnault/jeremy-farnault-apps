@@ -164,9 +164,11 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
   // ── Render ────────────────────────────────────────────────────────────────
   const displayEntries = isSearching ? (searchResults ?? []) : entries;
   const isEmpty = displayEntries.length === 0;
-  // A brand-new search with no results yet: show "Searching…" rather than
-  // letting an empty list read as "No results found."
-  const showSearching = isSearching && searchLoading && searchResults === null;
+  // While a search is in flight with nothing to show yet, display "Searching…"
+  // rather than letting an empty list read as "No results found." This covers
+  // both a brand-new search (searchResults === null) and a re-search whose prior
+  // result set was empty — otherwise "No results" and "Loading…" flash together.
+  const showSearching = isSearching && searchLoading && isEmpty;
 
   return (
     <>
@@ -207,7 +209,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
           </>
         )}
 
-        {(loading || (isSearching && searchLoading && searchResults !== null)) && (
+        {(loading || (isSearching && searchLoading && !isEmpty)) && (
           <div className="flex justify-center pt-6">
             <p className="text-sm text-(--grey-400)">Loading…</p>
           </div>
