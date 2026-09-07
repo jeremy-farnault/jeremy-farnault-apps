@@ -26,7 +26,13 @@ export function SortableCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="touch-manipulation"
+    >
       <CardTile card={card} tags={tags} {...(onClick ? { onClick } : {})} />
     </div>
   );

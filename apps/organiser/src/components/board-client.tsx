@@ -495,7 +495,7 @@ export function BoardClient({
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-y-0 left-0 w-16 backdrop-blur-[3px] transition-opacity duration-300",
+              "pointer-events-none absolute inset-y-0 left-0 hidden w-16 backdrop-blur-[3px] transition-opacity duration-300 sm:block",
               "[mask-image:linear-gradient(to_right,black,transparent)] [-webkit-mask-image:linear-gradient(to_right,black,transparent)]",
               canScrollLeft ? "opacity-100" : "opacity-0"
             )}
@@ -503,7 +503,7 @@ export function BoardClient({
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute inset-y-0 right-0 w-16 backdrop-blur-[3px] transition-opacity duration-300",
+              "pointer-events-none absolute inset-y-0 right-0 hidden w-16 backdrop-blur-[3px] transition-opacity duration-300 sm:block",
               "[mask-image:linear-gradient(to_left,black,transparent)] [-webkit-mask-image:linear-gradient(to_left,black,transparent)]",
               canScrollRight ? "opacity-100" : "opacity-0"
             )}
