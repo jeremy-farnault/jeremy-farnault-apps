@@ -1,6 +1,6 @@
 import type { ShowcaseApp } from "@/config/showcase";
 import { getColorForeground } from "@jf/ui/color-palette";
-import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr";
+import { ArrowSquareOutIcon, DeviceMobileIcon } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import { ShowcaseCarousel } from "./showcase-carousel";
 
@@ -37,6 +37,13 @@ export function AppShowcase({ app }: { app: ShowcaseApp }) {
             <h2 className="text-2xl font-semibold text-(--grey-900)">{app.name}</h2>
           </div>
           <p className="mt-4 text-[15px] leading-relaxed text-(--grey-700)">{app.description}</p>
+          <div className="mt-5 flex items-start gap-2.5 border-t border-(--grey-200) pt-4 text-(--grey-500)">
+            <DeviceMobileIcon size={18} weight="regular" className="mt-px shrink-0" />
+            <p className="text-[13px] leading-relaxed">
+              Like every app here, it installs straight from your browser. Open it on mobile and add
+              it to your home screen to use it as an app.
+            </p>
+          </div>
         </div>
 
         <div className="p-4 md:px-7 md:pb-7">
