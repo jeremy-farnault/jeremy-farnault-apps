@@ -25,6 +25,7 @@ export type CardRow = {
   title: string;
   body: string | null;
   color: string | null;
+  important: boolean;
   deadline: string | null;
   position: string;
 };
@@ -101,6 +102,7 @@ export async function getOrCreateBoard(userId: string): Promise<BoardData> {
         title: organiserCards.title,
         body: organiserCards.body,
         color: organiserCards.color,
+        important: organiserCards.important,
         deadline: organiserCards.deadline,
         position: organiserCards.position,
       })

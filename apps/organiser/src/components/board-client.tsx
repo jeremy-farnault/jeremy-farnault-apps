@@ -205,6 +205,7 @@ export function BoardClient({
       title: string;
       body: string | null;
       color: string | null;
+      important: boolean;
       deadline: string | null;
       columnId: string;
       tagIds: string[];

@@ -75,6 +75,7 @@ export async function createCardAction(input: {
       title: organiserCards.title,
       body: organiserCards.body,
       color: organiserCards.color,
+      important: organiserCards.important,
       deadline: organiserCards.deadline,
       position: organiserCards.position,
     });
@@ -89,6 +90,7 @@ export async function updateCardAction(input: {
   title: string;
   body: string | null;
   color: string | null;
+  important: boolean;
   deadline: string | null;
   columnId: string;
   tagIds: string[];
@@ -143,6 +145,7 @@ export async function updateCardAction(input: {
       title,
       body: input.body,
       color: input.color,
+      important: input.important,
       deadline: input.deadline,
       columnId,
       boardId,
@@ -156,6 +159,7 @@ export async function updateCardAction(input: {
       title: organiserCards.title,
       body: organiserCards.body,
       color: organiserCards.color,
+      important: organiserCards.important,
       deadline: organiserCards.deadline,
       position: organiserCards.position,
     });
@@ -376,6 +380,7 @@ export async function deleteColumnAction(
           title: organiserCards.title,
           body: organiserCards.body,
           color: organiserCards.color,
+          important: organiserCards.important,
           deadline: organiserCards.deadline,
           position: organiserCards.position,
         });

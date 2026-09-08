@@ -190,6 +190,13 @@
       "when": 1788641906331,
       "tag": "0026_empty_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1788850402404,
+      "tag": "0027_lyrical_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

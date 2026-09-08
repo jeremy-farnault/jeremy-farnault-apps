@@ -64,6 +64,8 @@ export const organiserCards = pgTable(
     body: text("body"),
     // Optional palette value, e.g. "var(--blue-600)".
     color: text("color"),
+    // Flags the card as important/critical; surfaced with a red marker on the tile.
+    important: boolean("important").notNull().default(false),
     // Date-only deadline; overdue is computed against the current local day.
     deadline: date("deadline"),
     // Fractional-index key; cards are read as `position ASC` within a column.

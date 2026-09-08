@@ -8,6 +8,7 @@ import {
   DatePicker,
   Select,
   SelectItem,
+  Switch,
   TextInput,
   cn,
 } from "@jf/ui";
@@ -17,7 +18,7 @@ import {
   useRichTextEditor,
 } from "@jf/ui/components/rich-text-editor";
 import { extractPlainText } from "@jf/ui/rich-text";
-import { TrashIcon } from "@phosphor-icons/react";
+import { TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { TagField } from "./tag-field";
@@ -54,6 +55,7 @@ export function CardDetailModal({
     title: string;
     body: string | null;
     color: string | null;
+    important: boolean;
     deadline: string | null;
     columnId: string;
     tagIds: string[];
@@ -64,6 +66,7 @@ export function CardDetailModal({
   const [title, setTitle] = useState(card.title);
   const [body, setBody] = useState<string | null>(card.body);
   const [color, setColor] = useState<string | null>(card.color);
+  const [important, setImportant] = useState(card.important);
   const [deadline, setDeadline] = useState(card.deadline ?? "");
   const [columnId, setColumnId] = useState(card.columnId);
   const [tagIds, setTagIds] = useState<string[]>(initialTagIds);
@@ -91,6 +94,7 @@ export function CardDetailModal({
         title: trimmed,
         body: normalizedBody,
         color,
+        important,
         deadline: deadline || null,
         columnId,
         tagIds,
@@ -143,6 +147,14 @@ export function CardDetailModal({
               autoFocus
               className="shrink-0"
             />
+
+            <div className="flex shrink-0 items-center justify-between rounded-[10px] bg-(--surface-150) px-3 py-2">
+              <span className="flex items-center gap-1.5 text-sm text-(--grey-900)">
+                <WarningIcon size={16} weight="fill" className="text-(--red-500)" />
+                Important
+              </span>
+              <Switch checked={important} onCheckedChange={setImportant} />
+            </div>
 
             <div className="flex flex-col gap-2">
               <span className="text-xs text-(--grey-500)">Description</span>

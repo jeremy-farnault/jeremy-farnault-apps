@@ -1,0 +1,1 @@
+ALTER TABLE "organiser_cards" ADD COLUMN "important" boolean DEFAULT false NOT NULL;

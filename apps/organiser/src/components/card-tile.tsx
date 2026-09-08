@@ -1,7 +1,7 @@
 import type { CardRow, TagRow } from "@/lib/queries";
 import { cn, getColorForeground } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
-import { TextAlignLeftIcon } from "@phosphor-icons/react";
+import { TextAlignLeftIcon, WarningIcon } from "@phosphor-icons/react";
 
 // Signed whole-day count from today to the deadline, date-only against the local day.
 function daysUntil(deadline: string): number {
@@ -55,6 +55,14 @@ export function CardTile({
         <span className="min-w-0 flex-1 break-words">{card.title}</span>
         {hasBody && (
           <TextAlignLeftIcon size={14} className="mt-0.5 shrink-0 text-(--grey-400)" aria-hidden />
+        )}
+        {card.important && (
+          <WarningIcon
+            size={16}
+            weight="fill"
+            className="mt-0.5 shrink-0 text-(--red-500)"
+            aria-label="Important"
+          />
         )}
       </div>
       {hasBody && <p className="mt-1 line-clamp-2 text-xs text-(--grey-500)">{preview}</p>}
