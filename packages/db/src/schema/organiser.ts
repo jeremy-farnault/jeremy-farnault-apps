@@ -39,6 +39,9 @@ export const organiserColumns = pgTable(
     // Fractional-index key; columns are read as `position ASC`.
     position: text("position").notNull(),
     collapsed: boolean("collapsed").notNull().default(false),
+    // Marks this column as the board's "done" state: cards here freeze their deadline badge
+    // (shown as a struck-through static date rather than a live, growing countdown).
+    isDone: boolean("is_done").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },

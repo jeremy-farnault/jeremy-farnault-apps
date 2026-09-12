@@ -22,6 +22,7 @@ import { SortableCard } from "./sortable-card";
 export function BoardColumn({
   column,
   cards,
+  isDoneColumn,
   isOnlyColumn,
   otherColumns,
   tagsForCard,
@@ -33,12 +34,16 @@ export function BoardColumn({
 }: {
   column: ColumnRow;
   cards: CardRow[];
+  isDoneColumn: boolean;
   isOnlyColumn: boolean;
   otherColumns: { id: string; name: string }[];
   tagsForCard: (cardId: string) => TagRow[];
   onAddCard: (columnId: string, title: string) => Promise<void>;
   onCardClick: (card: CardRow) => void;
-  onUpdate: (columnId: string, input: { name: string; color: string | null }) => Promise<void>;
+  onUpdate: (
+    columnId: string,
+    input: { name: string; color: string | null; isDone: boolean }
+  ) => Promise<void>;
   onToggleCollapsed: (columnId: string, collapsed: boolean) => void;
   onDelete: (columnId: string, mode: DeleteColumnMode) => Promise<void>;
 }) {
@@ -184,6 +189,7 @@ export function BoardColumn({
               key={card.id}
               card={card}
               tags={tagsForCard(card.id)}
+              isDoneColumn={isDoneColumn}
               onClick={() => onCardClick(card)}
             />
           ))}

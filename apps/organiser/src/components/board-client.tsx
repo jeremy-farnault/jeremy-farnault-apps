@@ -17,6 +17,7 @@ import {
 import { keyBetween } from "@/lib/ordering";
 import type { CardRow, ColumnRow, TagRow } from "@/lib/queries";
 import {
+  type CollisionDetection,
   DndContext,
   type DragEndEvent,
   type DragOverEvent,
@@ -26,6 +27,7 @@ import {
   PointerSensor,
   TouchSensor,
   closestCorners,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -177,6 +179,20 @@ export function BoardClient({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // Prefer a card under the pointer, then fall back to the column under the pointer — the
+  // latter is what makes an empty column droppable (closestCorners otherwise lets a card in
+  // a neighbouring column win over the empty column's far corners). closestCorners remains
+  // the last resort for the keyboard sensor / off-screen autoscroll, which have no pointer.
+  const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
+    const ids = new Set(columnsRef.current.map((c) => c.id));
+    const hits = pointerWithin(args);
+    const cardHit = hits.find(({ id }) => !ids.has(String(id)));
+    if (cardHit) return [cardHit];
+    const columnHit = hits.find(({ id }) => ids.has(String(id)));
+    if (columnHit) return [columnHit];
+    return closestCorners(args);
+  }, []);
+
   const orderedColumns = [...columns].sort(byPosition);
   const columnIds = new Set(columns.map((c) => c.id));
 
@@ -270,9 +286,14 @@ export function BoardClient({
 
   async function handleUpdateColumn(
     columnId: string,
-    input: { name: string; color: string | null }
+    input: { name: string; color: string | null; isDone: boolean }
   ) {
-    await updateColumnAction({ columnId, name: input.name, color: input.color });
+    await updateColumnAction({
+      columnId,
+      name: input.name,
+      color: input.color,
+      isDone: input.isDone,
+    });
     setColumns((prev) => prev.map((c) => (c.id === columnId ? { ...c, ...input } : c)));
   }
 
@@ -322,6 +343,26 @@ export function BoardClient({
       const targetColumnId = resolveColumnId(over, prev);
       if (!targetColumnId) return prev;
 
+      // Same-column reorder: move within the full ordering via arrayMove so the result is
+      // direction-correct (inserting "before the hovered card" alone lands downward drags one
+      // slot too high). Mirrors the column-reorder math in handleDragEnd.
+      if (activeCard.columnId === targetColumnId) {
+        const full = cardsForColumn(prev, targetColumnId);
+        const oldIndex = full.findIndex((c) => c.id === active);
+        const newIndex = columnIds.has(over)
+          ? full.length - 1
+          : full.findIndex((c) => c.id === over);
+        if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev;
+
+        const reordered = arrayMove(full, oldIndex, newIndex);
+        const idx = reordered.findIndex((c) => c.id === active);
+        const before = reordered[idx - 1] ?? null;
+        const after = reordered[idx + 1] ?? null;
+        const position = keyBetween(before?.position ?? null, after?.position ?? null);
+        return prev.map((c) => (c.id === active ? { ...c, position } : c));
+      }
+
+      // Cross-column move: insert at the hovered card's slot (or the end when over a column).
       const targetCards = cardsForColumn(prev, targetColumnId).filter((c) => c.id !== active);
       const index = columnIds.has(over)
         ? targetCards.length
@@ -330,12 +371,6 @@ export function BoardClient({
 
       const before = targetCards[insertAt - 1] ?? null;
       const after = targetCards[insertAt] ?? null;
-
-      if (activeCard.columnId === targetColumnId) {
-        const gtBefore = before ? activeCard.position > before.position : true;
-        const ltAfter = after ? activeCard.position < after.position : true;
-        if (gtBefore && ltAfter) return prev;
-      }
 
       const position = keyBetween(before?.position ?? null, after?.position ?? null);
       return prev.map((c) => (c.id === active ? { ...c, columnId: targetColumnId, position } : c));
@@ -402,7 +437,7 @@ export function BoardClient({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -442,6 +477,7 @@ export function BoardClient({
                   key={column.id}
                   column={column}
                   cards={cardsForColumn(cards, column.id).filter(matchesFilters)}
+                  isDoneColumn={column.isDone}
                   isOnlyColumn={columns.length <= 1}
                   otherColumns={orderedColumns
                     .filter((c) => c.id !== column.id)
@@ -514,7 +550,11 @@ export function BoardClient({
 
       <DragOverlay>
         {activeCard ? (
-          <CardTile card={activeCard} tags={tagsForCard(activeCard.id)} />
+          <CardTile
+            card={activeCard}
+            tags={tagsForCard(activeCard.id)}
+            isDoneColumn={columns.find((c) => c.id === activeCard.columnId)?.isDone ?? false}
+          />
         ) : activeColumn ? (
           <div className="min-w-[85vw] max-w-[85vw] rounded-[16px] bg-(--surface-150) px-3 py-3 text-sm font-semibold text-(--grey-900) shadow-lg sm:min-w-[280px] sm:max-w-[280px]">
             {activeColumn.name}

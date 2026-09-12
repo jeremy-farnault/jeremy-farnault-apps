@@ -13,13 +13,24 @@ function daysUntil(deadline: string): number {
   return Math.round((due.getTime() - today.getTime()) / 86_400_000);
 }
 
+// Static, human-readable deadline (e.g. "3 Oct"), parsed date-only like daysUntil.
+function formatDeadline(deadline: string): string {
+  const [y, m, d] = deadline.split("-").map(Number);
+  return new Date(y as number, (m as number) - 1, d as number).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+  });
+}
+
 export function CardTile({
   card,
   tags = [],
+  isDoneColumn = false,
   onClick,
 }: {
   card: CardRow;
   tags?: TagRow[];
+  isDoneColumn?: boolean;
   onClick?: () => void;
 }) {
   const preview = extractPlainText(card.body, 120).trim();
@@ -79,16 +90,24 @@ export function CardTile({
           ))}
         </div>
       )}
-      {days !== null && (
-        <span
-          className={cn(
-            "mt-2 inline-flex items-center rounded-full bg-(--surface-200) px-1.5 py-0.5 text-xs font-semibold tabular-nums",
-            days >= 1 ? "text-(--green-500)" : "text-(--red-500)"
-          )}
-        >
-          {days}d
-        </span>
-      )}
+      {card.deadline &&
+        (isDoneColumn ? (
+          // Completed: freeze the countdown — show the deadline as a muted, struck-through date.
+          <span className="mt-2 inline-flex items-center rounded-full bg-(--surface-200) px-1.5 py-0.5 text-xs font-semibold text-(--grey-400) line-through">
+            {formatDeadline(card.deadline)}
+          </span>
+        ) : (
+          days !== null && (
+            <span
+              className={cn(
+                "mt-2 inline-flex items-center rounded-full bg-(--surface-200) px-1.5 py-0.5 text-xs font-semibold tabular-nums",
+                days >= 1 ? "text-(--green-500)" : "text-(--red-500)"
+              )}
+            >
+              {days}d
+            </span>
+          )
+        ))}
     </div>
   );
 }

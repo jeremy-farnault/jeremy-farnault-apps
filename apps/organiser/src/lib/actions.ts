@@ -255,6 +255,7 @@ export async function createColumnAction(input: {
       color: organiserColumns.color,
       position: organiserColumns.position,
       collapsed: organiserColumns.collapsed,
+      isDone: organiserColumns.isDone,
     });
 
   const column = inserted[0];
@@ -266,6 +267,7 @@ export async function updateColumnAction(input: {
   columnId: string;
   name: string;
   color: string | null;
+  isDone: boolean;
 }): Promise<void> {
   const name = input.name.trim();
   if (!name) throw new Error("Name is required");
@@ -273,7 +275,7 @@ export async function updateColumnAction(input: {
   const userId = await getUserId();
   await db
     .update(organiserColumns)
-    .set({ name, color: input.color, updatedAt: new Date() })
+    .set({ name, color: input.color, isDone: input.isDone, updatedAt: new Date() })
     .where(and(eq(organiserColumns.id, input.columnId), eq(organiserColumns.userId, userId)));
 }
 

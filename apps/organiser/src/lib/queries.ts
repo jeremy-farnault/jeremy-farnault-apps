@@ -17,6 +17,7 @@ export type ColumnRow = {
   color: string | null;
   position: string;
   collapsed: boolean;
+  isDone: boolean;
 };
 
 export type CardRow = {
@@ -91,6 +92,7 @@ export async function getOrCreateBoard(userId: string): Promise<BoardData> {
         color: organiserColumns.color,
         position: organiserColumns.position,
         collapsed: organiserColumns.collapsed,
+        isDone: organiserColumns.isDone,
       })
       .from(organiserColumns)
       .where(and(eq(organiserColumns.userId, userId), eq(organiserColumns.boardId, boardId)))

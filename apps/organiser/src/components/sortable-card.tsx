@@ -8,10 +8,12 @@ import { CardTile } from "./card-tile";
 export function SortableCard({
   card,
   tags,
+  isDoneColumn = false,
   onClick,
 }: {
   card: CardRow;
   tags: TagRow[];
+  isDoneColumn?: boolean;
   onClick?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -33,7 +35,12 @@ export function SortableCard({
       {...listeners}
       className="touch-manipulation"
     >
-      <CardTile card={card} tags={tags} {...(onClick ? { onClick } : {})} />
+      <CardTile
+        card={card}
+        tags={tags}
+        isDoneColumn={isDoneColumn}
+        {...(onClick ? { onClick } : {})}
+      />
     </div>
   );
 }

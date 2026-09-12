@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnRow } from "@/lib/queries";
-import { ActionModal, COLOR_PALETTE, ColorPicker, TextInput } from "@jf/ui";
+import { ActionModal, COLOR_PALETTE, ColorPicker, Switch, TextInput } from "@jf/ui";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,10 +14,11 @@ export function ColumnEditModal({
   column: ColumnRow;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (input: { name: string; color: string | null }) => Promise<void>;
+  onSave: (input: { name: string; color: string | null; isDone: boolean }) => Promise<void>;
 }) {
   const [name, setName] = useState(column.name);
   const [color, setColor] = useState<string | null>(column.color);
+  const [isDone, setIsDone] = useState(column.isDone);
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -28,7 +29,7 @@ export function ColumnEditModal({
     }
     setSaving(true);
     try {
-      await onSave({ name: trimmed, color });
+      await onSave({ name: trimmed, color, isDone });
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -58,6 +59,15 @@ export function ColumnEditModal({
               </button>
             </div>
             <ColorPicker palette={COLOR_PALETTE} value={color} onChange={setColor} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-sm text-(--grey-900)">Done column</span>
+              <span className="text-xs text-(--grey-500)">
+                Cards here freeze their deadline badge
+              </span>
+            </div>
+            <Switch checked={isDone} onCheckedChange={setIsDone} aria-label="Mark as done column" />
           </div>
         </div>
       }
