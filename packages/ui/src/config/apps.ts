@@ -4,6 +4,7 @@ import type { Icon } from "@phosphor-icons/react";
 // which is client-only and crashes in RSC).
 import {
   ApertureIcon,
+  AtomIcon,
   BarbellIcon,
   ChecksIcon,
   CoinsIcon,
@@ -109,5 +110,12 @@ export const apps: AppDefinition[] = [
     icon: MapTrifoldIcon,
     href: process.env.NEXT_PUBLIC_TRACER_URL ?? "#",
     accentColor: "--red-600",
+  },
+  {
+    id: "unifier",
+    name: "Unifier",
+    icon: AtomIcon,
+    href: process.env.NEXT_PUBLIC_UNIFIER_URL ?? "#",
+    accentColor: "--teal-600",
   },
 ];

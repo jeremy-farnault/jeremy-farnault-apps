@@ -1,0 +1,6 @@
+:root,
+.dark {
+  --primary: var(--teal-600);
+  --primary-foreground: var(--grey-100);
+  --secondary: var(--teal-800);
+}
