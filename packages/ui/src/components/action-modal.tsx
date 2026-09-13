@@ -2,7 +2,7 @@
 
 import { CircleNotchIcon, XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, type RefObject, useEffect, useState } from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 
@@ -31,6 +31,11 @@ interface ActionModalProps {
    * breakpoints regardless of `closeOnBackdropClick`.
    */
   headerActions?: ReactNode;
+  /**
+   * Element to focus when the modal opens, instead of the first tabbable one.
+   * Useful when the field the user actually came to fill isn't first in the content.
+   */
+  initialFocusRef?: RefObject<HTMLElement | null>;
   primaryButton?: PrimaryButton;
   secondaryButton?: SecondaryButton;
   size: "small" | "large";
@@ -54,6 +59,7 @@ export function ActionModal({
   icon,
   content,
   headerActions,
+  initialFocusRef,
   primaryButton,
   secondaryButton,
   size,
@@ -103,6 +109,12 @@ export function ActionModal({
           )}
         >
           <Dialog.Content
+            onOpenAutoFocus={(e) => {
+              const target = initialFocusRef?.current;
+              if (!target) return;
+              e.preventDefault();
+              target.focus();
+            }}
             {...(!closeOnEscapeKeyDown && {
               onEscapeKeyDown: (e: KeyboardEvent) => e.preventDefault(),
             })}

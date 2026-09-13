@@ -1,6 +1,6 @@
 "use client";
 
-import { renderToHtml } from "@/lib/note-body-utils";
+import { extractPlainText, renderToHtml } from "@/lib/note-body-utils";
 import { DEFAULT_COLOR } from "@/lib/note-utils.ts";
 import type { Folder, Note } from "@/lib/queries";
 import { cn, isDarkSurface } from "@jf/ui";
@@ -32,6 +32,9 @@ export function NoteCard({
   parentFolderId,
   onFolderLinkClick,
 }: Props) {
+  // A note whose body is empty (or an empty rich-text doc) shrinks to its title + actions row
+  // instead of reserving the full card height, so the notes around it stay visible.
+  const hasBody = extractPlainText(note.body).trim().length > 0;
   const bgColor = note.backgroundColor ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
   const isDark = isDarkSurface(bgColor);
@@ -51,7 +54,8 @@ export function NoteCard({
   return (
     <div
       className={cn(
-        "group relative flex h-[150px] flex-col rounded-[22px] border p-4",
+        "group relative flex flex-col rounded-[22px] border p-4",
+        hasBody ? "h-[150px]" : "h-fit self-start",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",
         note.pinned ? "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]" : "shadow-sm"
       )}
@@ -77,7 +81,11 @@ export function NoteCard({
 
       <div
         className="relative flex-1 flex flex-col justify-start overflow-hidden w-full pointer-events-none"
-        style={{ maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)" }}
+        style={
+          hasBody
+            ? { maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)" }
+            : undefined
+        }
       >
         {note.title && (
           <div
@@ -88,7 +96,7 @@ export function NoteCard({
             <span className="text-base font-semibold truncate">{note.title}</span>
           </div>
         )}
-        {note.body && (
+        {hasBody && (
           <div
             className="note-card-body text-sm"
             style={{ color: textSoft }}

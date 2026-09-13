@@ -4,7 +4,7 @@ import { logHabitAction } from "@/lib/actions";
 import type { Habit, HabitLog } from "@/lib/queries";
 import { ActionModal, DatePicker, Switch, Textarea } from "@jf/ui";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -25,6 +25,13 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
   const [date, setDate] = useState(targetDate);
   const [value, setValue] = useState("");
   const [comment, setComment] = useState("");
+  // The value control is what the user opened the modal for, so it takes focus on open
+  // rather than the date picker that precedes it in the layout.
+  const valueRef = useRef<HTMLElement | null>(null);
+  // Only one of the three value controls renders, so they share a single ref.
+  const setValueRef = (el: HTMLElement | null) => {
+    valueRef.current = el;
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -67,6 +74,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       />
       {habit.type === "boolean" && (
         <Switch
+          ref={setValueRef}
           checked={value === "true"}
           onCheckedChange={(checked) => setValue(checked ? "true" : "false")}
           label="Done"
@@ -74,6 +82,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       )}
       {habit.type === "numeric" && (
         <input
+          ref={setValueRef}
           type="number"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -83,6 +92,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       )}
       {habit.type === "time" && (
         <input
+          ref={setValueRef}
           type="time"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -98,6 +108,7 @@ export function LogHabitModal({ isOpen, onClose, habit, targetDate, existingLog 
       isOpen={isOpen}
       onClose={onClose}
       size="small"
+      initialFocusRef={valueRef}
       title={existingLog ? "Edit log" : "Log habit"}
       content={content}
       primaryButton={{

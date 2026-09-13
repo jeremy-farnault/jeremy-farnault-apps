@@ -1,20 +1,22 @@
 "use client";
 
 import * as SwitchPrimitive from "@radix-ui/react-switch";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { useId } from "react";
 import { cn } from "../lib/utils";
 
 interface SwitchProps extends SwitchPrimitive.SwitchProps {
   label?: ReactNode;
+  ref?: Ref<HTMLButtonElement>;
 }
 
-export function Switch({ label, className, ...props }: SwitchProps) {
+export function Switch({ label, className, ref, ...props }: SwitchProps) {
   const id = useId();
 
   return (
     <label htmlFor={id} className="flex cursor-pointer items-center gap-2">
       <SwitchPrimitive.Root
+        ref={ref}
         id={id}
         className={cn(
           "relative inline-flex h-6 w-[42px] shrink-0 cursor-pointer items-center rounded-full",
