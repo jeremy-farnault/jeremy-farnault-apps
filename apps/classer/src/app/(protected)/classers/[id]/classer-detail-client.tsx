@@ -7,7 +7,7 @@ import { ItemFormModal } from "@/components/item-form-modal";
 import type { ItemForEdit } from "@/components/item-form-modal";
 import { deleteItemAction, updateItemAction } from "@/lib/actions";
 import { FloatingCTA } from "@jf/ui";
-import { PlusSquareIcon } from "@phosphor-icons/react";
+import { RowsPlusBottomIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -120,7 +120,7 @@ export function ClasserDetailClient({ classer, items }: Props) {
         )}
       </main>
 
-      <FloatingCTA icon={<PlusSquareIcon size={22} />} onClick={openCreate} />
+      <FloatingCTA icon={<RowsPlusBottomIcon size={22} />} onClick={openCreate} />
 
       <ItemFormModal
         isOpen={isModalOpen}

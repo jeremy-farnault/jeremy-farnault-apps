@@ -4,7 +4,7 @@ import { deleteEntryAction, fetchEntriesAction, searchEntriesAction } from "@/li
 import type { FilterParams, SortOption } from "@/lib/queries";
 import type { EntryCursor } from "@/lib/queries";
 import { FloatingCTA, Grid } from "@jf/ui";
-import { PlusSquareIcon } from "@phosphor-icons/react";
+import { StackPlusIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { type CardEntry, EntryCard } from "./entry-card";
 import { EntryFormModal } from "./entry-form-modal";
@@ -217,7 +217,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
       </div>
 
       <FloatingCTA
-        icon={<PlusSquareIcon size={22} />}
+        icon={<StackPlusIcon size={22} />}
         onClick={() => {
           setEditingEntry(undefined);
           setModalOpen(true);

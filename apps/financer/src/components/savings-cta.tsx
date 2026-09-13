@@ -4,7 +4,7 @@ import { addIncomeEntry, createIncomeSource } from "@/lib/actions";
 import { CURRENCIES } from "@/lib/constants";
 import type { IncomeSourceRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
-import { MinusIcon, PlusCircleIcon, PlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { MinusIcon, PiggyBankIcon, PlusCircleIcon, PlusIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -152,7 +152,7 @@ export function SavingsCta({ viewedMonth, homeCurrency, sources }: SavingsCtaPro
           aria-label="Log savings"
           className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
         >
-          <PlusSquareIcon size={22} />
+          <PiggyBankIcon size={22} />
         </button>
       </div>
 

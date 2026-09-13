@@ -6,7 +6,7 @@ import { ItemFormModal } from "@/components/item-form-modal";
 import { fetchFeedPageAction } from "@/lib/actions";
 import type { FeedCursor, FeedFilters, FeedItem as FeedItemData, FeedTag } from "@/lib/queries";
 import { FloatingCTA } from "@jf/ui";
-import { PlusIcon } from "@phosphor-icons/react";
+import { ImagesIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -182,7 +182,7 @@ export function PortfolioFeed({
 
       {isOwner && (
         <>
-          <FloatingCTA icon={<PlusIcon size={22} weight="bold" />} onClick={openCreate} />
+          <FloatingCTA icon={<ImagesIcon size={22} />} onClick={openCreate} />
           <ItemFormModal
             isOpen={modalOpen}
             itemId={editingId}

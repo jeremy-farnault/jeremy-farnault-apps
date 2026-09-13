@@ -3,7 +3,7 @@
 import { addExerciseToSession } from "@/lib/actions";
 import type { gainerExercises } from "@jf/db";
 import { ActionModal, TextInput } from "@jf/ui";
-import { PlusSquareIcon, TimerIcon, XIcon } from "@phosphor-icons/react";
+import { BarbellIcon, TimerIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -166,7 +166,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
             aria-label="Add exercise"
             className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
           >
-            <PlusSquareIcon size={22} />
+            <BarbellIcon size={22} />
           </button>
         </div>
       )}

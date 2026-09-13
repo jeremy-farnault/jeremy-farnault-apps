@@ -2,7 +2,7 @@
 
 import type { Medicine, MedicineMonthView, Symptom, SymptomLogDetail } from "@/lib/queries";
 import { FloatingCTA } from "@jf/ui";
-import { PlusSquareIcon } from "@phosphor-icons/react";
+import { PillIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { DayDetailModal } from "./day-detail-modal";
 import { DayHeaderRow } from "./day-header-row";
@@ -85,7 +85,7 @@ export function MedicinesList({
         </>
       )}
 
-      <FloatingCTA icon={<PlusSquareIcon size={22} />} onClick={openCreate} />
+      <FloatingCTA icon={<PillIcon size={22} />} onClick={openCreate} />
 
       <MedicineFormModal
         isOpen={isModalOpen}

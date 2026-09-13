@@ -4,7 +4,7 @@ import { searchNotesAction } from "@/lib/actions";
 import { type SortOption, splitItems } from "@/lib/grid-utils";
 import type { Folder, Note } from "@/lib/queries";
 import { Divider, Grid, SearchInput, Select, SelectItem } from "@jf/ui";
-import { ArchiveIcon, FolderPlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { ArchiveIcon, FolderPlusIcon, NotePencilIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -182,7 +182,7 @@ export function ItemsGrid({
           aria-label="New note"
           className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
         >
-          <PlusSquareIcon size={22} />
+          <NotePencilIcon size={22} />
         </button>
       </div>
 

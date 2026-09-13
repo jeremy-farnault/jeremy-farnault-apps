@@ -4,7 +4,7 @@ import { archiveClasserAction, fetchClassersAction, searchClassersAction } from 
 import type { ClasserResult } from "@/lib/actions";
 import type { ClasserCursor } from "@/lib/queries";
 import { FloatingCTA, Grid, SearchInput, Select, SelectItem } from "@jf/ui";
-import { PlusSquareIcon } from "@phosphor-icons/react";
+import { ListNumbersIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Breadcrumb } from "./breadcrumb";
@@ -190,7 +190,7 @@ export function ClassersGrid({ initialClassers, initialNextCursor, sort }: Props
       </div>
 
       <FloatingCTA
-        icon={<PlusSquareIcon size={22} />}
+        icon={<ListNumbersIcon size={22} />}
         onClick={() => {
           setEditingClasser(undefined);
           setModalOpen(true);

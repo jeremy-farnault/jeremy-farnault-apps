@@ -3,7 +3,7 @@
 import { archiveHabitAction, deleteHabitAction, searchHabitsAction } from "@/lib/actions";
 import type { Habit, HabitLog, SortOption } from "@/lib/queries";
 import { ActionModal, FloatingCTA, Grid } from "@jf/ui";
-import { ClipboardIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { ClipboardIcon, RepeatIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Breadcrumb } from "./breadcrumb";
@@ -171,7 +171,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
       )}
 
       <FloatingCTA
-        icon={<PlusSquareIcon size={22} />}
+        icon={<RepeatIcon size={22} />}
         onClick={() => {
           setEditingHabit(undefined);
           setModalOpen(true);

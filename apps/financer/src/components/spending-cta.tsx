@@ -4,7 +4,7 @@ import { createSpendingCategory, createSpendingEntry } from "@/lib/actions";
 import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import type { SpendingCategoryRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
-import { MinusIcon, PlusCircleIcon, PlusIcon, PlusSquareIcon } from "@phosphor-icons/react";
+import { MinusIcon, PlusCircleIcon, PlusIcon, ReceiptIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -149,7 +149,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
           aria-label="Log spending"
           className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
         >
-          <PlusSquareIcon size={22} />
+          <ReceiptIcon size={22} />
         </button>
       </div>
 
