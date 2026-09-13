@@ -105,7 +105,8 @@ export function NoteCard({
         )}
       </div>
 
-      <div className="relative flex items-center justify-end gap-1">
+      {/* Fixed row height so the hover-only action buttons don't grow a collapsed card. */}
+      <div className="relative flex h-7 shrink-0 items-center justify-end gap-1">
         <NoteActionsMenu
           note={note}
           allFolders={allFolders}
