@@ -12,7 +12,7 @@ import {
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { keyAfter } from "./ordering";
+import { keyAfter } from "@jf/ui/ordering";
 import type { CardRow, ColumnRow, TagRow } from "./queries";
 
 // The default palette colour applied to tags created on the fly (the app accent).

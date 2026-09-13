@@ -24,6 +24,7 @@ export const COLOR_PALETTE: readonly PaletteItem[] = [
   { label: "Green Dark", value: "var(--green-600)", foreground: ON_LIGHT },
   { label: "Moss", value: "var(--moss-400)", foreground: ON_LIGHT },
   { label: "Teal", value: "var(--teal-400)", foreground: ON_LIGHT },
+  { label: "Teal Dark", value: "var(--teal-600)", foreground: ON_LIGHT },
   { label: "Blue", value: "var(--blue-400)", foreground: ON_LIGHT },
   { label: "Blue Dark", value: "var(--blue-600)", foreground: ON_DARK },
   { label: "Purple", value: "var(--purple-400)", foreground: ON_LIGHT },

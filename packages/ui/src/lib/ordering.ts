@@ -1,8 +1,8 @@
 import { generateKeyBetween } from "fractional-indexing";
 
 /**
- * Fractional-index ordering helpers. Columns and cards store a `position` text
- * key; ordering is the lexicographic sort of those keys. A move computes a key
+ * Fractional-index ordering helpers. Ordered rows store a `position` text key;
+ * ordering is the lexicographic sort of those keys. A move computes a key
  * strictly between two neighbours, touching only the moved row.
  */
 
@@ -16,7 +16,7 @@ export function keyAfter(last: string | null): string {
   return generateKeyBetween(last, null);
 }
 
-/** `n` sequential end-keys, e.g. for seeding the initial columns in order. */
+/** `n` sequential end-keys, e.g. for seeding an initial ordered set. */
 export function seedKeys(n: number): string[] {
   const keys: string[] = [];
   let prev: string | null = null;

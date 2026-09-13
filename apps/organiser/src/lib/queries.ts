@@ -9,7 +9,7 @@ import {
 } from "@jf/db";
 import { and, asc, eq } from "drizzle-orm";
 
-import { seedKeys } from "./ordering";
+import { seedKeys } from "@jf/ui/ordering";
 
 export type ColumnRow = {
   id: string;

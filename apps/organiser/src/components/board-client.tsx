@@ -14,7 +14,6 @@ import {
   updateColumnAction,
   updateTagAction,
 } from "@/lib/actions";
-import { keyBetween } from "@/lib/ordering";
 import type { CardRow, ColumnRow, TagRow } from "@/lib/queries";
 import {
   type CollisionDetection,
@@ -38,6 +37,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { TextInput, cn } from "@jf/ui";
+import { keyBetween } from "@jf/ui/ordering";
 import { extractPlainText } from "@jf/ui/rich-text";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
