@@ -1,14 +1,9 @@
 "use client";
 
 import { createCategory, deleteCategory } from "@/lib/actions";
-import {
-  CATEGORY_ICONS,
-  DEFAULT_CATEGORY_COLOR,
-  DEFAULT_CATEGORY_ICON,
-  PLACER_COLOR_PALETTE,
-} from "@/lib/constants";
+import { CATEGORY_ICONS, DEFAULT_CATEGORY_COLOR, DEFAULT_CATEGORY_ICON } from "@/lib/constants";
 import type { CategoryRow } from "@/lib/queries";
-import { ActionModal, ColorPicker, TextInput } from "@jf/ui";
+import { ActionModal, COLOR_PALETTE, ColorPicker, TextInput } from "@jf/ui";
 import { TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -93,7 +88,7 @@ export function CategoryModal({ isOpen, onClose, categories }: CategoryModalProp
               </div>
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs text-(--grey-500)">Color</p>
-                <ColorPicker palette={PLACER_COLOR_PALETTE} value={color} onChange={setColor} />
+                <ColorPicker palette={COLOR_PALETTE} value={color} onChange={setColor} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs text-(--grey-500)">Icon</p>

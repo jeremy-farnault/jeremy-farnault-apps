@@ -8,9 +8,9 @@ import {
   updateIncomeSource,
   updateIncomeSourceColor,
 } from "@/lib/actions";
-import { FINANCER_COLOR_PALETTE, INCOME_SOURCE_COLORS } from "@/lib/constants";
+import { INCOME_SOURCE_COLORS } from "@/lib/constants";
 import type { IncomeEntryRow, IncomeSourceRow } from "@/lib/queries";
-import { ActionModal, ColorPicker, TextInput } from "@jf/ui";
+import { ActionModal, COLOR_PALETTE, ColorPicker, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -213,7 +213,7 @@ export function IncomeSourcesList({ sources, month, entries, isClosed }: IncomeS
               {coloringSourceId === source.id && (
                 <div className="pt-1 pb-0.5">
                   <ColorPicker
-                    palette={FINANCER_COLOR_PALETTE}
+                    palette={COLOR_PALETTE}
                     value={effectiveColor}
                     onChange={(color) => handleColorChange(source.id, color)}
                   />

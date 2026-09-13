@@ -9,22 +9,6 @@ export const CURRENCY_FLAGS: Record<(typeof CURRENCIES)[number], string> = {
   USD: "🇺🇸",
 };
 
-export const FINANCER_COLOR_PALETTE = [
-  { label: "Blue", value: "var(--blue-400)" },
-  { label: "Green", value: "var(--green-400)" },
-  { label: "Green Dark", value: "var(--green-600)" },
-  { label: "Teal", value: "var(--teal-400)" },
-  { label: "Moss", value: "var(--moss-400)" },
-  { label: "Beige", value: "var(--beige-400)" },
-  { label: "Yellow", value: "var(--yellow-400)" },
-  { label: "Yellow Dark", value: "var(--yellow-600)" },
-  { label: "Magenta", value: "var(--magenta-400)" },
-  { label: "Red", value: "var(--red-400)" },
-  { label: "Red Dark", value: "var(--red-600)" },
-  { label: "Purple", value: "var(--purple-400)" },
-  { label: "Purple Dark", value: "var(--purple-600)" },
-] as const;
-
 export const ASSET_SOURCE_COLORS = [
   "var(--blue-400)",
   "var(--green-400)",
