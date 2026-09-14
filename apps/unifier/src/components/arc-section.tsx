@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { ArcDeleteDialog, type DeleteArcMode } from "./arc-delete-dialog";
 import { ArcEditModal } from "./arc-edit-modal";
 import { ArcSlotsModal } from "./arc-slots-modal";
+import { PersonBubble } from "./person-bubble";
 import { PersonMoveDialog } from "./person-move-dialog";
 
 type Props = {
@@ -33,6 +34,7 @@ type Props = {
   onMoveArc: (arcId: string, direction: "up" | "down") => Promise<void>;
   onDeleteArc: (arcId: string, mode: DeleteArcMode) => Promise<void>;
   onMovePerson: (personId: string, targetArcId: string) => Promise<void>;
+  onEditPerson: (person: PersonRow) => void;
   onAddSlot: (arcId: string, label: string) => Promise<void>;
   onRenameSlot: (slotId: string, label: string) => Promise<void>;
   onMoveSlot: (slotId: string, direction: "up" | "down") => Promise<void>;
@@ -55,6 +57,7 @@ export function ArcSection({
   onMoveArc,
   onDeleteArc,
   onMovePerson,
+  onEditPerson,
   onAddSlot,
   onRenameSlot,
   onMoveSlot,
@@ -189,10 +192,25 @@ export function ArcSection({
             >
               <Link
                 href={`/people/${person.id}`}
-                className="flex-1 truncate rounded-[8px] transition-colors hover:text-(--grey-900) hover:underline"
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-[8px] transition-colors hover:text-(--grey-900)"
               >
-                {person.name}
+                <PersonBubble
+                  name={person.name}
+                  avatarUrl={person.avatarUrl}
+                  color={person.color}
+                  arcColor={arc.color}
+                  size={24}
+                />
+                <span className="truncate hover:underline">{person.name}</span>
               </Link>
+              <button
+                type="button"
+                onClick={() => onEditPerson(person)}
+                aria-label={`Edit ${person.name}`}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--grey-400) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--grey-800) active:scale-90"
+              >
+                <PencilSimpleIcon size={14} />
+              </button>
               {otherArcs.length > 0 && (
                 <button
                   type="button"

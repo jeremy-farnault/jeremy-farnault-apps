@@ -7,6 +7,7 @@ import {
   unifierTouches,
 } from "@jf/db";
 import { and, asc, desc, eq, ilike, max } from "drizzle-orm";
+import { getPublicImageUrl } from "./s3-url";
 
 export type ArcRow = {
   id: string;
@@ -19,10 +20,35 @@ export type PersonRow = {
   id: string;
   arcId: string;
   name: string;
+  /** S3 key of the avatar photo, kept so an edit can replace or delete the object. */
+  avatarKey: string | null;
+  /** Public URL for `avatarKey`, resolved server-side; null when there is no photo. */
+  avatarUrl: string | null;
+  /** Bubble colour; null inherits the arc's colour. */
+  color: string | null;
   note: string | null;
   important: boolean;
   flaggedAt: Date | null;
 };
+
+/** Person columns every surface reads, in one place so the selects can't drift apart. */
+const personColumns = {
+  id: unifierPersons.id,
+  arcId: unifierPersons.arcId,
+  name: unifierPersons.name,
+  avatarKey: unifierPersons.avatarKey,
+  color: unifierPersons.color,
+  note: unifierPersons.note,
+  important: unifierPersons.important,
+  flaggedAt: unifierPersons.flaggedAt,
+};
+
+/** Resolves the stored S3 key into the URL the client renders. */
+function withAvatarUrl<T extends { avatarKey: string | null }>(
+  row: T
+): T & { avatarUrl: string | null } {
+  return { ...row, avatarUrl: row.avatarKey ? getPublicImageUrl(row.avatarKey) : null };
+}
 
 export type SlotRow = {
   id: string;
@@ -65,14 +91,7 @@ export async function getArcsAndPeople(userId: string): Promise<UnifierData> {
       .where(eq(unifierArcs.userId, userId))
       .orderBy(asc(unifierArcs.position), asc(unifierArcs.id)),
     db
-      .select({
-        id: unifierPersons.id,
-        arcId: unifierPersons.arcId,
-        name: unifierPersons.name,
-        note: unifierPersons.note,
-        important: unifierPersons.important,
-        flaggedAt: unifierPersons.flaggedAt,
-      })
+      .select(personColumns)
       .from(unifierPersons)
       .where(eq(unifierPersons.userId, userId))
       .orderBy(asc(unifierPersons.name), asc(unifierPersons.id)),
@@ -101,7 +120,7 @@ export async function getArcsAndPeople(userId: string): Promise<UnifierData> {
     if (row.lastTouchAt) lastTouchAt[row.personId] = row.lastTouchAt;
   }
 
-  return { arcs, persons, slots, lastTouchAt };
+  return { arcs, persons: persons.map(withAvatarUrl), slots, lastTouchAt };
 }
 
 export type TouchRow = {
@@ -132,19 +151,13 @@ export async function getPersonDetail(
   personId: string
 ): Promise<PersonDetail | null> {
   const persons = await db
-    .select({
-      id: unifierPersons.id,
-      arcId: unifierPersons.arcId,
-      name: unifierPersons.name,
-      note: unifierPersons.note,
-      important: unifierPersons.important,
-      flaggedAt: unifierPersons.flaggedAt,
-    })
+    .select(personColumns)
     .from(unifierPersons)
     .where(and(eq(unifierPersons.id, personId), eq(unifierPersons.userId, userId)))
     .limit(1);
-  const person = persons[0];
-  if (!person) return null;
+  const row = persons[0];
+  if (!row) return null;
+  const person = withAvatarUrl(row);
 
   const [arcs, slots, valueRows, touches] = await Promise.all([
     db
@@ -194,6 +207,8 @@ export async function getPersonDetail(
 export type PersonSearchRow = {
   id: string;
   name: string;
+  avatarUrl: string | null;
+  color: string | null;
   arcName: string;
   arcColor: string | null;
 };
@@ -214,10 +229,12 @@ export async function searchPeople(userId: string, query: string): Promise<Perso
   const trimmed = query.trim();
   if (!trimmed) return [];
 
-  return db
+  const rows = await db
     .select({
       id: unifierPersons.id,
       name: unifierPersons.name,
+      avatarKey: unifierPersons.avatarKey,
+      color: unifierPersons.color,
       arcName: unifierArcs.name,
       arcColor: unifierArcs.color,
     })
@@ -228,4 +245,9 @@ export async function searchPeople(userId: string, query: string): Promise<Perso
     )
     .orderBy(asc(unifierPersons.name), asc(unifierPersons.id))
     .limit(20);
+
+  return rows.map(({ avatarKey, ...rest }) => ({
+    ...rest,
+    avatarUrl: avatarKey ? getPublicImageUrl(avatarKey) : null,
+  }));
 }

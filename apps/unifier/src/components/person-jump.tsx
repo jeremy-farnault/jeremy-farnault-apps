@@ -6,6 +6,7 @@ import { ActionModal, SearchInput, cn } from "@jf/ui";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PersonBubble } from "./person-bubble";
 
 /**
  * Jump straight to a person by name, from anywhere in the app. The daily loop is
@@ -139,10 +140,12 @@ export function PersonJump() {
                           i === active ? "bg-(--surface-150)" : "hover:bg-(--surface-150)"
                         )}
                       >
-                        <span
-                          className="h-2 w-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: person.arcColor ?? "var(--primary)" }}
-                          aria-hidden
+                        <PersonBubble
+                          name={person.name}
+                          avatarUrl={person.avatarUrl}
+                          color={person.color}
+                          arcColor={person.arcColor}
+                          size={24}
                         />
                         <span className="flex-1 truncate text-sm text-(--grey-900)">
                           {person.name}

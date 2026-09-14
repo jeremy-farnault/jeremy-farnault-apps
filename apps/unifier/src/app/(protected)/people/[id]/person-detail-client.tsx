@@ -1,14 +1,18 @@
 "use client";
 
 import { ArcSlotsModal } from "@/components/arc-slots-modal";
+import { PersonBubble } from "@/components/person-bubble";
+import { PersonFormModal } from "@/components/person-form-modal";
 import { PlainButton } from "@/components/plain-button";
 import {
   createSlotAction,
+  deletePersonAction,
   deleteSlotAction,
   logTouchAction,
   moveSlotAction,
   setPersonImportantAction,
   setSlotValueAction,
+  updatePersonAction,
   updatePersonNoteAction,
   updateSlotAction,
 } from "@/lib/actions";
@@ -16,8 +20,9 @@ import { formatDrift, lastTouchAt } from "@/lib/drift";
 import type { ArcRow, PersonRow, SlotRow, TouchRow } from "@/lib/queries";
 import { TextInput, Textarea } from "@jf/ui";
 import { keyBetween } from "@jf/ui/ordering";
-import { ArrowLeftIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, PencilSimpleIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CriticalFlag } from "./critical-flag";
@@ -38,11 +43,13 @@ export function PersonDetailClient({
   values: initialValues,
   touches: initialTouches,
 }: Props) {
+  const router = useRouter();
   const [values, setValues] = useState<Record<string, string | null>>(initialValues);
   // The template is editable from here too: with no slots there is nothing to fill in,
   // and sending the user back to the arc list just to define one is a dead end.
   const [slots, setSlots] = useState<SlotRow[]>(initialSlots);
   const [slotsOpen, setSlotsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [touches, setTouches] = useState<TouchRow[]>(initialTouches);
   const [person, setPerson] = useState<PersonRow>(initialPerson);
   const [note, setNote] = useState(initialPerson.note ?? "");
@@ -69,6 +76,28 @@ export function PersonDetailClient({
       setValues((prev) => ({ ...prev, [slotId]: previous }));
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
+  }
+
+  /**
+   * The arc picker stays out of this modal: moving someone between arcs re-bases their
+   * slot values, which belongs with the arc list where the consequence is visible.
+   */
+  async function handleUpdatePerson(values: {
+    name: string;
+    color: string | null;
+    avatarKey: string | null;
+  }) {
+    const updated = await updatePersonAction({
+      personId: person.id,
+      arcId: arc.id,
+      ...values,
+    });
+    setPerson(updated);
+  }
+
+  async function handleDeletePerson() {
+    await deletePersonAction({ personId: person.id });
+    router.push("/");
   }
 
   async function handleAddSlot(label: string) {
@@ -176,15 +205,25 @@ export function PersonDetailClient({
       </Link>
 
       <header className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span
-          className="h-3 w-3 shrink-0 rounded-full"
-          style={{ backgroundColor: arc.color ?? "var(--primary)" }}
-          aria-hidden
+        <PersonBubble
+          name={person.name}
+          avatarUrl={person.avatarUrl}
+          color={person.color}
+          arcColor={arc.color}
+          size={40}
         />
         <h1 className="min-w-0 break-words text-2xl font-semibold text-(--grey-900)">
           {person.name}
         </h1>
         <span className="text-sm text-(--grey-500)">{arc.name}</span>
+        <button
+          type="button"
+          onClick={() => setEditOpen(true)}
+          aria-label={`Edit ${person.name}`}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-(--grey-400) transition-[color,background-color] hover:bg-(--surface-150) hover:text-(--grey-900)"
+        >
+          <PencilSimpleIcon size={16} />
+        </button>
         <span
           className={
             neverTouched
@@ -249,6 +288,19 @@ export function PersonDetailClient({
       </section>
 
       <TouchFeed touches={touches} onLogTouch={handleLogTouch} />
+
+      {editOpen && (
+        <PersonFormModal
+          arcs={[{ id: arc.id, name: arc.name, color: arc.color }]}
+          person={person}
+          isOpen
+          onClose={() => setEditOpen(false)}
+          onSubmit={({ name: newName, color, avatarKey }) =>
+            handleUpdatePerson({ name: newName, color, avatarKey })
+          }
+          onDelete={handleDeletePerson}
+        />
+      )}
 
       {slotsOpen && (
         <ArcSlotsModal

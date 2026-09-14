@@ -21,11 +21,30 @@ import {
   type TouchRow,
   searchPeople,
 } from "./queries";
+import { deleteS3Object, generatePresignedUploadUrl } from "./s3";
+import { getPublicImageUrl } from "./s3-url";
 
 async function getUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("Unauthorized");
   return session.user.id;
+}
+
+/** The person columns every mutation returns, so the client's row never loses a field. */
+const personReturning = {
+  id: unifierPersons.id,
+  arcId: unifierPersons.arcId,
+  name: unifierPersons.name,
+  avatarKey: unifierPersons.avatarKey,
+  color: unifierPersons.color,
+  note: unifierPersons.note,
+  important: unifierPersons.important,
+  flaggedAt: unifierPersons.flaggedAt,
+};
+
+/** Resolves the stored avatar key into the URL the client renders. */
+function toPersonRow(row: Omit<PersonRow, "avatarUrl">): PersonRow {
+  return { ...row, avatarUrl: row.avatarKey ? getPublicImageUrl(row.avatarKey) : null };
 }
 
 /** Creates an arc at the end of the user's current arc order. */
@@ -69,6 +88,8 @@ export async function createArcAction(input: {
 export async function createPersonAction(input: {
   arcId: string;
   name: string;
+  color?: string | null;
+  avatarKey?: string | null;
 }): Promise<PersonRow> {
   const name = input.name.trim();
   if (!name) throw new Error("Name is required");
@@ -85,19 +106,18 @@ export async function createPersonAction(input: {
 
   const inserted = await db
     .insert(unifierPersons)
-    .values({ userId, arcId: input.arcId, name })
-    .returning({
-      id: unifierPersons.id,
-      arcId: unifierPersons.arcId,
-      name: unifierPersons.name,
-      note: unifierPersons.note,
-      important: unifierPersons.important,
-      flaggedAt: unifierPersons.flaggedAt,
-    });
+    .values({
+      userId,
+      arcId: input.arcId,
+      name,
+      color: input.color ?? null,
+      avatarKey: input.avatarKey ?? null,
+    })
+    .returning(personReturning);
 
   const person = inserted[0];
   if (!person) throw new Error("Failed to create person");
-  return person;
+  return toPersonRow(person);
 }
 
 /** Updates an arc's name and palette colour. */
@@ -194,6 +214,101 @@ async function rebaseSlotValues(
   }
 }
 
+/** Presigns a single avatar upload; the browser PUTs the file straight to S3. */
+export async function generatePresignedUploadUrlAction(
+  filename: string
+): Promise<{ key: string; url: string }> {
+  return generatePresignedUploadUrl(filename);
+}
+
+/**
+ * Updates a person's name, arc, bubble colour and avatar in one write — the person
+ * form modal edits them together, so splitting this into four actions would mean four
+ * round-trips for one save.
+ *
+ * A changed arc re-bases slot values onto the destination template, exactly as
+ * `movePersonAction` does. A replaced or removed avatar deletes the old S3 object:
+ * nothing else ever references it, so leaving it behind is pure litter.
+ */
+export async function updatePersonAction(input: {
+  personId: string;
+  name: string;
+  arcId: string;
+  color: string | null;
+  avatarKey: string | null;
+}): Promise<PersonRow> {
+  const name = input.name.trim();
+  if (!name) throw new Error("Name is required");
+
+  const userId = await getUserId();
+
+  const persons = await db
+    .select({
+      id: unifierPersons.id,
+      arcId: unifierPersons.arcId,
+      avatarKey: unifierPersons.avatarKey,
+    })
+    .from(unifierPersons)
+    .where(and(eq(unifierPersons.id, input.personId), eq(unifierPersons.userId, userId)))
+    .limit(1);
+  const current = persons[0];
+  if (!current) throw new Error("Person not found");
+
+  const arcs = await db
+    .select({ id: unifierArcs.id })
+    .from(unifierArcs)
+    .where(and(eq(unifierArcs.id, input.arcId), eq(unifierArcs.userId, userId)))
+    .limit(1);
+  if (!arcs[0]) throw new Error("Arc not found");
+
+  if (current.arcId !== input.arcId) {
+    await rebaseSlotValues(userId, current.id, input.arcId);
+  }
+
+  const updated = await db
+    .update(unifierPersons)
+    .set({
+      name,
+      arcId: input.arcId,
+      color: input.color,
+      avatarKey: input.avatarKey,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(unifierPersons.id, current.id), eq(unifierPersons.userId, userId)))
+    .returning(personReturning);
+
+  const row = updated[0];
+  if (!row) throw new Error("Failed to update person");
+
+  if (current.avatarKey && current.avatarKey !== input.avatarKey) {
+    await deleteS3Object(current.avatarKey);
+  }
+
+  return toPersonRow(row);
+}
+
+/**
+ * Deletes a person. Their slot values and touches go with them via the FK cascades;
+ * their avatar object is removed here, since nothing cascades into S3.
+ */
+export async function deletePersonAction(input: { personId: string }): Promise<void> {
+  const userId = await getUserId();
+
+  const persons = await db
+    .select({ avatarKey: unifierPersons.avatarKey })
+    .from(unifierPersons)
+    .where(and(eq(unifierPersons.id, input.personId), eq(unifierPersons.userId, userId)))
+    .limit(1);
+  const person = persons[0];
+  if (!person) throw new Error("Person not found");
+
+  await db
+    .delete(unifierPersons)
+    .where(and(eq(unifierPersons.id, input.personId), eq(unifierPersons.userId, userId)));
+
+  if (person.avatarKey) await deleteS3Object(person.avatarKey);
+}
+
 /** Moves a person into another arc, re-basing their slot values onto its template. */
 export async function movePersonAction(input: {
   personId: string;
@@ -222,18 +337,11 @@ export async function movePersonAction(input: {
     .update(unifierPersons)
     .set({ arcId: input.targetArcId, updatedAt: new Date() })
     .where(and(eq(unifierPersons.id, person.id), eq(unifierPersons.userId, userId)))
-    .returning({
-      id: unifierPersons.id,
-      arcId: unifierPersons.arcId,
-      name: unifierPersons.name,
-      note: unifierPersons.note,
-      important: unifierPersons.important,
-      flaggedAt: unifierPersons.flaggedAt,
-    });
+    .returning(personReturning);
 
   const row = updated[0];
   if (!row) throw new Error("Failed to move person");
-  return row;
+  return toPersonRow(row);
 }
 
 type DeleteArcInput =
@@ -287,15 +395,8 @@ export async function deleteArcAction(
         .update(unifierPersons)
         .set({ arcId: input.targetArcId, updatedAt: new Date() })
         .where(and(eq(unifierPersons.id, person.id), eq(unifierPersons.userId, userId)))
-        .returning({
-          id: unifierPersons.id,
-          arcId: unifierPersons.arcId,
-          name: unifierPersons.name,
-          note: unifierPersons.note,
-          important: unifierPersons.important,
-          flaggedAt: unifierPersons.flaggedAt,
-        });
-      if (updated[0]) movedPersons.push(updated[0]);
+        .returning(personReturning);
+      if (updated[0]) movedPersons.push(toPersonRow(updated[0]));
     }
   }
 
@@ -523,18 +624,11 @@ export async function setPersonImportantAction(input: {
     .update(unifierPersons)
     .set({ important: input.important, flaggedAt, updatedAt: new Date() })
     .where(and(eq(unifierPersons.id, input.personId), eq(unifierPersons.userId, userId)))
-    .returning({
-      id: unifierPersons.id,
-      arcId: unifierPersons.arcId,
-      name: unifierPersons.name,
-      note: unifierPersons.note,
-      important: unifierPersons.important,
-      flaggedAt: unifierPersons.flaggedAt,
-    });
+    .returning(personReturning);
 
   const row = updated[0];
   if (!row) throw new Error("Failed to update flag");
-  return row;
+  return toPersonRow(row);
 }
 
 /** Name search backing the jump-to-person control, scoped to the session user. */

@@ -2,8 +2,9 @@
 
 import { formatDrift } from "@/lib/drift";
 import {
+  BUBBLE_HIT_PADDING,
+  BUBBLE_SIZE,
   CENTRE,
-  DOT_RADIUS,
   GUIDE_DAYS,
   type OrbitArc,
   type OrbitPerson,
@@ -12,41 +13,65 @@ import {
   radiusForDrift,
 } from "@/lib/orbit";
 import { useSession } from "@jf/auth/client";
-import { ArrowsOutIcon, InfoIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
+import {
+  ArrowsOutIcon,
+  HandWavingIcon,
+  InfoIcon,
+  MinusIcon,
+  PencilSimpleIcon,
+  PlusIcon,
+  SealWarningIcon,
+} from "@phosphor-icons/react";
+import * as Popover from "@radix-ui/react-popover";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
+import { PersonBubble } from "./person-bubble";
 
 type Props = {
   arcs: OrbitArc[];
   people: OrbitPerson[];
   lastTouchAt: Record<string, Date>;
   onLogTouch: (personId: string) => Promise<void>;
+  onToggleImportant: (personId: string, important: boolean) => Promise<void>;
+  onEditPerson: (personId: string) => void;
 };
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
-/** Generous invisible tap area around each dot — the visible dot stays small. */
-const HIT_RADIUS = 17;
+/** Radius at which a spoke leaves the centre disc, just clear of its edge. */
+const SPOKE_START = 27;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
+const CARD_ACTION =
+  "flex min-h-10 w-full items-center gap-2 rounded-[10px] px-2.5 text-left text-sm text-(--grey-700) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900) disabled:opacity-50";
+
 /**
- * The weekly-review surface: "me" at the centre, everyone else a dot whose angle is
- * their arc and whose distance is how far they've drifted. Flagged people carry a halo
- * that grows with the flag's age.
+ * The weekly-review surface: "me" at the centre, everyone else a bubble — their photo
+ * or their initials — whose angle is their arc and whose distance is how far they have
+ * drifted. A spoke in the arc's colour ties them back to the centre, and a flagged
+ * person wears a ring that grows with the flag's age.
  *
- * At the expected scale (~30–40 people) neighbouring dots sit only ~23px apart on a
- * phone, which is below any comfortable tap target — so the orbit zooms and pans rather
- * than becoming a separate mobile design. Geometry still comes entirely from
- * `layoutOrbit`; zoom only moves the viewBox.
+ * At the expected scale (~30–40 people) neighbouring bubbles sit only ~10–18px apart,
+ * so the orbit zooms and pans rather than becoming a separate mobile design. Bubbles
+ * hold a fixed on-screen size while the geometry zooms underneath them, which is what
+ * makes zooming pull a crowded arc apart instead of magnifying it unchanged.
  */
-export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
+export function OrbitView({
+  arcs,
+  people,
+  lastTouchAt,
+  onLogTouch,
+  onToggleImportant,
+  onEditPerson,
+}: Props) {
   const { data: session } = useSession();
   const [busy, setBusy] = useState<string | null>(null);
+  const [openPersonId, setOpenPersonId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const svgRef = useRef<SVGSVGElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchStart = useRef<{ dist: number; zoom: number } | null>(null);
   const dragged = useRef(false);
@@ -57,6 +82,11 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
 
   const now = new Date();
   const dots = layoutOrbit(arcs, people, lastTouchAt, now);
+  // Flagged people paint last, so the loudest signal is never buried under a neighbour.
+  const painted = [...dots].sort((a, b) => {
+    if (!!a.ring !== !!b.ring) return a.ring ? 1 : -1;
+    return a.driftDays - b.driftDays;
+  });
 
   // The visible window into the 400×400 world.
   const span = VIEW / zoom;
@@ -66,21 +96,20 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
 
   /** viewBox units per rendered pixel, for converting drag deltas. */
   const unitsPerPixel = useCallback(() => {
-    const width = svgRef.current?.getBoundingClientRect().width ?? VIEW;
+    const width = frameRef.current?.getBoundingClientRect().width ?? VIEW;
     return span / (width || VIEW);
   }, [span]);
 
-  function onPointerDown(e: React.PointerEvent<SVGSVGElement>) {
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     dragged.current = false;
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
       if (a && b) pinchStart.current = { dist: Math.hypot(a.x - b.x, a.y - b.y), zoom };
     }
-    e.currentTarget.setPointerCapture(e.pointerId);
   }
 
-  function onPointerMove(e: React.PointerEvent<SVGSVGElement>) {
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const previous = pointers.current.get(e.pointerId);
     if (!previous) return;
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -106,7 +135,7 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
     setPan((p) => ({ x: p.x - dx * scale, y: p.y - dy * scale }));
   }
 
-  function onPointerUp(e: React.PointerEvent<SVGSVGElement>) {
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
     pointers.current.delete(e.pointerId);
     if (pointers.current.size < 2) pinchStart.current = null;
   }
@@ -121,6 +150,17 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
     setBusy(personId);
     try {
       await onLogTouch(personId);
+      setOpenPersonId(null);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function toggleImportant(personId: string, important: boolean) {
+    if (busy) return;
+    setBusy(personId);
+    try {
+      await onToggleImportant(personId, important);
     } finally {
       setBusy(null);
     }
@@ -134,15 +174,19 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square w-full max-w-[560px] self-center">
+      {/* Pan and pinch live on the frame, not the svg: the bubbles sit in an HTML
+          overlay above it, and a drag that starts on someone's face must still pan. */}
+      <div
+        ref={frameRef}
+        className="relative aspect-square w-full max-w-[560px] touch-none select-none self-center"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
         <svg
-          ref={svgRef}
           viewBox={`${vx} ${vy} ${span} ${span}`}
-          className="absolute inset-0 h-full w-full touch-none select-none"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          className="absolute inset-0 h-full w-full"
           role="img"
           aria-label={`Orbit of ${dots.length} people across ${arcs.length} arcs`}
         >
@@ -161,22 +205,24 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
             />
           ))}
 
-          {/* Arc sector dividers, so sectors stay distinguishable when zoomed in. */}
-          {arcs.length > 1 &&
-            arcs.map((arc, i) => {
-              const angle = -Math.PI / 2 + (i * Math.PI * 2) / arcs.length;
-              return (
-                <line
-                  key={arc.id}
-                  x1={CENTRE + Math.cos(angle) * 38}
-                  y1={CENTRE + Math.sin(angle) * 38}
-                  x2={CENTRE + Math.cos(angle) * 182}
-                  y2={CENTRE + Math.sin(angle) * 182}
-                  stroke="var(--grey-200)"
-                  strokeWidth={1 / zoom}
-                />
-              );
-            })}
+          {/* One spoke per person, in their arc's colour: this is what says which arc
+              someone belongs to, now that their bubble shows their face instead. It runs
+              to the dot's centre and vanishes under the bubble drawn over it. */}
+          {dots.map((dot) => {
+            const out = Math.hypot(dot.x - CENTRE, dot.y - CENTRE) || 1;
+            return (
+              <line
+                key={dot.id}
+                x1={CENTRE + ((dot.x - CENTRE) / out) * SPOKE_START}
+                y1={CENTRE + ((dot.y - CENTRE) / out) * SPOKE_START}
+                x2={dot.x}
+                y2={dot.y}
+                stroke={dot.arcColor}
+                strokeWidth={1 / zoom}
+                opacity={0.35}
+              />
+            );
+          })}
 
           {/* The centre is me. The avatar itself is an HTML image in the overlay below —
               it only ever sits on top of this disc, which stays as its backdrop. */}
@@ -193,56 +239,11 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
               {meLetter || "me"}
             </text>
           )}
-
-          {dots.map((dot) => {
-            const drift = formatDrift(lastTouchAt[dot.id] ?? null, now);
-            const label = `${dot.name} — ${dot.arcName}, ${drift}`;
-            return (
-              <g key={dot.id}>
-                {dot.ring && (
-                  <circle
-                    cx={dot.x}
-                    cy={dot.y}
-                    r={dot.ring.radius}
-                    fill="none"
-                    stroke="var(--red-500)"
-                    strokeWidth={dot.ring.width}
-                    opacity={dot.ring.opacity}
-                  />
-                )}
-
-                {/* A real link, so it is keyboard reachable and middle-clickable. The
-                    transparent circle behind the dot is the actual tap target — at 40
-                    people the visible dots are far too small to hit reliably. */}
-                <Link
-                  href={`/people/${dot.id}`}
-                  aria-label={`Open ${label}`}
-                  onClick={(e) => {
-                    // A pan gesture that ends over a dot must not navigate.
-                    if (dragged.current) e.preventDefault();
-                  }}
-                >
-                  <circle cx={dot.x} cy={dot.y} r={HIT_RADIUS} fill="transparent" />
-                  <circle
-                    cx={dot.x}
-                    cy={dot.y}
-                    r={DOT_RADIUS}
-                    fill={dot.color}
-                    stroke="var(--surface-100)"
-                    strokeWidth={1.5}
-                    className="cursor-pointer transition-opacity hover:opacity-80"
-                  />
-                  <title>{label}</title>
-                </Link>
-              </g>
-            );
-          })}
         </svg>
 
-        {/* Log-touch affordances live in an HTML overlay rather than inside the SVG:
-            a real button cannot be a child of an svg element, and these need to be
-            proper buttons to be keyboard- and screen-reader-reachable. Each has a
-            44px hit area with a smaller visible pill inside it. */}
+        {/* People live in an HTML overlay rather than inside the SVG: they need to be
+            real buttons to be keyboard- and screen-reader-reachable, they carry photos,
+            and they must hold a fixed pixel size while the viewBox zooms under them. */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {meImage && (
             <img
@@ -253,27 +254,110 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
               className="absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
             />
           )}
-          {dots.map((dot) => {
-            const out = Math.hypot(dot.x - CENTRE, dot.y - CENTRE) || 1;
-            const offset = (dot.ring?.radius ?? DOT_RADIUS) + 9;
-            const bx = dot.x + ((dot.x - CENTRE) / out) * offset;
-            const by = dot.y + ((dot.y - CENTRE) / out) * offset;
+
+          {painted.map((dot) => {
+            const person = people.find((p) => p.id === dot.id);
+            const drift = formatDrift(lastTouchAt[dot.id] ?? null, now);
+            const flagged = person?.important ?? false;
             return (
-              <button
+              <Popover.Root
                 key={dot.id}
-                type="button"
-                onClick={() => void logTouch(dot.id)}
-                disabled={busy === dot.id}
-                aria-label={`Log a touch with ${dot.name}`}
-                style={toPercent(bx, by)}
-                className="pointer-events-auto absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full disabled:opacity-40"
+                open={openPersonId === dot.id}
+                onOpenChange={(open) => {
+                  // A pan gesture that ends over someone must not open their card.
+                  if (open && dragged.current) return;
+                  setOpenPersonId(open ? dot.id : null);
+                }}
               >
-                {/* Visible pill: small, but always visible — touch devices have no
-                    hover, so it cannot depend on one to be discoverable. */}
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-(--surface-300) text-[11px] font-bold leading-none text-(--grey-900) opacity-70 transition-transform active:scale-90 group-hover:opacity-100 sm:opacity-45 sm:hover:opacity-100">
-                  {busy === dot.id ? "·" : "+"}
-                </span>
-              </button>
+                <Popover.Trigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`${dot.name} — ${dot.arcName}, ${drift}`}
+                    title={`${dot.name} — ${dot.arcName}, ${drift}`}
+                    style={{
+                      ...toPercent(dot.x, dot.y),
+                      width: BUBBLE_SIZE + BUBBLE_HIT_PADDING * 2,
+                      height: BUBBLE_SIZE + BUBBLE_HIT_PADDING * 2,
+                    }}
+                    className="pointer-events-auto absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full transition-transform active:scale-95"
+                  >
+                    <PersonBubble
+                      name={dot.name}
+                      avatarUrl={dot.avatarUrl}
+                      color={dot.color}
+                      arcColor={dot.arcColor}
+                      size={BUBBLE_SIZE}
+                      ring={dot.ring ?? undefined}
+                      outlined
+                    />
+                  </button>
+                </Popover.Trigger>
+
+                <Popover.Portal>
+                  <Popover.Content
+                    side="top"
+                    sideOffset={8}
+                    collisionPadding={12}
+                    className="z-50 flex w-[220px] flex-col gap-1 rounded-[18px] bg-(--card) p-2 shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] outline-none animate-[overlay-in_0.2s_ease-in-out]"
+                  >
+                    <div className="flex items-center gap-2 px-1.5 pt-1 pb-2">
+                      <PersonBubble
+                        name={dot.name}
+                        avatarUrl={dot.avatarUrl}
+                        color={dot.color}
+                        arcColor={dot.arcColor}
+                        size={28}
+                      />
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-semibold text-(--grey-900)">
+                          {dot.name}
+                        </span>
+                        <span className="truncate text-xs text-(--grey-500)">
+                          {dot.arcName} · {drift}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void logTouch(dot.id)}
+                      disabled={busy === dot.id}
+                      className="flex min-h-10 w-full items-center gap-2 rounded-[10px] bg-(--primary) px-2.5 text-sm font-medium text-(--primary-foreground) transition-transform active:scale-[0.98] disabled:opacity-50"
+                    >
+                      <HandWavingIcon size={16} weight="fill" /> Log touch
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void toggleImportant(dot.id, !flagged)}
+                      disabled={busy === dot.id}
+                      className={
+                        flagged
+                          ? `${CARD_ACTION} text-(--red-600) hover:text-(--red-600)`
+                          : CARD_ACTION
+                      }
+                    >
+                      <SealWarningIcon size={16} weight={flagged ? "fill" : "regular"} />
+                      {flagged ? "Clear critical flag" : "Flag as critical"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenPersonId(null);
+                        onEditPerson(dot.id);
+                      }}
+                      className={CARD_ACTION}
+                    >
+                      <PencilSimpleIcon size={16} /> Edit
+                    </button>
+
+                    <Link href={`/people/${dot.id}`} className={CARD_ACTION}>
+                      <ArrowsOutIcon size={16} /> Open profile
+                    </Link>
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
             );
           })}
         </div>
@@ -323,6 +407,7 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
           </span>
         ))}
       </div>
+
       {/* How to read the orbit is worth one read, not a permanent caption under it. */}
       <div className="flex flex-col items-center gap-1.5">
         <button
@@ -336,9 +421,10 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
         </button>
         {helpOpen && (
           <p id="orbit-help" className="px-2 text-center text-xs text-(--grey-500)">
-            Further out means longer since you reached out. A red halo is a critical flag, growing
-            the longer it stays unresolved. Tap a dot to open someone, or + to log a touch. Pinch or
-            drag to zoom in when dots crowd.
+            Further out means longer since you reached out, and each spoke carries the colour of the
+            arc someone belongs to. A red ring is a critical flag, growing the longer it stays
+            unresolved. Tap someone to log a touch, flag them, or open them. Pinch or drag to zoom
+            in when they crowd.
           </p>
         )}
       </div>

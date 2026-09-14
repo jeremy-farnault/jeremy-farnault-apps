@@ -54,6 +54,10 @@ export const unifierPersons = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    // S3 object key for the person's avatar photo; null falls back to their initials.
+    avatarKey: text("avatar_key"),
+    // Optional palette value for the initials bubble; null inherits the arc's colour.
+    color: text("color"),
     // Free-text overflow for anything the arc's slots don't capture.
     note: text("note"),
     // Marks the person as critical; drives ring growth on the orbit.

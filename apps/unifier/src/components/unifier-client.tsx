@@ -5,12 +5,15 @@ import {
   createPersonAction,
   createSlotAction,
   deleteArcAction,
+  deletePersonAction,
   deleteSlotAction,
   logTouchAction,
   moveArcAction,
   movePersonAction,
   moveSlotAction,
+  setPersonImportantAction,
   updateArcAction,
+  updatePersonAction,
   updateSlotAction,
 } from "@/lib/actions";
 import type { ArcRow, PersonRow, SlotRow } from "@/lib/queries";
@@ -23,7 +26,7 @@ import type { DeleteArcMode } from "./arc-delete-dialog";
 import { ArcSection } from "./arc-section";
 import { FirstRunEmptyState } from "./first-run-empty-state";
 import { OrbitView } from "./orbit-view";
-import { PersonCreateModal } from "./person-create-modal";
+import { PersonFormModal, type PersonFormValues } from "./person-form-modal";
 
 /** Lexicographic sort on a fractional-index `position` key. */
 function byPosition<T extends { position: string }>(a: T, b: T): number {
@@ -52,6 +55,7 @@ export function UnifierClient({
   const [view, setView] = useState<"orbit" | "list">("orbit");
   const [arcModalOpen, setArcModalOpen] = useState(false);
   const [personModalOpen, setPersonModalOpen] = useState(false);
+  const [editingPerson, setEditingPerson] = useState<PersonRow | null>(null);
 
   // Order is re-derived on every render, so an appended or re-keyed row lands in place.
   const orderedArcs = [...arcs].sort(byPosition);
@@ -72,6 +76,27 @@ export function UnifierClient({
   async function handleAddPerson(arcId: string, name: string) {
     const created = await createPersonAction({ arcId, name });
     setPersons((prev) => [...prev, created]);
+  }
+
+  async function handleCreatePerson(values: PersonFormValues) {
+    const created = await createPersonAction(values);
+    setPersons((prev) => [...prev, created]);
+  }
+
+  async function handleUpdatePerson(personId: string, values: PersonFormValues) {
+    const updated = await updatePersonAction({ personId, ...values });
+    setPersons((prev) => prev.map((p) => (p.id === personId ? updated : p)));
+  }
+
+  async function handleDeletePerson(personId: string) {
+    const snapshot = persons;
+    setPersons((prev) => prev.filter((p) => p.id !== personId));
+    try {
+      await deletePersonAction({ personId });
+    } catch (err) {
+      setPersons(snapshot);
+      throw err;
+    }
   }
 
   async function handleUpdateArc(arcId: string, input: { name: string; color: string | null }) {
@@ -197,6 +222,25 @@ export function UnifierClient({
     }
   }
 
+  /** Flagging from the orbit card: optimistic, so the ring appears on the spot. */
+  async function handleToggleImportant(personId: string, important: boolean) {
+    const snapshot = persons;
+    setPersons((prev) =>
+      prev.map((p) =>
+        p.id === personId
+          ? { ...p, important, flaggedAt: important ? (p.flaggedAt ?? new Date()) : null }
+          : p
+      )
+    );
+    try {
+      const updated = await setPersonImportantAction({ personId, important });
+      setPersons((prev) => prev.map((p) => (p.id === personId ? updated : p)));
+    } catch (err) {
+      setPersons(snapshot);
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
+
   async function handleMovePerson(personId: string, targetArcId: string) {
     const moved = await movePersonAction({ personId, targetArcId });
     setPersons((prev) => prev.map((p) => (p.id === personId ? moved : p)));
@@ -244,6 +288,10 @@ export function UnifierClient({
             people={persons}
             lastTouchAt={lastTouchAt}
             onLogTouch={handleOrbitLogTouch}
+            onToggleImportant={handleToggleImportant}
+            onEditPerson={(personId) =>
+              setEditingPerson(persons.find((p) => p.id === personId) ?? null)
+            }
           />
         </div>
       ) : (
@@ -264,6 +312,7 @@ export function UnifierClient({
               onMoveArc={handleMoveArc}
               onDeleteArc={handleDeleteArc}
               onMovePerson={handleMovePerson}
+              onEditPerson={setEditingPerson}
               onAddSlot={handleAddSlot}
               onRenameSlot={handleRenameSlot}
               onMoveSlot={handleMoveSlot}
@@ -306,11 +355,23 @@ export function UnifierClient({
       />
 
       {personModalOpen && (
-        <PersonCreateModal
-          arcs={orderedArcs.map((a) => ({ id: a.id, name: a.name }))}
+        <PersonFormModal
+          arcs={orderedArcs.map((a) => ({ id: a.id, name: a.name, color: a.color }))}
           isOpen
           onClose={() => setPersonModalOpen(false)}
-          onSubmit={({ arcId, name }) => handleAddPerson(arcId, name)}
+          onSubmit={handleCreatePerson}
+        />
+      )}
+
+      {editingPerson && (
+        <PersonFormModal
+          key={editingPerson.id}
+          arcs={orderedArcs.map((a) => ({ id: a.id, name: a.name, color: a.color }))}
+          person={editingPerson}
+          isOpen
+          onClose={() => setEditingPerson(null)}
+          onSubmit={(values) => handleUpdatePerson(editingPerson.id, values)}
+          onDelete={handleDeletePerson}
         />
       )}
     </main>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  BUBBLE_SIZE,
   CENTRE,
-  DOT_RADIUS,
   angleInSector,
   driftFraction,
   layoutOrbit,
@@ -48,7 +48,7 @@ describe("driftFraction", () => {
 
 describe("radiusForDrift", () => {
   it("keeps a hole in the middle for 'me'", () => {
-    expect(radiusForDrift(0)).toBeGreaterThan(DOT_RADIUS * 2);
+    expect(radiusForDrift(0)).toBeGreaterThan(BUBBLE_SIZE);
   });
 
   it("places neglected further out than recently touched (AC#3)", () => {
@@ -113,14 +113,14 @@ describe("ringFor", () => {
     expect(ringFor(null, NOW)).toBeNull();
   });
 
-  it("sits outside the dot even when freshly flagged", () => {
-    expect(ringFor(NOW, NOW)!.radius).toBeGreaterThan(DOT_RADIUS);
+  it("clears the bubble even when freshly flagged", () => {
+    expect(ringFor(NOW, NOW)!.gap).toBeGreaterThan(0);
   });
 
   it("grows and strengthens with the flag's age", () => {
     const fresh = ringFor(daysAgo(0), NOW)!;
     const old = ringFor(daysAgo(60), NOW)!;
-    expect(old.radius).toBeGreaterThan(fresh.radius);
+    expect(old.gap).toBeGreaterThan(fresh.gap);
     expect(old.opacity).toBeGreaterThan(fresh.opacity);
     expect(old.width).toBeGreaterThan(fresh.width);
   });
@@ -128,7 +128,8 @@ describe("ringFor", () => {
   it("caps so an ancient flag stays legible", () => {
     const capped = ringFor(daysAgo(90), NOW)!;
     const ancient = ringFor(daysAgo(900), NOW)!;
-    expect(ancient.radius).toBeCloseTo(capped.radius);
+    expect(ancient.gap).toBeCloseTo(capped.gap);
+    expect(ancient.width).toBeCloseTo(capped.width);
     expect(ancient.opacity).toBeCloseTo(capped.opacity);
   });
 
@@ -143,9 +144,33 @@ describe("layoutOrbit", () => {
     { id: "a2", name: "Work", color: null, position: "a1" },
   ];
   const people = [
-    { id: "p1", name: "Ann", arcId: "a1", important: false, flaggedAt: null },
-    { id: "p2", name: "Bob", arcId: "a1", important: true, flaggedAt: daysAgo(30) },
-    { id: "p3", name: "Cal", arcId: "a2", important: false, flaggedAt: null },
+    {
+      id: "p1",
+      name: "Ann",
+      arcId: "a1",
+      avatarUrl: null,
+      color: null,
+      important: false,
+      flaggedAt: null,
+    },
+    {
+      id: "p2",
+      name: "Bob",
+      arcId: "a1",
+      avatarUrl: null,
+      color: null,
+      important: true,
+      flaggedAt: daysAgo(30),
+    },
+    {
+      id: "p3",
+      name: "Cal",
+      arcId: "a2",
+      avatarUrl: "https://example.test/cal.jpg",
+      color: "var(--red-400)",
+      important: false,
+      flaggedAt: null,
+    },
   ];
 
   it("lays out every person exactly once", () => {
@@ -153,10 +178,17 @@ describe("layoutOrbit", () => {
     expect(dots.map((d) => d.id).sort()).toEqual(["p1", "p2", "p3"]);
   });
 
-  it("takes a dot's colour from its arc, falling back to the accent (AC#4)", () => {
+  it("takes a bubble's colour from its arc, falling back to the accent (AC#4)", () => {
     const dots = layoutOrbit(arcs, people, {}, NOW);
     expect(dots.find((d) => d.id === "p1")!.color).toBe("var(--teal-600)");
-    expect(dots.find((d) => d.id === "p3")!.color).toBe("var(--primary)");
+    expect(dots.find((d) => d.id === "p2")!.arcColor).toBe("var(--teal-600)");
+  });
+
+  it("lets a person's own colour win over their arc's, but never the spoke's", () => {
+    const cal = layoutOrbit(arcs, people, {}, NOW).find((d) => d.id === "p3")!;
+    expect(cal.color).toBe("var(--red-400)");
+    expect(cal.arcColor).toBe("var(--primary)");
+    expect(cal.avatarUrl).toBe("https://example.test/cal.jpg");
   });
 
   it("separates arcs by angle (AC#2)", () => {
@@ -199,7 +231,17 @@ describe("layoutOrbit", () => {
   });
 
   it("skips people whose arc is not in the list", () => {
-    const orphan = [{ id: "px", name: "Ghost", arcId: "gone", important: false, flaggedAt: null }];
+    const orphan = [
+      {
+        id: "px",
+        name: "Ghost",
+        arcId: "gone",
+        avatarUrl: null,
+        color: null,
+        important: false,
+        flaggedAt: null,
+      },
+    ];
     expect(layoutOrbit(arcs, orphan, {}, NOW)).toHaveLength(0);
   });
 

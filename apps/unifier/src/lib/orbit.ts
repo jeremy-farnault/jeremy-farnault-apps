@@ -27,9 +27,21 @@ export const GUIDE_DAYS = [7, 30, 90] as const;
 
 /** Flag age at which the ring stops growing, so an old flag stays legible. */
 const RING_CAP_DAYS = 90;
-export const DOT_RADIUS = 7;
-const RING_MIN_GAP = 4;
-const RING_MAX_GAP = 13;
+
+/**
+ * The person bubble's rendered diameter, in CSS pixels. Bubbles are deliberately *not*
+ * in viewBox units: holding them at a fixed on-screen size while the geometry zooms is
+ * what lets zooming pull a crowded arc apart instead of magnifying it unchanged.
+ */
+export const BUBBLE_SIZE = 30;
+/** Padding around the bubble that still counts as a tap. */
+export const BUBBLE_HIT_PADDING = 4;
+
+/** Ring geometry, in px: the clear gap around the bubble and the stroke outside it. */
+const RING_MIN_GAP = 3;
+const RING_MAX_GAP = 10;
+const RING_MIN_WIDTH = 1.5;
+const RING_MAX_WIDTH = 3;
 
 /**
  * Drift as a 0..1 fraction of the radial band. Compressed with log1p so a year-long
@@ -84,18 +96,21 @@ export function pointAt(angle: number, radius: number): { x: number; y: number }
  * flag, capped so an ancient flag stays legible rather than swallowing its neighbours.
  * Deliberately a function of `flaggedAt` alone — never of drift, so logging a touch
  * cannot quieten it.
+ *
+ * Expressed in px rather than viewBox units, because the bubble it wraps is drawn in
+ * the HTML overlay at a fixed on-screen size.
  */
 export function ringFor(
   flaggedAt: Date | null,
   now: Date
-): { radius: number; opacity: number; width: number } | null {
+): { gap: number; width: number; opacity: number } | null {
   if (!flaggedAt) return null;
   const age = driftDays(flaggedAt, now);
   const t = Math.min(Number.isFinite(age) ? age : RING_CAP_DAYS, RING_CAP_DAYS) / RING_CAP_DAYS;
   return {
-    radius: DOT_RADIUS + RING_MIN_GAP + t * (RING_MAX_GAP - RING_MIN_GAP),
+    gap: RING_MIN_GAP + t * (RING_MAX_GAP - RING_MIN_GAP),
+    width: RING_MIN_WIDTH + t * (RING_MAX_WIDTH - RING_MIN_WIDTH),
     opacity: 0.35 + t * 0.5,
-    width: 1.5 + t * 1.5,
   };
 }
 
@@ -103,6 +118,9 @@ export type OrbitPerson = {
   id: string;
   name: string;
   arcId: string;
+  avatarUrl: string | null;
+  /** Their own bubble colour; null inherits the arc's. */
+  color: string | null;
   important: boolean;
   flaggedAt: Date | null;
 };
@@ -113,11 +131,15 @@ export type OrbitDot = {
   id: string;
   name: string;
   arcName: string;
+  avatarUrl: string | null;
+  /** The bubble's background, already resolved from person → arc → accent. */
   color: string;
+  /** The arc's own colour, which the spoke uses regardless of any person override. */
+  arcColor: string;
   x: number;
   y: number;
   driftDays: number;
-  ring: { radius: number; opacity: number; width: number } | null;
+  ring: { gap: number; width: number; opacity: number } | null;
 };
 
 /**
@@ -144,7 +166,9 @@ export function layoutOrbit(
         id: person.id,
         name: person.name,
         arcName: arc.name,
-        color: arc.color ?? "var(--primary)",
+        avatarUrl: person.avatarUrl,
+        color: person.color ?? arc.color ?? "var(--primary)",
+        arcColor: arc.color ?? "var(--primary)",
         x,
         y,
         driftDays: days,
