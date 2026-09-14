@@ -1,5 +1,6 @@
 "use client";
 
+import { PlainButton } from "@/components/plain-button";
 import { formatAgo } from "@/lib/drift";
 import { SealWarningIcon } from "@phosphor-icons/react";
 import { useState } from "react";
@@ -30,16 +31,15 @@ export function CriticalFlag({ important, flaggedAt, onToggle }: Props) {
 
   if (!important) {
     return (
-      <button
-        type="button"
+      <PlainButton
         onClick={() => void toggle()}
         disabled={busy}
         aria-pressed={false}
-        className="flex min-h-11 items-center gap-2 self-start rounded-[12px] border border-(--grey-200) px-4 text-sm text-(--grey-600) transition-[color,border-color,transform] hover:border-(--grey-300) hover:text-(--grey-900) active:scale-[0.98] disabled:opacity-50"
+        className="self-start"
       >
-        <SealWarningIcon size={18} />
+        <SealWarningIcon size={16} />
         Flag as critical
-      </button>
+      </PlainButton>
     );
   }
 

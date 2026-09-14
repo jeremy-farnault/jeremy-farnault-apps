@@ -11,7 +11,8 @@ import {
   layoutOrbit,
   radiusForDrift,
 } from "@/lib/orbit";
-import { ArrowsOutIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
+import { useSession } from "@jf/auth/client";
+import { ArrowsOutIcon, InfoIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 
@@ -40,13 +41,19 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * `layoutOrbit`; zoom only moves the viewBox.
  */
 export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
+  const { data: session } = useSession();
   const [busy, setBusy] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchStart = useRef<{ dist: number; zoom: number } | null>(null);
   const dragged = useRef(false);
+
+  // "me" at the centre is the user's own avatar, falling back to their initial.
+  const meImage = session?.user?.image ?? null;
+  const meLetter = (session?.user?.name?.[0] ?? session?.user?.email?.[0] ?? "").toUpperCase();
 
   const now = new Date();
   const dots = layoutOrbit(arcs, people, lastTouchAt, now);
@@ -171,17 +178,21 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
               );
             })}
 
+          {/* The centre is me. The avatar itself is an HTML image in the overlay below —
+              it only ever sits on top of this disc, which stays as its backdrop. */}
           <circle cx={CENTRE} cy={CENTRE} r={26} fill="var(--surface-200)" />
-          <text
-            x={CENTRE}
-            y={CENTRE}
-            textAnchor="middle"
-            dominantBaseline="central"
-            className="fill-(--grey-700) font-semibold"
-            style={{ fontSize: 11 }}
-          >
-            me
-          </text>
+          {!meImage && (
+            <text
+              x={CENTRE}
+              y={CENTRE}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className="fill-(--grey-700) font-semibold"
+              style={{ fontSize: meLetter ? 18 : 11 }}
+            >
+              {meLetter || "me"}
+            </text>
+          )}
 
           {dots.map((dot) => {
             const drift = formatDrift(lastTouchAt[dot.id] ?? null, now);
@@ -233,6 +244,15 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
             proper buttons to be keyboard- and screen-reader-reachable. Each has a
             44px hit area with a smaller visible pill inside it. */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {meImage && (
+            <img
+              src={meImage}
+              alt="You, at the centre"
+              referrerPolicy="no-referrer"
+              style={{ ...toPercent(CENTRE, CENTRE), width: `${(52 / span) * 100}%` }}
+              className="absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
+            />
+          )}
           {dots.map((dot) => {
             const out = Math.hypot(dot.x - CENTRE, dot.y - CENTRE) || 1;
             const offset = (dot.ring?.radius ?? DOT_RADIUS) + 9;
@@ -303,11 +323,25 @@ export function OrbitView({ arcs, people, lastTouchAt, onLogTouch }: Props) {
           </span>
         ))}
       </div>
-      <p className="px-2 text-center text-xs text-(--grey-500)">
-        Further out means longer since you reached out. A red halo is a critical flag, growing the
-        longer it stays unresolved. Tap a dot to open someone, or + to log a touch. Pinch or drag to
-        zoom in when dots crowd.
-      </p>
+      {/* How to read the orbit is worth one read, not a permanent caption under it. */}
+      <div className="flex flex-col items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => setHelpOpen((v) => !v)}
+          aria-expanded={helpOpen}
+          aria-controls="orbit-help"
+          className="flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-xs text-(--grey-500) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900)"
+        >
+          <InfoIcon size={14} /> How to read this
+        </button>
+        {helpOpen && (
+          <p id="orbit-help" className="px-2 text-center text-xs text-(--grey-500)">
+            Further out means longer since you reached out. A red halo is a critical flag, growing
+            the longer it stays unresolved. Tap a dot to open someone, or + to log a touch. Pinch or
+            drag to zoom in when dots crowd.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

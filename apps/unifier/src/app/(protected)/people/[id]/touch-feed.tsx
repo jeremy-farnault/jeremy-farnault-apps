@@ -1,5 +1,6 @@
 "use client";
 
+import { PlainButton } from "@/components/plain-button";
 import type { TouchRow } from "@/lib/queries";
 import { Button, TextInput } from "@jf/ui";
 import { ChatCircleTextIcon, HandWavingIcon } from "@phosphor-icons/react";
@@ -47,14 +48,14 @@ export function TouchFeed({ touches, onLogTouch }: Props) {
         >
           <HandWavingIcon size={18} weight="fill" /> Log touch
         </Button>
-        <Button
-          variant="outline"
+        <PlainButton
           onClick={() => setNoting((v) => !v)}
           disabled={busy}
-          className="gap-2 transition-transform active:scale-[0.98]"
+          aria-expanded={noting}
+          className="h-[42px] self-start sm:self-center"
         >
-          <ChatCircleTextIcon size={18} /> Add note
-        </Button>
+          <ChatCircleTextIcon size={16} /> Add note
+        </PlainButton>
       </div>
 
       {noting && (

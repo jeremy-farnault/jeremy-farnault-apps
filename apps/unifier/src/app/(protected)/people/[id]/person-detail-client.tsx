@@ -1,15 +1,22 @@
 "use client";
 
+import { ArcSlotsModal } from "@/components/arc-slots-modal";
+import { PlainButton } from "@/components/plain-button";
 import {
+  createSlotAction,
+  deleteSlotAction,
   logTouchAction,
+  moveSlotAction,
   setPersonImportantAction,
   setSlotValueAction,
   updatePersonNoteAction,
+  updateSlotAction,
 } from "@/lib/actions";
 import { formatDrift, lastTouchAt } from "@/lib/drift";
 import type { ArcRow, PersonRow, SlotRow, TouchRow } from "@/lib/queries";
 import { TextInput, Textarea } from "@jf/ui";
-import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { keyBetween } from "@jf/ui/ordering";
+import { ArrowLeftIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,15 +34,24 @@ type Props = {
 export function PersonDetailClient({
   person: initialPerson,
   arc,
-  slots,
+  slots: initialSlots,
   values: initialValues,
   touches: initialTouches,
 }: Props) {
   const [values, setValues] = useState<Record<string, string | null>>(initialValues);
+  // The template is editable from here too: with no slots there is nothing to fill in,
+  // and sending the user back to the arc list just to define one is a dead end.
+  const [slots, setSlots] = useState<SlotRow[]>(initialSlots);
+  const [slotsOpen, setSlotsOpen] = useState(false);
   const [touches, setTouches] = useState<TouchRow[]>(initialTouches);
   const [person, setPerson] = useState<PersonRow>(initialPerson);
   const [note, setNote] = useState(initialPerson.note ?? "");
   const [savedNote, setSavedNote] = useState(initialPerson.note ?? "");
+
+  // Re-derived on every render, so a moved or appended slot lands in template order.
+  const orderedSlots = [...slots].sort((a, b) =>
+    a.position < b.position ? -1 : a.position > b.position ? 1 : 0
+  );
 
   // Drift is derived here, on every render, from the touch list in state — so logging a
   // touch moves it immediately. Nothing about staleness is stored.
@@ -51,6 +67,58 @@ export function PersonDetailClient({
       await setSlotValueAction({ personId: person.id, slotId, value });
     } catch (err) {
       setValues((prev) => ({ ...prev, [slotId]: previous }));
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
+
+  async function handleAddSlot(label: string) {
+    const created = await createSlotAction({ arcId: arc.id, label });
+    setSlots((prev) => [...prev, created]);
+  }
+
+  async function handleRenameSlot(slotId: string, label: string) {
+    const snapshot = slots;
+    setSlots((prev) => prev.map((s) => (s.id === slotId ? { ...s, label } : s)));
+    try {
+      await updateSlotAction({ slotId, label });
+    } catch (err) {
+      setSlots(snapshot);
+      throw err;
+    }
+  }
+
+  /** Swaps a slot with its neighbour — one row written, same as the arc list does. */
+  async function handleMoveSlot(slotId: string, direction: "up" | "down") {
+    const ordered = [...slots].sort((a, b) =>
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0
+    );
+    const i = ordered.findIndex((s) => s.id === slotId);
+    if (i === -1) return;
+    if (direction === "up" && i === 0) return;
+    if (direction === "down" && i === ordered.length - 1) return;
+
+    const position =
+      direction === "up"
+        ? keyBetween(ordered[i - 2]?.position ?? null, ordered[i - 1]?.position ?? null)
+        : keyBetween(ordered[i + 1]?.position ?? null, ordered[i + 2]?.position ?? null);
+
+    const snapshot = slots;
+    setSlots((prev) => prev.map((s) => (s.id === slotId ? { ...s, position } : s)));
+    try {
+      await moveSlotAction({ slotId, position });
+    } catch (err) {
+      setSlots(snapshot);
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }
+
+  async function handleRemoveSlot(slotId: string) {
+    const snapshot = slots;
+    setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    try {
+      await deleteSlotAction({ slotId });
+    } catch (err) {
+      setSlots(snapshot);
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     }
   }
@@ -138,14 +206,16 @@ export function PersonDetailClient({
           in template order, blank ones included — that fixed order and fixed set is
           what lets the same field be scanned down a whole arc. */}
       <section className="flex flex-col gap-2 rounded-[22px] bg-(--surface-150) p-5">
-        {slots.length === 0 ? (
-          <p className="text-sm text-(--grey-500)">
-            No slots on {arc.name} yet. Add some from the arc’s menu and they’ll appear here for
-            everyone in it.
-          </p>
+        {orderedSlots.length === 0 ? (
+          <PlainButton
+            onClick={() => setSlotsOpen(true)}
+            className="self-start bg-(--surface-200) hover:bg-(--surface-300)"
+          >
+            <SlidersHorizontalIcon size={16} /> Add slots to {arc.name}
+          </PlainButton>
         ) : (
           <dl className="flex flex-col gap-2.5">
-            {slots.map((slot) => (
+            {orderedSlots.map((slot) => (
               <div
                 key={slot.id}
                 className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3"
@@ -179,6 +249,19 @@ export function PersonDetailClient({
       </section>
 
       <TouchFeed touches={touches} onLogTouch={handleLogTouch} />
+
+      {slotsOpen && (
+        <ArcSlotsModal
+          arcName={arc.name}
+          slots={orderedSlots}
+          isOpen
+          onClose={() => setSlotsOpen(false)}
+          onAdd={handleAddSlot}
+          onRename={handleRenameSlot}
+          onMove={handleMoveSlot}
+          onRemove={handleRemoveSlot}
+        />
+      )}
     </main>
   );
 }
