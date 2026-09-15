@@ -215,7 +215,7 @@ export function PersonDetailClient({
         <h1 className="min-w-0 break-words text-2xl font-semibold text-(--grey-900)">
           {person.name}
         </h1>
-        <span className="text-sm text-(--grey-500)">{arc.name}</span>
+        <span className="self-end pb-0.5 text-sm text-(--grey-500)">{arc.name}</span>
         <button
           type="button"
           onClick={() => setEditOpen(true)}

@@ -38,7 +38,7 @@ export function TouchFeed({ touches, onLogTouch }: Props) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="mt-3 flex flex-col gap-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         {/* One tap, no typing — this has to be frictionless or it won't happen. */}
         <Button

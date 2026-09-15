@@ -139,6 +139,7 @@ export function ArcSlotsModal({
               onClick={() => void handleAdd()}
               disabled={!newLabel.trim() || adding}
               aria-label="Add slot"
+              className="h-11 w-11 shrink-0"
             >
               <PlusIcon size={16} />
             </Button>
