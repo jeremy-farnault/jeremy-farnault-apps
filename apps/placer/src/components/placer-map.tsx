@@ -224,6 +224,14 @@ export function PlacerMap({
   const [locationOverride, setLocationOverride] = useState(false);
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  // Tapping a marker on a touch device synthesises a mouseover but never a matching mouseout,
+  // so the hover bubble would stay stuck on screen. On mobile the detail modal is the only
+  // marker affordance.
+  const isCoarsePointer = useRef(false);
+
+  useEffect(() => {
+    isCoarsePointer.current = window.matchMedia("(pointer: coarse)").matches;
+  }, []);
 
   const visibleSpots = activeCategoryId
     ? spots.filter((s) => s.category?.id === activeCategoryId)
@@ -270,8 +278,12 @@ export function PlacerMap({
                   spot.category?.icon ?? DEFAULT_CATEGORY_ICON
                 )}
                 eventHandlers={{
-                  click: () => setSelectedSpot(spot),
+                  click: () => {
+                    setHoveredSpot(null);
+                    setSelectedSpot(spot);
+                  },
                   mouseover: () => {
+                    if (isCoarsePointer.current) return;
                     const map = mapRef.current;
                     if (!map) return;
                     const point = map.latLngToContainerPoint([spot.lat, spot.lng]);

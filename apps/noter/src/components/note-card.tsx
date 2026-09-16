@@ -105,15 +105,22 @@ export function NoteCard({
         )}
       </div>
 
-      {/* Fixed row height so the hover-only action buttons don't grow a collapsed card. */}
-      <div className="relative flex h-7 shrink-0 items-center justify-end gap-1">
-        <NoteActionsMenu
-          note={note}
-          allFolders={allFolders}
-          menuVisible={menuVisible}
-          hideDelete
-          isDark={isDark}
-        />
+      {/*
+        Fixed row height so the hover-only action buttons don't grow a collapsed card.
+        The row itself is transparent to pointers so taps on the empty space beside the
+        buttons still reach the full-card open button underneath — only the buttons
+        themselves opt back in.
+      */}
+      <div className="pointer-events-none relative flex h-7 shrink-0 items-center justify-end gap-1">
+        <div className="pointer-events-auto flex items-center gap-1">
+          <NoteActionsMenu
+            note={note}
+            allFolders={allFolders}
+            menuVisible={menuVisible}
+            hideDelete
+            isDark={isDark}
+          />
+        </div>
         {showFolderLink && (
           <Link
             href={parentFolderId ? `/${parentFolderId}` : "/"}
@@ -124,7 +131,7 @@ export function NoteCard({
             aria-label="Go to folder"
             style={{ color: textSoft }}
             className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-lg",
+              "pointer-events-auto flex h-7 w-7 items-center justify-center rounded-lg",
               isDark ? "hover:bg-white/15" : "hover:bg-(--surface-150)"
             )}
           >
