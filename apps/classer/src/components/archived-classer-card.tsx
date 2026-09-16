@@ -14,7 +14,7 @@ export function ArchivedClasserCard({ classer, onRestore, onDelete }: Props) {
   const hasImage = classer.imageUrl !== null;
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-[22px] h-[200px]">
+    <div className="relative card-raised flex flex-col overflow-hidden rounded-[22px] h-[200px]">
       <div
         className="relative flex-[2]"
         style={

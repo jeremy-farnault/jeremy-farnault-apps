@@ -258,3 +258,14 @@
     --ring: oklch(55.6% 0 0);
   }
 }
+
+/*
+ * Cards sit on a translucent grey ground, and their own surfaces are translucent too —
+ * so a surface alone barely separates from the page. This is the shared lift: a tight
+ * contact shadow plus a softer ambient one, tuned to read on the grey without turning
+ * into a drop-shadow effect. Composes with a border where a card already has one, and
+ * stays off the image edge on poster cards.
+ */
+@utility card-raised {
+  box-shadow: 0 1px 2px #2222261a, 0 3px 8px #22222614;
+}

@@ -30,7 +30,7 @@ export function ClasserCard({ classer, onEdit, onArchive }: Props) {
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-[22px] h-[200px]"
+      className="group relative card-raised flex flex-col overflow-hidden rounded-[22px] h-[200px]"
       onMouseEnter={() => setMenuVisible(true)}
       onMouseLeave={() => setMenuVisible(false)}
     >

@@ -1,7 +1,16 @@
 "use client";
 
 import { Tooltip } from "@jf/ui";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
+
+/**
+ * A day with nothing in it is drawn as an outline rather than a grey fill, so the grid
+ * reads as slots waiting to be filled and the logged days carry all the colour weight.
+ */
+const EMPTY_SQUARE: CSSProperties = {
+  backgroundColor: "transparent",
+  border: "1px solid var(--grey-300)",
+};
 
 type HabitLog = { date: string; value: string };
 type HabitType = "boolean" | "numeric" | "time";
@@ -188,21 +197,21 @@ export function HabitHeatmap({
     }
   }
 
-  function getSquareColor(date: string): string {
+  function getSquareStyle(date: string): CSSProperties {
     const isBeforeStart = date < startDate;
-    if (isBeforeStart) return "var(--grey-200)";
+    if (isBeforeStart) return EMPTY_SQUARE;
 
     const logValue = logMap.get(date);
 
     if (type === "boolean") {
-      return logValue === "true" ? `var(--${colorBase}-400)` : "var(--grey-200)";
+      return logValue === "true" ? { backgroundColor: `var(--${colorBase}-400)` } : EMPTY_SQUARE;
     }
 
-    if (logValue === undefined) return "var(--grey-200)";
+    if (logValue === undefined) return EMPTY_SQUARE;
     const v = parseLogValue(type, logValue);
-    if (Number.isNaN(v)) return "var(--grey-200)";
+    if (Number.isNaN(v)) return EMPTY_SQUARE;
     const step = getNumericStep(v, numericMin, numericMedian, numericMax);
-    return `var(--${colorBase}-${step})`;
+    return { backgroundColor: `var(--${colorBase}-${step})` };
   }
 
   function getTooltipContent(date: string): string {
@@ -259,7 +268,7 @@ export function HabitHeatmap({
 
                     const isBeforeStart = date < startDate;
                     const isFuture = date > today;
-                    const squareColor = getSquareColor(date);
+                    const squareStyle = getSquareStyle(date);
                     const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
 
                     return (
@@ -269,7 +278,7 @@ export function HabitHeatmap({
                           type="button"
                           className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
                           style={{
-                            backgroundColor: squareColor,
+                            ...squareStyle,
                             cursor: isInteractive ? "pointer" : "default",
                           }}
                           onClick={isInteractive ? () => onDayClick(date) : undefined}

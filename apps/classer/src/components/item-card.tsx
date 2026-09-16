@@ -29,7 +29,7 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
   return (
     <>
       <li
-        className="group relative flex h-[96px] cursor-pointer overflow-hidden rounded-2xl bg-(--surface-100)"
+        className="group relative card-raised flex h-[96px] cursor-pointer overflow-hidden rounded-2xl bg-(--surface-100)"
         onClick={onEdit}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onEdit();

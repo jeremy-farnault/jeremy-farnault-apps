@@ -99,7 +99,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
       <div style={{ color }}>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={data} margin={commonMargin}>
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <CartesianGrid vertical={false} stroke="var(--grey-300)" />
             <XAxis
               dataKey="date"
               interval={interval}
@@ -131,7 +131,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     <div style={{ color }}>
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={data} margin={commonMargin}>
-          <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+          <CartesianGrid vertical={false} stroke="var(--grey-300)" />
           <XAxis
             dataKey="date"
             interval={interval}

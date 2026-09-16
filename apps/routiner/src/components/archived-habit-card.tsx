@@ -16,7 +16,7 @@ export function ArchivedHabitCard({ habit, logs, onUnarchive, onDelete }: Props)
   const heatmapLogs = logs.map((l) => ({ date: l.date, value: l.value }));
 
   return (
-    <div className="group flex flex-col gap-3 rounded-[22px] border border-(--grey-200) bg-(--surface-150) p-4">
+    <div className="group card-raised flex flex-col gap-3 rounded-[22px] border border-(--grey-200) bg-(--surface-150) p-4">
       <HabitHeatmap
         logs={heatmapLogs}
         startDate={habit.startDate}
