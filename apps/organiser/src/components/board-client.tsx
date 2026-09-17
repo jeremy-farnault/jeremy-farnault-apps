@@ -188,8 +188,21 @@ export function BoardClient({
     const hits = pointerWithin(args);
     const cardHit = hits.find(({ id }) => !ids.has(String(id)));
     if (cardHit) return [cardHit];
+
     const columnHit = hits.find(({ id }) => ids.has(String(id)));
-    if (columnHit) return [columnHit];
+    if (columnHit) {
+      // Over a gap or the empty tail of the card's *own* column: resolve to the nearest card
+      // instead. Same-column reordering is driven by the card under the pointer, so keeping
+      // the column here would freeze the sortable preview and make a release in the gap a
+      // no-op. Every other column keeps the column hit, which is what lets an empty one
+      // accept a card.
+      const activeCard = cardsRef.current.find((c) => c.id === String(args.active.id));
+      if (activeCard && activeCard.columnId === String(columnHit.id)) {
+        const nearestCard = closestCorners(args).find(({ id }) => !ids.has(String(id)));
+        return nearestCard ? [nearestCard] : [columnHit];
+      }
+      return [columnHit];
+    }
     return closestCorners(args);
   }, []);
 
@@ -198,6 +211,12 @@ export function BoardClient({
 
   function cardsForColumn(list: CardRow[], columnId: string): CardRow[] {
     return list.filter((c) => c.columnId === columnId).sort(byPosition);
+  }
+
+  // What the column actually renders — drop maths has to run against this list, not the
+  // full one, or an active filter shifts every index the user is aiming at.
+  function visibleCardsForColumn(list: CardRow[], columnId: string): CardRow[] {
+    return cardsForColumn(list, columnId).filter(matchesFilters);
   }
 
   function resolveColumnId(overId: string, list: CardRow[]): string | undefined {
@@ -330,6 +349,62 @@ export function BoardClient({
     setActiveType((event.active.data.current?.type as "card" | "column") ?? null);
   }
 
+  // Where a card ends up for a given `over` target: its column, and a position key derived
+  // from the neighbours it lands between. Returns the card unchanged when the drop is a
+  // no-op, so callers can skip both the state write and the server round-trip.
+  function resolveDrop(list: CardRow[], activeId: string, overId: string | null): CardRow | null {
+    const activeCard = list.find((c) => c.id === activeId);
+    if (!activeCard) return null;
+    if (!overId || overId === activeId) return activeCard;
+
+    const targetColumnId = resolveColumnId(overId, list);
+    if (!targetColumnId) return activeCard;
+
+    const siblings = visibleCardsForColumn(list, targetColumnId);
+
+    // Over the column itself (its padding or empty space): append when arriving from
+    // another column, and leave the card alone when it already lives here.
+    if (columnIds.has(overId)) {
+      if (activeCard.columnId === targetColumnId) return activeCard;
+      const last = siblings[siblings.length - 1] ?? null;
+      return {
+        ...activeCard,
+        columnId: targetColumnId,
+        position: keyBetween(last?.position ?? null, null),
+      };
+    }
+
+    // Same-column reorder: move within the rendered ordering via arrayMove so the result is
+    // direction-correct (inserting "before the hovered card" alone lands downward drags one
+    // slot too high). Mirrors the column-reorder math in handleDragEnd.
+    if (activeCard.columnId === targetColumnId) {
+      const oldIndex = siblings.findIndex((c) => c.id === activeId);
+      const newIndex = siblings.findIndex((c) => c.id === overId);
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return activeCard;
+
+      const reordered = arrayMove(siblings, oldIndex, newIndex);
+      const before = reordered[newIndex - 1] ?? null;
+      const after = reordered[newIndex + 1] ?? null;
+      return {
+        ...activeCard,
+        position: keyBetween(before?.position ?? null, after?.position ?? null),
+      };
+    }
+
+    // Cross-column move: take the hovered card's slot.
+    const targetCards = siblings.filter((c) => c.id !== activeId);
+    const insertAt = targetCards.findIndex((c) => c.id === overId);
+    if (insertAt === -1) return activeCard;
+
+    const before = targetCards[insertAt - 1] ?? null;
+    const after = targetCards[insertAt] ?? null;
+    return {
+      ...activeCard,
+      columnId: targetColumnId,
+      position: keyBetween(before?.position ?? null, after?.position ?? null),
+    };
+  }
+
   function handleDragOver(event: DragOverEvent) {
     if (event.active.data.current?.type !== "card") return;
     const active = String(event.active.id);
@@ -343,37 +418,16 @@ export function BoardClient({
       const targetColumnId = resolveColumnId(over, prev);
       if (!targetColumnId) return prev;
 
-      // Same-column reorder: move within the full ordering via arrayMove so the result is
-      // direction-correct (inserting "before the hovered card" alone lands downward drags one
-      // slot too high). Mirrors the column-reorder math in handleDragEnd.
-      if (activeCard.columnId === targetColumnId) {
-        const full = cardsForColumn(prev, targetColumnId);
-        const oldIndex = full.findIndex((c) => c.id === active);
-        const newIndex = columnIds.has(over)
-          ? full.length - 1
-          : full.findIndex((c) => c.id === over);
-        if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev;
+      // Only the column change is previewed mid-drag. Rewriting positions within a column
+      // here would fight dnd-kit: the board re-flows under a stationary pointer, that picks
+      // a new collision target, the [overId] effect calls back in, and the cascade only ends
+      // when React bails out with "Maximum update depth exceeded". SortableContext already
+      // previews same-column reordering with transforms, and handleDragEnd commits it.
+      if (targetColumnId === activeCard.columnId) return prev;
 
-        const reordered = arrayMove(full, oldIndex, newIndex);
-        const idx = reordered.findIndex((c) => c.id === active);
-        const before = reordered[idx - 1] ?? null;
-        const after = reordered[idx + 1] ?? null;
-        const position = keyBetween(before?.position ?? null, after?.position ?? null);
-        return prev.map((c) => (c.id === active ? { ...c, position } : c));
-      }
-
-      // Cross-column move: insert at the hovered card's slot (or the end when over a column).
-      const targetCards = cardsForColumn(prev, targetColumnId).filter((c) => c.id !== active);
-      const index = columnIds.has(over)
-        ? targetCards.length
-        : targetCards.findIndex((c) => c.id === over);
-      const insertAt = index === -1 ? targetCards.length : index;
-
-      const before = targetCards[insertAt - 1] ?? null;
-      const after = targetCards[insertAt] ?? null;
-
-      const position = keyBetween(before?.position ?? null, after?.position ?? null);
-      return prev.map((c) => (c.id === active ? { ...c, columnId: targetColumnId, position } : c));
+      const moved = resolveDrop(prev, active, over);
+      if (!moved || moved === activeCard) return prev;
+      return prev.map((c) => (c.id === active ? moved : c));
     });
   }
 
@@ -412,10 +466,17 @@ export function BoardClient({
       return;
     }
 
-    // Card move — position already applied optimistically in onDragOver.
+    // Card move — any column change was applied optimistically in onDragOver; the final
+    // slot within that column is settled here, once the board has stopped moving.
     const active = String(event.active.id);
-    const moved = cardsRef.current.find((c) => c.id === active);
+    const overId = event.over ? String(event.over.id) : null;
+    const moved = resolveDrop(cardsRef.current, active, overId);
     if (!moved) return;
+    setCards((prev) => prev.map((c) => (c.id === active ? moved : c)));
+
+    const original = cardsSnapshotRef.current.find((c) => c.id === active);
+    if (original?.columnId === moved.columnId && original.position === moved.position) return;
+
     try {
       await moveCardAction({
         cardId: moved.id,
@@ -476,7 +537,7 @@ export function BoardClient({
                 <BoardColumn
                   key={column.id}
                   column={column}
-                  cards={cardsForColumn(cards, column.id).filter(matchesFilters)}
+                  cards={visibleCardsForColumn(cards, column.id)}
                   isDoneColumn={column.isDone}
                   isOnlyColumn={columns.length <= 1}
                   otherColumns={orderedColumns
