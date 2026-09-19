@@ -17,12 +17,16 @@ export const CENTRE = VIEW / 2;
 const MIN_RADIUS = 44;
 const MAX_RADIUS = 176;
 
-/** Drift beyond this compresses no further; `never touched` still sits outside it. */
-const DRIFT_CAP_DAYS = 365;
+/**
+ * The horizon the whole radial scale is proportional to, and as far out as anyone gets:
+ * drift at or past it shares the outermost guide ring, while `never touched` still sits
+ * alone outside that. Moving it rescales every dot — keep GUIDE_DAYS ending on it.
+ */
+export const DRIFT_CAP_DAYS = 90;
 /** Touched people stop short of the rim so "never touched" owns the outer edge. */
-const TOUCHED_MAX_FRACTION = 0.92;
+const TOUCHED_MAX_FRACTION = 0.94;
 
-/** Guide rings, in days — unlabelled reference marks for week / month / quarter. */
+/** Guide rings, in days — reference marks up to the horizon, which ends the list. */
 export const GUIDE_DAYS = [7, 30, 90] as const;
 
 /** Flag age at which the ring stops growing, so an old flag stays legible. */
@@ -33,9 +37,22 @@ const RING_CAP_DAYS = 90;
  * in viewBox units: holding them at a fixed on-screen size while the geometry zooms is
  * what lets zooming pull a crowded arc apart instead of magnifying it unchanged.
  */
-export const BUBBLE_SIZE = 30;
+export const BUBBLE_SIZE = 24;
 /** Padding around the bubble that still counts as a tap. */
 export const BUBBLE_HIT_PADDING = 4;
+
+/** The orbit's widest rendered size, in CSS px — the frame's own max-width. */
+export const FRAME_MAX_PX = 640;
+
+/** "me" at the centre: rendered diameter in CSS px at that full-width frame. */
+export const ME_SIZE = 48;
+
+/**
+ * CSS px → viewBox units at the full-width frame. "me" sits in the zooming geometry
+ * rather than the fixed-size overlay, so its size is specified in px here and converted
+ * once, which is what keeps it a stated multiple of a person bubble.
+ */
+export const pxToUnits = (px: number) => (px * VIEW) / FRAME_MAX_PX;
 
 /** Ring geometry, in px: the clear gap around the bubble and the stroke outside it. */
 const RING_MIN_GAP = 3;
@@ -44,15 +61,19 @@ const RING_MIN_WIDTH = 1.5;
 const RING_MAX_WIDTH = 3;
 
 /**
- * Drift as a 0..1 fraction of the radial band. Compressed with log1p so a year-long
- * gap doesn't visually dwarf the difference between one week and one month — the range
- * that actually matters. Never-touched returns exactly 1: the far edge.
+ * Drift as a 0..1 fraction of the radial band — a straight fraction of the horizon, so
+ * distance out from the hub *is* elapsed time. That makes the guide rings divide the
+ * band exactly (a ring at half the horizon sits at half the distance) and gives every
+ * day of drift the same step, so 27 days and 29 days are not the same spot.
+ *
+ * The cost is that the freshly-touched crowd shares a thin annulus near the hub: a week
+ * is only 7/90 of the band. That is what proportional spacing honestly means, and what
+ * the zoom is for. Never-touched returns exactly 1: the far edge, alone outside everyone.
  */
 export function driftFraction(days: number): number {
   if (!Number.isFinite(days)) return 1;
   const capped = Math.min(Math.max(days, 0), DRIFT_CAP_DAYS);
-  const t = Math.log1p(capped) / Math.log1p(DRIFT_CAP_DAYS);
-  return t * TOUCHED_MAX_FRACTION;
+  return (capped / DRIFT_CAP_DAYS) * TOUCHED_MAX_FRACTION;
 }
 
 /** Distance from the centre, in viewBox units, for a given drift in days. */

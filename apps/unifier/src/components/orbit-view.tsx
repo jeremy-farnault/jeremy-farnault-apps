@@ -5,11 +5,14 @@ import {
   BUBBLE_HIT_PADDING,
   BUBBLE_SIZE,
   CENTRE,
+  FRAME_MAX_PX,
   GUIDE_DAYS,
+  ME_SIZE,
   type OrbitArc,
   type OrbitPerson,
   VIEW,
   layoutOrbit,
+  pxToUnits,
   radiusForDrift,
 } from "@/lib/orbit";
 import { useSession } from "@jf/auth/client";
@@ -38,8 +41,24 @@ type Props = {
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
-/** Radius at which a spoke leaves the centre disc, just clear of its edge. */
-const SPOKE_START = 27;
+/** The centre disc, in viewBox units, and the radius at which a spoke leaves its edge. */
+const ME_RADIUS = pxToUnits(ME_SIZE) / 2;
+const SPOKE_START = ME_RADIUS + 1;
+
+/**
+ * The period each reference ring stands for, revealed on hover. The outermost ring is
+ * the horizon everything beyond it clamps onto, so it reads "or more" — worked out from
+ * GUIDE_DAYS rather than written in, so moving the horizon cannot leave it lying.
+ */
+const GUIDE_PERIODS: Record<number, string> = {
+  7: "A week",
+  30: "A month",
+  90: "Three months",
+  180: "Six months",
+};
+
+const guideLabel = (days: number, outermost: boolean) =>
+  outermost ? `${GUIDE_PERIODS[days]} or more` : `${GUIDE_PERIODS[days]} since your last touch`;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -178,7 +197,8 @@ export function OrbitView({
           overlay above it, and a drag that starts on someone's face must still pan. */}
       <div
         ref={frameRef}
-        className="relative aspect-square w-full max-w-[560px] touch-none select-none self-center"
+        style={{ maxWidth: FRAME_MAX_PX }}
+        className="relative aspect-square w-full touch-none select-none self-center"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -192,17 +212,31 @@ export function OrbitView({
         >
           {/* Reference rings at the week / month / quarter marks. Unlabelled on purpose —
               they calibrate the eye without turning the orbit into a chart. */}
-          {GUIDE_DAYS.map((days) => (
-            <circle
-              key={days}
-              cx={CENTRE}
-              cy={CENTRE}
-              r={radiusForDrift(days)}
-              fill="none"
-              stroke="var(--grey-200)"
-              strokeWidth={1 / zoom}
-              strokeDasharray={`${2 / zoom} ${4 / zoom}`}
-            />
+          {GUIDE_DAYS.map((days, i) => (
+            <g key={days}>
+              <circle
+                cx={CENTRE}
+                cy={CENTRE}
+                r={radiusForDrift(days)}
+                fill="none"
+                stroke="var(--grey-400)"
+                strokeWidth={1 / zoom}
+                strokeDasharray={`${2 / zoom} ${4 / zoom}`}
+              />
+              {/* A fat, invisible companion: the dashes themselves are too thin and too
+                  gappy to hover, so this is what carries the explanation. */}
+              <circle
+                cx={CENTRE}
+                cy={CENTRE}
+                r={radiusForDrift(days)}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={12 / zoom}
+                style={{ pointerEvents: "stroke" }}
+              >
+                <title>{guideLabel(days, i === GUIDE_DAYS.length - 1)}</title>
+              </circle>
+            </g>
           ))}
 
           {/* One spoke per person, in their arc's colour: this is what says which arc
@@ -218,15 +252,15 @@ export function OrbitView({
                 x2={dot.x}
                 y2={dot.y}
                 stroke={dot.arcColor}
-                strokeWidth={1 / zoom}
-                opacity={0.35}
+                strokeWidth={1.75 / zoom}
+                opacity={0.45}
               />
             );
           })}
 
           {/* The centre is me. The avatar itself is an HTML image in the overlay below —
               it only ever sits on top of this disc, which stays as its backdrop. */}
-          <circle cx={CENTRE} cy={CENTRE} r={26} fill="var(--surface-200)" />
+          <circle cx={CENTRE} cy={CENTRE} r={ME_RADIUS} fill="var(--surface-200)" />
           {!meImage && (
             <text
               x={CENTRE}
@@ -234,7 +268,7 @@ export function OrbitView({
               textAnchor="middle"
               dominantBaseline="central"
               className="fill-(--grey-700) font-semibold"
-              style={{ fontSize: meLetter ? 18 : 11 }}
+              style={{ fontSize: meLetter ? ME_RADIUS * 0.85 : ME_RADIUS * 0.52 }}
             >
               {meLetter || "me"}
             </text>
@@ -250,7 +284,7 @@ export function OrbitView({
               src={meImage}
               alt="You, at the centre"
               referrerPolicy="no-referrer"
-              style={{ ...toPercent(CENTRE, CENTRE), width: `${(52 / span) * 100}%` }}
+              style={{ ...toPercent(CENTRE, CENTRE), width: `${((ME_RADIUS * 2) / span) * 100}%` }}
               className="absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
             />
           )}
@@ -272,14 +306,14 @@ export function OrbitView({
                 <Popover.Trigger asChild>
                   <button
                     type="button"
-                    aria-label={`${dot.name} — ${dot.arcName}, ${drift}`}
-                    title={`${dot.name} — ${dot.arcName}, ${drift}`}
+                    aria-label={`${dot.name} - ${dot.arcName}, ${drift}`}
+                    title={`${dot.name} - ${dot.arcName}, ${drift}`}
                     style={{
                       ...toPercent(dot.x, dot.y),
                       width: BUBBLE_SIZE + BUBBLE_HIT_PADDING * 2,
                       height: BUBBLE_SIZE + BUBBLE_HIT_PADDING * 2,
                     }}
-                    className="pointer-events-auto absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full transition-transform active:scale-95"
+                    className="pointer-events-auto absolute grid -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full transition-transform active:scale-95"
                   >
                     <PersonBubble
                       name={dot.name}
@@ -408,25 +442,32 @@ export function OrbitView({
         ))}
       </div>
 
-      {/* How to read the orbit is worth one read, not a permanent caption under it. */}
-      <div className="flex flex-col items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => setHelpOpen((v) => !v)}
-          aria-expanded={helpOpen}
-          aria-controls="orbit-help"
-          className="flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-xs text-(--grey-500) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900)"
-        >
-          <InfoIcon size={14} /> How to read this
-        </button>
-        {helpOpen && (
-          <p id="orbit-help" className="px-2 text-center text-xs text-(--grey-500)">
-            Further out means longer since you reached out, and each spoke carries the colour of the
-            arc someone belongs to. A red ring is a critical flag, growing the longer it stays
-            unresolved. Tap someone to log a touch, flag them, or open them. Pinch or drag to zoom
-            in when they crowd.
-          </p>
-        )}
+      {/* How to read the orbit is worth one read, and it floats: pushing a paragraph
+          into the column below the button shoved the whole page around. */}
+      <div className="flex justify-center">
+        <Popover.Root open={helpOpen} onOpenChange={setHelpOpen}>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-[10px] px-3 text-xs text-(--grey-500) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900)"
+            >
+              <InfoIcon size={14} /> How to read this
+            </button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              side="top"
+              sideOffset={6}
+              collisionPadding={12}
+              className="z-50 w-[280px] rounded-[10px] bg-(--grey-900) px-2.5 py-2 text-xs leading-relaxed text-white outline-none animate-[overlay-in_0.2s_ease-in-out]"
+            >
+              Further out means longer since you reached out, and each spoke carries the colour of
+              the arc someone belongs to. A red ring is a critical flag, growing the longer it stays
+              unresolved. Tap someone to log a touch, flag them, or open them.
+              <Popover.Arrow className="fill-(--grey-900)" />
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
       </div>
     </div>
   );

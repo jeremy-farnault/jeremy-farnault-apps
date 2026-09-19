@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   BUBBLE_SIZE,
   CENTRE,
+  DRIFT_CAP_DAYS,
+  GUIDE_DAYS,
   angleInSector,
   driftFraction,
   layoutOrbit,
@@ -26,18 +28,29 @@ describe("driftFraction", () => {
   });
 
   it("is monotonic in drift", () => {
-    const samples = [0, 1, 3, 7, 14, 30, 90, 200, 365].map(driftFraction);
+    const samples = [0, 1, 3, 7, 14, 30, 60, 89].map(driftFraction);
     for (let i = 1; i < samples.length; i++) {
       expect(samples[i]!).toBeGreaterThan(samples[i - 1]!);
     }
   });
 
-  it("compresses so the week-to-month range gets real room", () => {
-    // The 7→30 day step should be a bigger visual jump than 300→365,
-    // which is the whole point of the log compression.
-    const early = driftFraction(30) - driftFraction(7);
-    const late = driftFraction(365) - driftFraction(300);
-    expect(early).toBeGreaterThan(late);
+  it("spaces the rings in proportion to their period", () => {
+    // Every ring sits at its own share of the horizon — half the days, half the
+    // distance from the hub: position *is* elapsed time.
+    const outer = driftFraction(DRIFT_CAP_DAYS);
+    for (const days of GUIDE_DAYS) {
+      expect(driftFraction(days) / outer).toBeCloseTo(days / DRIFT_CAP_DAYS);
+    }
+    expect(driftFraction(DRIFT_CAP_DAYS / 2)).toBeCloseTo(outer / 2);
+  });
+
+  it("ends the guide rings on the horizon", () => {
+    expect(GUIDE_DAYS.at(-1)).toBe(DRIFT_CAP_DAYS);
+  });
+
+  it("clamps everything past the horizon onto the outer ring", () => {
+    expect(driftFraction(DRIFT_CAP_DAYS + 20)).toBe(driftFraction(DRIFT_CAP_DAYS));
+    expect(driftFraction(365)).toBe(driftFraction(DRIFT_CAP_DAYS));
   });
 
   it("clamps negatives and never exceeds 1", () => {
@@ -54,6 +67,17 @@ describe("radiusForDrift", () => {
   it("places neglected further out than recently touched (AC#3)", () => {
     expect(radiusForDrift(90)).toBeGreaterThan(radiusForDrift(3));
     expect(radiusForDrift(Number.POSITIVE_INFINITY)).toBeGreaterThan(radiusForDrift(365));
+  });
+
+  it("keeps never-touched outside even the clamped stragglers", () => {
+    expect(radiusForDrift(Number.POSITIVE_INFINITY)).toBeGreaterThan(radiusForDrift(200));
+  });
+
+  it("resolves single days between the rings, at a uniform step", () => {
+    expect(radiusForDrift(29)).toBeGreaterThan(radiusForDrift(27));
+    expect(radiusForDrift(29) - radiusForDrift(27)).toBeCloseTo(
+      radiusForDrift(9) - radiusForDrift(7)
+    );
   });
 
   it("stays inside the viewBox", () => {
