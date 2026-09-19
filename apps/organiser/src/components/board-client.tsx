@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions";
 import type { CardRow, ColumnRow, TagRow } from "@/lib/queries";
 import {
+  type Collision,
   type CollisionDetection,
   DndContext,
   type DragEndEvent,
@@ -25,6 +26,7 @@ import {
   KeyboardSensor,
   PointerSensor,
   TouchSensor,
+  type UniqueIdentifier,
   closestCorners,
   pointerWithin,
   useSensor,
@@ -173,6 +175,12 @@ export function BoardClient({
   const cardsSnapshotRef = useRef<CardRow[]>(cards);
   const columnsSnapshotRef = useRef<ColumnRow[]>(columns);
 
+  // Last target the pointer genuinely resolved to, and the drag delta at which the last
+  // cross-column preview was applied. Both exist to break the feedback loop described on
+  // collisionDetectionStrategy and handleDragOver below.
+  const lastOverIdRef = useRef<UniqueIdentifier | null>(null);
+  const lastPreviewDeltaRef = useRef<{ x: number; y: number } | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
@@ -185,9 +193,18 @@ export function BoardClient({
   // the last resort for the keyboard sensor / off-screen autoscroll, which have no pointer.
   const collisionDetectionStrategy = useCallback<CollisionDetection>((args) => {
     const ids = new Set(columnsRef.current.map((c) => c.id));
+    const remember = (collisions: Collision[]): Collision[] => {
+      const first = collisions[0];
+      if (first) lastOverIdRef.current = first.id;
+      return collisions;
+    };
+
+    // No pointer (keyboard sensor, off-screen autoscroll): geometry is the only signal.
+    if (!args.pointerCoordinates) return remember(closestCorners(args));
+
     const hits = pointerWithin(args);
     const cardHit = hits.find(({ id }) => !ids.has(String(id)));
-    if (cardHit) return [cardHit];
+    if (cardHit) return remember([cardHit]);
 
     const columnHit = hits.find(({ id }) => ids.has(String(id)));
     if (columnHit) {
@@ -199,11 +216,20 @@ export function BoardClient({
       const activeCard = cardsRef.current.find((c) => c.id === String(args.active.id));
       if (activeCard && activeCard.columnId === String(columnHit.id)) {
         const nearestCard = closestCorners(args).find(({ id }) => !ids.has(String(id)));
-        return nearestCard ? [nearestCard] : [columnHit];
+        return remember(nearestCard ? [nearestCard] : [columnHit]);
       }
-      return [columnHit];
+      return remember([columnHit]);
     }
-    return closestCorners(args);
+
+    // Dead space: the 16px gutters between columns, the board's padding, the "add column"
+    // tile. Nothing is under the pointer, and resolving by corner distance oscillates —
+    // previewing a move into the nearest column re-flows both columns, which makes a card
+    // in the *old* column the nearest corner, which previews the move back, and so on until
+    // React gives up with "maximum update depth exceeded". Hold the last real target so the
+    // board stays still until the pointer reaches a column again; that also makes the drop
+    // land where the preview says it will.
+    const last = lastOverIdRef.current;
+    return last === null ? remember(closestCorners(args)) : [{ id: last }];
   }, []);
 
   const orderedColumns = [...columns].sort(byPosition);
@@ -345,6 +371,8 @@ export function BoardClient({
   function handleDragStart(event: DragStartEvent) {
     cardsSnapshotRef.current = cardsRef.current;
     columnsSnapshotRef.current = columnsRef.current;
+    lastOverIdRef.current = null;
+    lastPreviewDeltaRef.current = null;
     setActiveId(String(event.active.id));
     setActiveType((event.active.data.current?.type as "card" | "column") ?? null);
   }
@@ -411,24 +439,36 @@ export function BoardClient({
     const over = event.over ? String(event.over.id) : null;
     if (!over || over === active) return;
 
-    setCards((prev) => {
-      const activeCard = prev.find((c) => c.id === active);
-      if (!activeCard) return prev;
+    const list = cardsRef.current;
+    const activeCard = list.find((c) => c.id === active);
+    if (!activeCard) return;
 
-      const targetColumnId = resolveColumnId(over, prev);
-      if (!targetColumnId) return prev;
+    const targetColumnId = resolveColumnId(over, list);
+    if (!targetColumnId) return;
 
-      // Only the column change is previewed mid-drag. Rewriting positions within a column
-      // here would fight dnd-kit: the board re-flows under a stationary pointer, that picks
-      // a new collision target, the [overId] effect calls back in, and the cascade only ends
-      // when React bails out with "Maximum update depth exceeded". SortableContext already
-      // previews same-column reordering with transforms, and handleDragEnd commits it.
-      if (targetColumnId === activeCard.columnId) return prev;
+    // Only the column change is previewed mid-drag. Rewriting positions within a column
+    // here would fight dnd-kit: the board re-flows under a stationary pointer, that picks
+    // a new collision target, the [overId] effect calls back in, and the cascade only ends
+    // when React bails out with "Maximum update depth exceeded". SortableContext already
+    // previews same-column reordering with transforms, and handleDragEnd commits it.
+    if (targetColumnId === activeCard.columnId) return;
 
-      const moved = resolveDrop(prev, active, over);
-      if (!moved || moved === activeCard) return prev;
-      return prev.map((c) => (c.id === active ? moved : c));
-    });
+    // Same cascade, one level up: a cross-column preview re-flows the board, and the new
+    // geometry can hand dnd-kit a target in the column the card just left — under a pointer
+    // that never moved. One preview per pointer position is enough to stop that dead; a real
+    // column change always comes with a delta the user produced (or that autoscroll did).
+    const previousDelta = lastPreviewDeltaRef.current;
+    if (previousDelta && previousDelta.x === event.delta.x && previousDelta.y === event.delta.y) {
+      return;
+    }
+
+    const moved = resolveDrop(list, active, over);
+    if (!moved || moved === activeCard) return;
+
+    lastPreviewDeltaRef.current = { x: event.delta.x, y: event.delta.y };
+    const next = list.map((c) => (c.id === active ? moved : c));
+    cardsRef.current = next;
+    setCards(next);
   }
 
   async function handleDragEnd(event: DragEndEvent) {
