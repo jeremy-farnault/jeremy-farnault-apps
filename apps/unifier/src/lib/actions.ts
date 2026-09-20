@@ -554,8 +554,16 @@ export async function updatePersonNoteAction(input: {
 }
 
 /**
- * Logs a contact with a person, stamped now. The note is optional — a bare touch is the
- * one-tap case, and it is the only thing that reduces drift.
+ * Logs a contact with a person. The note is optional — a bare touch is the one-tap case,
+ * and it is the only thing that reduces drift.
+ *
+ * `occurredAt` is optional and back-dates the touch: contact is often logged days after
+ * it happened, and a person's whole position in the orbit is derived from when their
+ * last touch *happened*, not when it was typed in. Omitting it stamps now, which is what
+ * the one-tap path on the main page does.
+ *
+ * Future dates are rejected rather than clamped: drift floors at zero, so a touch dated
+ * next week would read as "Today" and silently hide how long the real drift has been.
  *
  * Deliberately does not write any status field: drift is derived from touch history at
  * render time, so there is nothing here to keep in sync.
@@ -563,6 +571,7 @@ export async function updatePersonNoteAction(input: {
 export async function logTouchAction(input: {
   personId: string;
   note?: string;
+  occurredAt?: Date;
 }): Promise<TouchRow> {
   const userId = await getUserId();
 
@@ -575,9 +584,25 @@ export async function logTouchAction(input: {
 
   const note = input.note?.trim();
 
+  const occurredAt = input.occurredAt;
+  if (occurredAt !== undefined) {
+    if (!(occurredAt instanceof Date) || Number.isNaN(occurredAt.getTime())) {
+      throw new Error("Invalid date");
+    }
+    // A day of slack, so a clock skewed against the server can still log "today".
+    if (occurredAt.getTime() > Date.now() + 86_400_000) {
+      throw new Error("A touch can't be dated in the future");
+    }
+  }
+
   const inserted = await db
     .insert(unifierTouches)
-    .values({ userId, personId: input.personId, note: note ? note : null })
+    .values({
+      userId,
+      personId: input.personId,
+      note: note ? note : null,
+      ...(occurredAt ? { occurredAt } : {}),
+    })
     .returning({
       id: unifierTouches.id,
       note: unifierTouches.note,

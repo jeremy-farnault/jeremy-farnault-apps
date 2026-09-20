@@ -71,3 +71,35 @@ export function lastTouchAt(touches: { occurredAt: Date }[]): Date | null {
   }
   return latest;
 }
+
+/** Today as `YYYY-MM-DD` in local time — the form `DatePicker` reads and writes. */
+export function todayISODate(now: Date): string {
+  const y = String(now.getFullYear()).padStart(4, "0");
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * A calendar day picked for a back-dated touch → the instant to stamp it with. Returns
+ * null when the day is unparseable or in the future, so the caller falls back to now
+ * rather than sending something the server will reject.
+ *
+ * Anchored at local noon rather than midnight: the hour a past contact happened is
+ * genuinely unknown, and midday leaves half a day of slack on either side, so no
+ * timezone conversion between here and the database can shift the touch onto a
+ * neighbouring date — which would move the person in the orbit by a whole day.
+ */
+export function backdatedTouchAt(isoDate: string, now: Date): Date | null {
+  const parts = isoDate.split("-").map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isInteger(n))) return null;
+
+  const [y, m, d] = parts as [number, number, number];
+  const at = new Date(y, m - 1, d, 12, 0, 0, 0);
+
+  // Reject overflow like 2026-02-31, which JS would roll forward into March.
+  if (at.getFullYear() !== y || at.getMonth() !== m - 1 || at.getDate() !== d) return null;
+  if (at.getTime() > now.getTime()) return null;
+
+  return at;
+}

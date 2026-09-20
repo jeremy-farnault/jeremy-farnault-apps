@@ -184,12 +184,15 @@ export function PersonDetailClient({
     }
   }
 
-  async function handleLogTouch(touchNote?: string) {
+  async function handleLogTouch(input: { note?: string; occurredAt?: Date }) {
     try {
-      const created = await logTouchAction(
-        touchNote ? { personId: person.id, note: touchNote } : { personId: person.id }
+      const created = await logTouchAction({ personId: person.id, ...input });
+      // Sorted rather than prepended: a back-dated touch belongs where it happened in the
+      // timeline, and the marked dot at the top has to be the most recent contact rather
+      // than the last one typed. Matches the server's own `occurredAt desc` ordering.
+      setTouches((prev) =>
+        [created, ...prev].sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
       );
-      setTouches((prev) => [created, ...prev]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     }

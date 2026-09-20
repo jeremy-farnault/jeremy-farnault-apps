@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { MAX_DRIFT_DAYS, driftDays, formatAgo, formatDrift, lastTouchAt } from "./drift";
+import {
+  MAX_DRIFT_DAYS,
+  backdatedTouchAt,
+  driftDays,
+  formatAgo,
+  formatDrift,
+  lastTouchAt,
+  todayISODate,
+} from "./drift";
 
 // A fixed "now" so these never depend on the wall clock.
 const NOW = new Date(2026, 2, 15, 14, 30); // 15 Mar 2026, 14:30 local
@@ -79,5 +87,46 @@ describe("formatAgo", () => {
   it("is what the critical flag's age is rendered with", () => {
     // A flag set 10 days ago reads the same way a 10-day drift would.
     expect(formatAgo(daysBefore(10), NOW)).toBe("1 week ago");
+  });
+});
+
+describe("todayISODate", () => {
+  it("reads the local calendar day, not the UTC one", () => {
+    // 23:30 local on the 15th is already the 16th in UTC for a positive offset — the
+    // picker has to agree with the calendar the user is looking at.
+    expect(todayISODate(new Date(2026, 2, 15, 23, 30))).toBe("2026-03-15");
+  });
+
+  it("zero-pads month and day", () => {
+    expect(todayISODate(new Date(2026, 0, 5, 9, 0))).toBe("2026-01-05");
+  });
+});
+
+describe("backdatedTouchAt", () => {
+  it("anchors a past day at local noon, so no timezone shift can move the date", () => {
+    expect(backdatedTouchAt("2026-03-10", NOW)).toEqual(new Date(2026, 2, 10, 12, 0, 0, 0));
+  });
+
+  it("lands on the day the user picked, as drift counts it", () => {
+    const at = backdatedTouchAt("2026-03-08", NOW) as Date;
+    expect(driftDays(at, NOW)).toBe(7);
+  });
+
+  it("rejects a future day rather than letting drift floor to zero", () => {
+    expect(backdatedTouchAt("2026-03-16", NOW)).toBeNull();
+  });
+
+  it("accepts today, which is not in the future", () => {
+    expect(backdatedTouchAt("2026-03-15", NOW)).toEqual(new Date(2026, 2, 15, 12, 0, 0, 0));
+  });
+
+  it("rejects a date that would roll forward into the next month", () => {
+    expect(backdatedTouchAt("2026-02-31", NOW)).toBeNull();
+  });
+
+  it("rejects malformed input rather than guessing", () => {
+    expect(backdatedTouchAt("", NOW)).toBeNull();
+    expect(backdatedTouchAt("2026-03", NOW)).toBeNull();
+    expect(backdatedTouchAt("not-a-date", NOW)).toBeNull();
   });
 });
