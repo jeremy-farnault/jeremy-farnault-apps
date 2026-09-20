@@ -47,5 +47,5 @@ export const descriptions: Record<string, string> = {
   routiner:
     "Build routines that fit you: done or not, amount of time achieved, or time-based. Set up your daily checklist and keep your streaks strong.",
   unifier:
-    "Keep your relationships in hand. Group the people you care about into arcs, glance at what matters about each one, and log a touch in a tap. An orbit view shows who you've drifted from, so no one slips away.",
+    "Keep your people close. Sort the ones who matter into arcs (family, friends, work...) and log a contact in a tap. The orbit puts you at the centre and everyone else at the distance they've drifted, so the person you haven't spoken to in months is impossible to miss.",
 };
