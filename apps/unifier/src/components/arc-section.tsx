@@ -199,7 +199,7 @@ export function ArcSection({
                   avatarUrl={person.avatarUrl}
                   color={person.color}
                   arcColor={arc.color}
-                  size={24}
+                  size={32}
                 />
                 <span className="truncate hover:underline">{person.name}</span>
               </Link>

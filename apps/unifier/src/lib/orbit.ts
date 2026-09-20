@@ -37,7 +37,7 @@ const RING_CAP_DAYS = 90;
  * in viewBox units: holding them at a fixed on-screen size while the geometry zooms is
  * what lets zooming pull a crowded arc apart instead of magnifying it unchanged.
  */
-export const BUBBLE_SIZE = 24;
+export const BUBBLE_SIZE = 32;
 /** Padding around the bubble that still counts as a tap. */
 export const BUBBLE_HIT_PADDING = 4;
 

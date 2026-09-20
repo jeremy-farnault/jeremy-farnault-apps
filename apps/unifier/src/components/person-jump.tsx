@@ -145,7 +145,7 @@ export function PersonJump() {
                           avatarUrl={person.avatarUrl}
                           color={person.color}
                           arcColor={person.arcColor}
-                          size={24}
+                          size={32}
                         />
                         <span className="flex-1 truncate text-sm text-(--grey-900)">
                           {person.name}

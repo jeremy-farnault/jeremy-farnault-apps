@@ -24,7 +24,7 @@ type Props = {
   /** The person's own colour override; null falls back to `arcColor`. */
   color: string | null;
   arcColor: string | null;
-  /** Rendered size in px — the same bubble serves a 24px list row and a 30px orbit dot. */
+  /** Rendered size in px — the same bubble serves a 32px list row and a 32px orbit dot. */
   size: number;
   /** Critical-flag halo, in px, from `ringFor`. Omitted when the person isn't flagged. */
   ring?: { gap: number; width: number; opacity: number } | undefined;
@@ -84,7 +84,7 @@ export function PersonBubble({
         ...style,
         backgroundColor: background,
         color: getColorForeground(background),
-        // Initials track the bubble so one component covers 24px rows and 30px dots.
+        // Initials track the bubble so one component covers 32px rows and 40px detail headers.
         fontSize: Math.max(9, Math.round(size * 0.38)),
       }}
       className={cn(
