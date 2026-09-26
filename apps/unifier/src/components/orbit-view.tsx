@@ -41,9 +41,11 @@ type Props = {
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
-/** The centre disc, in viewBox units, and the radius at which a spoke leaves its edge. */
+/** The centre disc, in viewBox units, and the radius at which a spoke leaves its edge.
+ * The disc is drawn at a fixed pixel size like every other avatar, so the spoke start
+ * is divided by the zoom to keep meeting its edge rather than pulling away from it. */
 const ME_RADIUS = pxToUnits(ME_SIZE) / 2;
-const SPOKE_START = ME_RADIUS + 1;
+const SPOKE_GAP = ME_RADIUS + 1;
 
 /**
  * The period each reference ring stands for, revealed on hover. The outermost ring is
@@ -244,11 +246,12 @@ export function OrbitView({
               to the dot's centre and vanishes under the bubble drawn over it. */}
           {dots.map((dot) => {
             const out = Math.hypot(dot.x - CENTRE, dot.y - CENTRE) || 1;
+            const start = SPOKE_GAP / zoom;
             return (
               <line
                 key={dot.id}
-                x1={CENTRE + ((dot.x - CENTRE) / out) * SPOKE_START}
-                y1={CENTRE + ((dot.y - CENTRE) / out) * SPOKE_START}
+                x1={CENTRE + ((dot.x - CENTRE) / out) * start}
+                y1={CENTRE + ((dot.y - CENTRE) / out) * start}
                 x2={dot.x}
                 y2={dot.y}
                 stroke={dot.arcColor}
@@ -257,37 +260,34 @@ export function OrbitView({
               />
             );
           })}
-
-          {/* The centre is me. The avatar itself is an HTML image in the overlay below —
-              it only ever sits on top of this disc, which stays as its backdrop. */}
-          <circle cx={CENTRE} cy={CENTRE} r={ME_RADIUS} fill="var(--surface-200)" />
-          {!meImage && (
-            <text
-              x={CENTRE}
-              y={CENTRE}
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="fill-(--grey-700) font-semibold"
-              style={{ fontSize: meLetter ? ME_RADIUS * 0.85 : ME_RADIUS * 0.52 }}
-            >
-              {meLetter || "me"}
-            </text>
-          )}
         </svg>
 
         {/* People live in an HTML overlay rather than inside the SVG: they need to be
             real buttons to be keyboard- and screen-reader-reachable, they carry photos,
             and they must hold a fixed pixel size while the viewBox zooms under them. */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {meImage && (
-            <img
-              src={meImage}
-              alt="You, at the centre"
-              referrerPolicy="no-referrer"
-              style={{ ...toPercent(CENTRE, CENTRE), width: `${((ME_RADIUS * 2) / span) * 100}%` }}
-              className="absolute aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full object-cover"
-            />
-          )}
+          {/* The centre is me, sized in pixels like everyone else's bubble: zooming pulls
+              the orbit apart under it rather than magnifying the faces on top of it. */}
+          <div
+            style={{ ...toPercent(CENTRE, CENTRE), width: ME_SIZE, height: ME_SIZE }}
+            className="absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden rounded-full bg-(--surface-200)"
+          >
+            {meImage ? (
+              <img
+                src={meImage}
+                alt="You, at the centre"
+                referrerPolicy="no-referrer"
+                className="h-full w-full rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className="font-semibold text-(--grey-700)"
+                style={{ fontSize: meLetter ? ME_SIZE * 0.42 : ME_SIZE * 0.26 }}
+              >
+                {meLetter || "me"}
+              </span>
+            )}
+          </div>
 
           {painted.map((dot) => {
             const person = people.find((p) => p.id === dot.id);

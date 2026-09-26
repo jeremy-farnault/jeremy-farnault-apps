@@ -105,27 +105,34 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
   }, [title, body]);
 
   return (
-    <div className="w-full px-4 pt-6 pb-6">
-      <Breadcrumb crumbs={crumbs} />
+    // Pinned to the viewport (minus the shell header, and the shell's mobile bottom
+    // padding) so the editor owns the only scroll: the toolbar and actions stay put
+    // while a long note scrolls underneath them.
+    <div className="flex h-[calc(100dvh-7.5rem)] w-full flex-col px-4 pt-6 pb-6 md:h-[calc(100dvh-3.5rem)]">
+      <div className="shrink-0">
+        <Breadcrumb crumbs={crumbs} />
+      </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
         <TextInput
           value={title}
           onChange={setTitle}
           placeholder="Title"
-          className="text-base font-semibold"
+          className="shrink-0 text-base font-semibold"
         />
         <RichTextEditor
           editor={editor}
           placeholder="Write something…"
-          className="min-h-[calc(100dvh-328px)] sm:min-h-[50vh]"
+          containerClassName="min-h-0 flex-1 overflow-y-auto rounded-[10px] bg-(--surface-150)"
         />
-        <FormattingToolbar editor={editor} noteId={note.id ?? ""} />
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <ColorPicker value={color} onChange={setColor} />
-          <div className="flex items-center gap-2">
-            <NoteActionsMenu note={note} allFolders={allFolders} alwaysVisible />
-            {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
+        <div className="flex shrink-0 flex-col gap-4">
+          <FormattingToolbar editor={editor} noteId={note.id ?? ""} />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <ColorPicker value={color} onChange={setColor} />
+            <div className="flex items-center gap-2">
+              <NoteActionsMenu note={note} allFolders={allFolders} alwaysVisible />
+              {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
+            </div>
           </div>
         </div>
       </div>
