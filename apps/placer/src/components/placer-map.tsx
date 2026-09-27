@@ -4,7 +4,7 @@ import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from "@/lib/constants";
 import type { CategoryRow, SpotRow } from "@/lib/queries";
 import L from "leaflet";
 import { createElement } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
@@ -196,6 +196,25 @@ function MapDoubleClick({
   return null;
 }
 
+// Opening the bubble on the tiniest pointer graze feels twitchy, and it also fires while the
+// map slides markers under a stationary cursor during a pan/zoom. A short intent delay plus
+// dismissing on any map motion keeps the bubble deliberate and never leaves it stranded.
+const HOVER_OPEN_DELAY_MS = 180;
+
+function MapMotion({
+  onMotionStart,
+  onMotionEnd,
+}: { onMotionStart: () => void; onMotionEnd: () => void }) {
+  useMapEvents({
+    movestart: onMotionStart,
+    zoomstart: onMotionStart,
+    dragstart: onMotionStart,
+    moveend: onMotionEnd,
+    zoomend: onMotionEnd,
+  });
+  return null;
+}
+
 function FlyTo({
   target,
 }: { target: { lat: number; lng: number; zoom: number } | null | undefined }) {
@@ -228,10 +247,43 @@ export function PlacerMap({
   // so the hover bubble would stay stuck on screen. On mobile the detail modal is the only
   // marker affordance.
   const isCoarsePointer = useRef(false);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMapMovingRef = useRef(false);
 
   useEffect(() => {
     isCoarsePointer.current = window.matchMedia("(pointer: coarse)").matches;
   }, []);
+
+  const cancelHover = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setHoveredSpot(null);
+  }, []);
+
+  const scheduleHover = useCallback((spot: SpotRow) => {
+    if (isCoarsePointer.current || isMapMovingRef.current) return;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => {
+      hoverTimerRef.current = null;
+      const map = mapRef.current;
+      if (!map || isMapMovingRef.current) return;
+      const point = map.latLngToContainerPoint([spot.lat, spot.lng]);
+      setHoveredSpot({ spot, x: point.x, y: point.y });
+    }, HOVER_OPEN_DELAY_MS);
+  }, []);
+
+  const handleMotionStart = useCallback(() => {
+    isMapMovingRef.current = true;
+    cancelHover();
+  }, [cancelHover]);
+
+  const handleMotionEnd = useCallback(() => {
+    isMapMovingRef.current = false;
+  }, []);
+
+  useEffect(() => () => cancelHover(), [cancelHover]);
 
   const visibleSpots = activeCategoryId
     ? spots.filter((s) => s.category?.id === activeCategoryId)
@@ -260,6 +312,7 @@ export function PlacerMap({
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <MapRefCapture mapRef={mapRef} />
             <MapDoubleClick onDoubleClick={onMapDoubleClick} />
+            <MapMotion onMotionStart={handleMotionStart} onMotionEnd={handleMotionEnd} />
             <FlyTo target={flyToTarget} />
             <FitBounds markers={markerPositions} skip={locationOverride} />
             <UserLocation
@@ -279,17 +332,11 @@ export function PlacerMap({
                 )}
                 eventHandlers={{
                   click: () => {
-                    setHoveredSpot(null);
+                    cancelHover();
                     setSelectedSpot(spot);
                   },
-                  mouseover: () => {
-                    if (isCoarsePointer.current) return;
-                    const map = mapRef.current;
-                    if (!map) return;
-                    const point = map.latLngToContainerPoint([spot.lat, spot.lng]);
-                    setHoveredSpot({ spot, x: point.x, y: point.y });
-                  },
-                  mouseout: () => setHoveredSpot(null),
+                  mouseover: () => scheduleHover(spot),
+                  mouseout: cancelHover,
                 }}
               />
             ))}
