@@ -3,7 +3,12 @@
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ColorPicker } from "@/components/color-picker";
 import { NoteActionsMenu } from "@/components/note-actions-menu";
-import { FormattingToolbar, RichTextEditor, useNoteEditor } from "@/components/rich-text-editor";
+import {
+  EditorCharacterCount,
+  FormattingToolbar,
+  RichTextEditor,
+  useNoteEditor,
+} from "@/components/rich-text-editor";
 import { createNote, updateNote } from "@/lib/actions";
 import { DEFAULT_COLOR } from "@/lib/note-utils";
 import type { Folder, Note } from "@/lib/queries";
@@ -122,7 +127,6 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
         />
         <RichTextEditor
           editor={editor}
-          placeholder="Write something…"
           containerClassName="min-h-0 flex-1 overflow-y-auto rounded-[10px] bg-(--surface-150)"
         />
         <div className="flex shrink-0 flex-col gap-4">
@@ -130,6 +134,7 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <ColorPicker value={color} onChange={setColor} />
             <div className="flex items-center gap-2">
+              <EditorCharacterCount editor={editor} />
               <NoteActionsMenu note={note} allFolders={allFolders} alwaysVisible />
               {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
             </div>

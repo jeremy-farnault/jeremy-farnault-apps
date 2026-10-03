@@ -13,6 +13,7 @@ import {
   cn,
 } from "@jf/ui";
 import {
+  EDITOR_PROSE_CLASS,
   FormattingToolbar,
   RichTextEditor,
   useRichTextEditor,
@@ -23,17 +24,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { TagField } from "./tag-field";
 
-// Editable-surface chrome layered on top of the shared editor's generic prose styling.
+// The card body's editable-surface chrome, composed with the shared prose styling.
 const CARD_EDITOR_CLASS = cn(
   "w-full min-h-[120px] rounded-[10px] bg-(--surface-150) px-3 py-2 text-sm outline-none",
-  "prose prose-sm max-w-none",
-  "[&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-1 [&_h1]:mt-2",
-  "[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-1 [&_h2]:mt-2",
-  "[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-1",
-  "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
-  "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0",
-  "[&_li]:my-0.5",
-  "[&_p]:my-0 [&_p:empty]:min-h-[1.25rem]"
+  EDITOR_PROSE_CLASS
 );
 
 export function CardDetailModal({
@@ -78,6 +72,7 @@ export function CardDetailModal({
     content: card.body,
     onChange: setBody,
     editorClass: CARD_EDITOR_CLASS,
+    placeholder: "Add a description…",
   });
 
   async function handleSave() {
@@ -158,7 +153,7 @@ export function CardDetailModal({
 
             <div className="flex flex-col gap-2">
               <span className="text-xs text-(--grey-500)">Description</span>
-              <RichTextEditor editor={editor} placeholder="Add a description…" />
+              <RichTextEditor editor={editor} />
               <FormattingToolbar editor={editor} />
             </div>
 

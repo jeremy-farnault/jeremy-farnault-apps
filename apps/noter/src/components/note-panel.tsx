@@ -9,7 +9,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "./color-picker";
-import { FormattingToolbar, RichTextEditor, useNoteEditor } from "./rich-text-editor";
+import {
+  EditorCharacterCount,
+  FormattingToolbar,
+  RichTextEditor,
+  useNoteEditor,
+} from "./rich-text-editor";
 
 type Props = {
   note: Note | null;
@@ -138,20 +143,19 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       </div>
       <RichTextEditor
         editor={editor}
-        placeholder="Write something…"
         containerClassName="flex-1 min-h-0 rounded-[10px] overflow-hidden sm:overflow-y-auto sm:min-h-[200px] sm:max-h-[60vh]"
         className="h-full overflow-y-auto sm:h-auto sm:min-h-[200px]"
       />
       <div className="shrink-0 flex flex-col gap-4">
         <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
-        <ColorPicker value={color} onChange={setColor} />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <ColorPicker value={color} onChange={setColor} />
+          <div className="flex items-center gap-2">
+            <EditorCharacterCount editor={editor} />
+            {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
+          </div>
+        </div>
       </div>
-      {isSaving && (
-        <CircleNotchIcon
-          size={14}
-          className="absolute bottom-6 right-6 animate-spin text-(--grey-400)"
-        />
-      )}
     </div>
   );
 
