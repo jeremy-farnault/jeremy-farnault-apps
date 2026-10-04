@@ -148,12 +148,12 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
       />
       <div className="shrink-0 flex flex-col gap-4">
         <FormattingToolbar editor={editor} noteId={noteId ?? ""} />
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <ColorPicker value={color} onChange={setColor} />
-          <div className="flex items-center gap-2">
-            <EditorCharacterCount editor={editor} />
-            {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
-          </div>
+        <ColorPicker value={color} onChange={setColor} />
+        {/* Its own row in the modal's bottom-right corner, clear of the colour swatches. The
+            saving spinner keeps it company, where it used to sit absolutely positioned. */}
+        <div className="flex items-center justify-end gap-2">
+          <EditorCharacterCount editor={editor} />
+          {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
         </div>
       </div>
     </div>
