@@ -1,7 +1,7 @@
 "use client";
 
 import { Tooltip } from "@jf/ui";
-import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useLayoutEffect, useRef } from "react";
 
 /**
  * A day with nothing in it is drawn as an outline rather than a grey fill, so the grid
@@ -53,8 +53,20 @@ function formatTooltipDate(dateStr: string): string {
 
 // ─── Color utilities ──────────────────────────────────────────────────────────
 
-function parseColorBase(colorVar: string): string {
-  return colorVar.match(/--([a-z]+)-\d+/)?.[1] ?? "grey";
+type ParsedColor = { hue: string; step: number };
+
+// "var(--green-600)" → { hue: "green", step: 600 }. The step is the shade picked, so a dark
+// variant has to keep it or it collapses into the light one.
+function parseColor(colorVar: string): ParsedColor {
+  const match = colorVar.match(/--([a-z]+)-(\d+)/);
+  if (!match?.[1] || !match[2]) return { hue: "grey", step: 400 };
+  return { hue: match[1], step: Number.parseInt(match[2], 10) };
+}
+
+// The numeric ramp runs 100–700 around a median of 400. Shift it so the median lands on the
+// picked step, clamped so the whole ramp stays within the 100–900 token scale.
+function rampOffset(pickedStep: number): number {
+  return Math.min(Math.max(pickedStep - 400, 0), 200);
 }
 
 function computeMedian(sorted: number[]): number {
@@ -155,26 +167,16 @@ export function HabitHeatmap({
   onMeasured,
 }: HabitHeatmapProps) {
   const today = toDateStr(new Date());
-  const colorBase = parseColorBase(color);
+  const { hue, step: pickedStep } = parseColor(color);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleWeekCount, setVisibleWeekCount] = useState<number | null>(null);
 
+  // Open scrolled to the right so today is in view; older weeks are a swipe away.
   // biome-ignore lint/correctness/useExhaustiveDependencies: runs once on mount; onMeasured is a one-shot callback
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    setVisibleWeekCount(Math.floor((el.getBoundingClientRect().width + 3) / 15));
+    el.scrollLeft = el.scrollWidth;
     onMeasured?.();
-  }, []);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setVisibleWeekCount(Math.floor((entry.contentRect.width + 3) / 15));
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
   }, []);
 
   const logMap = new Map(logs.map((l) => [l.date, l.value]));
@@ -204,14 +206,16 @@ export function HabitHeatmap({
     const logValue = logMap.get(date);
 
     if (type === "boolean") {
-      return logValue === "true" ? { backgroundColor: `var(--${colorBase}-400)` } : EMPTY_SQUARE;
+      return logValue === "true"
+        ? { backgroundColor: `var(--${hue}-${pickedStep})` }
+        : EMPTY_SQUARE;
     }
 
     if (logValue === undefined) return EMPTY_SQUARE;
     const v = parseLogValue(type, logValue);
     if (Number.isNaN(v)) return EMPTY_SQUARE;
-    const step = getNumericStep(v, numericMin, numericMedian, numericMax);
-    return { backgroundColor: `var(--${colorBase}-${step})` };
+    const step = getNumericStep(v, numericMin, numericMedian, numericMax) + rampOffset(pickedStep);
+    return { backgroundColor: `var(--${hue}-${step})` };
   }
 
   function getTooltipContent(date: string): string {
@@ -223,8 +227,7 @@ export function HabitHeatmap({
   }
 
   const weeks = buildWeekColumns(today);
-  const displayedWeeks = visibleWeekCount !== null ? weeks.slice(-visibleWeekCount) : weeks;
-  const monthLabels = buildMonthLabels(displayedWeeks);
+  const monthLabels = buildMonthLabels(weeks);
 
   return (
     <div className="flex items-start gap-2">
@@ -239,59 +242,61 @@ export function HabitHeatmap({
       </div>
 
       {/* Heatmap grid */}
-      <div className="overflow-hidden flex-1 min-w-0" ref={containerRef}>
-        {visibleWeekCount !== null && (
-          <div className="flex flex-col gap-1">
-            {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
-            <div className="relative h-[9px]" style={{ width: displayedWeeks.length * 15 - 3 }}>
-              {monthLabels.map((label, col) =>
-                label ? (
-                  <span
-                    key={label}
-                    className="absolute text-[9px] leading-none text-(--grey-400) whitespace-nowrap"
-                    style={{ left: col * 15 }}
-                  >
-                    {label}
-                  </span>
-                ) : null
-              )}
-            </div>
-
-            {/* Squares grid */}
-            <div className="flex gap-[3px]">
-              {displayedWeeks.map((week, col) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: week column position is the identity in the heatmap grid
-                <div key={col} className="flex flex-col gap-[3px]">
-                  {week.map((date, row) => {
-                    // biome-ignore lint/suspicious/noArrayIndexKey: row position is the identity; null cells have no date
-                    if (date === null) return <div key={row} className="size-3" />;
-
-                    const isBeforeStart = date < startDate;
-                    const isFuture = date > today;
-                    const squareStyle = getSquareStyle(date);
-                    const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
-
-                    return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: row position is the identity within the week column
-                      <Tooltip key={row} content={getTooltipContent(date)} side="top">
-                        <button
-                          type="button"
-                          className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
-                          style={{
-                            ...squareStyle,
-                            cursor: isInteractive ? "pointer" : "default",
-                          }}
-                          onClick={isInteractive ? () => onDayClick(date) : undefined}
-                          aria-label={getTooltipContent(date)}
-                        />
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+      <div
+        className="flex-1 min-w-0 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        ref={containerRef}
+      >
+        <div className="flex w-max flex-col gap-1">
+          {/* Month labels row — absolutely positioned so text isn't clipped by flex cells */}
+          <div className="relative h-[9px]" style={{ width: weeks.length * 15 - 3 }}>
+            {monthLabels.map((label, col) =>
+              label ? (
+                <span
+                  // biome-ignore lint/suspicious/noArrayIndexKey: a year-long grid can show the same month twice, so the column is the identity
+                  key={col}
+                  className="absolute text-[9px] leading-none text-(--grey-400) whitespace-nowrap"
+                  style={{ left: col * 15 }}
+                >
+                  {label}
+                </span>
+              ) : null
+            )}
           </div>
-        )}
+
+          {/* Squares grid */}
+          <div className="flex gap-[3px]">
+            {weeks.map((week, col) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: week column position is the identity in the heatmap grid
+              <div key={col} className="flex flex-col gap-[3px]">
+                {week.map((date, row) => {
+                  // biome-ignore lint/suspicious/noArrayIndexKey: row position is the identity; null cells have no date
+                  if (date === null) return <div key={row} className="size-3" />;
+
+                  const isBeforeStart = date < startDate;
+                  const isFuture = date > today;
+                  const squareStyle = getSquareStyle(date);
+                  const isInteractive = !isBeforeStart && !isFuture && !!onDayClick;
+
+                  return (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: row position is the identity within the week column
+                    <Tooltip key={row} content={getTooltipContent(date)} side="top">
+                      <button
+                        type="button"
+                        className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
+                        style={{
+                          ...squareStyle,
+                          cursor: isInteractive ? "pointer" : "default",
+                        }}
+                        onClick={isInteractive ? () => onDayClick(date) : undefined}
+                        aria-label={getTooltipContent(date)}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

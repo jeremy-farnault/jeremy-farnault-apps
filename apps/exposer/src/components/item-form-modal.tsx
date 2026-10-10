@@ -257,6 +257,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
         isOpen={isOpen}
         onClose={onClose}
         size="large"
+        fitMobileViewport
         title={isEdit ? "Edit post" : "New post"}
         closeOnBackdropClick={!busy}
         closeOnEscapeKeyDown={!busy}
@@ -370,7 +371,13 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
 
               {/* Date + visibility */}
               <div className="flex items-center justify-between gap-4">
-                <DatePicker value={date} onChange={setDate} disabled={busy} calendarAlign="start" />
+                <DatePicker
+                  value={date}
+                  onChange={setDate}
+                  disabled={busy}
+                  calendarAlign="start"
+                  className="min-w-0"
+                />
                 <Switch
                   checked={isPublic}
                   onCheckedChange={setIsPublic}
