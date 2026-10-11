@@ -1,6 +1,7 @@
 import { PersonJump } from "@/components/person-jump";
 import { UserMenuConnected } from "@/components/user-menu-connected";
-import { AppShell, TooltipProvider } from "@jf/ui";
+import { syncThemeCookie } from "@jf/auth/settings-actions";
+import { AppShell, ThemeSync, TooltipProvider } from "@jf/ui";
 import { AtomIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         startSlot={<PersonJump />}
         rightSlot={<UserMenuConnected />}
       >
+        <ThemeSync sync={syncThemeCookie} />
         {children}
       </AppShell>
     </TooltipProvider>

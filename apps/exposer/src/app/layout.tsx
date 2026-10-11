@@ -1,4 +1,6 @@
 import "@jf/ui/globals.css";
+import { syncThemeCookie } from "@jf/auth/settings-actions";
+import { ThemeScript, ThemeSync } from "@jf/ui";
 import "./globals.css";
 import { HeaderAuth } from "@/components/header-auth";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
@@ -87,7 +89,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#82499c" },
-    { media: "(prefers-color-scheme: dark)", color: "#82499c" },
+    { media: "(prefers-color-scheme: dark)", color: "#28282a" },
   ],
   viewportFit: "cover",
 };
@@ -99,6 +101,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
@@ -112,6 +117,7 @@ export default function RootLayout({
           {children}
         </AppShell>
         <ServiceWorkerRegister />
+        <ThemeSync sync={syncThemeCookie} />
       </body>
     </html>
   );

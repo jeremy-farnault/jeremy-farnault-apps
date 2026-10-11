@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "@jf/auth/client";
+import { setTheme } from "@jf/auth/settings-actions";
 import { UserMenu } from "@jf/ui";
 
 export function UserMenuConnected() {
@@ -20,6 +21,7 @@ export function UserMenuConnected() {
       name={session.user.name ?? undefined}
       {...(session.user.image ? { image: session.user.image } : {})}
       onLogout={handleLogout}
+      onThemeChange={setTheme}
     />
   );
 }

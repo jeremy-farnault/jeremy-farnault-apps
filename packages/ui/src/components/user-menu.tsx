@@ -3,7 +3,9 @@
 import { GearSixIcon, InfinityIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
+import type { Theme } from "../lib/theme";
 import { cn } from "../lib/utils";
+import { ThemeToggle } from "./theme-toggle";
 
 const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:3014";
 
@@ -13,9 +15,21 @@ interface UserMenuProps {
   image?: string;
   settingsHref?: string;
   onLogout: () => void;
+  /**
+   * Saves a theme preference (`setTheme` from `@jf/auth/settings-actions`). When given, the
+   * menu shows the Light / Dark / System control.
+   */
+  onThemeChange?: (theme: Theme) => Promise<void>;
 }
 
-export function UserMenu({ email, name, image, settingsHref, onLogout }: UserMenuProps) {
+export function UserMenu({
+  email,
+  name,
+  image,
+  settingsHref,
+  onLogout,
+  onThemeChange,
+}: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
 
@@ -55,6 +69,12 @@ export function UserMenu({ email, name, image, settingsHref, onLogout }: UserMen
             "outline-none min-w-[140px]"
           )}
         >
+          {onThemeChange && (
+            <>
+              <ThemeToggle onChange={onThemeChange} />
+              <div className="mx-2 my-1 h-px bg-(--border)" aria-hidden />
+            </>
+          )}
           {settingsHref && (
             <a
               href={settingsHref}

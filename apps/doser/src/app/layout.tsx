@@ -1,9 +1,9 @@
 import "@jf/ui/globals.css";
+import { ThemeScript, ThemedToaster } from "@jf/ui";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#eb7f00" },
-    { media: "(prefers-color-scheme: dark)", color: "#eb7f00" },
+    { media: "(prefers-color-scheme: dark)", color: "#28282a" },
   ],
   viewportFit: "cover",
 };
@@ -93,11 +93,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         {children}
-        <Toaster
+        <ThemedToaster
           position="bottom-right"
           toastOptions={{ classNames: { toast: "!left-auto !right-8 !w-fit" } }}
         />

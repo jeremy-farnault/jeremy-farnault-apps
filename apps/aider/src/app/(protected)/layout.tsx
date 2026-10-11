@@ -3,7 +3,8 @@ import { SidebarShell } from "@/components/sidebar-shell";
 import { UserMenuConnected } from "@/components/user-menu-connected";
 import { listConversations } from "@/lib/queries";
 import { auth } from "@jf/auth";
-import { AppShell, TooltipProvider } from "@jf/ui";
+import { syncThemeCookie } from "@jf/auth/settings-actions";
+import { AppShell, ThemeSync, TooltipProvider } from "@jf/ui";
 import { RobotIcon } from "@phosphor-icons/react/dist/ssr";
 import { headers } from "next/headers";
 
@@ -22,7 +23,10 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           rightSlot={<UserMenuConnected />}
           fullHeight
         >
-          <SidebarShell>{children}</SidebarShell>
+          <SidebarShell>
+            <ThemeSync sync={syncThemeCookie} />
+            {children}
+          </SidebarShell>
         </AppShell>
       </TooltipProvider>
     </SidebarProvider>

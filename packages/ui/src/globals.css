@@ -20,6 +20,18 @@
     transition-duration: 300ms;
   }
 
+  /*
+   * Set by the theme runtime for the two frames of a theme switch, so the whole page changes
+   * at once instead of animating every element. `!important` so it also beats the transitions
+   * components declare themselves.
+   */
+  html[data-theme-switching],
+  html[data-theme-switching] *,
+  html[data-theme-switching] *::before,
+  html[data-theme-switching] *::after {
+    transition: none !important;
+  }
+
   @keyframes modal-in {
     from {
       transform: translateY(16px);
@@ -207,55 +219,238 @@
     --moss-800: #324d44;
     --moss-900: #1e2e29;
 
-    /* Surface */
+    /* Surface — translucent layers, stacked over the page. Dark ink here, light ink in .dark. */
     --surface-100: #22222608;
     --surface-150: #2222260f;
     --surface-175: #22222610;
     --surface-200: #2222261f;
     --surface-300: #22222633;
-    --surface: #222226;
 
-    /* Semantic aliases */
+    /*
+     * Roles — what a colour is *for*, not which shade it is. Build new UI on these and it
+     * works in both modes with no `dark:` variants. Each role has a light value here (the
+     * shade it replaces, so light mode looks unchanged) and a dark value in `.dark`. Reach
+     * for a raw palette shade only where a colour must stay the same in both modes.
+     *
+     *   --text            body text, headings, icons
+     *   --text-muted      secondary text: metadata, captions, placeholders
+     *   --text-subtle     tertiary text: hints, disabled labels, axis ticks
+     *   --text-inverse    text on a --text-coloured fill (tooltips, dark chips)
+     *   --text-on-strong-hue  text on a hue shade that is dark in light mode but light in
+     *                     dark mode (the blue/purple/red -600 swatches, the -700 row)
+     *   --surface         the page itself — the opaque canvas the translucent layers sit on
+     *   --surface-raised  opaque surfaces above the page: cards, popovers, menus, dialogs
+     *   --surface-sunken  wells set into a raised surface: hover fills, skeletons, inputs
+     *   --border          default dividers and outlines
+     *   --border-strong   outlines that must read clearly: focused or checked controls
+     *   --shadow-raised   resting lift of a card (`card-raised`)
+     *   --shadow-lifted   hovered lift of a card (`card-hover-lift`)
+     */
+    --text: var(--grey-900);
+    --text-muted: var(--grey-500);
+    --text-subtle: var(--grey-400);
+    --text-inverse: var(--grey-100);
+    --text-on-strong-hue: var(--grey-100);
+    --surface: #ffffff;
+    --surface-raised: var(--moleskine-100);
+    --surface-sunken: var(--grey-150);
+    --border: var(--grey-200);
+    --border-strong: var(--grey-300);
+    --shadow-raised: 0 1px 2px #2222261a, 0 3px 8px #22222614;
+    --shadow-lifted: 0 2px 4px #2222261a, 0 8px 18px #2222261f;
+
+    /* Semantic aliases (shadcn-style) — they point at roles, so they follow the theme. */
     --radius: 0.625rem;
-    --background: var(--beige-200);
-    --foreground: var(--grey-900);
-    --card: var(--moleskine-100);
-    --card-foreground: var(--grey-900);
-    --popover: var(--moleskine-100);
-    --popover-foreground: var(--grey-900);
+    --background: var(--surface);
+    --foreground: var(--text);
+    --card: var(--surface-raised);
+    --card-foreground: var(--text);
+    --popover: var(--surface-raised);
+    --popover-foreground: var(--text);
     --primary: var(--magenta-400);
     --primary-foreground: var(--grey-900);
     --secondary: var(--magenta-600);
     --secondary-foreground: var(--grey-100);
-    --muted: var(--grey-150);
-    --muted-foreground: var(--grey-500);
-    --accent: var(--grey-150);
-    --accent-foreground: var(--grey-900);
+    --muted: var(--surface-sunken);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--surface-sunken);
+    --accent-foreground: var(--text);
     --destructive: var(--red-500);
-    --border: var(--grey-200);
-    --input: var(--grey-200);
+    --input: var(--border);
     --ring: var(--magenta-400);
   }
 
+  /*
+   * Dark values are literal colours, not palette references: the hue scales flip too, and a
+   * role built on a shade that flips would flip twice.
+   *
+   * Hue scales — stored colours are `var(--hue-N)` strings, so these adapt with no data
+   * migration. The scale is split by what each level is used for, not kept in light order:
+   *
+   *   100–150  deep washes: a tinted panel sits just above the card instead of glaring.
+   *   200–400  fills that carry dark text (highlights, tags, accents): deeper and duller
+   *            than in light, each still at least 4.5:1 against --grey-900.
+   *   500–900  ink: error text (red-500/600), the -700 text-colour row and the -800
+   *            secondaries have to read *on* a dark card, so they turn into lighter tints,
+   *            lightest at 900. A -600 "dark" swatch therefore turns lighter than its -400
+   *            and takes dark text in dark mode — see `--text-on-strong-hue`.
+   *
+   * Each value keeps its light hue (OKLCH), at 0.3–0.7× its chroma, tuned to a target
+   * luminance per level. Contrast is recorded next to the palette in `lib/color-palette.ts`.
+   */
   .dark {
-    --background: oklch(14.5% 0 0);
-    --foreground: oklch(98.5% 0 0);
-    --card: oklch(20.5% 0 0);
-    --card-foreground: oklch(98.5% 0 0);
-    --popover: oklch(20.5% 0 0);
-    --popover-foreground: oklch(98.5% 0 0);
-    --primary: oklch(98.5% 0 0);
-    --primary-foreground: oklch(20.5% 0 0);
-    --secondary: oklch(26.9% 0 0);
-    --secondary-foreground: oklch(98.5% 0 0);
-    --muted: oklch(26.9% 0 0);
-    --muted-foreground: oklch(70.8% 0 0);
-    --accent: oklch(26.9% 0 0);
-    --accent-foreground: oklch(98.5% 0 0);
-    --destructive: oklch(57.7% 0.245 27.325);
-    --border: oklch(26.9% 0 0);
-    --input: oklch(26.9% 0 0);
-    --ring: oklch(55.6% 0 0);
+    /* Yellow */
+    --yellow-100: #483520;
+    --yellow-200: #d0b08a;
+    --yellow-300: #cc9e6c;
+    --yellow-400: #c08f59;
+    --yellow-500: #c4925c;
+    --yellow-600: #d0a16f;
+    --yellow-700: #d9b68d;
+    --yellow-800: #e2cbb1;
+    --yellow-900: #efdecc;
+
+    /* Moleskine */
+    --moleskine-100: #3a3837;
+    --moleskine-150: #413f3e;
+    --moleskine-200: #b4b2b0;
+    --moleskine-300: #a19c9b;
+    --moleskine-400: #8f8a89;
+    --moleskine-500: #a09a99;
+    --moleskine-600: #ada9a7;
+    --moleskine-700: #bebbba;
+    --moleskine-800: #d0cece;
+    --moleskine-900: #e2e0e0;
+
+    /* Taupe */
+    --taupe-100: #3c3737;
+    --taupe-150: #443e3e;
+    --taupe-200: #aca5a4;
+    --taupe-300: #a09594;
+    --taupe-400: #958988;
+    --taupe-500: #a59998;
+    --taupe-600: #b3a7a6;
+    --taupe-700: #c2bab9;
+    --taupe-800: #d3cdcd;
+    --taupe-900: #e4e0e0;
+
+    /* Beige */
+    --beige-100: #3b3834;
+    --beige-150: #423f3a;
+    --beige-200: #b7b2ac;
+    --beige-300: #a49d95;
+    --beige-400: #918b81;
+    --beige-500: #a29b91;
+    --beige-600: #afa9a0;
+    --beige-700: #c0bbb4;
+    --beige-800: #d1ceca;
+    --beige-900: #e2e0dd;
+
+    /* Green */
+    --green-100: #2b3c36;
+    --green-200: #9ebcb1;
+    --green-300: #86afa0;
+    --green-400: #75a191;
+    --green-500: #79a595;
+    --green-600: #89b2a3;
+    --green-700: #a2c3b7;
+    --green-800: #bfd3cc;
+    --green-900: #d5e4df;
+
+    /* Red */
+    --red-100: #493332;
+    --red-200: #c5a1a0;
+    --red-300: #bf8a89;
+    --red-400: #b57d7c;
+    --red-500: #c68d8c;
+    --red-600: #d29c9b;
+    --red-700: #dab2b2;
+    --red-800: #e1c9c9;
+    --red-900: #eedddd;
+
+    /* Magenta */
+    --magenta-100: #49313f;
+    --magenta-200: #c29ab1;
+    --magenta-300: #bf86a7;
+    --magenta-400: #b6799c;
+    --magenta-500: #c789ac;
+    --magenta-600: #d399ba;
+    --magenta-700: #dcafc9;
+    --magenta-800: #e3c7d8;
+    --magenta-900: #f0dbe8;
+
+    /* Purple */
+    --purple-100: #3f3545;
+    --purple-200: #b3a0bb;
+    --purple-300: #a88eb4;
+    --purple-400: #9d82ab;
+    --purple-500: #ad92bb;
+    --purple-600: #baa1c8;
+    --purple-700: #c9b5d3;
+    --purple-800: #d7cade;
+    --purple-900: #e7ddec;
+
+    /* Blue */
+    --blue-100: #313849;
+    --blue-200: #9aa5c1;
+    --blue-300: #8797be;
+    --blue-400: #7a8bb5;
+    --blue-500: #8a9bc6;
+    --blue-600: #99aad2;
+    --blue-700: #afbcda;
+    --blue-800: #c7cfe2;
+    --blue-900: #dbe1ef;
+
+    /* Teal */
+    --teal-100: #2c3b3f;
+    --teal-200: #9cb5bd;
+    --teal-300: #82a4af;
+    --teal-400: #6e929f;
+    --teal-500: #7da1ae;
+    --teal-600: #8dafbb;
+    --teal-700: #a5c0c9;
+    --teal-800: #c0d2d7;
+    --teal-900: #d6e3e7;
+
+    /* Moss */
+    --moss-100: #313a37;
+    --moss-200: #a4b4ae;
+    --moss-300: #8da39b;
+    --moss-400: #7a9189;
+    --moss-500: #89a198;
+    --moss-600: #98afa6;
+    --moss-700: #aebfb9;
+    --moss-800: #c6d1cd;
+    --moss-900: #dbe2df;
+
+    --surface-100: #ffffff05;
+    --surface-150: #ffffff0a;
+    --surface-175: #ffffff0b;
+    --surface-200: #ffffff14;
+    --surface-300: #ffffff24;
+
+    --text: #edeff0;
+    --text-muted: #a0a2a6;
+    --text-subtle: #86868d;
+    --text-inverse: #222226;
+    --text-on-strong-hue: #222226;
+    --surface: #161618;
+    --surface-raised: #2e2e33;
+    --surface-sunken: #1f1f23;
+    --border: #3a3a41;
+    --border-strong: #53535a;
+    --shadow-raised: 0 1px 2px #0000004d, 0 3px 8px #00000040;
+    --shadow-lifted: 0 2px 4px #0000004d, 0 8px 18px #00000059;
+  }
+
+  html {
+    background-color: var(--surface);
+    color: var(--text);
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 }
 
@@ -267,7 +462,7 @@
  * stays off the image edge on poster cards.
  */
 @utility card-raised {
-  box-shadow: 0 1px 2px #2222261a, 0 3px 8px #22222614;
+  box-shadow: var(--shadow-raised);
 }
 
 /*
@@ -283,7 +478,7 @@
   @media (hover: hover) {
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 2px 4px #2222261a, 0 8px 18px #2222261f;
+      box-shadow: var(--shadow-lifted);
     }
   }
 }

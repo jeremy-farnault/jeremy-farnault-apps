@@ -1,5 +1,6 @@
 import { UserMenuConnected } from "@/components/user-menu-connected";
-import { AppSwitcher, TooltipProvider } from "@jf/ui";
+import { syncThemeCookie } from "@jf/auth/settings-actions";
+import { AppSwitcher, ThemeSync, TooltipProvider } from "@jf/ui";
 import { MapTrifoldIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             <UserMenuConnected />
           </div>
         </header>
+        <ThemeSync sync={syncThemeCookie} />
         {children}
       </div>
     </TooltipProvider>

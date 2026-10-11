@@ -14,20 +14,37 @@
     "./handle": {
       "types": "./src/handle.ts",
       "import": "./src/handle.ts"
+    },
+    "./settings": {
+      "types": "./src/settings.ts",
+      "import": "./src/settings.ts"
+    },
+    "./settings-actions": {
+      "types": "./src/settings-actions.ts",
+      "import": "./src/settings-actions.ts"
     }
   },
   "scripts": {
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@jf/db": "workspace:*",
+    "@jf/ui": "workspace:*",
     "better-auth": "^1.2.0",
+    "drizzle-orm": "^0.45.2",
     "resend": "^4.0.0"
+  },
+  "peerDependencies": {
+    "next": ">=15.0.0"
   },
   "devDependencies": {
     "@jf/config": "workspace:*",
-    "typescript": "^5.7.0"
+    "@jf/testing": "workspace:*",
+    "next": "^15.2.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }
