@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="flex w-full flex-1 flex-col gap-8 px-4 py-8">
-      <h1 className="text-xl font-semibold text-(--grey-900)">Settings</h1>
+      <h1 className="text-xl font-semibold text-(--text)">Settings</h1>
       <HandleSettings currentHandle={sessionUser.handle ?? ""} />
       <TagSettings initialTags={tags} />
     </main>

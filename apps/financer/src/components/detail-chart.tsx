@@ -53,15 +53,17 @@ function DetailTooltip({
       style={{
         fontSize: 11,
         borderRadius: 12,
-        backgroundColor: "var(--grey-700)",
+        backgroundColor: "var(--text-secondary)",
         padding: "8px 12px",
       }}
     >
-      <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
+      <p style={{ color: "var(--text-inverse)", margin: "0 0 4px 0" }}>
+        {formatMonthLabel(label ?? "")}
+      </p>
       {items.map((item) => (
         <div
           key={item.dataKey}
-          style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-inverse)" }}
         >
           <span
             style={{
@@ -146,8 +148,8 @@ export function DetailChart({
   if (!series.length) {
     return (
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">{title}</h3>
-        <p className="text-sm text-(--grey-400)">No data yet.</p>
+        <h3 className="text-sm font-medium text-(--text-secondary)">{title}</h3>
+        <p className="text-sm text-(--text-subtle)">No data yet.</p>
       </div>
     );
   }
@@ -169,25 +171,25 @@ export function DetailChart({
     return row;
   });
 
-  const axisTickProps = { fontSize: 10, fill: "var(--grey-400)" };
+  const axisTickProps = { fontSize: 10, fill: "var(--text-subtle)" };
   const selectedSeries = series.filter((s) => selected.has(s.name));
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-medium text-(--grey-600)">{title}</h3>
+        <h3 className="text-sm font-medium text-(--text-secondary)">{title}</h3>
         <div className="flex items-center gap-3 text-xs">
           <button
             type="button"
             onClick={() => setSelected(new Set(series.map((s) => s.name)))}
-            className="text-(--grey-500) hover:text-(--grey-800) transition-colors"
+            className="text-(--text-muted) hover:text-(--text) transition-colors"
           >
             Select all
           </button>
           <button
             type="button"
             onClick={() => setSelected(new Set())}
-            className="text-(--grey-500) hover:text-(--grey-800) transition-colors"
+            className="text-(--text-muted) hover:text-(--text) transition-colors"
           >
             Clear
           </button>
@@ -206,8 +208,8 @@ export function DetailChart({
               className={cn(
                 "flex items-center gap-2 h-8 px-3 rounded-full text-xs font-medium border transition-colors",
                 active
-                  ? "border-(--grey-300) bg-(--surface-200) text-(--grey-800)"
-                  : "border-transparent bg-(--surface-150) text-(--grey-400) hover:text-(--grey-600)"
+                  ? "border-(--border-strong) bg-(--surface-200) text-(--text)"
+                  : "border-transparent bg-(--surface-150) text-(--text-subtle) hover:text-(--text-secondary)"
               )}
             >
               <span
@@ -226,12 +228,12 @@ export function DetailChart({
       </div>
 
       {selectedSeries.length === 0 ? (
-        <p className="text-sm text-(--grey-400)">Select an item to see its trend.</p>
+        <p className="text-sm text-(--text-subtle)">Select an item to see its trend.</p>
       ) : (
         <>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+              <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis
                 dataKey="month"
                 tickFormatter={formatMonthLabel}
@@ -279,25 +281,25 @@ export function DetailChart({
                   key={s.name}
                   className="flex flex-col gap-1 rounded-[12px] bg-(--surface-150) px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="flex items-center gap-2 text-sm font-medium text-(--grey-800)">
+                  <div className="flex items-center gap-2 text-sm font-medium text-(--text)">
                     <span
                       className="inline-block rounded-full"
                       style={{ width: 8, height: 8, backgroundColor: s.color }}
                     />
                     {s.name}
                   </div>
-                  <div className="flex gap-4 text-xs text-(--grey-600)">
+                  <div className="flex gap-4 text-xs text-(--text-secondary)">
                     <span>
-                      <span className="text-(--grey-400)">Min</span> {formatStat(min)}
+                      <span className="text-(--text-subtle)">Min</span> {formatStat(min)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Max</span> {formatStat(max)}
+                      <span className="text-(--text-subtle)">Max</span> {formatStat(max)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Avg</span> {formatStat(avg)}
+                      <span className="text-(--text-subtle)">Avg</span> {formatStat(avg)}
                     </span>
                     <span>
-                      <span className="text-(--grey-400)">Latest</span> {formatStat(latest)}
+                      <span className="text-(--text-subtle)">Latest</span> {formatStat(latest)}
                     </span>
                   </div>
                 </div>

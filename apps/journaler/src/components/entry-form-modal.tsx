@@ -190,19 +190,22 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
               type="button"
               onClick={onClose}
               aria-label="Close dialog"
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--text-muted) hover:text-(--text)"
             >
               <XIcon size={16} weight="bold" />
             </button>
 
-            <Dialog.Title className="mb-6 text-base font-semibold text-(--grey-900)">
+            <Dialog.Title className="mb-6 text-base font-semibold text-(--text)">
               {isEdit ? "Edit entry" : "Log entry"}
             </Dialog.Title>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Title */}
               <div className="flex flex-col gap-1">
-                <label htmlFor="entry-title" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="entry-title"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Title
                 </label>
                 <TextInput
@@ -218,7 +221,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
               {/* Category + Date row */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-(--grey-700)">Category</p>
+                  <p className="text-sm font-medium text-(--text-secondary)">Category</p>
                   <Select
                     value={form.category}
                     onValueChange={(v) => setField("category", v as EntryCategory)}
@@ -235,7 +238,10 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="entry-date" className="text-sm font-medium text-(--grey-700)">
+                  <label
+                    htmlFor="entry-date"
+                    className="text-sm font-medium text-(--text-secondary)"
+                  >
                     Date
                   </label>
                   <DatePicker
@@ -250,7 +256,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
 
               {/* Rating */}
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-(--grey-700)">Rating</p>
+                <p className="text-sm font-medium text-(--text-secondary)">Rating</p>
                 <div className="flex gap-1">
                   {RATINGS.map((r) => (
                     <button
@@ -260,8 +266,8 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                       onClick={() => setField("rating", form.rating === r ? "none" : r)}
                       className={`flex flex-1 items-center justify-center rounded-[8px] py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         form.rating === r
-                          ? "bg-(--grey-900) text-white"
-                          : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+                          ? "bg-(--text) text-(--text-inverse)"
+                          : "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200)"
                       }`}
                     >
                       {r}
@@ -272,7 +278,10 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
 
               {/* Comment */}
               <div className="flex flex-col gap-1">
-                <label htmlFor="entry-comment" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="entry-comment"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Comment
                 </label>
                 <Textarea
@@ -286,7 +295,10 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
 
               {/* Image */}
               <div className="flex flex-col gap-2">
-                <label htmlFor="entry-image" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="entry-image"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Image
                 </label>
                 {previewUrl ? (
@@ -302,6 +314,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                       onClick={handleRemoveImage}
                       disabled={submitting}
                       aria-label="Remove image"
+                      // dark-mode-fixed: a scrim chip over the image preview, in both modes.
                       className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
                     >
                       <XIcon size={14} weight="bold" />
@@ -315,7 +328,7 @@ export function EntryFormModal({ isOpen, onClose, onSuccess, entry }: Props) {
                     accept="image/*"
                     disabled={submitting}
                     onChange={handleFileChange}
-                    className="text-sm text-(--grey-700) file:mr-3 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--grey-900) file:cursor-pointer hover:file:bg-(--surface-200)"
+                    className="text-sm text-(--text-secondary) file:mr-3 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--text) file:cursor-pointer hover:file:bg-(--surface-200)"
                   />
                 )}
               </div>

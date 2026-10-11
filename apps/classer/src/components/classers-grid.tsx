@@ -184,7 +184,7 @@ export function ClassersGrid({ initialClassers, initialNextCursor, sort }: Props
 
         {(loading || searchLoading) && (
           <div className="flex justify-center pt-6">
-            <p className="text-sm text-(--grey-400)">Loading…</p>
+            <p className="text-sm text-(--text-subtle)">Loading…</p>
           </div>
         )}
       </div>

@@ -270,7 +270,7 @@ export function ChatShell({
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-2xl mx-auto">
       <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto py-4 flex flex-col gap-3">
         {messages.length === 0 ? (
-          <p className="m-auto text-center text-sm text-(--grey-400)">
+          <p className="m-auto text-center text-sm text-(--text-subtle)">
             {userName ? `Hi ${userName}, ask` : "Ask"} me anything.
           </p>
         ) : (
@@ -284,7 +284,7 @@ export function ChatShell({
               }
             >
               {message.tool && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--grey-500)">
+                <span className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--text-muted)">
                   <span aria-hidden>🔧</span>
                   {toolChipText(message.tool)}
                 </span>
@@ -292,7 +292,7 @@ export function ChatShell({
               <div
                 className={
                   message.role === "user"
-                    ? "rounded-[12px] bg-(--primary) px-3 py-2 text-sm"
+                    ? "rounded-[12px] bg-(--primary) px-3 py-2 text-sm text-(--primary-foreground)"
                     : "rounded-[12px] bg-(--surface-150) px-3 py-2 text-sm"
                 }
               >

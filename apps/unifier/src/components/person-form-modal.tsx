@@ -167,7 +167,7 @@ export function PersonFormModal({ arcs, person, isOpen, onClose, onSubmit, onDel
                   onClick={removeImage}
                   disabled={submitting}
                   aria-label="Remove photo"
-                  className="absolute -top-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-(--grey-900) text-white transition-transform active:scale-90 disabled:opacity-50"
+                  className="absolute -top-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-(--text) text-(--text-inverse) transition-transform active:scale-90 disabled:opacity-50"
                 >
                   <XIcon size={12} weight="bold" />
                 </button>
@@ -182,7 +182,7 @@ export function PersonFormModal({ arcs, person, isOpen, onClose, onSubmit, onDel
                 disabled={submitting}
                 onChange={handleFile}
                 aria-label="Choose a photo"
-                className="text-xs text-(--grey-500) file:mr-2 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-2 file:py-1 file:text-xs file:text-(--grey-700)"
+                className="text-xs text-(--text-muted) file:mr-2 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-2 file:py-1 file:text-xs file:text-(--text-secondary)"
               />
             </div>
           </div>
@@ -201,7 +201,7 @@ export function PersonFormModal({ arcs, person, isOpen, onClose, onSubmit, onDel
               is a photo — picking it then would change nothing visible. */}
           {!previewUrl && (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium text-(--grey-500)">Bubble colour</span>
+              <span className="text-xs font-medium text-(--text-muted)">Bubble colour</span>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -211,7 +211,7 @@ export function PersonFormModal({ arcs, person, isOpen, onClose, onSubmit, onDel
                   style={{ backgroundColor: arc?.color ?? "var(--primary)" }}
                   className={
                     color === null
-                      ? "h-6 w-6 shrink-0 rounded-full outline-2 outline-(--grey-900) outline-offset-2"
+                      ? "h-6 w-6 shrink-0 rounded-full outline-2 outline-(--text) outline-offset-2"
                       : "h-6 w-6 shrink-0 rounded-full opacity-60"
                   }
                 />
@@ -232,8 +232,8 @@ export function PersonFormModal({ arcs, person, isOpen, onClose, onSubmit, onDel
               disabled={submitting}
               className={
                 confirmingDelete
-                  ? "flex min-h-11 items-center gap-2 self-start rounded-[10px] bg-(--red-500) px-3 text-sm font-medium text-white active:scale-95 disabled:opacity-50"
-                  : "flex min-h-11 items-center gap-2 self-start rounded-[10px] px-3 text-sm text-(--grey-500) transition-colors hover:bg-(--surface-150) hover:text-(--red-500) disabled:opacity-50"
+                  ? "flex min-h-11 items-center gap-2 self-start rounded-[10px] bg-(--red-500) px-3 text-sm font-medium text-(--text-on-strong-hue) active:scale-95 disabled:opacity-50"
+                  : "flex min-h-11 items-center gap-2 self-start rounded-[10px] px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-150) hover:text-(--red-500) disabled:opacity-50"
               }
             >
               <TrashIcon size={16} />

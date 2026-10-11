@@ -48,7 +48,7 @@ export function SearchInput({
             onImmediateChange?.("");
             onDebouncedChange("");
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-(--grey-400) hover:text-(--grey-700)"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-subtle) hover:text-(--text-secondary)"
           aria-label="Clear search"
         >
           <XIcon size={14} />

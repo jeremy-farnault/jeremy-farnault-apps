@@ -82,7 +82,7 @@ function TimeScrollPanel({
             <span
               className={cn(
                 "text-xs font-medium",
-                h === hour ? "text-(--dt-accent-fg)" : "text-(--grey-850)"
+                h === hour ? "text-(--dt-accent-fg)" : "text-(--text)"
               )}
             >
               {h.toString().padStart(2, "0")}
@@ -94,7 +94,7 @@ function TimeScrollPanel({
 
       <div
         ref={minuteScrollRef}
-        className="relative flex w-11 flex-col border-l border-(--grey-200) p-1 [scrollbar-width:none] overflow-y-scroll max-h-[358px] [&::-webkit-scrollbar]:hidden"
+        className="relative flex w-11 flex-col border-l border-(--border) p-1 [scrollbar-width:none] overflow-y-scroll max-h-[358px] [&::-webkit-scrollbar]:hidden"
       >
         <div style={{ height: SPACER_HEIGHT, flexShrink: 0 }} />
         {MINUTE_OPTIONS.map((m) => (
@@ -112,7 +112,7 @@ function TimeScrollPanel({
             <span
               className={cn(
                 "text-xs font-medium",
-                m === minute ? "text-(--dt-accent-fg)" : "text-(--grey-850)"
+                m === minute ? "text-(--dt-accent-fg)" : "text-(--text)"
               )}
             >
               {m.toString().padStart(2, "0")}
@@ -248,11 +248,11 @@ export function TimeInput({
             "bg-(--surface-150) px-3 text-sm",
             "hover:bg-(--surface-200) focus:outline-none focus:ring-0",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-            formatted ? "text-(--grey-900)" : "text-(--grey-500)"
+            formatted ? "text-(--text)" : "text-(--text-muted)"
           )}
         >
           <span>{formatted ?? placeholder}</span>
-          <ClockIcon size={16} className="shrink-0 text-(--grey-700)" />
+          <ClockIcon size={16} className="shrink-0 text-(--text-secondary)" />
         </button>
       </PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>

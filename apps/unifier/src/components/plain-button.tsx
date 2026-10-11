@@ -13,8 +13,8 @@ export function PlainButton({ className, ...props }: ComponentProps<"button">) {
       type="button"
       className={cn(
         "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] px-3 text-sm",
-        "bg-(--surface-150) text-(--grey-700) transition-colors",
-        "hover:bg-(--surface-200) hover:text-(--grey-900)",
+        "bg-(--surface-150) text-(--text-secondary) transition-colors",
+        "hover:bg-(--surface-200) hover:text-(--text)",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}

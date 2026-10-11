@@ -35,6 +35,7 @@ export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive }: 
                 type="button"
                 onClick={onEdit}
                 aria-label="Edit classer"
+                // dark-mode-fixed: a dark chip over the cover image or colour, in both modes.
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) hover:bg-(--grey-700) text-white"
               >
                 <PencilSimpleIcon size={14} />
@@ -45,6 +46,7 @@ export function ClasserActionsMenu({ classer, menuVisible, onEdit, onArchive }: 
                 type="button"
                 onClick={() => setArchiveOpen(true)}
                 aria-label="Archive classer"
+                // dark-mode-fixed: a dark chip over the cover image or colour, in both modes.
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) hover:bg-(--grey-700) text-white"
               >
                 <ArchiveIcon size={14} />

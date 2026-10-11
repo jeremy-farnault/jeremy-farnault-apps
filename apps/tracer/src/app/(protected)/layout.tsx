@@ -12,7 +12,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             href="/"
             className="flex items-center gap-2 text-l font-semibold text-(--primary-foreground) hover:opacity-80 transition-opacity bg-(--primary) px-4 py-1 rounded-xl"
           >
-            <MapTrifoldIcon className="text-white" size={32} />
+            <MapTrifoldIcon size={32} />
             Tracer
           </a>
           <div className="flex items-center gap-2">

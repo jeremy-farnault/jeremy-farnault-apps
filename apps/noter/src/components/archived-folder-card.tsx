@@ -44,18 +44,18 @@ export function ArchivedFolderCard({ folder }: Props) {
   }
 
   const iconBtnClass =
-    "flex h-7 w-7 items-center justify-center rounded-lg bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)";
+    "flex h-7 w-7 items-center justify-center rounded-lg bg-(--surface-150) hover:bg-(--surface-200) text-(--text-secondary)";
 
   return (
     <>
       <div
-        className="relative flex h-[150px] flex-col rounded-[22px] border border-(--grey-200) bg-(--surface-150) p-4 shadow-sm hover:bg-(--surface-200)"
+        className="relative flex h-[150px] flex-col rounded-[22px] border border-(--border) bg-(--surface-150) p-4 shadow-sm hover:bg-(--surface-200)"
         style={{ opacity: isPending ? 0.5 : 1 }}
       >
         <div className="flex flex-1 flex-col">
           <div className="flex items-center gap-2">
-            <FolderIcon size={20} className="shrink-0 text-(--grey-700)" />
-            <span className="text-sm font-semibold text-(--grey-900) truncate">{folder.name}</span>
+            <FolderIcon size={20} className="shrink-0 text-(--text-secondary)" />
+            <span className="text-sm font-semibold text-(--text) truncate">{folder.name}</span>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export function ArchivedFolderCard({ folder }: Props) {
                 setMenuOpen((o) => !o);
               }}
               aria-label="Folder actions"
-              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-200) text-(--grey-700)"
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-(--surface-200) text-(--text-secondary)"
             >
               <DotsThreeVerticalIcon size={16} />
             </button>

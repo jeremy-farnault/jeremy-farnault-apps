@@ -54,7 +54,7 @@ export function HabitsFilterBar({
             <Link
               href="/archive"
               title="Archive"
-              className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
             >
               <ArchiveIcon size={20} />
             </Link>
@@ -67,8 +67,8 @@ export function HabitsFilterBar({
               onClick={() => onViewModeChange("heatmap")}
               className={`flex h-11 w-11 items-center justify-center rounded-[10px] ${
                 viewMode === "heatmap"
-                  ? "bg-(--surface-200) text-(--grey-900)"
-                  : "text-(--grey-600) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                  ? "bg-(--surface-200) text-(--text)"
+                  : "text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
               }`}
             >
               <GridFourIcon size={18} />
@@ -80,8 +80,8 @@ export function HabitsFilterBar({
               onClick={() => onViewModeChange("chart")}
               className={`flex h-11 w-11 items-center justify-center rounded-[10px] ${
                 viewMode === "chart"
-                  ? "bg-(--surface-200) text-(--grey-900)"
-                  : "text-(--grey-600) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                  ? "bg-(--surface-200) text-(--text)"
+                  : "text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
               }`}
             >
               <ChartLineIcon size={18} />
@@ -93,7 +93,7 @@ export function HabitsFilterBar({
       {viewMode === "chart" && (
         <div className="flex flex-row flex-wrap gap-x-4 gap-y-2">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-(--grey-500)">From</span>
+            <span className="text-xs text-(--text-muted)">From</span>
             <div className="w-full max-w-[284px]">
               <DatePicker
                 value={dateRange.from}
@@ -103,7 +103,7 @@ export function HabitsFilterBar({
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-(--grey-500)">To</span>
+            <span className="text-xs text-(--text-muted)">To</span>
             <div className="w-full max-w-[284px]">
               <DatePicker
                 value={dateRange.to}

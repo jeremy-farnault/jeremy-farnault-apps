@@ -18,7 +18,7 @@ export default async function AppShowcasePage({
       <div className="mb-4 w-full max-w-[860px]">
         <Link
           href="/"
-          className="inline-flex items-center gap-1 text-sm text-(--grey-600) transition-colors hover:text-(--grey-900)"
+          className="inline-flex items-center gap-1 text-sm text-(--text-secondary) transition-colors hover:text-(--text)"
         >
           <CaretLeftIcon size={16} weight="bold" />
           All apps

@@ -8,7 +8,7 @@ import {
   updateAssetSource,
   updateAssetSourceColor,
 } from "@/lib/actions";
-import { ASSET_SOURCE_COLORS } from "@/lib/constants";
+import { ASSET_SOURCE_COLORS, FALLBACK_COLOR } from "@/lib/constants";
 import type { AssetEntryRow, AssetSourceRow } from "@/lib/queries";
 import { ActionModal, COLOR_PALETTE, ColorPicker, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
@@ -174,7 +174,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
   }
 
   if (sources.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No asset sources yet.</p>;
+    return <p className="text-sm text-(--text-muted)">No asset sources yet.</p>;
   }
 
   return (
@@ -184,7 +184,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
           const effectiveColor =
             source.color ??
             ASSET_SOURCE_COLORS[index % ASSET_SOURCE_COLORS.length] ??
-            "var(--grey-400)";
+            FALLBACK_COLOR;
           return (
             <li
               key={source.id}
@@ -209,10 +209,8 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                     padding: 0,
                   }}
                 />
-                <span className="truncate text-sm font-medium text-(--grey-900)">
-                  {source.name}
-                </span>
-                <span className="shrink-0 text-xs text-(--grey-500)">{source.currency}</span>
+                <span className="truncate text-sm font-medium text-(--text)">{source.name}</span>
+                <span className="shrink-0 text-xs text-(--text-muted)">{source.currency}</span>
               </div>
               {coloringSourceId === source.id && (
                 <div className="pt-1 pb-0.5">
@@ -228,7 +226,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                   key={entry.id}
                   className="flex items-center justify-between rounded-[8px] bg-(--surface-150) px-2 py-1"
                 >
-                  <span className="text-sm text-(--grey-700)">
+                  <span className="text-sm text-(--text-secondary)">
                     {entry.value.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -240,7 +238,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                         type="button"
                         onClick={() => openEditEntry(entry)}
                         aria-label="Edit entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                       >
                         <PencilSimpleIcon size={14} />
                       </button>
@@ -248,7 +246,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                         type="button"
                         onClick={() => setDeletingEntryId(entry.id)}
                         aria-label="Delete entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                       >
                         <TrashIcon size={14} />
                       </button>
@@ -261,7 +259,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                   type="button"
                   onClick={() => openEdit(source)}
                   aria-label="Edit source"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                 >
                   <PencilSimpleIcon size={16} />
                 </button>
@@ -269,7 +267,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                   type="button"
                   onClick={() => setDeletingSource(source)}
                   aria-label="Delete source"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                 >
                   <TrashIcon size={16} />
                 </button>
@@ -277,7 +275,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                   <button
                     type="button"
                     onClick={() => openLog(source)}
-                    className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
+                    className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--text-secondary) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
                   >
                     + Log
                   </button>
@@ -312,7 +310,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
         title="Delete source?"
         content={
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-(--grey-700)">
+            <p className="text-sm text-(--text-secondary)">
               Are you sure you want to delete{" "}
               <span className="font-medium">{deletingSource?.name}</span>?
             </p>
@@ -359,7 +357,9 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
         size="small"
         title="Delete entry?"
         content={
-          <p className="text-sm text-(--grey-700)">Are you sure you want to delete this entry?</p>
+          <p className="text-sm text-(--text-secondary)">
+            Are you sure you want to delete this entry?
+          </p>
         }
         primaryButton={{ label: "Delete", loading: isPending, onClick: handleDeleteEntryConfirm }}
         secondaryButton={{ label: "Cancel", onClick: () => setDeletingEntryId(null) }}
@@ -374,7 +374,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
         title="Log amount"
         content={
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-(--grey-500)">
+            <p className="text-sm text-(--text-muted)">
               {loggingSource?.name} · {loggingSource?.currency} · {formatMonth(month)}
             </p>
             <TextInput

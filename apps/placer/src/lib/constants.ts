@@ -37,5 +37,6 @@ export const CATEGORY_ICONS: Record<string, Icon> = {
   Flag: FlagIcon,
 };
 
+// dark-mode-fixed: a stored colour (the palette's Grey), the same in both modes.
 export const DEFAULT_CATEGORY_COLOR = "var(--grey-200)";
 export const DEFAULT_CATEGORY_ICON = "MapPin";

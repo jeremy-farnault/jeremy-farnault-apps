@@ -26,13 +26,13 @@ export function EquipmentShopModal({ poi, onClose }: Props) {
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center">
-      <div className="w-80 rounded-xl bg-(--surface-200)/95 backdrop-blur-sm border border-(--surface-300) p-4 flex flex-col gap-3">
+      <div className="w-80 rounded-xl bg-(--hud-glass)/95 backdrop-blur-sm border border-(--hud-glass-strong) p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-white">{title}</p>
+          <p className="text-sm font-semibold text-(--hud-ink)">{title}</p>
           <button
             type="button"
             onClick={onClose}
-            className="text-xs text-(--grey-500) hover:text-white transition-colors"
+            className="text-xs text-(--hud-text-muted) hover:text-(--hud-ink) transition-colors"
           >
             ✕
           </button>
@@ -43,8 +43,8 @@ export function EquipmentShopModal({ poi, onClose }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-base">{item.emoji}</span>
                 <div>
-                  <p className="text-xs font-semibold text-white">{item.name}</p>
-                  <p className="text-xs text-(--grey-500)">
+                  <p className="text-xs font-semibold text-(--hud-ink)">{item.name}</p>
+                  <p className="text-xs text-(--hud-text-muted)">
                     {item.kind === "weapon" ? `+${item.might} Might` : profileLabel(item.profile)}
                   </p>
                 </div>
@@ -61,14 +61,14 @@ export function EquipmentShopModal({ poi, onClose }: Props) {
                     });
                   }
                 }}
-                className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-1 transition-colors"
+                className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-(--hud-ink) text-xs font-semibold px-3 py-1 transition-colors"
               >
                 ¥{item.price}
               </button>
             </div>
           ))}
         </div>
-        <p className="text-xs text-(--grey-500) text-right tabular-nums">
+        <p className="text-xs text-(--hud-text-muted) text-right tabular-nums">
           Balance: ¥{money.toLocaleString()}
         </p>
       </div>

@@ -96,7 +96,7 @@ export function BoardToolbar({
               className={cn(popoverContentClass, "max-w-[280px]")}
             >
               {allTags.length === 0 ? (
-                <span className="px-1 text-xs text-(--grey-500)">No tags yet.</span>
+                <span className="px-1 text-xs text-(--text-muted)">No tags yet.</span>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {allTags.map((tag) => {
@@ -109,8 +109,8 @@ export function BoardToolbar({
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
                           on
-                            ? "border-(--blue-600) text-(--grey-900)"
-                            : "border-(--grey-300) text-(--grey-600) hover:border-(--grey-400)"
+                            ? "border-(--blue-600) text-(--text)"
+                            : "border-(--border-strong) text-(--text-secondary) hover:border-(--text-subtle)"
                         )}
                       >
                         <span
@@ -161,7 +161,7 @@ export function BoardToolbar({
                     className="h-6 w-6 shrink-0 rounded-full"
                     style={{
                       backgroundColor: c.value,
-                      outline: filterColor === c.value ? "2px solid var(--grey-900)" : "none",
+                      outline: filterColor === c.value ? "2px solid var(--text)" : "none",
                       outlineOffset: 2,
                     }}
                   />
@@ -171,7 +171,7 @@ export function BoardToolbar({
                 <button
                   type="button"
                   onClick={() => onColorChange(null)}
-                  className="self-start text-xs text-(--grey-500) hover:text-(--grey-900)"
+                  className="self-start text-xs text-(--text-muted) hover:text-(--text)"
                 >
                   Any colour
                 </button>
@@ -184,7 +184,7 @@ export function BoardToolbar({
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex items-center gap-1 text-xs text-(--grey-500) hover:text-(--grey-900)"
+            className="inline-flex items-center gap-1 text-xs text-(--text-muted) hover:text-(--text)"
           >
             <XIcon size={12} weight="bold" /> Clear
           </button>
@@ -209,8 +209,8 @@ const FilterButton = forwardRef<
       className={cn(
         "inline-flex h-9 items-center gap-1.5 rounded-[10px] border px-3 text-sm",
         active
-          ? "border-(--blue-600) text-(--grey-900)"
-          : "border-(--grey-300) text-(--grey-700) hover:border-(--grey-400)",
+          ? "border-(--blue-600) text-(--text)"
+          : "border-(--border-strong) text-(--text-secondary) hover:border-(--text-subtle)",
         className
       )}
     >
@@ -221,7 +221,7 @@ const FilterButton = forwardRef<
 
 function Count({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-(--blue-600) px-1 text-[10px] font-semibold text-white">
+    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-(--blue-600) px-1 text-[10px] font-semibold text-(--text-on-strong-hue)">
       {children}
     </span>
   );
@@ -235,7 +235,7 @@ function ManageTagsButton({ onClick, className }: { onClick: () => void; classNa
       onClick={onClick}
       className={cn(
         "inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm",
-        "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)",
+        "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)",
         className
       )}
     >

@@ -7,7 +7,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<KanbanIcon className="text-white" size={32} />}
+        appIcon={<KanbanIcon className="text-(--text-on-strong-hue)" size={32} />}
         appName="Organiser"
         currentAppId="organiser"
         titleHref="/"

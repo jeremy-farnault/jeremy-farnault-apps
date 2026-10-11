@@ -257,8 +257,8 @@ export function UnifierClient({
               aria-pressed={view === "orbit"}
               className={
                 view === "orbit"
-                  ? "flex items-center gap-1.5 rounded-[9px] bg-(--card) px-3 py-1.5 text-sm font-medium text-(--grey-900)"
-                  : "flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-sm text-(--grey-600) hover:text-(--grey-900)"
+                  ? "flex items-center gap-1.5 rounded-[9px] bg-(--card) px-3 py-1.5 text-sm font-medium text-(--text)"
+                  : "flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-sm text-(--text-secondary) hover:text-(--text)"
               }
             >
               <TargetIcon size={16} /> Orbit
@@ -269,8 +269,8 @@ export function UnifierClient({
               aria-pressed={view === "list"}
               className={
                 view === "list"
-                  ? "flex items-center gap-1.5 rounded-[9px] bg-(--card) px-3 py-1.5 text-sm font-medium text-(--grey-900)"
-                  : "flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-sm text-(--grey-600) hover:text-(--grey-900)"
+                  ? "flex items-center gap-1.5 rounded-[9px] bg-(--card) px-3 py-1.5 text-sm font-medium text-(--text)"
+                  : "flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-sm text-(--text-secondary) hover:text-(--text)"
               }
             >
               <ListIcon size={16} /> List
@@ -333,7 +333,7 @@ export function UnifierClient({
             type="button"
             onClick={() => setArcModalOpen(true)}
             aria-label="New arc"
-            className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+            className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
           >
             <CirclesThreeIcon size={22} />
           </button>
@@ -341,7 +341,7 @@ export function UnifierClient({
             type="button"
             onClick={() => setPersonModalOpen(true)}
             aria-label="Add a person"
-            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
+            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
           >
             <UserPlusIcon size={22} />
           </button>

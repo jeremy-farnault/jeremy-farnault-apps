@@ -16,7 +16,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     <SidebarProvider initialConversations={conversations}>
       <TooltipProvider>
         <AppShell
-          appIcon={<RobotIcon className="text-white" size={32} />}
+          appIcon={<RobotIcon className="text-(--text-on-strong-hue)" size={32} />}
           appName="Aider"
           currentAppId="aider"
           titleHref="/"

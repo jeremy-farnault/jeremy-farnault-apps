@@ -14,7 +14,7 @@ export function SavingsList({
   rates: Record<string, number>;
 }) {
   if (data.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No savings logged for this month.</p>;
+    return <p className="text-sm text-(--text-muted)">No savings logged for this month.</p>;
   }
 
   const currencyTotals = new Map<string, number>();
@@ -41,8 +41,8 @@ export function SavingsList({
             key={sourceId}
             className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
           >
-            <span className="text-sm font-medium text-(--grey-900)">{name}</span>
-            <span className="text-sm font-semibold text-(--grey-900)">
+            <span className="text-sm font-medium text-(--text)">{name}</span>
+            <span className="text-sm font-semibold text-(--text)">
               {currency} {formatAmount(total)}
             </span>
           </li>
@@ -52,14 +52,14 @@ export function SavingsList({
       <div className="flex flex-col gap-1 border-t border-(--border) pt-3">
         {sortedCurrencies.map(([currency, total]) => (
           <div key={currency} className="flex justify-between text-sm">
-            <span className="text-(--grey-500)">Total {currency}</span>
-            <span className="font-semibold text-(--grey-900)">
+            <span className="text-(--text-muted)">Total {currency}</span>
+            <span className="font-semibold text-(--text)">
               {currency} {formatAmount(total)}
             </span>
           </div>
         ))}
         {showGrandTotal && (
-          <div className="flex justify-between pt-2 text-sm font-semibold text-(--grey-900)">
+          <div className="flex justify-between pt-2 text-sm font-semibold text-(--text)">
             <span>Total</span>
             <span>
               ≈ {homeCurrency} {formatAmount(grandTotal)}

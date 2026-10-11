@@ -9,7 +9,7 @@ export function HabitDetailClient({ habit }: Props) {
   return (
     <div>
       <Breadcrumb crumbs={[{ label: habit.name }]} />
-      <p className="text-sm text-(--grey-500)">Coming soon</p>
+      <p className="text-sm text-(--text-muted)">Coming soon</p>
     </div>
   );
 }

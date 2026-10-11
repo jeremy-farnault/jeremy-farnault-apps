@@ -3,3 +3,15 @@
   --primary: var(--yellow-400);
   --secondary: var(--yellow-600);
 }
+
+/*
+ * Numeric heatmap cells carry both ramps as custom properties (see habit-heatmap.tsx). Empty
+ * and boolean cells set an inline background, which wins over these.
+ */
+.heat-cell {
+  background-color: var(--heat-light);
+}
+
+.dark .heat-cell {
+  background-color: var(--heat-dark);
+}

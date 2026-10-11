@@ -54,15 +54,18 @@ export function ClasserCard({ classer, onEdit, onArchive }: Props) {
         }
       >
         {hasImage && (
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+          <div
+            // dark-mode-fixed: shades the cover image, in both modes.
+            className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"
+          />
         )}
       </div>
 
       {/* Bottom 1/3: info area */}
       <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200)">
-        <p className="text-sm font-semibold truncate text-(--grey-900)">{classer.name}</p>
+        <p className="text-sm font-semibold truncate text-(--text)">{classer.name}</p>
         <div className="flex items-center justify-end">
-          <span className="text-xs text-(--grey-600) shrink-0">
+          <span className="text-xs text-(--text-secondary) shrink-0">
             {classer.itemCount} {classer.itemCount === 1 ? "item" : "items"}
           </span>
         </div>

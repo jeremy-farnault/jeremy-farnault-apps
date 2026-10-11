@@ -18,6 +18,7 @@ export function ShowcaseModal({ app }: { app: ShowcaseApp }) {
       }}
     >
       <Dialog.Portal>
+        {/* dark-mode-fixed: a black scrim dims the page in both modes. */}
         <Dialog.Overlay className="fixed inset-0 z-[5000] bg-black/40 animate-[overlay-in_0.2s_ease-in-out]" />
         <Dialog.Content
           aria-describedby={undefined}
@@ -31,7 +32,7 @@ export function ShowcaseModal({ app }: { app: ShowcaseApp }) {
           <Dialog.Title className="sr-only">{app.name}</Dialog.Title>
           <Dialog.Close
             aria-label="Close"
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
           >
             <XIcon size={18} weight="bold" />
           </Dialog.Close>

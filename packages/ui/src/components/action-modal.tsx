@@ -154,7 +154,7 @@ export function ActionModal({
                   <button
                     onClick={onClose}
                     aria-label="Close dialog"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900)"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-(--text-muted) hover:text-(--text)"
                     type="button"
                   >
                     <XIcon size={16} weight="bold" />
@@ -166,13 +166,13 @@ export function ActionModal({
             <div className={cn("flex flex-col gap-4", fitMobileViewport && "flex-1 min-h-0")}>
               {icon}
               {title ? (
-                <Dialog.Title className="text-base font-semibold text-(--grey-900)">
+                <Dialog.Title className="text-base font-semibold text-(--text)">
                   {title}
                 </Dialog.Title>
               ) : (
                 <Dialog.Title className="sr-only" />
               )}
-              {paragraph && <p className="text-sm text-(--grey-600)">{paragraph}</p>}
+              {paragraph && <p className="text-sm text-(--text-secondary)">{paragraph}</p>}
               {content}
             </div>
 

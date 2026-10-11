@@ -132,7 +132,7 @@ export function MapSearchBar({
         {showDropdown && (
           <div className="absolute left-0 right-0 top-full mt-1 overflow-hidden rounded-xl border border-(--border) bg-(--card) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]">
             {isLoading && !coordMatch && results.length === 0 && (
-              <p className="px-3 py-2 text-xs text-(--grey-500)">Searching…</p>
+              <p className="px-3 py-2 text-xs text-(--text-muted)">Searching…</p>
             )}
 
             {coordMatch && (
@@ -140,9 +140,9 @@ export function MapSearchBar({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelect({ kind: "coordinates", ...coordMatch })}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
               >
-                <span className="text-(--grey-400)">Go to</span>
+                <span className="text-(--text-subtle)">Go to</span>
                 <span className="font-mono">
                   {coordMatch.lat.toFixed(5)}, {coordMatch.lng.toFixed(5)}
                 </span>
@@ -151,17 +151,18 @@ export function MapSearchBar({
 
             {spotResults.length > 0 && (
               <>
-                <p className="px-3 pb-1 pt-2 text-xs text-(--grey-400)">Saved spots</p>
+                <p className="px-3 pb-1 pt-2 text-xs text-(--text-subtle)">Saved spots</p>
                 {spotResults.map((spot) => (
                   <button
                     key={spot.id}
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handleSelect({ kind: "spot", spot })}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
                   >
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      // dark-mode-fixed: the fallback category colour, a fixed swatch like the stored ones.
                       style={{ backgroundColor: spot.category?.color ?? "var(--grey-400)" }}
                     />
                     {spot.name}
@@ -173,7 +174,7 @@ export function MapSearchBar({
             {nominatimResults.length > 0 && !coordMatch && (
               <>
                 {spotResults.length > 0 && <div className="mx-3 h-px bg-(--border)" />}
-                <p className="px-3 pb-1 pt-2 text-xs text-(--grey-400)">Places</p>
+                <p className="px-3 pb-1 pt-2 text-xs text-(--text-subtle)">Places</p>
                 {nominatimResults.map((r) => {
                   const short = r.address ? formatAddress(r.address) : r.display_name;
                   return (
@@ -189,7 +190,7 @@ export function MapSearchBar({
                             lng: Number.parseFloat(r.lon),
                           })
                         }
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
                       >
                         <span className="truncate">{short}</span>
                       </button>

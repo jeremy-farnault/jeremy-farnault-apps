@@ -11,8 +11,8 @@ export function SignInLanding() {
     <main className="flex w-full flex-1 flex-col items-center justify-center gap-6 px-4 py-16 text-center">
       <ApertureIcon size={56} weight="thin" className="text-(--purple-600)" />
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-(--grey-900)">Exposer</h1>
-        <p className="max-w-md text-(--grey-600)">
+        <h1 className="text-2xl font-semibold text-(--text)">Exposer</h1>
+        <p className="max-w-md text-(--text-secondary)">
           A public-by-link photo portfolio. Sign in to create yours, or open a{" "}
           <span className="whitespace-nowrap">/handle</span> link to view someone&apos;s work.
         </p>

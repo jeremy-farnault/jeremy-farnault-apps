@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteSpendingCategory, updateSpendingCategory } from "@/lib/actions";
-import { SPENDING_CATEGORY_COLORS } from "@/lib/constants";
+import { FALLBACK_COLOR, SPENDING_CATEGORY_COLORS } from "@/lib/constants";
 import type { SpendingCategoryRow } from "@/lib/queries";
 import { ActionModal, TextInput } from "@jf/ui";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
@@ -55,7 +55,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
   }
 
   if (categories.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No custom categories yet.</p>;
+    return <p className="text-sm text-(--text-muted)">No custom categories yet.</p>;
   }
 
   return (
@@ -65,7 +65,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
           const effectiveColor =
             category.color ??
             SPENDING_CATEGORY_COLORS[index % SPENDING_CATEGORY_COLORS.length] ??
-            "var(--grey-400)";
+            FALLBACK_COLOR;
           return (
             <li
               key={category.id}
@@ -81,7 +81,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
                   backgroundColor: effectiveColor,
                 }}
               />
-              <span className="flex-1 truncate text-sm font-medium text-(--grey-900)">
+              <span className="flex-1 truncate text-sm font-medium text-(--text)">
                 {category.name}
               </span>
               <div className="flex items-center gap-0.5">
@@ -89,7 +89,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
                   type="button"
                   onClick={() => openEdit(category)}
                   aria-label="Edit category"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                 >
                   <PencilSimpleIcon size={16} />
                 </button>
@@ -97,7 +97,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
                   type="button"
                   onClick={() => setDeletingCategory(category)}
                   aria-label="Delete category"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                 >
                   <TrashIcon size={16} />
                 </button>
@@ -126,7 +126,7 @@ export function SpendingCategoriesList({ categories }: SpendingCategoriesListPro
         title="Delete category?"
         content={
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-(--grey-700)">
+            <p className="text-sm text-(--text-secondary)">
               Are you sure you want to delete{" "}
               <span className="font-medium">{deletingCategory?.name}</span>?
             </p>

@@ -25,7 +25,7 @@ export function ColorPicker({ value, onChange }: Props) {
             flexShrink: 0,
             borderRadius: "50%",
             backgroundColor: c.value,
-            border: value === c.value ? "2px solid #000" : "1px solid #ccc",
+            border: value === c.value ? "2px solid var(--text)" : "1px solid var(--border-strong)",
             cursor: "pointer",
           }}
         />

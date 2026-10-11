@@ -3,8 +3,10 @@ import type { ResolvedTheme } from "./theme";
 export type PaletteItem = { value: string; label?: string; foreground?: string };
 
 /** Light text token, for use on dark-surfaced palette colors. */
+// dark-mode-fixed: pairs with a fixed swatch, not with the page.
 const ON_DARK = "var(--grey-100)";
 /** Default (dark) text token, for use on light-surfaced palette colors. */
+// dark-mode-fixed: every ON_LIGHT swatch stays a light fill in dark mode.
 const ON_LIGHT = "var(--grey-900)";
 /**
  * Text token for a shade that is dark in light mode but light in dark mode, where the hue
@@ -38,6 +40,7 @@ const ON_STRONG_HUE = "var(--text-on-strong-hue)";
  * the same in both modes.
  */
 export const COLOR_PALETTE: readonly PaletteItem[] = [
+  // dark-mode-fixed: a stored colour; the Grey chip stays light in both modes.
   { label: "Grey", value: "var(--grey-200)", foreground: ON_LIGHT },
   { label: "Taupe", value: "var(--taupe-400)", foreground: ON_LIGHT },
   { label: "Beige", value: "var(--beige-400)", foreground: ON_LIGHT },
@@ -98,7 +101,9 @@ export const HIGHLIGHT_PALETTE = paletteAtLevel(200, ON_LIGHT);
  *
  * In dark mode `-700` is a light tint instead, so the row reads on the dark card: 7.0–7.1:1
  * for every hue, yellow and green included. The swatch foreground flips with it. Grey is the
- * exception: `--grey-700` stays fixed and sits at 1.8:1 on the dark card.
+ * exception: `--grey-700` stays fixed (1.8:1 on the dark card), so in dark mode a rule in
+ * `globals.css` draws it as `--text-secondary` inside `.jf-rich-text` and on its picker swatch.
+ * The stored value is untouched.
  */
 export const TEXT_COLOR_PALETTE = paletteAtLevel(700, ON_STRONG_HUE);
 

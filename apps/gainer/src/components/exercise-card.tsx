@@ -45,7 +45,7 @@ function SetDisplay({
     summary = `${set.weight} kg × ${set.reps}`;
   }
   return (
-    <p className="text-sm text-(--grey-600)">
+    <p className="text-sm text-(--text-secondary)">
       Set {set.setNumber} — {summary}
     </p>
   );
@@ -168,9 +168,9 @@ export function ExerciseCard({ data, lastSession }: ExerciseCardProps) {
   return (
     <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--surface-100) border border-(--surface-200)">
       <div className="flex flex-col gap-0.5">
-        <p className="text-sm font-semibold text-(--grey-900)">{data.exercise.name}</p>
+        <p className="text-sm font-semibold text-(--text)">{data.exercise.name}</p>
         {lastSession && (
-          <p className="text-xs text-(--grey-500)">
+          <p className="text-xs text-(--text-muted)">
             Last · {formatLastSession(lastSession, exerciseType)}
           </p>
         )}

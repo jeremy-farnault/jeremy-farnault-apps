@@ -104,7 +104,7 @@ export function ItemsGrid({
           <Link
             href="/archive"
             title="Archive"
-            className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
+            className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
           >
             <ArchiveIcon size={20} />
           </Link>
@@ -172,7 +172,7 @@ export function ItemsGrid({
           type="button"
           onClick={() => setFolderModalOpen(true)}
           aria-label="New folder"
-          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
         >
           <FolderPlusIcon size={22} />
         </button>
@@ -180,7 +180,7 @@ export function ItemsGrid({
           type="button"
           onClick={() => setPanel({ mode: "new" })}
           aria-label="New note"
-          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
+          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
         >
           <NotePencilIcon size={22} />
         </button>

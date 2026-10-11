@@ -144,7 +144,7 @@ export function PortfolioFeed({
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
-            <p className="text-base font-medium text-(--grey-900)">
+            <p className="text-base font-medium text-(--text)">
               {filtering
                 ? "No posts match your filters."
                 : isOwner
@@ -152,7 +152,7 @@ export function PortfolioFeed({
                   : "Nothing shared yet."}
             </p>
             {!filtering && isOwner && (
-              <p className="max-w-sm text-sm text-(--grey-600)">
+              <p className="max-w-sm text-sm text-(--text-secondary)">
                 Create your first post to start your portfolio.
               </p>
             )}
@@ -161,7 +161,7 @@ export function PortfolioFeed({
           <div className="flex flex-col gap-8">
             {groups.map((group) => (
               <section key={group.date} className="flex flex-col gap-4">
-                <time className="text-xs font-medium uppercase tracking-wide text-(--grey-500)">
+                <time className="text-xs font-medium uppercase tracking-wide text-(--text-muted)">
                   {formatDay(group.date)}
                 </time>
                 <div className="flex flex-col gap-8">

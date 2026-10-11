@@ -76,7 +76,7 @@ const SlashList = forwardRef<ListHandle, ListProps>(({ items, command, query }, 
       )}
     >
       {items.length === 0 ? (
-        <p className="px-2 py-1.5 text-sm text-(--grey-500)">No matching command</p>
+        <p className="px-2 py-1.5 text-sm text-(--text-muted)">No matching command</p>
       ) : (
         items.map((item, i) => {
           const Icon = item.icon;
@@ -92,7 +92,7 @@ const SlashList = forwardRef<ListHandle, ListProps>(({ items, command, query }, 
               className={cn(
                 // `min-h-9` keeps every row a comfortable tap target on a phone.
                 "flex min-h-9 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left",
-                "text-sm text-(--grey-900) outline-none",
+                "text-sm text-(--text) outline-none",
                 i === selected && "bg-(--surface-150)"
               )}
             >

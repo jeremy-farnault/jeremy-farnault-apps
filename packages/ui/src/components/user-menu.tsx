@@ -53,7 +53,7 @@ export function UserMenu({
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
-            <span className="text-xl font-semibold uppercase text-(--grey-900)">{letter}</span>
+            <span className="text-xl font-semibold uppercase text-(--text)">{letter}</span>
           )}
         </button>
       </Popover.Trigger>
@@ -80,7 +80,7 @@ export function UserMenu({
               href={settingsHref}
               onClick={() => setOpen(false)}
               className={cn(
-                "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--grey-900)",
+                "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--text)",
                 "hover:bg-(--surface-150)"
               )}
             >
@@ -92,7 +92,7 @@ export function UserMenu({
             href={INDEXER_URL}
             onClick={() => setOpen(false)}
             className={cn(
-              "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--grey-900)",
+              "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--text)",
               "hover:bg-(--surface-150)"
             )}
           >
@@ -105,7 +105,7 @@ export function UserMenu({
               onLogout();
             }}
             className={cn(
-              "w-full rounded-[14px] px-4 py-2.5 text-left text-sm text-(--grey-900)",
+              "w-full rounded-[14px] px-4 py-2.5 text-left text-sm text-(--text)",
               "hover:bg-(--surface-150)"
             )}
             type="button"

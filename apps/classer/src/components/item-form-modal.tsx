@@ -165,19 +165,19 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
               onClick={onClose}
               disabled={submitting}
               aria-label="Close dialog"
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900) disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--text-muted) hover:text-(--text) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <XIcon size={16} weight="bold" />
             </button>
 
-            <Dialog.Title className="mb-6 flex items-center gap-2 text-base font-semibold text-(--grey-900)">
+            <Dialog.Title className="mb-6 flex items-center gap-2 text-base font-semibold text-(--text)">
               <RankingIcon size={18} weight="bold" className="text-(--green-500)" />
               {isEdit ? "Edit Item" : "New Item"}
             </Dialog.Title>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label htmlFor="item-name" className="text-sm font-medium text-(--grey-700)">
+                <label htmlFor="item-name" className="text-sm font-medium text-(--text-secondary)">
                   Name
                 </label>
                 <TextInput
@@ -192,7 +192,10 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="item-description" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="item-description"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Description
                 </label>
                 <Textarea
@@ -205,7 +208,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="item-rank" className="text-sm font-medium text-(--grey-700)">
+                <label htmlFor="item-rank" className="text-sm font-medium text-(--text-secondary)">
                   Rank
                 </label>
                 <Select
@@ -222,7 +225,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="item-image" className="text-sm font-medium text-(--grey-700)">
+                <label htmlFor="item-image" className="text-sm font-medium text-(--text-secondary)">
                   Image
                 </label>
                 {previewUrl ? (
@@ -238,6 +241,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
                       onClick={handleRemoveImage}
                       disabled={submitting}
                       aria-label="Remove image"
+                      // dark-mode-fixed: a scrim chip over the image preview, in both modes.
                       className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 disabled:cursor-not-allowed"
                     >
                       <XIcon size={14} weight="bold" />
@@ -251,7 +255,7 @@ export function ItemFormModal({ isOpen, onClose, onSuccess, classerId, itemCount
                     accept="image/*"
                     disabled={submitting}
                     onChange={handleFileChange}
-                    className="text-sm text-(--grey-700) file:mr-3 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--grey-900) file:cursor-pointer hover:file:bg-(--surface-200)"
+                    className="text-sm text-(--text-secondary) file:mr-3 file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--text) file:cursor-pointer hover:file:bg-(--surface-200)"
                   />
                 )}
               </div>

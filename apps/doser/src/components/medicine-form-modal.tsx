@@ -31,7 +31,7 @@ type FormErrors = {
 };
 
 const numberInputClass =
-  "h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none placeholder:text-(--grey-400)";
+  "h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm outline-none placeholder:text-(--text-subtle)";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -176,13 +176,13 @@ export function MedicineFormModal({ isOpen, onClose, medicine, initialTypes, onC
         {types.map((row, index) => (
           <div key={row.key} className="flex flex-col gap-2 rounded-[10px] bg-(--surface-150) p-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-(--grey-700)">Type {index + 1}</span>
+              <span className="text-xs font-medium text-(--text-secondary)">Type {index + 1}</span>
               {types.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeType(row.key)}
                   aria-label={`Remove type ${index + 1}`}
-                  className="text-(--grey-500) hover:text-(--red-500)"
+                  className="text-(--text-muted) hover:text-(--red-500)"
                 >
                   <XIcon size={14} />
                 </button>
@@ -218,7 +218,7 @@ export function MedicineFormModal({ isOpen, onClose, medicine, initialTypes, onC
         <button
           type="button"
           onClick={addType}
-          className="self-start text-sm font-medium text-(--grey-700) hover:text-(--grey-900)"
+          className="self-start text-sm font-medium text-(--text-secondary) hover:text-(--text)"
         >
           + Add type
         </button>

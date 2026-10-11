@@ -41,22 +41,22 @@ export function CalendarBreadcrumb({ scope }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 text-sm text-(--grey-600)">
+    <div className="flex items-center gap-1.5 text-sm text-(--text-secondary)">
       <button
         type="button"
         onClick={() => navigateTo({ year: scope.year })}
-        className="hover:text-(--grey-900) transition-colors font-medium"
+        className="hover:text-(--text) transition-colors font-medium"
       >
         {scope.year}
       </button>
 
       {scope.month !== undefined && (
         <>
-          <span className="text-(--grey-300)">›</span>
+          <span className="text-(--border-strong)">›</span>
           <button
             type="button"
             onClick={() => navigateTo({ year: scope.year, month: scope.month })}
-            className="hover:text-(--grey-900) transition-colors"
+            className="hover:text-(--text) transition-colors"
           >
             {MONTH_NAMES[scope.month - 1]}
           </button>
@@ -65,8 +65,8 @@ export function CalendarBreadcrumb({ scope }: Props) {
 
       {scope.day !== undefined && (
         <>
-          <span className="text-(--grey-300)">›</span>
-          <span className="text-(--grey-900)">{scope.day}</span>
+          <span className="text-(--border-strong)">›</span>
+          <span className="text-(--text)">{scope.day}</span>
         </>
       )}
     </div>

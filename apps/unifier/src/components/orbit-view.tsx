@@ -65,7 +65,7 @@ const guideLabel = (days: number, outermost: boolean) =>
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 const CARD_ACTION =
-  "flex min-h-10 w-full items-center gap-2 rounded-[10px] px-2.5 text-left text-sm text-(--grey-700) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900) disabled:opacity-50";
+  "flex min-h-10 w-full items-center gap-2 rounded-[10px] px-2.5 text-left text-sm text-(--text-secondary) transition-colors hover:bg-(--surface-150) hover:text-(--text) disabled:opacity-50";
 
 /**
  * The weekly-review surface: "me" at the centre, everyone else a bubble — their photo
@@ -221,7 +221,7 @@ export function OrbitView({
                 cy={CENTRE}
                 r={radiusForDrift(days)}
                 fill="none"
-                stroke="var(--grey-400)"
+                stroke="var(--text-subtle)"
                 strokeWidth={1 / zoom}
                 strokeDasharray={`${2 / zoom} ${4 / zoom}`}
               />
@@ -281,7 +281,7 @@ export function OrbitView({
               />
             ) : (
               <span
-                className="font-semibold text-(--grey-700)"
+                className="font-semibold text-(--text-secondary)"
                 style={{ fontSize: meLetter ? ME_SIZE * 0.42 : ME_SIZE * 0.26 }}
               >
                 {meLetter || "me"}
@@ -343,10 +343,10 @@ export function OrbitView({
                         size={28}
                       />
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm font-semibold text-(--grey-900)">
+                        <span className="truncate text-sm font-semibold text-(--text)">
                           {dot.name}
                         </span>
-                        <span className="truncate text-xs text-(--grey-500)">
+                        <span className="truncate text-xs text-(--text-muted)">
                           {dot.arcName} · {drift}
                         </span>
                       </div>
@@ -404,7 +404,7 @@ export function OrbitView({
             onClick={() => setZoom((z) => clamp(z * 1.5, MIN_ZOOM, MAX_ZOOM))}
             disabled={zoom >= MAX_ZOOM}
             aria-label="Zoom in"
-            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--grey-800) transition-transform active:scale-90 disabled:opacity-30"
+            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--text) transition-transform active:scale-90 disabled:opacity-30"
           >
             <PlusIcon size={16} weight="bold" />
           </button>
@@ -413,7 +413,7 @@ export function OrbitView({
             onClick={() => setZoom((z) => clamp(z / 1.5, MIN_ZOOM, MAX_ZOOM))}
             disabled={zoom <= MIN_ZOOM}
             aria-label="Zoom out"
-            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--grey-800) transition-transform active:scale-90 disabled:opacity-30"
+            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--text) transition-transform active:scale-90 disabled:opacity-30"
           >
             <MinusIcon size={16} weight="bold" />
           </button>
@@ -422,7 +422,7 @@ export function OrbitView({
             onClick={reset}
             disabled={zoom === 1 && pan.x === 0 && pan.y === 0}
             aria-label="Reset the view"
-            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--grey-800) transition-transform active:scale-90 disabled:opacity-30"
+            className="grid h-11 w-11 place-items-center rounded-full bg-(--surface-200) text-(--text) transition-transform active:scale-90 disabled:opacity-30"
           >
             <ArrowsOutIcon size={16} />
           </button>
@@ -431,7 +431,7 @@ export function OrbitView({
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-2">
         {arcs.map((arc) => (
-          <span key={arc.id} className="flex items-center gap-1.5 text-xs text-(--grey-600)">
+          <span key={arc.id} className="flex items-center gap-1.5 text-xs text-(--text-secondary)">
             <span
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: arc.color ?? "var(--primary)" }}
@@ -449,7 +449,7 @@ export function OrbitView({
           <Popover.Trigger asChild>
             <button
               type="button"
-              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-[10px] px-3 text-xs text-(--grey-500) transition-colors hover:bg-(--surface-150) hover:text-(--grey-900)"
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-[10px] px-3 text-xs text-(--text-muted) transition-colors hover:bg-(--surface-150) hover:text-(--text)"
             >
               <InfoIcon size={14} /> How to read this
             </button>
@@ -459,12 +459,12 @@ export function OrbitView({
               side="top"
               sideOffset={6}
               collisionPadding={12}
-              className="z-50 w-[280px] rounded-[10px] bg-(--grey-900) px-2.5 py-2 text-xs leading-relaxed text-white outline-none animate-[overlay-in_0.2s_ease-in-out]"
+              className="z-50 w-[280px] rounded-[10px] bg-(--text) px-2.5 py-2 text-xs leading-relaxed text-(--text-inverse) outline-none animate-[overlay-in_0.2s_ease-in-out]"
             >
               Further out means longer since you reached out, and each spoke carries the colour of
               the arc someone belongs to. A red ring is a critical flag, growing the longer it stays
               unresolved. Tap someone to log a touch, flag them, or open them.
-              <Popover.Arrow className="fill-(--grey-900)" />
+              <Popover.Arrow className="fill-(--text)" />
             </Popover.Content>
           </Popover.Portal>
         </Popover.Root>

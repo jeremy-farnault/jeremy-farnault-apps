@@ -4,3 +4,14 @@
   --primary-foreground: var(--text-on-strong-hue);
   --secondary: var(--teal-800);
 }
+
+/*
+ * Hover behind the critical flag's red text. Dark mode's `red-200` is a light fill that the
+ * `red-600` text vanishes into, so it lifts the flag's own deep wash instead.
+ */
+:root {
+  --critical-hover: var(--red-200);
+}
+.dark {
+  --critical-hover: color-mix(in oklab, var(--red-600) 18%, var(--red-100));
+}

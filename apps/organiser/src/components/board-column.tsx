@@ -95,12 +95,12 @@ export function BoardColumn({
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: column.color }} />
         )}
         <span
-          className="text-sm font-semibold text-(--grey-900)"
+          className="text-sm font-semibold text-(--text)"
           style={{ writingMode: "vertical-rl" }}
         >
           {column.name}
         </span>
-        <span className="text-xs text-(--grey-500)">{cards.length}</span>
+        <span className="text-xs text-(--text-muted)">{cards.length}</span>
       </button>
     );
   }
@@ -119,20 +119,20 @@ export function BoardColumn({
           {...attributes}
           {...listeners}
           aria-label={`Reorder ${column.name}`}
-          className="flex h-7 w-6 cursor-grab items-center justify-center text-(--grey-400) hover:text-(--grey-700) touch-none"
+          className="flex h-7 w-6 cursor-grab items-center justify-center text-(--text-subtle) hover:text-(--text-secondary) touch-none"
         >
           <DotsSixVerticalIcon size={16} />
         </button>
 
-        <h2 className="flex-1 truncate text-sm font-semibold text-(--grey-900)">{column.name}</h2>
-        <span className="text-xs text-(--grey-500)">{cards.length}</span>
+        <h2 className="flex-1 truncate text-sm font-semibold text-(--text)">{column.name}</h2>
+        <span className="text-xs text-(--text-muted)">{cards.length}</span>
 
         <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <Popover.Trigger asChild>
             <button
               type="button"
               aria-label={`${column.name} options`}
-              className="flex h-7 w-7 items-center justify-center rounded-[8px] text-(--grey-700) hover:bg-(--surface-200)"
+              className="flex h-7 w-7 items-center justify-center rounded-[8px] text-(--text-secondary) hover:bg-(--surface-200)"
             >
               <DotsThreeIcon size={18} weight="bold" />
             </button>
@@ -152,7 +152,7 @@ export function BoardColumn({
                   setMenuOpen(false);
                   setEditOpen(true);
                 }}
-                className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) transition-colors hover:bg-(--surface-150)"
+                className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--text) transition-colors hover:bg-(--surface-150)"
               >
                 <PencilSimpleIcon size={16} /> Edit
               </button>
@@ -162,7 +162,7 @@ export function BoardColumn({
                   setMenuOpen(false);
                   onToggleCollapsed(column.id, true);
                 }}
-                className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) transition-colors hover:bg-(--surface-150)"
+                className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--text) transition-colors hover:bg-(--surface-150)"
               >
                 <CaretDownIcon size={16} /> Collapse
               </button>
@@ -222,8 +222,8 @@ export function BoardColumn({
             type="button"
             onClick={() => setAdding(true)}
             className={cn(
-              "flex w-full items-center gap-1 rounded-[10px] px-2 py-2 text-sm text-(--grey-500)",
-              "hover:bg-(--surface-200) hover:text-(--grey-800)"
+              "flex w-full items-center gap-1 rounded-[10px] px-2 py-2 text-sm text-(--text-muted)",
+              "hover:bg-(--surface-200) hover:text-(--text)"
             )}
           >
             <PlusIcon size={16} /> Add card

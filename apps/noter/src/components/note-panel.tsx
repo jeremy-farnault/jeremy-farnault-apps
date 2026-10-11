@@ -153,7 +153,7 @@ export function NotePanel({ note, parentFolderId, onClose }: Props) {
             saving spinner keeps it company, where it used to sit absolutely positioned. */}
         <div className="flex items-center justify-end gap-2">
           <EditorCharacterCount editor={editor} />
-          {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
+          {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--text-subtle)" />}
         </div>
       </div>
     </div>

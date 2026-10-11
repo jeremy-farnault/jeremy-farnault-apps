@@ -93,15 +93,15 @@ export function ClasserDetailClient({ classer, items }: Props) {
               />
             </div>
           )}
-          <h1 className="text-2xl font-bold text-(--grey-900)">{classer.name}</h1>
+          <h1 className="text-2xl font-bold text-(--text)">{classer.name}</h1>
           {classer.description && (
-            <p className="mt-1 text-sm text-(--grey-600)">{classer.description}</p>
+            <p className="mt-1 text-sm text-(--text-secondary)">{classer.description}</p>
           )}
         </header>
 
         {items.length === 0 ? (
           <div className="flex justify-center pt-16">
-            <p className="text-sm text-(--grey-500)">Nothing here yet.</p>
+            <p className="text-sm text-(--text-muted)">Nothing here yet.</p>
           </div>
         ) : (
           <ol className="flex flex-col gap-3">

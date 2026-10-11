@@ -121,3 +121,26 @@ describe("palette contrast in dark mode", () => {
     }
   });
 });
+
+describe("text roles in dark mode", () => {
+  const dark = css.slice(css.indexOf("  .dark {"));
+  const role = (name: string) => {
+    const hex = new RegExp(`--${name}:\\s*(#[0-9a-f]{6});`).exec(dark)?.[1];
+    if (!hex) throw new Error(`No dark value for --${name}`);
+    return hex;
+  };
+
+  it("keeps body, secondary and muted text at 4.5:1 on the dark card, subtle at 3:1", () => {
+    for (const name of ["text", "text-secondary", "text-muted"]) {
+      expect(contrast(role(name), CARD.dark), name).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(role("text-subtle"), CARD.dark)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("orders the text roles from strongest to faintest, as in light mode", () => {
+    const steps = ["text", "text-secondary", "text-muted", "text-subtle"].map((n) =>
+      contrast(role(n), CARD.dark)
+    );
+    for (let i = 1; i < steps.length; i++) expect(steps[i]).toBeLessThan(steps[i - 1] ?? 0);
+  });
+});

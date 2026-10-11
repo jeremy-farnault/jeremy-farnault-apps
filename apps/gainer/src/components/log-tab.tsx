@@ -31,7 +31,7 @@ export function LogTab({
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-4 py-8 text-center">
-          <p className="text-(--grey-600) text-sm">
+          <p className="text-(--text-secondary) text-sm">
             No active session. Start one to begin logging.
           </p>
           <StartSessionButton />
@@ -49,12 +49,12 @@ export function LogTab({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-(--grey-900)">{activeSession.name}</h2>
+        <h2 className="text-base font-semibold text-(--text)">{activeSession.name}</h2>
         <FinishSessionButton sessionId={activeSession.id} />
       </div>
 
       {sessionExercisesWithSets.length === 0 ? (
-        <p className="text-(--grey-600) text-sm">No exercises yet. Add one to get started.</p>
+        <p className="text-(--text-secondary) text-sm">No exercises yet. Add one to get started.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {sessionExercisesWithSets.map((se) => {

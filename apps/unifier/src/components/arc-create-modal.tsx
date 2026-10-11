@@ -57,11 +57,11 @@ export function ArcCreateModal({ isOpen, onClose, onSubmit }: Props) {
           <TextInput value={name} onChange={setName} placeholder="Arc name" autoFocus />
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-(--grey-500)">Colour</span>
+              <span className="text-xs text-(--text-muted)">Colour</span>
               <button
                 type="button"
                 onClick={() => setColor(null)}
-                className="text-xs text-(--grey-500) hover:text-(--grey-800)"
+                className="text-xs text-(--text-muted) hover:text-(--text)"
               >
                 No colour
               </button>

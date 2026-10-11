@@ -70,10 +70,10 @@ export function ArcDeleteDialog({
           <div className="flex flex-col gap-3">
             {canMove ? (
               <>
-                <p className="text-sm text-(--grey-700)">
+                <p className="text-sm text-(--text-secondary)">
                   This arc has {people}. Choose what happens to them.
                 </p>
-                <label className="flex items-center gap-2 text-sm text-(--grey-900)">
+                <label className="flex items-center gap-2 text-sm text-(--text)">
                   <input
                     type="radio"
                     name="delete-arc-mode"
@@ -91,7 +91,7 @@ export function ArcDeleteDialog({
                     ))}
                   </Select>
                 )}
-                <label className="flex items-center gap-2 text-sm text-(--grey-900)">
+                <label className="flex items-center gap-2 text-sm text-(--text)">
                   <input
                     type="radio"
                     name="delete-arc-mode"
@@ -102,7 +102,7 @@ export function ArcDeleteDialog({
                 </label>
               </>
             ) : (
-              <p className="text-sm text-(--grey-700)">
+              <p className="text-sm text-(--text-secondary)">
                 This is your only arc, so the {people} in it can’t be moved anywhere. Deleting it
                 removes them too.
               </p>

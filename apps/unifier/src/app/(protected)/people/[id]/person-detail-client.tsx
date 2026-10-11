@@ -202,7 +202,7 @@ export function PersonDetailClient({
     <main className="flex w-full flex-1 flex-col gap-5 px-4 py-4">
       <Link
         href="/"
-        className="flex items-center gap-1.5 self-start text-sm text-(--grey-600) transition-colors hover:text-(--grey-900)"
+        className="flex items-center gap-1.5 self-start text-sm text-(--text-secondary) transition-colors hover:text-(--text)"
       >
         <ArrowLeftIcon size={16} /> All arcs
       </Link>
@@ -215,15 +215,13 @@ export function PersonDetailClient({
           arcColor={arc.color}
           size={40}
         />
-        <h1 className="min-w-0 break-words text-2xl font-semibold text-(--grey-900)">
-          {person.name}
-        </h1>
-        <span className="self-end pb-0.5 text-sm text-(--grey-500)">{arc.name}</span>
+        <h1 className="min-w-0 break-words text-2xl font-semibold text-(--text)">{person.name}</h1>
+        <span className="self-end pb-0.5 text-sm text-(--text-muted)">{arc.name}</span>
         <button
           type="button"
           onClick={() => setEditOpen(true)}
           aria-label={`Edit ${person.name}`}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-(--grey-400) transition-[color,background-color] hover:bg-(--surface-150) hover:text-(--grey-900)"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-(--text-subtle) transition-[color,background-color] hover:bg-(--surface-150) hover:text-(--text)"
         >
           <PencilSimpleIcon size={16} />
         </button>
@@ -231,7 +229,7 @@ export function PersonDetailClient({
           className={
             neverTouched
               ? "shrink-0 rounded-full bg-(--surface-200) px-2.5 py-1 text-xs font-medium text-(--red-500) sm:ml-auto"
-              : "shrink-0 rounded-full bg-(--surface-200) px-2.5 py-1 text-xs font-medium text-(--grey-700) sm:ml-auto"
+              : "shrink-0 rounded-full bg-(--surface-200) px-2.5 py-1 text-xs font-medium text-(--text-secondary) sm:ml-auto"
           }
         >
           {drift}
@@ -262,7 +260,7 @@ export function PersonDetailClient({
                 key={slot.id}
                 className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3"
               >
-                <dt className="shrink-0 break-words text-xs text-(--grey-500) sm:w-32 sm:text-sm">
+                <dt className="shrink-0 break-words text-xs text-(--text-muted) sm:w-32 sm:text-sm">
                   {slot.label}
                 </dt>
                 <dd className="flex-1">
@@ -280,7 +278,7 @@ export function PersonDetailClient({
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xs font-medium text-(--grey-500)">Note</h2>
+        <h2 className="text-xs font-medium text-(--text-muted)">Note</h2>
         <Textarea
           value={note}
           onChange={setNote}

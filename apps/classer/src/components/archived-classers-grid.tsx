@@ -44,7 +44,7 @@ export function ArchivedClassersGrid({ classers: initialClassers }: Props) {
       <Breadcrumb crumbs={[{ label: "Archived" }]} />
 
       {localClassers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--grey-500)">
+        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--text-muted)">
           <ArchiveIcon size={40} weight="thin" />
           <p className="text-sm">No archived classers.</p>
         </div>

@@ -181,7 +181,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
 
         {showSearching ? (
           <div className="flex justify-center pt-16">
-            <p className="text-sm text-(--grey-400)">Searching…</p>
+            <p className="text-sm text-(--text-subtle)">Searching…</p>
           </div>
         ) : isEmpty ? (
           <div className="flex justify-center pt-16">
@@ -211,7 +211,7 @@ export function EntriesGrid({ initialEntries, initialNextCursor, filters }: Prop
 
         {(loading || (isSearching && searchLoading && !isEmpty)) && (
           <div className="flex justify-center pt-6">
-            <p className="text-sm text-(--grey-400)">Loading…</p>
+            <p className="text-sm text-(--text-subtle)">Loading…</p>
           </div>
         )}
       </div>

@@ -22,10 +22,17 @@ type Props = {
   allFolders: Folder[];
   menuVisible?: boolean;
   hideDelete?: boolean;
-  isDark?: boolean;
+  /** The card under the menu has a strong fill: see `NoteCard`. */
+  strongFill?: boolean;
 };
 
-export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete, isDark }: Props) {
+export function FolderActionsMenu({
+  folder,
+  allFolders,
+  menuVisible,
+  hideDelete,
+  strongFill,
+}: Props) {
   const [modal, setModal] = useState<"rename" | "move" | "color" | "archive" | "delete" | null>(
     null
   );
@@ -70,9 +77,9 @@ export function FolderActionsMenu({ folder, allFolders, menuVisible, hideDelete,
 
   const iconBtnClass = cn(
     "flex h-7 w-7 items-center justify-center rounded-lg",
-    isDark
-      ? "bg-white/15 hover:bg-white/25 text-(--grey-100)"
-      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)"
+    strongFill
+      ? "bg-(--strong-fill-chip) hover:bg-(--strong-fill-chip-hover) text-(--strong-fill-text)"
+      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--text-secondary)"
   );
 
   return (

@@ -68,8 +68,8 @@ export function DayDetailModal({
               className={cn(
                 "rounded-full px-3 py-1.5 text-sm transition-colors",
                 selected
-                  ? "bg-(--grey-800) text-white"
-                  : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+                  ? "bg-(--text)/90 text-(--text-inverse)"
+                  : "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200)"
               )}
             >
               {symptom.name}

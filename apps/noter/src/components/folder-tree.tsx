@@ -39,11 +39,13 @@ function TreeNode({
         onClick={() => onPick(node.id)}
         disabled={isPending}
         style={{ paddingLeft: `${12 + (depth - 1) * 16}px` }}
-        className="w-full flex items-center gap-1.5 rounded-[10px] pr-3 py-2 text-left text-sm text-(--grey-900) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
+        className="w-full flex items-center gap-1.5 rounded-[10px] pr-3 py-2 text-left text-sm text-(--text) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
       >
-        <ArrowElbowDownRightIcon size={14} className="shrink-0 text-(--grey-400)" />
+        <ArrowElbowDownRightIcon size={14} className="shrink-0 text-(--text-subtle)" />
         <span className="flex-1">{node.name}</span>
-        {isCurrent && <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--grey-500)" />}
+        {isCurrent && (
+          <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--text-muted)" />
+        )}
       </button>
       {children.map((child) => (
         <TreeNode
@@ -70,11 +72,11 @@ export function FolderTree({ folders, currentParentFolderId, onPick, isPending }
         type="button"
         onClick={() => onPick(null)}
         disabled={isPending}
-        className="w-full flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
+        className="w-full flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-left text-sm text-(--text) hover:bg-(--surface-150) disabled:opacity-50 transition-colors"
       >
         <span className="flex-1">Home</span>
         {isHomeActive && (
-          <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--grey-500)" />
+          <MapPinIcon size={14} weight="fill" className="shrink-0 text-(--text-muted)" />
         )}
       </button>
       {roots.map((root) => (

@@ -18,7 +18,7 @@ type Props = {
 };
 
 const ICON_BUTTON =
-  "flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--grey-500) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--grey-900) active:scale-90 disabled:cursor-not-allowed disabled:opacity-30";
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--text-muted) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--text) active:scale-90 disabled:cursor-not-allowed disabled:opacity-30";
 
 /**
  * Edits an arc's slot template. Slots are defined once here and inherited by every
@@ -62,7 +62,7 @@ export function ArcSlotsModal({
       content={
         <div className="flex flex-col gap-3">
           {slots.length === 0 ? (
-            <p className="text-sm text-(--grey-500)">
+            <p className="text-sm text-(--text-muted)">
               No slots yet. Add one — a birthday, their kids, a career goal.
             </p>
           ) : (
@@ -107,7 +107,7 @@ export function ArcSlotsModal({
                     }
                     className={
                       pendingRemove === slot.id
-                        ? "flex h-11 shrink-0 items-center rounded-[8px] bg-(--red-500) px-2.5 text-xs font-medium text-white active:scale-95"
+                        ? "flex h-11 shrink-0 items-center rounded-[8px] bg-(--red-500) px-2.5 text-xs font-medium text-(--text-on-strong-hue) active:scale-95"
                         : `${ICON_BUTTON} hover:text-(--red-500)`
                     }
                   >
@@ -118,7 +118,7 @@ export function ArcSlotsModal({
             </ul>
           )}
 
-          <div className="flex items-center gap-2 border-t border-(--grey-200) pt-3">
+          <div className="flex items-center gap-2 border-t border-(--border) pt-3">
             <TextInput
               value={newLabel}
               onChange={setNewLabel}

@@ -143,8 +143,8 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
         <button
           type="button"
           onClick={backToYears}
-          className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--grey-600)
-                     hover:text-(--grey-900) transition-colors rounded-[14px]
+          className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--text-secondary)
+                     hover:text-(--text) transition-colors rounded-[14px]
                      hover:bg-(--surface-150)"
         >
           <CaretLeftIcon size={13} />
@@ -157,8 +157,8 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
         <button
           type="button"
           onClick={backToMonths}
-          className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--grey-600)
-                     hover:text-(--grey-900) transition-colors rounded-[14px]
+          className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--text-secondary)
+                     hover:text-(--text) transition-colors rounded-[14px]
                      hover:bg-(--surface-150)"
         >
           <CaretLeftIcon size={13} />
@@ -171,12 +171,14 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
 
   function renderRows() {
     if (loading) {
-      return <p className="px-3 py-4 text-sm text-(--grey-400) text-center">Loading…</p>;
+      return <p className="px-3 py-4 text-sm text-(--text-subtle) text-center">Loading…</p>;
     }
 
     if (level === "years") {
       if (years.length === 0) {
-        return <p className="px-3 py-4 text-sm text-(--grey-400) text-center">No entries yet.</p>;
+        return (
+          <p className="px-3 py-4 text-sm text-(--text-subtle) text-center">No entries yet.</p>
+        );
       }
       return years.map((row) => (
         <div key={row.year} className="flex items-center">
@@ -187,14 +189,14 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
                        hover:bg-(--surface-150) transition-colors text-left"
           >
             <span className="font-medium">{row.year}</span>
-            <span className="text-(--grey-400) text-xs">{row.count}</span>
+            <span className="text-(--text-subtle) text-xs">{row.count}</span>
           </button>
           <button
             type="button"
             onClick={() => drillIntoYear(row.year)}
             className="flex items-center justify-center w-8 h-9 rounded-r-[14px]
-                       hover:bg-(--surface-150) transition-colors text-(--grey-400)
-                       hover:text-(--grey-700)"
+                       hover:bg-(--surface-150) transition-colors text-(--text-subtle)
+                       hover:text-(--text-secondary)"
             aria-label={`Show months for ${row.year}`}
           >
             <CaretRightIcon size={13} />
@@ -213,14 +215,14 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
                        hover:bg-(--surface-150) transition-colors text-left"
           >
             <span>{MONTH_NAMES[row.month - 1]}</span>
-            <span className="text-(--grey-400) text-xs">{row.count}</span>
+            <span className="text-(--text-subtle) text-xs">{row.count}</span>
           </button>
           <button
             type="button"
             onClick={() => drillIntoMonth(row.month)}
             className="flex items-center justify-center w-8 h-9 rounded-r-[14px]
-                       hover:bg-(--surface-150) transition-colors text-(--grey-400)
-                       hover:text-(--grey-700)"
+                       hover:bg-(--surface-150) transition-colors text-(--text-subtle)
+                       hover:text-(--text-secondary)"
             aria-label={`Show days for ${MONTH_NAMES[row.month - 1]}`}
           >
             <CaretRightIcon size={13} />
@@ -239,7 +241,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
                      hover:bg-(--surface-150) transition-colors text-left"
         >
           <span>{row.day}</span>
-          <span className="text-(--grey-400) text-xs">{row.count}</span>
+          <span className="text-(--text-subtle) text-xs">{row.count}</span>
         </button>
       ));
     }
@@ -256,7 +258,7 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
             "flex h-11 w-11 items-center justify-center rounded-[10px] transition-colors",
             scope
               ? "bg-(--surface-200) text-(--teal-400)"
-              : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+              : "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200)"
           )}
           aria-label="Filter by date"
         >
@@ -282,8 +284,8 @@ export function CalendarDrillDown({ scope, onScopeChange, filters }: Props) {
                   onScopeChange(null);
                   setOpen(false);
                 }}
-                className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--grey-500)
-                           hover:text-(--grey-800) transition-colors rounded-[14px]
+                className="flex items-center gap-1.5 w-full px-3 py-2 text-sm text-(--text-muted)
+                           hover:text-(--text) transition-colors rounded-[14px]
                            hover:bg-(--surface-150)"
               >
                 <XIcon size={13} />

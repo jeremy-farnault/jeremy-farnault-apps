@@ -26,13 +26,15 @@ export function LogPanel() {
   const entries = useLogStore((s) => s.entries);
 
   return (
-    <div className="rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-red-500 select-none text-left w-full">
+    <div className="rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-red-500 select-none text-left w-full">
       <button
         type="button"
         className="w-full flex items-center justify-between p-4 cursor-pointer"
         onClick={() => setExpanded((v) => !v)}
       >
-        <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">📜 Log</p>
+        <p className="text-xs font-semibold text-(--hud-text-muted) uppercase tracking-wider">
+          📜 Log
+        </p>
       </button>
 
       {expanded && (
@@ -43,10 +45,10 @@ export function LogPanel() {
             .map((entry) => (
               <div key={entry.id} className="flex items-start gap-2 text-xs">
                 <span className="shrink-0">{CATEGORY_EMOJI[entry.category]}</span>
-                <span className="shrink-0 text-(--grey-500) tabular-nums">
+                <span className="shrink-0 text-(--hud-text-muted) tabular-nums">
                   {new Date(entry.timestamp).toLocaleTimeString()}
                 </span>
-                <span className="text-(--grey-200)">{entry.message}</span>
+                <span className="text-(--hud-text)">{entry.message}</span>
               </div>
             ))}
         </div>

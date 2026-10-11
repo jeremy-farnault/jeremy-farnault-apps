@@ -12,7 +12,7 @@ export function AppGrid({ apps }: { apps: ShowcaseApp[] }) {
           scroll={false}
           className="group flex flex-col items-center gap-3 outline-none"
         >
-          <div className="relative h-20 w-20 overflow-hidden rounded-[22px] shadow-[0_10px_24px_0_rgba(0,0,0,0.12)] transition-transform duration-200 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-(--grey-400) sm:h-24 sm:w-24">
+          <div className="relative h-20 w-20 overflow-hidden rounded-[22px] shadow-[0_10px_24px_0_rgba(0,0,0,0.12)] transition-transform duration-200 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-focus-visible:ring-2 group-focus-visible:ring-(--text-subtle) sm:h-24 sm:w-24">
             <Image
               src={`/icons/${app.id}.png`}
               alt={`${app.name} icon`}
@@ -21,7 +21,7 @@ export function AppGrid({ apps }: { apps: ShowcaseApp[] }) {
               className="object-cover"
             />
           </div>
-          <span className="text-sm font-medium text-(--grey-900)">{app.name}</span>
+          <span className="text-sm font-medium text-(--text)">{app.name}</span>
         </Link>
       ))}
     </div>

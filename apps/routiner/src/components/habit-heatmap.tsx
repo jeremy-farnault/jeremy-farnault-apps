@@ -9,7 +9,7 @@ import { type CSSProperties, useLayoutEffect, useRef } from "react";
  */
 const EMPTY_SQUARE: CSSProperties = {
   backgroundColor: "transparent",
-  border: "1px solid var(--grey-300)",
+  border: "1px solid var(--border-strong)",
 };
 
 type HabitLog = { date: string; value: string };
@@ -68,6 +68,13 @@ function parseColor(colorVar: string): ParsedColor {
 function rampOffset(pickedStep: number): number {
   return Math.min(Math.max(pickedStep - 400, 0), 200);
 }
+
+/**
+ * The dark scales are split by use (DM-02), so stepping through 100–700 in dark mode jumps
+ * between deep washes and light tints instead of rising. Dark mode instead fades the picked
+ * colour into the page: one opacity per ramp step, faintest for the lowest values.
+ */
+const DARK_RAMP = [22, 34, 46, 58, 72, 86, 100];
 
 function computeMedian(sorted: number[]): number {
   const mid = Math.floor(sorted.length / 2);
@@ -214,8 +221,12 @@ export function HabitHeatmap({
     if (logValue === undefined) return EMPTY_SQUARE;
     const v = parseLogValue(type, logValue);
     if (Number.isNaN(v)) return EMPTY_SQUARE;
-    const step = getNumericStep(v, numericMin, numericMedian, numericMax) + rampOffset(pickedStep);
-    return { backgroundColor: `var(--${hue}-${step})` };
+    const rawStep = getNumericStep(v, numericMin, numericMedian, numericMax);
+    // No inline background: `.heat-cell` in globals.css picks the light or dark ramp.
+    return {
+      "--heat-light": `var(--${hue}-${rawStep + rampOffset(pickedStep)})`,
+      "--heat-dark": `color-mix(in oklab, var(--${hue}-${pickedStep}) ${DARK_RAMP[rawStep / 100 - 1]}%, transparent)`,
+    } as CSSProperties;
   }
 
   function getTooltipContent(date: string): string {
@@ -234,8 +245,11 @@ export function HabitHeatmap({
       {/* Static day-of-week labels — outside the scroll container */}
       <div className="flex flex-col shrink-0" style={{ gap: 3, paddingTop: MONTH_ROW_OFFSET }}>
         {DAY_LABELS.map((label, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: DAY_LABELS is a fixed 7-item array; position is the identity
-          <div key={i} className="h-3 flex items-center text-[9px] leading-none text-(--grey-400)">
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: DAY_LABELS is a fixed 7-item array; position is the identity
+            key={i}
+            className="h-3 flex items-center text-[9px] leading-none text-(--text-subtle)"
+          >
             {label}
           </div>
         ))}
@@ -254,7 +268,7 @@ export function HabitHeatmap({
                 <span
                   // biome-ignore lint/suspicious/noArrayIndexKey: a year-long grid can show the same month twice, so the column is the identity
                   key={col}
-                  className="absolute text-[9px] leading-none text-(--grey-400) whitespace-nowrap"
+                  className="absolute text-[9px] leading-none text-(--text-subtle) whitespace-nowrap"
                   style={{ left: col * 15 }}
                 >
                   {label}
@@ -282,7 +296,7 @@ export function HabitHeatmap({
                     <Tooltip key={row} content={getTooltipContent(date)} side="top">
                       <button
                         type="button"
-                        className="size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
+                        className="heat-cell size-3 rounded-[2px] transition-opacity duration-150 hover:opacity-75"
                         style={{
                           ...squareStyle,
                           cursor: isInteractive ? "pointer" : "default",

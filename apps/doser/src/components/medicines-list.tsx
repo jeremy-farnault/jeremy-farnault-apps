@@ -54,7 +54,7 @@ export function MedicinesList({
   return (
     <div className="flex w-full flex-col gap-4 px-4 pt-8 pb-24">
       {monthViews.length === 0 || !days ? (
-        <p className="py-16 text-center text-(--grey-700)">No medicines yet.</p>
+        <p className="py-16 text-center text-(--text-secondary)">No medicines yet.</p>
       ) : (
         <>
           <MonthNav

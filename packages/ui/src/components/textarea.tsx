@@ -37,7 +37,7 @@ export function Textarea({
       className={cn(
         "w-full resize-y rounded-[10px] bg-(--surface-150) px-3 py-2 text-sm",
         "border-none outline-none ring-0 focus:outline-none focus:ring-0",
-        "placeholder:text-(--grey-400)",
+        "placeholder:text-(--text-subtle)",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}

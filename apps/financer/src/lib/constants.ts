@@ -9,6 +9,10 @@ export const CURRENCY_FLAGS: Record<(typeof CURRENCIES)[number], string> = {
   USD: "🇺🇸",
 };
 
+/** The series colour for an item without one. */
+// dark-mode-fixed: a fixed swatch like the stored series colours, the same in both modes.
+export const FALLBACK_COLOR = "var(--grey-400)";
+
 export const ASSET_SOURCE_COLORS = [
   "var(--blue-400)",
   "var(--green-400)",

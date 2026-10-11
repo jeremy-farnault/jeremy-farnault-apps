@@ -99,15 +99,15 @@ export function ArcSection({
           style={{ backgroundColor: dotColor }}
           aria-hidden
         />
-        <h2 className="flex-1 truncate text-base font-semibold text-(--grey-900)">{arc.name}</h2>
-        <span className="text-xs text-(--grey-500)">{people.length}</span>
+        <h2 className="flex-1 truncate text-base font-semibold text-(--text)">{arc.name}</h2>
+        <span className="text-xs text-(--text-muted)">{people.length}</span>
 
         <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <Popover.Trigger asChild>
             <button
               type="button"
               aria-label={`${arc.name} options`}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--grey-700) transition-transform hover:bg-(--surface-200) active:scale-90"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--text-secondary) transition-transform hover:bg-(--surface-200) active:scale-90"
             >
               <DotsThreeIcon size={18} weight="bold" />
             </button>
@@ -127,7 +127,7 @@ export function ArcSection({
                   setMenuOpen(false);
                   setEditOpen(true);
                 }}
-                className={cn(MENU_ITEM, "text-(--grey-900)")}
+                className={cn(MENU_ITEM, "text-(--text)")}
               >
                 <PencilSimpleIcon size={16} /> Edit
               </button>
@@ -137,11 +137,11 @@ export function ArcSection({
                   setMenuOpen(false);
                   setSlotsOpen(true);
                 }}
-                className={cn(MENU_ITEM, "text-(--grey-900)")}
+                className={cn(MENU_ITEM, "text-(--text)")}
               >
                 <ListBulletsIcon size={16} /> Slots
                 {slots.length > 0 && (
-                  <span className="text-xs text-(--grey-500)">{slots.length}</span>
+                  <span className="text-xs text-(--text-muted)">{slots.length}</span>
                 )}
               </button>
               <button
@@ -151,7 +151,7 @@ export function ArcSection({
                   setMenuOpen(false);
                   void onMoveArc(arc.id, "up");
                 }}
-                className={cn(MENU_ITEM, "text-(--grey-900)")}
+                className={cn(MENU_ITEM, "text-(--text)")}
               >
                 <ArrowUpIcon size={16} /> Move up
               </button>
@@ -162,7 +162,7 @@ export function ArcSection({
                   setMenuOpen(false);
                   void onMoveArc(arc.id, "down");
                 }}
-                className={cn(MENU_ITEM, "text-(--grey-900)")}
+                className={cn(MENU_ITEM, "text-(--text)")}
               >
                 <ArrowDownIcon size={16} /> Move down
               </button>
@@ -182,17 +182,17 @@ export function ArcSection({
       </div>
 
       {people.length === 0 && !adding ? (
-        <p className="text-sm text-(--grey-500)">No one here yet.</p>
+        <p className="text-sm text-(--text-muted)">No one here yet.</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {people.map((person) => (
             <li
               key={person.id}
-              className="group flex min-h-11 items-center gap-2 rounded-[10px] px-2 text-sm text-(--grey-800)"
+              className="group flex min-h-11 items-center gap-2 rounded-[10px] px-2 text-sm text-(--text)"
             >
               <Link
                 href={`/people/${person.id}`}
-                className="flex min-w-0 flex-1 items-center gap-2 rounded-[8px] transition-colors hover:text-(--grey-900)"
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-[8px] transition-colors hover:text-(--text)"
               >
                 <PersonBubble
                   name={person.name}
@@ -207,7 +207,7 @@ export function ArcSection({
                 type="button"
                 onClick={() => onEditPerson(person)}
                 aria-label={`Edit ${person.name}`}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--grey-400) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--grey-800) active:scale-90"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--text-subtle) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--text) active:scale-90"
               >
                 <PencilSimpleIcon size={14} />
               </button>
@@ -216,7 +216,7 @@ export function ArcSection({
                   type="button"
                   onClick={() => setMovingPerson(person)}
                   aria-label={`Move ${person.name} to another arc`}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--grey-400) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--grey-800) active:scale-90"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] text-(--text-subtle) transition-[color,background-color,transform] hover:bg-(--surface-200) hover:text-(--text) active:scale-90"
                 >
                   <ArrowsLeftRightIcon size={14} />
                 </button>
@@ -246,7 +246,7 @@ export function ArcSection({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="flex min-h-11 items-center gap-1.5 self-start rounded-[10px] px-2 text-sm text-(--grey-600) transition-colors hover:bg-(--surface-200) hover:text-(--grey-900)"
+          className="flex min-h-11 items-center gap-1.5 self-start rounded-[10px] px-2 text-sm text-(--text-secondary) transition-colors hover:bg-(--surface-200) hover:text-(--text)"
         >
           <PlusIcon size={14} />
           {people.length === 0 ? "Add the first person" : "Add a person"}

@@ -145,8 +145,8 @@ export function FilterBar({ filters, onSearch, onSearchImmediate }: Props) {
               className={cn(
                 "h-9 rounded-full px-4 text-sm font-medium transition-colors",
                 filters.categories.includes(cat)
-                  ? "bg-(--grey-800) text-white"
-                  : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+                  ? "bg-(--text)/90 text-(--text-inverse)"
+                  : "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200)"
               )}
             >
               {cat}
@@ -158,7 +158,7 @@ export function FilterBar({ filters, onSearch, onSearchImmediate }: Props) {
           <button
             type="button"
             onClick={() => router.replace(pathname)}
-            className="flex shrink-0 items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--grey-700) bg-(--surface-150) hover:bg-(--surface-200)"
+            className="flex shrink-0 items-center gap-1.5 h-9 px-3 rounded-[10px] text-sm text-(--text-secondary) bg-(--surface-150) hover:bg-(--surface-200)"
           >
             <XIcon size={14} />
             Clear filters

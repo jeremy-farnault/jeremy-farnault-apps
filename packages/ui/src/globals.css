@@ -233,8 +233,10 @@
      * for a raw palette shade only where a colour must stay the same in both modes.
      *
      *   --text            body text, headings, icons
-     *   --text-muted      secondary text: metadata, captions, placeholders
-     *   --text-subtle     tertiary text: hints, disabled labels, axis ticks
+     *   --text-secondary  readable secondary text: form labels, modal body, icon buttons,
+     *                     labels on soft fills
+     *   --text-muted      quieter text: metadata, captions, placeholders
+     *   --text-subtle     faintest text: hints, disabled labels, axis ticks
      *   --text-inverse    text on a --text-coloured fill (tooltips, dark chips)
      *   --text-on-strong-hue  text on a hue shade that is dark in light mode but light in
      *                     dark mode (the blue/purple/red -600 swatches, the -700 row)
@@ -247,6 +249,7 @@
      *   --shadow-lifted   hovered lift of a card (`card-hover-lift`)
      */
     --text: var(--grey-900);
+    --text-secondary: var(--grey-700);
     --text-muted: var(--grey-500);
     --text-subtle: var(--grey-400);
     --text-inverse: var(--grey-100);
@@ -430,6 +433,7 @@
     --surface-300: #ffffff24;
 
     --text: #edeff0;
+    --text-secondary: #c8c9cc;
     --text-muted: #a0a2a6;
     --text-subtle: #86868d;
     --text-inverse: #222226;
@@ -452,6 +456,22 @@
   html.dark {
     color-scheme: dark;
   }
+}
+
+/*
+ * The Grey text colour is stored as `var(--grey-700)`, which stays fixed and is unreadable on
+ * a dark card. Rather than migrate stored values, dark mode draws it as secondary text, in
+ * rendered rich text and on its picker swatch. `!important` because the colour is an inline
+ * style. Rich-text renderers outside the editor opt in with the `jf-rich-text` class.
+ */
+/* dark-mode-fixed: the remap itself */
+.dark .jf-rich-text [style*="--grey-700"] {
+  color: var(--text-secondary) !important;
+}
+
+/* dark-mode-fixed: the remap itself */
+.dark [data-swatch="var(--grey-700)"] {
+  background-color: var(--text-secondary) !important;
 }
 
 /*

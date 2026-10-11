@@ -108,7 +108,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         <AppShell
-          appIcon={<ApertureIcon className="text-white" size={26} weight="bold" />}
+          appIcon={<ApertureIcon className="text-(--text-on-strong-hue)" size={26} weight="bold" />}
           appName="Exposer"
           currentAppId="exposer"
           titleHref="/"

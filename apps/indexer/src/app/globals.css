@@ -1,6 +1,12 @@
-:root,
-.dark {
+:root {
   /* Indexer is the neutral hub — grey chrome so the colourful app tiles stay the stars. */
   --primary: var(--grey-200);
   --secondary: var(--grey-400);
+}
+
+/* Greys stay fixed, so the dark chrome goes through roles instead. */
+.dark {
+  --primary: var(--border);
+  --primary-foreground: var(--text);
+  --secondary: var(--border-strong);
 }

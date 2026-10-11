@@ -42,7 +42,8 @@ export function PoiMarkers({ pois, selectedId, onSelect }: Props) {
             >
               <button
                 type="button"
-                className={`flex items-center justify-center rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-white font-semibold tabular-nums select-none ${clusterSize(item.count)}`}
+                // dark-mode-fixed: a dark marker over the night map, in both modes.
+                className={`flex items-center justify-center rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-(--hud-ink) font-semibold tabular-nums select-none ${clusterSize(item.count)}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   map?.flyTo({
@@ -62,6 +63,7 @@ export function PoiMarkers({ pois, selectedId, onSelect }: Props) {
           <Marker key={poi.id} longitude={poi.longitude} latitude={poi.latitude} anchor="bottom">
             <button
               type="button"
+              // dark-mode-fixed: a dark marker over the night map, in both modes.
               className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 cursor-pointer text-base select-none"
               onClick={(e) => {
                 e.stopPropagation();

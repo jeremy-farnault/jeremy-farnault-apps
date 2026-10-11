@@ -54,12 +54,12 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
 
         {/* Center: rank + name + description */}
         <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-3">
-          <span className="mb-0.5 w-fit rounded-md px-1.5 py-0.5 text-xs font-bold text-(--grey-900) bg-(--green-400)">
+          <span className="mb-0.5 w-fit rounded-md px-1.5 py-0.5 text-xs font-bold text-(--text) bg-(--green-400)">
             #{item.rank}
           </span>
-          <p className="truncate text-sm font-semibold text-(--grey-900)">{item.name}</p>
+          <p className="truncate text-sm font-semibold text-(--text)">{item.name}</p>
           {item.description && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-(--grey-500)">{item.description}</p>
+            <p className="mt-0.5 line-clamp-2 text-xs text-(--text-muted)">{item.description}</p>
           )}
         </div>
 
@@ -75,7 +75,7 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
             onClick={onUp}
             disabled={item.rank === 1}
             aria-label="Move up"
-            className="flex h-6 w-6 items-center justify-center rounded-full text-(--grey-900) transition-colors hover:bg-(--surface-200) disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-(--text) transition-colors hover:bg-(--surface-200) disabled:cursor-not-allowed disabled:opacity-30"
           >
             <ArrowUpIcon size={14} weight="bold" />
           </button>
@@ -84,7 +84,7 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
             onClick={onDown}
             disabled={item.rank === totalCount}
             aria-label="Move down"
-            className="flex h-6 w-6 items-center justify-center rounded-full text-(--grey-900) transition-colors hover:bg-(--surface-200) disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-(--text) transition-colors hover:bg-(--surface-200) disabled:cursor-not-allowed disabled:opacity-30"
           >
             <ArrowDownIcon size={14} weight="bold" />
           </button>
@@ -101,6 +101,7 @@ export function ItemCard({ item, totalCount, onUp, onDown, onEdit, onDelete }: P
             type="button"
             onClick={() => setDeleteOpen(true)}
             aria-label="Delete item"
+            // dark-mode-fixed: a dark chip over the item image, in both modes.
             className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) text-white transition-colors hover:bg-(--grey-700)"
           >
             <TrashIcon size={13} />

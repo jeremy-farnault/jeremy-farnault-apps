@@ -46,7 +46,7 @@ export function TextInput({
       className={cn(
         "h-11 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm",
         "border-none outline-none ring-0 focus:outline-none focus:ring-0",
-        "placeholder:text-(--grey-400)",
+        "placeholder:text-(--text-subtle)",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}

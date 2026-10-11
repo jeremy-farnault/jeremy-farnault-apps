@@ -21,6 +21,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import {
   ASSET_SOURCE_COLORS,
   CATEGORY_COLORS,
+  FALLBACK_COLOR,
   INCOME_SOURCE_COLORS,
   SPENDING_CATEGORY_COLORS,
 } from "@/lib/constants";
@@ -242,9 +243,7 @@ export default async function FinancerPage({
     ...Object.fromEntries(
       typedSpendingCategories.map((c, i) => [
         c.name,
-        c.color ??
-          SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ??
-          "var(--grey-400)",
+        c.color ?? SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ?? FALLBACK_COLOR,
       ])
     ),
   };
@@ -256,9 +255,7 @@ export default async function FinancerPage({
     ...Object.fromEntries(
       (overviewSpendingCategories as SpendingCategoryRow[]).map((c, i) => [
         c.name,
-        c.color ??
-          SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ??
-          "var(--grey-400)",
+        c.color ?? SPENDING_CATEGORY_COLORS[i % SPENDING_CATEGORY_COLORS.length] ?? FALLBACK_COLOR,
       ])
     ),
   };
@@ -278,21 +275,21 @@ export default async function FinancerPage({
 
   const spendingDetailSeries = buildDetailSeries(
     (m) => m.spendingByCategory,
-    (name) => overviewCategoryColors[name] ?? "var(--grey-400)"
+    (name) => overviewCategoryColors[name] ?? FALLBACK_COLOR
   );
   const assetDetailSeries = buildDetailSeries(
     (m) => m.assets,
     (name, i) =>
       overviewAssetSources.find((s) => s.name === name)?.color ??
       ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
-      "var(--grey-400)"
+      FALLBACK_COLOR
   );
   const incomeDetailSeries = buildDetailSeries(
     (m) => m.income,
     (name, i) =>
       overviewIncomeSources.find((s) => s.name === name)?.color ??
       INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
-      "var(--grey-400)"
+      FALLBACK_COLOR
   );
 
   return (

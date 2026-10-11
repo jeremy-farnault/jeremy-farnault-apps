@@ -1,6 +1,6 @@
 "use client";
 
-import { INCOME_SOURCE_COLORS } from "@/lib/constants";
+import { FALLBACK_COLOR, INCOME_SOURCE_COLORS } from "@/lib/constants";
 import type { IncomeRow, IncomeSourceRow } from "@/lib/queries";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -20,10 +20,10 @@ export function IncomeChart({
   const tooltipStyle = {
     fontSize: 11,
     borderRadius: 12,
-    backgroundColor: "var(--grey-700)",
+    backgroundColor: "var(--text-secondary)",
     border: "none",
   };
-  const tooltipTextStyle = { color: "white" };
+  const tooltipTextStyle = { color: "var(--text-inverse)" };
 
   return (
     <div>
@@ -46,7 +46,7 @@ export function IncomeChart({
               const color =
                 sources?.[sourceIndex]?.color ??
                 INCOME_SOURCE_COLORS[sourceIndex % INCOME_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
+                FALLBACK_COLOR;
               return <Cell key={entry.name} fill={color} />;
             })}
           </Pie>
@@ -68,11 +68,11 @@ export function IncomeChart({
           const color =
             sources?.[sourceIndex]?.color ??
             INCOME_SOURCE_COLORS[sourceIndex % INCOME_SOURCE_COLORS.length] ??
-            "var(--grey-400)";
+            FALLBACK_COLOR;
           return (
             <div key={entry.name} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-              <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
+              <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>
                 {entry.name}
               </span>
             </div>

@@ -65,7 +65,11 @@ export function CardTile({
       <div className="flex items-start gap-1.5">
         <span className="min-w-0 flex-1 break-words">{card.title}</span>
         {hasBody && (
-          <TextAlignLeftIcon size={14} className="mt-0.5 shrink-0 text-(--grey-400)" aria-hidden />
+          <TextAlignLeftIcon
+            size={14}
+            className="mt-0.5 shrink-0 text-(--text-subtle)"
+            aria-hidden
+          />
         )}
         {card.important && (
           <WarningIcon
@@ -76,7 +80,7 @@ export function CardTile({
           />
         )}
       </div>
-      {hasBody && <p className="mt-1 line-clamp-2 text-xs text-(--grey-500)">{preview}</p>}
+      {hasBody && <p className="mt-1 line-clamp-2 text-xs text-(--text-muted)">{preview}</p>}
       {tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {tags.map((tag) => (
@@ -93,7 +97,7 @@ export function CardTile({
       {card.deadline &&
         (isDoneColumn ? (
           // Completed: freeze the countdown — show the deadline as a muted, struck-through date.
-          <span className="mt-2 inline-flex items-center rounded-full bg-(--surface-200) px-1.5 py-0.5 text-xs font-semibold text-(--grey-400) line-through">
+          <span className="mt-2 inline-flex items-center rounded-full bg-(--surface-200) px-1.5 py-0.5 text-xs font-semibold text-(--text-subtle) line-through">
             {formatDeadline(card.deadline)}
           </span>
         ) : (

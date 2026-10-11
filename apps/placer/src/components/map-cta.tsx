@@ -42,7 +42,7 @@ export function MapCta({ categories, onLocationSelected, onSpotFormClosed }: Map
           type="button"
           onClick={() => setCategoryModalOpen(true)}
           aria-label="Add category"
-          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
         >
           <PlusCircleIcon size={22} />
         </button>
@@ -50,7 +50,7 @@ export function MapCta({ categories, onLocationSelected, onSpotFormClosed }: Map
           type="button"
           onClick={() => setLocationSearchOpen(true)}
           aria-label="Add spot"
-          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
+          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
         >
           <MapPinIcon size={22} />
         </button>

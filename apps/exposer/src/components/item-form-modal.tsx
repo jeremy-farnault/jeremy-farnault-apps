@@ -277,14 +277,14 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
         content={
           loadingEdit ? (
             <div className="flex min-h-[280px] items-center justify-center">
-              <CircleNotchIcon size={28} className="animate-spin text-(--grey-400)" />
+              <CircleNotchIcon size={28} className="animate-spin text-(--text-subtle)" />
             </div>
           ) : (
             <div className="flex flex-col gap-4">
               {/* Photos */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-(--grey-500)">
+                  <span className="text-xs font-medium text-(--text-muted)">
                     Photos ({photos.length}/{MAX_PHOTOS})
                   </span>
                 </div>
@@ -306,6 +306,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
                           aria-label="Move left"
                           disabled={index === 0 || busy}
                           onClick={() => movePhoto(index, -1)}
+                          // dark-mode-fixed: on the dark scrim over the photo, in both modes.
                           className="text-white disabled:opacity-30"
                         >
                           <ArrowLeftIcon size={12} />
@@ -315,6 +316,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
                           aria-label="Remove photo"
                           disabled={busy}
                           onClick={() => removePhoto(index)}
+                          // dark-mode-fixed: on the dark scrim over the photo, in both modes.
                           className="text-white disabled:opacity-30"
                         >
                           <TrashIcon size={12} />
@@ -324,6 +326,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
                           aria-label="Move right"
                           disabled={index === photos.length - 1 || busy}
                           onClick={() => movePhoto(index, 1)}
+                          // dark-mode-fixed: on the dark scrim over the photo, in both modes.
                           className="text-white disabled:opacity-30"
                         >
                           <ArrowRightIcon size={12} />
@@ -337,7 +340,7 @@ export function ItemFormModal({ isOpen, itemId, onClose, onSaved }: Props) {
                       type="button"
                       disabled={busy}
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-(--grey-300) text-(--grey-500) hover:text-(--grey-900) disabled:opacity-50"
+                      className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-(--border-strong) text-(--text-muted) hover:text-(--text) disabled:opacity-50"
                     >
                       <PlusIcon size={18} />
                       <span className="text-[10px]">Add</span>

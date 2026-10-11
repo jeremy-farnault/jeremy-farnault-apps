@@ -136,7 +136,9 @@ export function NotePageClient({ note, crumbs, allFolders }: Props) {
             <div className="flex items-center gap-2">
               <EditorCharacterCount editor={editor} />
               <NoteActionsMenu note={note} allFolders={allFolders} alwaysVisible />
-              {isSaving && <CircleNotchIcon size={14} className="animate-spin text-(--grey-400)" />}
+              {isSaving && (
+                <CircleNotchIcon size={14} className="animate-spin text-(--text-subtle)" />
+              )}
             </div>
           </div>
         </div>

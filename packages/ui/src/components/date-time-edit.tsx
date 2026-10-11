@@ -62,7 +62,7 @@ function Caption({ calendarMonth, onToggleYearView }: CaptionProps) {
         onClick={() => previousMonth && goToMonth(previousMonth)}
         className={cn(
           "flex h-7 w-7 items-center justify-center rounded-full",
-          "text-(--grey-700) hover:bg-(--surface-150) focus:outline-none",
+          "text-(--text-secondary) hover:bg-(--surface-150) focus:outline-none",
           !previousMonth && "pointer-events-none opacity-30"
         )}
       >
@@ -72,7 +72,7 @@ function Caption({ calendarMonth, onToggleYearView }: CaptionProps) {
       <button
         type="button"
         onClick={onToggleYearView}
-        className="flex items-center gap-1 text-sm font-semibold text-(--grey-900) hover:opacity-70 focus:outline-none"
+        className="flex items-center gap-1 text-sm font-semibold text-(--text) hover:opacity-70 focus:outline-none"
       >
         {label}
         <CaretDownIcon size={14} />
@@ -84,7 +84,7 @@ function Caption({ calendarMonth, onToggleYearView }: CaptionProps) {
         onClick={() => nextMonth && goToMonth(nextMonth)}
         className={cn(
           "flex h-7 w-7 items-center justify-center rounded-full",
-          "text-(--grey-700) hover:bg-(--surface-150) focus:outline-none",
+          "text-(--text-secondary) hover:bg-(--surface-150) focus:outline-none",
           !nextMonth && "pointer-events-none opacity-30"
         )}
       >
@@ -100,10 +100,10 @@ function DayButton({ day, modifiers, ...props }: DayButtonProps) {
       {...props}
       className={cn(
         "flex h-9 w-9 items-center justify-center rounded-full",
-        "text-xs font-medium text-(--grey-700)",
+        "text-xs font-medium text-(--text-secondary)",
         "hover:bg-(--surface-200) focus:outline-none",
         modifiers.selected && "bg-(--dt-accent) text-(--dt-accent-fg) hover:bg-(--dt-accent)",
-        modifiers.today && !modifiers.selected && "bg-(--grey-300)",
+        modifiers.today && !modifiers.selected && "bg-(--border-strong)",
         modifiers.outside && "opacity-40",
         modifiers.disabled && "pointer-events-none opacity-30"
       )}
@@ -172,7 +172,7 @@ export function DateTimeEdit({
     >
       <div className="relative flex flex-col">
         {/* Top section: calendar + time picker */}
-        <div className="flex flex-row gap-6 border-b border-(--grey-200)">
+        <div className="flex flex-row gap-6 border-b border-(--border)">
           {/* Calendar */}
           <div className="flex-1 p-4 pl-6 pt-4">
             {viewMode === "year" ? (
@@ -182,7 +182,7 @@ export function DateTimeEdit({
                   <button
                     type="button"
                     onClick={() => setViewMode("month")}
-                    className="flex items-center gap-1 text-sm font-semibold text-(--grey-900) hover:opacity-70 focus:outline-none"
+                    className="flex items-center gap-1 text-sm font-semibold text-(--text) hover:opacity-70 focus:outline-none"
                   >
                     {currentYear}
                     <CaretDownIcon size={14} className="rotate-180" />
@@ -202,7 +202,7 @@ export function DateTimeEdit({
                         "rounded-[10px] px-2 py-1.5 text-sm font-medium focus:outline-none",
                         year === currentYear
                           ? "text-(--dt-accent-fg)"
-                          : "text-(--grey-600) hover:bg-(--surface-150)"
+                          : "text-(--text-secondary) hover:bg-(--surface-150)"
                       )}
                     >
                       {year}
@@ -225,7 +225,7 @@ export function DateTimeEdit({
                   month_caption: "w-full",
                   month_grid: "w-full border-collapse",
                   weekdays: "flex justify-center",
-                  weekday: "w-9 py-1 text-center text-xs font-medium text-(--grey-500)",
+                  weekday: "w-9 py-1 text-center text-xs font-medium text-(--text-muted)",
                   week: "mt-1 flex justify-center",
                   day: "flex items-center justify-center",
                 }}
@@ -240,7 +240,7 @@ export function DateTimeEdit({
           </div>
 
           {/* Time picker */}
-          <div className="border-l border-(--grey-200)">
+          <div className="border-l border-(--border)">
             <TimePickerPanel value={timeValue} onChange={setTimeValue} />
           </div>
         </div>
@@ -250,7 +250,7 @@ export function DateTimeEdit({
           <button
             type="button"
             onClick={handleCancel}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--grey-900) hover:bg-(--surface-150) focus:outline-none"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--text) hover:bg-(--surface-150) focus:outline-none"
           >
             <XIcon size={20} />
           </button>
@@ -258,7 +258,7 @@ export function DateTimeEdit({
             type="button"
             onClick={handleConfirm}
             disabled={disabled}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--grey-900) hover:bg-(--surface-150) focus:outline-none disabled:bg-(--grey-200) disabled:cursor-not-allowed"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-(--surface-100) text-(--text) hover:bg-(--surface-150) focus:outline-none disabled:bg-(--border) disabled:cursor-not-allowed"
           >
             <CheckIcon size={20} />
           </button>

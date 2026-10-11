@@ -34,7 +34,7 @@ export function TagField({ available, selected, onChange, disabled = false }: Pr
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium text-(--grey-500)">Tags</span>
+      <span className="text-xs font-medium text-(--text-muted)">Tags</span>
 
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -43,7 +43,7 @@ export function TagField({ available, selected, onChange, disabled = false }: Pr
             return (
               <span
                 key={name}
-                className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--grey-800)"
+                className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--text)"
               >
                 {color && (
                   <span
@@ -58,7 +58,7 @@ export function TagField({ available, selected, onChange, disabled = false }: Pr
                   aria-label={`Remove ${name}`}
                   disabled={disabled}
                   onClick={() => remove(name)}
-                  className="text-(--grey-500) hover:text-(--grey-900)"
+                  className="text-(--text-muted) hover:text-(--text)"
                 >
                   <XIcon size={11} weight="bold" />
                 </button>
@@ -89,7 +89,7 @@ export function TagField({ available, selected, onChange, disabled = false }: Pr
               type="button"
               disabled={disabled}
               onClick={() => add(tag.name)}
-              className="inline-flex items-center gap-1 rounded-full border border-(--grey-300) px-2 py-0.5 text-xs text-(--grey-600) hover:border-(--grey-400) hover:text-(--grey-900) disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full border border-(--border-strong) px-2 py-0.5 text-xs text-(--text-secondary) hover:border-(--text-subtle) hover:text-(--text) disabled:opacity-50"
             >
               <PlusIcon size={10} weight="bold" />
               {tag.color && (

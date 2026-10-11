@@ -8,8 +8,8 @@ export function FirstRunEmptyState({ onCreateArc }: { onCreateArc: () => void })
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
       <AtomIcon size={48} className="text-(--primary)" weight="duotone" />
-      <h2 className="text-xl font-semibold text-(--grey-900)">Start with an arc</h2>
-      <p className="max-w-sm text-sm leading-relaxed text-(--grey-600)">
+      <h2 className="text-xl font-semibold text-(--text)">Start with an arc</h2>
+      <p className="max-w-sm text-sm leading-relaxed text-(--text-secondary)">
         Arcs are how you group the people you care about — Family, Managers, Close Friends. Create
         one, then add the people who belong in it.
       </p>

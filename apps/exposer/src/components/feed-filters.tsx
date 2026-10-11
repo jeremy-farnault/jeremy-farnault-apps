@@ -39,7 +39,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-(--grey-300) px-3 py-1 text-sm text-(--grey-700) hover:border-(--grey-400) hover:text-(--grey-900)"
+          className="inline-flex items-center gap-1.5 rounded-full border border-(--border-strong) px-3 py-1 text-sm text-(--text-secondary) hover:border-(--text-subtle) hover:text-(--text)"
         >
           <FunnelIcon size={15} weight={activeCount > 0 ? "fill" : "regular"} />
           Filter
@@ -53,7 +53,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
           <button
             type="button"
             onClick={clearAll}
-            className="text-sm text-(--grey-500) hover:text-(--grey-900)"
+            className="text-sm text-(--text-muted) hover:text-(--text)"
           >
             Clear all
           </button>
@@ -64,7 +64,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
         <div className="flex flex-col gap-4 rounded-xl bg-(--surface-150) p-4">
           {tags.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium text-(--grey-500)">
+              <span className="text-xs font-medium text-(--text-muted)">
                 Tags (match all selected)
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -78,7 +78,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors ${
                         selected
                           ? "bg-(--primary) text-(--primary-foreground)"
-                          : "bg-(--surface-200) text-(--grey-700) hover:bg-(--surface-300)"
+                          : "bg-(--surface-200) text-(--text-secondary) hover:bg-(--surface-300)"
                       }`}
                     >
                       {tag.color && (
@@ -97,7 +97,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
           )}
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-(--grey-500)">Date range</span>
+            <span className="text-xs font-medium text-(--text-muted)">Date range</span>
             <div className="flex flex-wrap items-center gap-2">
               <div className="min-w-0 flex-1">
                 <DatePicker
@@ -107,7 +107,7 @@ export function FeedFilterBar({ tags, value, onChange }: Props) {
                   {...(value.to ? { maxDate: value.to } : {})}
                 />
               </div>
-              <span className="text-sm text-(--grey-500)">–</span>
+              <span className="text-sm text-(--text-muted)">–</span>
               <div className="min-w-0 flex-1">
                 <DatePicker
                   value={value.to ?? ""}

@@ -18,7 +18,7 @@ function ConversationList() {
             setActiveId(undefined);
             setMobileOpen(false);
           }}
-          className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm font-medium text-(--grey-900) hover:bg-(--surface-150) transition-colors"
+          className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm font-medium text-(--text) hover:bg-(--surface-150) transition-colors"
         >
           <NotePencilIcon size={18} />
           New chat
@@ -27,7 +27,7 @@ function ConversationList() {
 
       <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5">
         {conversations.length === 0 ? (
-          <p className="px-3 py-2 text-sm text-(--grey-400)">No conversations yet</p>
+          <p className="px-3 py-2 text-sm text-(--text-subtle)">No conversations yet</p>
         ) : (
           conversations.map((conversation) => (
             <ConversationRow key={conversation.id} conversation={conversation} />
@@ -56,7 +56,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
             type="button"
             aria-label="Open conversations"
             onClick={() => setMobileOpen(true)}
-            className="md:hidden rounded-[10px] p-1.5 text-(--grey-700) hover:bg-(--surface-150) transition-colors"
+            className="md:hidden rounded-[10px] p-1.5 text-(--text-secondary) hover:bg-(--surface-150) transition-colors"
           >
             <ListIcon size={20} />
           </button>
@@ -65,7 +65,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
             type="button"
             aria-label="Toggle sidebar"
             onClick={toggleCollapsed}
-            className="hidden md:inline-flex rounded-[10px] p-1.5 text-(--grey-700) hover:bg-(--surface-150) transition-colors"
+            className="hidden md:inline-flex rounded-[10px] p-1.5 text-(--text-secondary) hover:bg-(--surface-150) transition-colors"
           >
             <SidebarSimpleIcon size={20} />
           </button>
@@ -85,6 +85,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             aria-label="Close menu"
+            // dark-mode-fixed: a black scrim dims the page in both modes.
             className="fixed inset-0 z-[5000] bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
@@ -94,7 +95,7 @@ export function SidebarShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label="Close menu"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-[10px] p-1.5 text-(--grey-700) hover:bg-(--surface-150) transition-colors"
+                className="rounded-[10px] p-1.5 text-(--text-secondary) hover:bg-(--surface-150) transition-colors"
               >
                 <XIcon size={18} />
               </button>

@@ -117,19 +117,19 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               onClick={onClose}
               disabled={submitting}
               aria-label="Close dialog"
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--grey-900) disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-(--text-muted) hover:text-(--text) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <XIcon size={16} weight="bold" />
             </button>
 
-            <Dialog.Title className="mb-6 flex items-center gap-2 text-base font-semibold text-(--grey-900)">
+            <Dialog.Title className="mb-6 flex items-center gap-2 text-base font-semibold text-(--text)">
               <MapPinIcon size={18} weight="bold" className="text-(--primary)" />
               New Spot
             </Dialog.Title>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label htmlFor="spot-name" className="text-sm font-medium text-(--grey-700)">
+                <label htmlFor="spot-name" className="text-sm font-medium text-(--text-secondary)">
                   Name
                 </label>
                 <TextInput
@@ -144,7 +144,10 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="spot-category" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="spot-category"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Category
                 </label>
                 <Select
@@ -162,7 +165,10 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               </div>
 
               <div className="flex flex-col gap-1">
-                <label htmlFor="spot-description" className="text-sm font-medium text-(--grey-700)">
+                <label
+                  htmlFor="spot-description"
+                  className="text-sm font-medium text-(--text-secondary)"
+                >
                   Description
                 </label>
                 <Textarea
@@ -175,7 +181,7 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="spot-photo" className="text-sm font-medium text-(--grey-700)">
+                <label htmlFor="spot-photo" className="text-sm font-medium text-(--text-secondary)">
                   Photo
                 </label>
                 {previewUrl ? (
@@ -191,6 +197,7 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
                       onClick={handleRemoveImage}
                       disabled={submitting}
                       aria-label="Remove photo"
+                      // dark-mode-fixed: a scrim chip over the photo, in both modes.
                       className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 disabled:cursor-not-allowed"
                     >
                       <XIcon size={14} weight="bold" />
@@ -204,7 +211,7 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
                     accept="image/*"
                     disabled={submitting}
                     onChange={handleFileChange}
-                    className="text-sm text-(--grey-700) file:mr-3 file:cursor-pointer file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--grey-900) hover:file:bg-(--surface-200)"
+                    className="text-sm text-(--text-secondary) file:mr-3 file:cursor-pointer file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--text) hover:file:bg-(--surface-200)"
                   />
                 )}
               </div>
@@ -212,8 +219,8 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
               {location && (
                 <div className="flex flex-col gap-1">
                   {addressLoading && <Skeleton height={20} className="rounded" />}
-                  {address && <p className="text-xs text-(--grey-500)">{address}</p>}
-                  <p className="font-mono text-xs text-(--grey-400)">
+                  {address && <p className="text-xs text-(--text-muted)">{address}</p>}
+                  <p className="font-mono text-xs text-(--text-subtle)">
                     {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
                   </p>
                 </div>
@@ -224,14 +231,14 @@ export function SpotFormModal({ isOpen, onClose, location, categories }: SpotFor
                   type="button"
                   onClick={onClose}
                   disabled={submitting}
-                  className="flex h-10 flex-1 items-center justify-center rounded-xl border border-(--border) text-sm font-medium text-(--grey-700) hover:bg-(--surface-150) disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 flex-1 items-center justify-center rounded-xl border border-(--border) text-sm font-medium text-(--text-secondary) hover:bg-(--surface-150) disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex h-10 flex-1 items-center justify-center rounded-xl bg-(--primary) text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 flex-1 items-center justify-center rounded-xl bg-(--primary) text-sm font-medium text-(--text-on-strong-hue) hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? "Saving…" : "Add spot"}
                 </button>

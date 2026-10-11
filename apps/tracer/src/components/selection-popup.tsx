@@ -38,8 +38,8 @@ export function SelectionPopup({
     >
       <div className="flex flex-col gap-2 p-1 min-w-32">
         <div>
-          <p className="text-sm font-semibold text-white">{poi.label}</p>
-          {!isHome && <p className="text-xs text-white/50 capitalize">{poi.category}</p>}
+          <p className="text-sm font-semibold text-(--hud-ink)">{poi.label}</p>
+          {!isHome && <p className="text-xs text-(--hud-ink)/50 capitalize">{poi.category}</p>}
         </div>
         {onAction && actionLabel && (
           <div className="flex flex-col gap-1">
@@ -47,18 +47,20 @@ export function SelectionPopup({
               type="button"
               onClick={() => !actionDisabled && onAction(poi)}
               disabled={actionDisabled}
-              className="w-full rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-1.5 transition-colors"
+              className="w-full rounded-lg bg-(--hud-ink)/10 hover:bg-(--hud-ink)/20 disabled:opacity-40 disabled:cursor-not-allowed text-(--hud-ink) text-xs font-semibold py-1.5 transition-colors"
             >
               {actionLabel}
             </button>
-            {actionHint && <p className="text-[10px] text-white/50 text-center">{actionHint}</p>}
+            {actionHint && (
+              <p className="text-[10px] text-(--hud-ink)/50 text-center">{actionHint}</p>
+            )}
           </div>
         )}
         <button
           type="button"
           onClick={() => !disabled && onGoHere(poi)}
           disabled={disabled}
-          className="w-full rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold py-1.5 transition-colors"
+          className="w-full rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-(--hud-ink) text-xs font-semibold py-1.5 transition-colors"
         >
           {isHome ? "Go home" : "Go here"}
         </button>

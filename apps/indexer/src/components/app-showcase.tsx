@@ -34,10 +34,12 @@ export function AppShowcase({ app }: { app: ShowcaseApp }) {
                 className="object-cover"
               />
             </div>
-            <h2 className="text-2xl font-semibold text-(--grey-900)">{app.name}</h2>
+            <h2 className="text-2xl font-semibold text-(--text)">{app.name}</h2>
           </div>
-          <p className="mt-4 text-[15px] leading-relaxed text-(--grey-700)">{app.description}</p>
-          <div className="mt-5 flex items-start gap-2.5 border-t border-(--grey-200) pt-4 text-(--grey-500)">
+          <p className="mt-4 text-[15px] leading-relaxed text-(--text-secondary)">
+            {app.description}
+          </p>
+          <div className="mt-5 flex items-start gap-2.5 border-t border-(--border) pt-4 text-(--text-muted)">
             <DeviceMobileIcon size={18} weight="regular" className="mt-px shrink-0" />
             <p className="text-[13px] leading-relaxed">
               Like every app here, it installs straight from your browser. Open it on mobile and add

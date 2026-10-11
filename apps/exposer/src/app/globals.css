@@ -55,7 +55,7 @@
   list-style: decimal;
 }
 .exposer-description blockquote {
-  border-left: 2px solid var(--grey-300);
+  border-left: 2px solid var(--border-strong);
   padding-left: 0.625rem;
   opacity: 0.8;
 }
@@ -92,10 +92,10 @@
   justify-content: center;
   width: 14px;
   height: 14px;
-  border: 1px solid var(--grey-400);
+  border: 1px solid var(--text-subtle);
   border-radius: 3px;
   flex-shrink: 0;
-  color: white;
+  color: var(--primary-foreground);
 }
 .exposer-description .task-checkbox--checked {
   background-color: var(--primary);
@@ -117,12 +117,13 @@
 }
 .exposer-description hr {
   border: 0;
-  border-top: 1px solid var(--grey-300);
+  border-top: 1px solid var(--border-strong);
 }
 .exposer-description mark {
   /* The authored palette colour rides on an inline style the sanitizer strips, so public
      highlights land on one shared marker tone rather than the UA default yellow. */
   background-color: var(--yellow-200);
+  /* dark-mode-fixed: a `-200` marker stays a light fill in dark mode, so the text stays dark. */
   color: var(--grey-900);
   border-radius: 2px;
   padding: 0 0.125rem;

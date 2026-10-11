@@ -15,7 +15,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<CoinsIcon className="text-white" size={32} />}
+        appIcon={<CoinsIcon className="text-(--text-on-strong-hue)" size={32} />}
         appName="Financer"
         currentAppId="financer"
         titleHref="/"

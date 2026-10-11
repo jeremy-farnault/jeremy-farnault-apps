@@ -42,7 +42,7 @@ export function ShowcaseCarousel({ screenshots, name, accentColor }: CarouselPro
         className="flex h-full w-full items-center justify-center rounded-[20px]"
         style={{ backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)` }}
       >
-        <div className="flex flex-col items-center gap-2 text-(--grey-500)">
+        <div className="flex flex-col items-center gap-2 text-(--text-muted)">
           <ImageIcon size={40} weight="light" />
           <span className="text-sm">Screenshots coming soon</span>
         </div>
@@ -85,7 +85,7 @@ export function ShowcaseCarousel({ screenshots, name, accentColor }: CarouselPro
             type="button"
             aria-label="Previous screenshot"
             onClick={() => go(-1)}
-            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--card)/80 text-(--grey-800) shadow-sm backdrop-blur hover:bg-(--card)"
+            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--card)/80 text-(--text) shadow-sm backdrop-blur hover:bg-(--card)"
           >
             <CaretLeftIcon size={20} weight="bold" />
           </button>
@@ -93,7 +93,7 @@ export function ShowcaseCarousel({ screenshots, name, accentColor }: CarouselPro
             type="button"
             aria-label="Next screenshot"
             onClick={() => go(1)}
-            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--card)/80 text-(--grey-800) shadow-sm backdrop-blur hover:bg-(--card)"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--card)/80 text-(--text) shadow-sm backdrop-blur hover:bg-(--card)"
           >
             <CaretRightIcon size={20} weight="bold" />
           </button>
@@ -106,7 +106,7 @@ export function ShowcaseCarousel({ screenshots, name, accentColor }: CarouselPro
                 onClick={() => setIndex(i)}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  i === index ? "w-5 bg-(--grey-700)" : "w-1.5 bg-(--grey-400)"
+                  i === index ? "w-5 bg-(--text-secondary)" : "w-1.5 bg-(--text-subtle)"
                 )}
               />
             ))}

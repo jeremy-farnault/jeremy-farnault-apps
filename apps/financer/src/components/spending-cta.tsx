@@ -139,7 +139,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
           type="button"
           onClick={() => setAddCategoryOpen(true)}
           aria-label="Add spending category"
-          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+          className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
         >
           <PlusCircleIcon size={22} />
         </button>
@@ -147,7 +147,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
           type="button"
           onClick={handleOpen}
           aria-label="Log spending"
-          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
+          className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
         >
           <ReceiptIcon size={22} />
         </button>
@@ -178,7 +178,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
         title="Log spending"
         content={
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-(--grey-600)">For: {formatMonth(viewedMonth)}</p>
+            <p className="text-sm text-(--text-secondary)">For: {formatMonth(viewedMonth)}</p>
             <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
               {rows.map((row, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID
@@ -221,7 +221,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
                       type="button"
                       onClick={() => removeRow(idx)}
                       aria-label="Remove row"
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900) ${idx === 0 ? "invisible" : ""}`}
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text) ${idx === 0 ? "invisible" : ""}`}
                     >
                       <MinusIcon size={16} />
                     </button>
@@ -233,7 +233,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
             <button
               type="button"
               onClick={addRow}
-              className="flex items-center gap-1 self-start text-sm text-(--grey-600) hover:text-(--grey-900)"
+              className="flex items-center gap-1 self-start text-sm text-(--text-secondary) hover:text-(--text)"
             >
               <PlusIcon size={14} />
               Add row

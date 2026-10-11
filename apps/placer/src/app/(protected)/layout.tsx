@@ -7,7 +7,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<MapPinIcon className="text-white" size={32} />}
+        appIcon={<MapPinIcon className="text-(--text-on-strong-hue)" size={32} />}
         appName="Placer"
         currentAppId="placer"
         titleHref="/"

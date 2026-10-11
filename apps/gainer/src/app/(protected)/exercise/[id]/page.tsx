@@ -11,8 +11,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[12px] bg-(--surface-100) p-3 flex flex-col gap-1">
-      <span className="text-xs text-(--grey-500)">{label}</span>
-      <span className="text-sm font-semibold text-(--grey-900)">{value}</span>
+      <span className="text-xs text-(--text-muted)">{label}</span>
+      <span className="text-sm font-semibold text-(--text)">{value}</span>
     </div>
   );
 }
@@ -247,13 +247,13 @@ export default async function ExerciseDetailPage({
     <div className="w-full px-4 pt-6 pb-24 flex flex-col gap-6">
       <Link
         href="/?view=data"
-        className="inline-flex items-center gap-1 text-sm text-(--grey-500) hover:text-(--grey-900) transition-colors w-fit"
+        className="inline-flex items-center gap-1 text-sm text-(--text-muted) hover:text-(--text) transition-colors w-fit"
       >
         <CaretLeftIcon size={14} />
         Exercises
       </Link>
 
-      <h1 className="text-lg font-semibold text-(--grey-900)">{exercise.name}</h1>
+      <h1 className="text-lg font-semibold text-(--text)">{exercise.name}</h1>
 
       <div className={`grid gap-3 ${statCards.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {statCards.map((card) => (
@@ -263,7 +263,9 @@ export default async function ExerciseDetailPage({
 
       {chartData.length > 1 && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-(--grey-600)">{chartValueLabel} per session</h2>
+          <h2 className="text-sm font-medium text-(--text-secondary)">
+            {chartValueLabel} per session
+          </h2>
           <ExerciseProgressChart
             data={chartData}
             chartType={chartType}
@@ -273,16 +275,16 @@ export default async function ExerciseDetailPage({
       )}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-(--grey-600)">Set log</h2>
+        <h2 className="text-sm font-medium text-(--text-secondary)">Set log</h2>
         {sessionGroups.map((group) => (
           <div key={group.id} className="flex flex-col gap-2">
-            <p className="text-xs text-(--grey-500)">
+            <p className="text-xs text-(--text-muted)">
               {group.date.toLocaleDateString("en-GB", { dateStyle: "long" })}
             </p>
             <div className="flex gap-3 items-start">
               <div className="flex flex-col gap-1 flex-1">
                 {group.sets.map((set) => (
-                  <p key={set.setNumber} className="text-sm text-(--grey-700) pl-2">
+                  <p key={set.setNumber} className="text-sm text-(--text-secondary) pl-2">
                     Set {set.setNumber} — {formatSetSummary(set)}
                   </p>
                 ))}
@@ -290,8 +292,8 @@ export default async function ExerciseDetailPage({
               <div className="flex flex-col gap-2 items-end shrink-0">
                 {group.sessionStats.map((stat) => (
                   <div key={stat.label} className="flex flex-col items-end">
-                    <span className="text-xs font-semibold text-(--grey-900)">{stat.value}</span>
-                    <span className="text-[10px] text-(--grey-400)">{stat.label}</span>
+                    <span className="text-xs font-semibold text-(--text)">{stat.value}</span>
+                    <span className="text-[10px] text-(--text-subtle)">{stat.label}</span>
                   </div>
                 ))}
               </div>

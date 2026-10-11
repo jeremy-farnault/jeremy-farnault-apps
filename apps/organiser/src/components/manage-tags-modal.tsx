@@ -67,11 +67,11 @@ export function ManageTagsModal({
           </div>
 
           {tags.length === 0 ? (
-            <p className="text-sm text-(--grey-500)">
+            <p className="text-sm text-(--text-muted)">
               No tags yet. Add one here, or create tags while editing a card.
             </p>
           ) : (
-            <ul className="flex max-h-[50vh] flex-col divide-y divide-(--grey-200) overflow-y-auto">
+            <ul className="flex max-h-[50vh] flex-col divide-y divide-(--border) overflow-y-auto">
               {tags.map((tag) => (
                 <ManageTagRow
                   key={tag.id}
@@ -151,7 +151,7 @@ function ManageTagRow({
           }}
         />
 
-        <span className="w-16 shrink-0 text-right text-xs text-(--grey-500)">
+        <span className="w-16 shrink-0 text-right text-xs text-(--text-muted)">
           {count} {count === 1 ? "card" : "cards"}
         </span>
 
@@ -159,7 +159,7 @@ function ManageTagRow({
           type="button"
           aria-label={`Delete ${tag.name}`}
           onClick={() => setConfirmDelete(true)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--grey-500) hover:bg-(--surface-200) hover:text-(--red-500)"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--text-muted) hover:bg-(--surface-200) hover:text-(--red-500)"
         >
           <TrashIcon size={16} />
         </button>

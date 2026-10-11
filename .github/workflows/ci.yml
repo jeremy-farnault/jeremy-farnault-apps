@@ -40,6 +40,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Raw greys don't follow dark mode. Runs on its own while the full lint below is off.
+      - name: Raw colour check
+        run: pnpm lint:colors
+
       # TODO: fix and re-enable when lint/type-check/tests are clean
       # - name: Lint
       #   run: pnpm turbo run lint

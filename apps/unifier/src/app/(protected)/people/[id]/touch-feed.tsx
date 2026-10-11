@@ -116,7 +116,7 @@ export function TouchFeed({ touches, onLogTouch }: Props) {
       )}
 
       {touches.length === 0 ? (
-        <p className="text-sm text-(--grey-500)">
+        <p className="text-sm text-(--text-muted)">
           No contact logged yet. The first touch starts the timeline.
         </p>
       ) : (
@@ -128,22 +128,20 @@ export function TouchFeed({ touches, onLogTouch }: Props) {
                   className={
                     i === 0
                       ? "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-(--primary)"
-                      : "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-(--grey-300)"
+                      : "mt-1.5 h-2 w-2 shrink-0 rounded-full bg-(--border-strong)"
                   }
                   aria-hidden
                 />
-                {i < touches.length - 1 && <span className="w-px flex-1 bg-(--grey-200)" />}
+                {i < touches.length - 1 && <span className="w-px flex-1 bg-(--border)" />}
               </div>
               <div className="flex min-w-0 flex-col pb-4">
                 <time
                   dateTime={touch.occurredAt.toISOString()}
-                  className="text-xs text-(--grey-500)"
+                  className="text-xs text-(--text-muted)"
                 >
                   {TIME.format(touch.occurredAt)}
                 </time>
-                {touch.note && (
-                  <p className="break-words text-sm text-(--grey-800)">{touch.note}</p>
-                )}
+                {touch.note && <p className="break-words text-sm text-(--text)">{touch.note}</p>}
               </div>
             </li>
           ))}

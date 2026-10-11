@@ -114,7 +114,7 @@ export function SpendingList({
       <>
         <div className="flex flex-col gap-4">
           {entries.length === 0 ? (
-            <p className="text-sm text-(--grey-500)">No spending logged for this month.</p>
+            <p className="text-sm text-(--text-muted)">No spending logged for this month.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {entries.map((entry) => (
@@ -123,10 +123,10 @@ export function SpendingList({
                   style={{ borderLeft: `4px solid ${categoryColors[entry.category]}` }}
                   className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
                 >
-                  <span className="text-sm font-medium text-(--grey-900)">{entry.category}</span>
+                  <span className="text-sm font-medium text-(--text)">{entry.category}</span>
                   <span className="ml-auto flex items-center gap-3">
-                    <span className="text-xs text-(--grey-500)">{entry.currency}</span>
-                    <span className="text-sm font-semibold text-(--grey-900)">
+                    <span className="text-xs text-(--text-muted)">{entry.currency}</span>
+                    <span className="text-sm font-semibold text-(--text)">
                       {formatAmount(entry.value)}
                     </span>
                     <div className="flex items-center gap-0.5">
@@ -134,7 +134,7 @@ export function SpendingList({
                         type="button"
                         onClick={() => openEdit(entry)}
                         aria-label="Edit entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                       >
                         <PencilSimpleIcon size={14} />
                       </button>
@@ -142,7 +142,7 @@ export function SpendingList({
                         type="button"
                         onClick={() => setDeletingEntryId(entry.id)}
                         aria-label="Delete entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                       >
                         <TrashIcon size={14} />
                       </button>
@@ -155,14 +155,14 @@ export function SpendingList({
 
           {showFooter && entries.length > 0 && (
             <div className="flex flex-col gap-1 border-t border-(--border) pt-3">
-              <div className="flex justify-between text-sm font-semibold text-(--grey-900)">
+              <div className="flex justify-between text-sm font-semibold text-(--text)">
                 <span>Total</span>
                 <span>
                   ≈ {homeCurrency} {formatAmount(grandTotal)}
                 </span>
               </div>
               {hasMissingRate && (
-                <p className="text-xs text-(--grey-500)">
+                <p className="text-xs text-(--text-muted)">
                   Some amounts excluded — exchange rate unavailable
                 </p>
               )}
@@ -214,7 +214,9 @@ export function SpendingList({
           size="small"
           title="Delete entry?"
           content={
-            <p className="text-sm text-(--grey-700)">Are you sure you want to delete this entry?</p>
+            <p className="text-sm text-(--text-secondary)">
+              Are you sure you want to delete this entry?
+            </p>
           }
           primaryButton={{ label: "Delete", loading: isPending, onClick: handleDeleteConfirm }}
           secondaryButton={{ label: "Cancel", onClick: () => setDeletingEntryId(null) }}
@@ -227,7 +229,7 @@ export function SpendingList({
 
   // Closed month: aggregated display
   if (data.length === 0) {
-    return <p className="text-sm text-(--grey-500)">No spending logged for this month.</p>;
+    return <p className="text-sm text-(--text-muted)">No spending logged for this month.</p>;
   }
 
   let grandTotal = 0;
@@ -267,10 +269,10 @@ export function SpendingList({
             style={{ borderLeft: `4px solid ${categoryColors[category]}` }}
             className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
           >
-            <span className="text-sm font-medium text-(--grey-900)">{category}</span>
+            <span className="text-sm font-medium text-(--text)">{category}</span>
             <span className="ml-auto flex items-center gap-3">
-              <span className="text-xs text-(--grey-500)">{currency}</span>
-              <span className="text-sm font-semibold text-(--grey-900)">
+              <span className="text-xs text-(--text-muted)">{currency}</span>
+              <span className="text-sm font-semibold text-(--text)">
                 {prefix}
                 {displayAmount}
               </span>
@@ -281,14 +283,14 @@ export function SpendingList({
 
       {showFooter && (
         <div className="flex flex-col gap-1 border-t border-(--border) pt-3">
-          <div className="flex justify-between text-sm font-semibold text-(--grey-900)">
+          <div className="flex justify-between text-sm font-semibold text-(--text)">
             <span>Total</span>
             <span>
               ≈ {homeCurrency} {formatAmount(grandTotal)}
             </span>
           </div>
           {hasMissingRate && (
-            <p className="text-xs text-(--grey-500)">
+            <p className="text-xs text-(--text-muted)">
               Some amounts excluded — exchange rate unavailable
             </p>
           )}

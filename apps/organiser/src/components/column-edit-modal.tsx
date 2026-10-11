@@ -49,11 +49,11 @@ export function ColumnEditModal({
           <TextInput value={name} onChange={setName} placeholder="Column name" autoFocus />
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-(--grey-500)">Colour</span>
+              <span className="text-xs text-(--text-muted)">Colour</span>
               <button
                 type="button"
                 onClick={() => setColor(null)}
-                className="text-xs text-(--grey-500) hover:text-(--grey-800)"
+                className="text-xs text-(--text-muted) hover:text-(--text)"
               >
                 No colour
               </button>
@@ -62,8 +62,8 @@ export function ColumnEditModal({
           </div>
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-sm text-(--grey-900)">Done column</span>
-              <span className="text-xs text-(--grey-500)">
+              <span className="text-sm text-(--text)">Done column</span>
+              <span className="text-xs text-(--text-muted)">
                 Cards here freeze their deadline badge
               </span>
             </div>

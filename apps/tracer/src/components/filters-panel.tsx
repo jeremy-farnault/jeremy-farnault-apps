@@ -67,13 +67,13 @@ export function FiltersPanel() {
   }
 
   return (
-    <div className="rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-red-500 select-none text-left w-full">
+    <div className="rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-red-500 select-none text-left w-full">
       <button
         type="button"
         className="w-full flex items-center justify-between p-4 cursor-pointer"
         onClick={() => setExpanded((v) => !v)}
       >
-        <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">
+        <p className="text-xs font-semibold text-(--hud-text-muted) uppercase tracking-wider">
           🎛️ Filters
         </p>
       </button>
@@ -86,24 +86,24 @@ export function FiltersPanel() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search POI…"
-              className="w-full rounded-lg bg-(--surface-300)/60 text-(--grey-200) placeholder:text-(--grey-500)/60 text-xs px-2.5 py-1.5 outline-none border border-transparent focus:border-(--grey-500)/40 transition-colors"
+              className="w-full rounded-lg bg-(--hud-glass-strong)/60 text-(--hud-text) placeholder:text-(--hud-text-muted)/60 text-xs px-2.5 py-1.5 outline-none border border-transparent focus:border-(--hud-text-muted)/40 transition-colors"
             />
             {query.trim() !== "" && (
               <div className="flex flex-col gap-0.5">
                 {results.length === 0 ? (
-                  <p className="text-xs text-(--grey-500)/60 italic px-1">No results</p>
+                  <p className="text-xs text-(--hud-text-muted)/60 italic px-1">No results</p>
                 ) : (
                   results.map((poi) => (
                     <button
                       key={poi.id}
                       type="button"
                       onClick={() => handleResultClick(poi.id)}
-                      className="flex items-center justify-between gap-2 text-xs text-(--grey-200) hover:text-white hover:bg-white/5 rounded px-1 py-0.5 transition-colors cursor-pointer"
+                      className="flex items-center justify-between gap-2 text-xs text-(--hud-text) hover:text-(--hud-ink) hover:bg-(--hud-ink)/5 rounded px-1 py-0.5 transition-colors cursor-pointer"
                     >
                       <span className="truncate">
                         {poi.emoji} {poi.label}
                       </span>
-                      <span className="text-(--grey-500)/60 capitalize shrink-0">
+                      <span className="text-(--hud-text-muted)/60 capitalize shrink-0">
                         {poi.category}
                       </span>
                     </button>
@@ -113,7 +113,7 @@ export function FiltersPanel() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-(--surface-300)">
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-(--hud-glass-strong)">
             {CATEGORY_LABELS.map((c) => {
               const on = enabledCategories.includes(c.id);
               return (
@@ -122,7 +122,7 @@ export function FiltersPanel() {
                   type="button"
                   onClick={() => toggleCategory(c.id)}
                   className={`flex items-center justify-between text-xs transition-colors cursor-pointer ${
-                    on ? "text-(--grey-200)" : "text-(--grey-500)/50"
+                    on ? "text-(--hud-text)" : "text-(--hud-text-muted)/50"
                   }`}
                 >
                   <span>
@@ -135,8 +135,8 @@ export function FiltersPanel() {
           </div>
 
           {stationOn && (
-            <div className="flex flex-col gap-2 pt-2 border-t border-(--surface-300)">
-              <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">
+            <div className="flex flex-col gap-2 pt-2 border-t border-(--hud-glass-strong)">
+              <p className="text-xs font-semibold text-(--hud-text-muted) uppercase tracking-wider">
                 Lines
               </p>
               {OPERATORS.map((op) => {
@@ -146,7 +146,7 @@ export function FiltersPanel() {
                 if (opLines.length === 0) return null;
                 return (
                   <div key={op.id} className="flex flex-col gap-1">
-                    <p className="text-xs text-(--grey-500)">{op.label}</p>
+                    <p className="text-xs text-(--hud-text-muted)">{op.label}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {opLines.map((line) => (
                         <LineBadge
@@ -168,7 +168,7 @@ export function FiltersPanel() {
           <button
             type="button"
             onClick={reset}
-            className="self-end text-xs text-(--grey-500) hover:text-white transition-colors cursor-pointer"
+            className="self-end text-xs text-(--hud-text-muted) hover:text-(--hud-ink) transition-colors cursor-pointer"
           >
             Reset filters
           </button>

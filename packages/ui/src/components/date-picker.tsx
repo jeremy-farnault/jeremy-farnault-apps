@@ -78,20 +78,20 @@ function CustomMonthCaption({ calendarMonth }: MonthCaptionProps) {
         onClick={() => previousMonth && goToMonth(previousMonth)}
         className={cn(
           "flex h-7 w-7 items-center justify-center rounded-full",
-          "text-(--grey-700) hover:bg-(--surface-150) focus:outline-none",
+          "text-(--text-secondary) hover:bg-(--surface-150) focus:outline-none",
           !previousMonth && "pointer-events-none opacity-30"
         )}
       >
         <CaretLeftIcon size={16} />
       </button>
-      <span className="text-sm font-semibold text-(--grey-900)">{label}</span>
+      <span className="text-sm font-semibold text-(--text)">{label}</span>
       <button
         type="button"
         disabled={!nextMonth}
         onClick={() => nextMonth && goToMonth(nextMonth)}
         className={cn(
           "flex h-7 w-7 items-center justify-center rounded-full",
-          "text-(--grey-700) hover:bg-(--surface-150) focus:outline-none",
+          "text-(--text-secondary) hover:bg-(--surface-150) focus:outline-none",
           !nextMonth && "pointer-events-none opacity-30"
         )}
       >
@@ -107,11 +107,11 @@ function CustomDayButton({ day, modifiers, ...props }: DayButtonProps) {
       {...props}
       className={cn(
         "flex h-9 w-9 items-center justify-center rounded-full",
-        "text-xs font-medium text-(--grey-700)",
+        "text-xs font-medium text-(--text-secondary)",
         "hover:bg-(--surface-200) focus:outline-none",
         modifiers.selected &&
           "bg-(--picker-accent) text-(--picker-accent-fg) hover:bg-(--picker-accent)",
-        modifiers.today && !modifiers.selected && "bg-(--grey-300)",
+        modifiers.today && !modifiers.selected && "bg-(--border-strong)",
         modifiers.outside && "opacity-40",
         modifiers.disabled && "pointer-events-none opacity-30"
       )}
@@ -209,8 +209,8 @@ export function DatePicker({
           }}
           className={cn(
             "min-w-0 flex-1 bg-transparent outline-none",
-            "placeholder:text-(--grey-500)",
-            text ? "text-(--grey-900)" : "text-(--grey-500)"
+            "placeholder:text-(--text-muted)",
+            text ? "text-(--text)" : "text-(--text-muted)"
           )}
         />
         <PopoverPrimitive.Trigger asChild>
@@ -220,7 +220,7 @@ export function DatePicker({
             aria-label="Open calendar"
             className={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-              "text-(--grey-700) hover:bg-(--surface-300) focus:outline-none",
+              "text-(--text-secondary) hover:bg-(--surface-300) focus:outline-none",
               "disabled:pointer-events-none"
             )}
           >
@@ -267,7 +267,7 @@ export function DatePicker({
                 month_caption: "w-full",
                 month_grid: "w-full border-collapse",
                 weekdays: "flex",
-                weekday: "w-9 py-1 text-center text-xs font-medium text-(--grey-500)",
+                weekday: "w-9 py-1 text-center text-xs font-medium text-(--text-muted)",
                 week: "mt-1 flex",
                 day: "flex items-center justify-center",
               }}

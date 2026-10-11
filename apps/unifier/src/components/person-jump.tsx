@@ -74,7 +74,7 @@ export function PersonJump() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Find a person"
-        className="flex h-11 w-11 items-center justify-center rounded-[10px] text-(--grey-700) transition-[background-color,transform] hover:bg-(--surface-200) active:scale-90"
+        className="flex h-11 w-11 items-center justify-center rounded-[10px] text-(--text-secondary) transition-[background-color,transform] hover:bg-(--surface-200) active:scale-90"
       >
         <MagnifyingGlassIcon size={18} />
       </button>
@@ -118,13 +118,13 @@ export function PersonJump() {
               />
 
               {!hasQuery ? (
-                <p className="px-1 py-3 text-sm text-(--grey-500)">
+                <p className="px-1 py-3 text-sm text-(--text-muted)">
                   Start typing a name to jump straight to someone.
                 </p>
               ) : loading && results.length === 0 ? (
-                <p className="px-1 py-3 text-sm text-(--grey-500)">Searching…</p>
+                <p className="px-1 py-3 text-sm text-(--text-muted)">Searching…</p>
               ) : results.length === 0 ? (
-                <p className="px-1 py-3 text-sm text-(--grey-500)">
+                <p className="px-1 py-3 text-sm text-(--text-muted)">
                   No one matches “{query.trim()}”.
                 </p>
               ) : (
@@ -147,10 +147,10 @@ export function PersonJump() {
                           arcColor={person.arcColor}
                           size={32}
                         />
-                        <span className="flex-1 truncate text-sm text-(--grey-900)">
-                          {person.name}
+                        <span className="flex-1 truncate text-sm text-(--text)">{person.name}</span>
+                        <span className="shrink-0 text-xs text-(--text-muted)">
+                          {person.arcName}
                         </span>
-                        <span className="shrink-0 text-xs text-(--grey-500)">{person.arcName}</span>
                       </button>
                     </li>
                   ))}

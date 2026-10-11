@@ -23,6 +23,7 @@ function toShowcaseApp(app: (typeof apps)[number]): ShowcaseApp {
     id: app.id,
     name: app.name,
     href: app.href,
+    // dark-mode-fixed: a neutral accent, the same mid grey in both modes.
     accentColor: app.accentColor ?? "--grey-400",
     description: descriptions[app.id] ?? "",
     screenshots: readScreenshots(app.id),

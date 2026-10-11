@@ -30,7 +30,7 @@ function OverrideOption({ label, selected, disabled, onSelect }: OverrideOptionP
       onClick={onSelect}
       className={cn(
         "rounded-[10px] px-3 py-2 text-left text-sm whitespace-nowrap",
-        selected ? "bg-(--surface-150) font-medium text-(--grey-900)" : "text-(--grey-700)",
+        selected ? "bg-(--surface-150) font-medium text-(--text)" : "text-(--text-secondary)",
         "hover:bg-(--surface-150) disabled:pointer-events-none disabled:opacity-50"
       )}
     >
@@ -108,19 +108,19 @@ function Pill({
 
   const style: CSSProperties = day.activeType
     ? day.taken
-      ? { backgroundColor: day.activeType.color, color: "white" }
+      ? { backgroundColor: day.activeType.color, color: "var(--text-on-strong-hue)" }
       : {
           borderWidth: 2,
           borderStyle: "solid",
           borderColor: day.activeType.color,
-          color: "var(--grey-900)",
+          color: "var(--text)",
         }
     : {
         backgroundColor: "var(--surface-200)",
-        color: "var(--grey-500)",
+        color: "var(--text-muted)",
         borderWidth: 1,
         borderStyle: "solid",
-        borderColor: "var(--grey-300)",
+        borderColor: "var(--border-strong)",
       };
 
   // Today's digit is colored to match this pill's own border color (rather than a fixed accent
@@ -130,7 +130,8 @@ function Pill({
     ? day.taken
       ? undefined
       : day.activeType.color
-    : "var(--grey-300)";
+    : // As faint as the empty pill's border, in both modes.
+      "var(--border-strong)";
 
   return (
     <Popover.Root open={isOverrideOpen} onOpenChange={onOverrideOpenChange}>
@@ -271,12 +272,12 @@ export function MedicineStrip({ medicine, days: initialDays, today, year, month,
   return (
     <div className="flex flex-col gap-3 rounded-[14px] bg-(--card) p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-(--grey-900)">{medicine.name}</span>
+        <span className="text-sm font-medium text-(--text)">{medicine.name}</span>
         <button
           type="button"
           onClick={onEdit}
           aria-label={`Edit ${medicine.name}`}
-          className="flex h-8 w-8 items-center justify-center text-(--grey-500) hover:text-(--grey-900)"
+          className="flex h-8 w-8 items-center justify-center text-(--text-muted) hover:text-(--text)"
         >
           <PencilSimpleIcon size={16} />
         </button>
@@ -290,7 +291,7 @@ export function MedicineStrip({ medicine, days: initialDays, today, year, month,
           <span
             key={weekday.key}
             style={{ gridRow: row + 1, gridColumn: 1 }}
-            className="flex h-9 w-5 items-center justify-center text-[10px] font-medium text-(--grey-400)"
+            className="flex h-9 w-5 items-center justify-center text-[10px] font-medium text-(--text-subtle)"
           >
             {weekday.label}
           </span>

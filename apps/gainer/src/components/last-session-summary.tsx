@@ -51,12 +51,12 @@ export function LastSessionSummary({ session, exercisesWithSets }: LastSessionSu
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline gap-2">
-        <p className="text-sm font-semibold text-(--grey-900)">{session.name}</p>
-        <span className="text-xs text-(--grey-500)">{formatRelativeDate(date)}</span>
+        <p className="text-sm font-semibold text-(--text)">{session.name}</p>
+        <span className="text-xs text-(--text-muted)">{formatRelativeDate(date)}</span>
       </div>
 
       {exercisesWithSets.length === 0 ? (
-        <p className="text-sm text-(--grey-500)">No exercises logged.</p>
+        <p className="text-sm text-(--text-muted)">No exercises logged.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {exercisesWithSets.map((se) => (
@@ -64,9 +64,9 @@ export function LastSessionSummary({ session, exercisesWithSets }: LastSessionSu
               key={se.id}
               className="flex flex-col gap-1 p-4 rounded-xl bg-(--surface-100) border border-(--surface-200)"
             >
-              <p className="text-sm font-semibold text-(--grey-900)">{se.exercise.name}</p>
+              <p className="text-sm font-semibold text-(--text)">{se.exercise.name}</p>
               {se.sets.map((set) => (
-                <p key={set.id} className="text-sm text-(--grey-600)">
+                <p key={set.id} className="text-sm text-(--text-secondary)">
                   Set {set.setNumber} — {formatSet(set, se.exercise.type)}
                 </p>
               ))}

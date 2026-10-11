@@ -59,7 +59,7 @@ export function CriticalFlag({ important, flaggedAt, onToggle }: Props) {
         onClick={() => void toggle()}
         disabled={busy}
         aria-pressed
-        className="min-h-11 shrink-0 rounded-[10px] px-3 text-xs font-medium text-(--red-600) transition-[background-color,transform] hover:bg-(--red-200) active:scale-95 disabled:opacity-50"
+        className="min-h-11 shrink-0 rounded-[10px] px-3 text-xs font-medium text-(--red-600) transition-[background-color,transform] hover:bg-(--critical-hover) active:scale-95 disabled:opacity-50"
       >
         Resolved
       </button>

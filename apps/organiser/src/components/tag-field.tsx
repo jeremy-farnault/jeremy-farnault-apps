@@ -65,14 +65,14 @@ export function TagField({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-(--grey-500)">Tags</span>
+      <span className="text-xs text-(--text-muted)">Tags</span>
 
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selectedTags.map((tag) => (
             <span
               key={tag.id}
-              className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--grey-800)"
+              className="inline-flex items-center gap-1 rounded-full bg-(--surface-200) px-2 py-0.5 text-xs text-(--text)"
             >
               <span
                 className="h-2 w-2 rounded-full"
@@ -84,7 +84,7 @@ export function TagField({
                 type="button"
                 aria-label={`Remove ${tag.name}`}
                 onClick={() => detach(tag.id)}
-                className="text-(--grey-500) hover:text-(--grey-900)"
+                className="text-(--text-muted) hover:text-(--text)"
               >
                 <XIcon size={11} weight="bold" />
               </button>
@@ -112,7 +112,7 @@ export function TagField({
               key={tag.id}
               type="button"
               onClick={() => attach(tag.id)}
-              className="inline-flex items-center gap-1 rounded-full border border-(--grey-300) px-2 py-0.5 text-xs text-(--grey-600) hover:border-(--grey-400) hover:text-(--grey-900)"
+              className="inline-flex items-center gap-1 rounded-full border border-(--border-strong) px-2 py-0.5 text-xs text-(--text-secondary) hover:border-(--text-subtle) hover:text-(--text)"
             >
               <span
                 className="h-2 w-2 rounded-full"
@@ -127,7 +127,7 @@ export function TagField({
               type="button"
               disabled={creating}
               onClick={() => void createAndAttach()}
-              className="inline-flex items-center gap-1 rounded-full border border-dashed border-(--grey-300) px-2 py-0.5 text-xs text-(--grey-600) hover:border-(--grey-400) hover:text-(--grey-900) disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full border border-dashed border-(--border-strong) px-2 py-0.5 text-xs text-(--text-secondary) hover:border-(--text-subtle) hover:text-(--text) disabled:opacity-50"
             >
               <PlusIcon size={10} weight="bold" />
               Create “{draft.trim()}”

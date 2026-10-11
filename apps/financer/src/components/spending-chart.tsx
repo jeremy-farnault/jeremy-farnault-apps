@@ -1,5 +1,6 @@
 "use client";
 
+import { FALLBACK_COLOR } from "@/lib/constants";
 import type { SpendingRow } from "@/lib/queries";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -19,10 +20,10 @@ export function SpendingChart({
   const tooltipStyle = {
     fontSize: 11,
     borderRadius: 12,
-    backgroundColor: "var(--grey-700)",
+    backgroundColor: "var(--text-secondary)",
     border: "none",
   };
-  const tooltipTextStyle = { color: "white" };
+  const tooltipTextStyle = { color: "var(--text-inverse)" };
 
   return (
     <div>
@@ -38,10 +39,7 @@ export function SpendingChart({
             strokeWidth={0}
           >
             {data.map((entry) => (
-              <Cell
-                key={entry.category}
-                fill={categoryColors[entry.category] ?? "var(--grey-400)"}
-              />
+              <Cell key={entry.category} fill={categoryColors[entry.category] ?? FALLBACK_COLOR} />
             ))}
           </Pie>
           <Tooltip
@@ -61,9 +59,9 @@ export function SpendingChart({
           <div key={entry.category} className="flex items-center gap-1.5">
             <div
               className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: categoryColors[entry.category] ?? "var(--grey-400)" }}
+              style={{ backgroundColor: categoryColors[entry.category] ?? FALLBACK_COLOR }}
             />
-            <span className="text-[11px]" style={{ color: "var(--grey-700)" }}>
+            <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>
               {entry.category}
             </span>
           </div>

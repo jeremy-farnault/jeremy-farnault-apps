@@ -5,7 +5,7 @@ import type { Folder as FolderRow } from "@/lib/queries";
 import { isDarkSurface } from "@jf/ui";
 import { FolderIcon } from "@phosphor-icons/react/dist/ssr";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 
 import { FolderActionsMenu } from "./folder-actions-menu";
 
@@ -27,9 +27,11 @@ export function FolderCard({ folder, allFolders }: Props) {
 
   const bgColor = folder.color ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
-  const isDark = isDarkSurface(bgColor);
-  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
-  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
+  // A strong (`-600` Blue, Purple or Red Dark) fill is dark in light mode. In dark mode every
+  // card is dark (see `.note-fill`), and the `--strong-fill-*` tokens fall back to the roles.
+  const strongFill = isDarkSurface(bgColor);
+  const textStrong = strongFill ? "var(--strong-fill-text)" : "var(--text)";
+  const textSoft = strongFill ? "var(--strong-fill-text-soft)" : "var(--text-secondary)";
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) setMenuVisible(true);
@@ -37,8 +39,8 @@ export function FolderCard({ folder, allFolders }: Props) {
 
   return (
     <div
-      className="group relative flex h-[150px] w-full flex-col rounded-[22px] border p-4 shadow-sm hover:brightness-95 transition-[filter] duration-300 ease-in-out"
-      style={{ backgroundColor: bgColor, borderColor }}
+      className="note-fill group relative flex h-[150px] w-full flex-col rounded-[22px] border p-4 shadow-sm hover:brightness-95 transition-[filter] duration-300 ease-in-out"
+      style={{ "--note-fill": bgColor, "--note-border": borderColor } as CSSProperties}
       onMouseEnter={() => setMenuVisible(true)}
       onMouseLeave={() => setMenuVisible(false)}
     >
@@ -71,7 +73,7 @@ export function FolderCard({ folder, allFolders }: Props) {
           allFolders={allFolders}
           menuVisible={menuVisible}
           hideDelete
-          isDark={isDark}
+          strongFill={strongFill}
         />
       </div>
     </div>

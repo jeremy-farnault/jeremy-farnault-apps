@@ -6,7 +6,7 @@ import type { Folder, Note } from "@/lib/queries";
 import { cn, isDarkSurface } from "@jf/ui";
 import { FolderIcon, PushPinIcon } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { NoteActionsMenu } from "./note-actions-menu";
 
 function getBorderColor(color: string): string {
@@ -37,9 +37,11 @@ export function NoteCard({
   const hasBody = extractPlainText(note.body).trim().length > 0;
   const bgColor = note.backgroundColor ?? DEFAULT_COLOR;
   const borderColor = getBorderColor(bgColor);
-  const isDark = isDarkSurface(bgColor);
-  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
-  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
+  // A strong (`-600` Blue, Purple or Red Dark) fill is dark in light mode. In dark mode every
+  // card is dark (see `.note-fill`), and the `--strong-fill-*` tokens fall back to the roles.
+  const strongFill = isDarkSurface(bgColor);
+  const textStrong = strongFill ? "var(--strong-fill-text)" : "var(--text)";
+  const textSoft = strongFill ? "var(--strong-fill-text-soft)" : "var(--text-secondary)";
   const pointerDownOnCard = useRef(false);
   const isTouchDevice = useRef(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -54,12 +56,12 @@ export function NoteCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col rounded-[22px] border p-4",
+        "note-fill group relative flex flex-col rounded-[22px] border p-4",
         hasBody ? "h-[150px]" : "h-fit self-start",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",
         note.pinned ? "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]" : "shadow-sm"
       )}
-      style={{ backgroundColor: bgColor, borderColor }}
+      style={{ "--note-fill": bgColor, "--note-border": borderColor } as CSSProperties}
       onMouseEnter={() => setMenuVisible(true)}
       onMouseLeave={() => {
         if (!isTouchDevice.current) setMenuVisible(false);
@@ -98,7 +100,7 @@ export function NoteCard({
         )}
         {hasBody && (
           <div
-            className="note-card-body text-sm"
+            className="jf-rich-text note-card-body text-sm"
             style={{ color: textSoft }}
             dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
           />
@@ -118,7 +120,7 @@ export function NoteCard({
             allFolders={allFolders}
             menuVisible={menuVisible}
             hideDelete
-            isDark={isDark}
+            strongFill={strongFill}
           />
         </div>
         {showFolderLink && (
@@ -132,7 +134,7 @@ export function NoteCard({
             style={{ color: textSoft }}
             className={cn(
               "pointer-events-auto flex h-7 w-7 items-center justify-center rounded-lg",
-              isDark ? "hover:bg-white/15" : "hover:bg-(--surface-150)"
+              strongFill ? "hover:bg-(--strong-fill-chip)" : "hover:bg-(--surface-150)"
             )}
           >
             <FolderIcon size={16} />

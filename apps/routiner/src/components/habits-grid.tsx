@@ -136,7 +136,7 @@ export function HabitsGrid({ habits: initialHabits, logs, sort }: Props) {
       />
 
       {displayedHabits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--grey-500)">
+        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--text-muted)">
           <ClipboardIcon size={40} weight="thin" />
           <p className="text-sm">
             {isSearching ? "No habits match your search." : "No habits yet. Create your first one!"}

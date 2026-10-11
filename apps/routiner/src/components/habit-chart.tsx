@@ -67,7 +67,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[120px] items-center justify-center text-sm text-(--grey-400)">
+      <div className="flex h-[120px] items-center justify-center text-sm text-(--text-subtle)">
         No data for this period
       </div>
     );
@@ -78,7 +78,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
   const commonAxisProps = {
     tickLine: false as const,
     axisLine: false as const,
-    tick: { fontSize: 10, fill: "var(--grey-400)" },
+    tick: { fontSize: 10, fill: "var(--text-subtle)" },
   };
 
   const commonMargin = { top: 4, right: 8, left: -28, bottom: 0 };
@@ -87,9 +87,10 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     fontSize: 11,
     zIndex: 50,
     borderRadius: 12,
-    backgroundColor: "var(--grey-700)",
+    // grey-700 in light, so the tooltip looks the same; a light chip in dark.
+    backgroundColor: "var(--text-secondary)",
   };
-  const tooltipTextStyle = { color: "white" };
+  const tooltipTextStyle = { color: "var(--text-inverse)" };
 
   if (type === "boolean") {
     const rangeDays = (new Date(to).getTime() - new Date(from).getTime()) / 86_400_000;
@@ -99,7 +100,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
       <div style={{ color }}>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={data} margin={commonMargin}>
-            <CartesianGrid vertical={false} stroke="var(--grey-300)" />
+            <CartesianGrid vertical={false} stroke="var(--border-strong)" />
             <XAxis
               dataKey="date"
               interval={interval}
@@ -131,7 +132,7 @@ export function HabitChart({ logs, type, color, from, to }: HabitChartProps) {
     <div style={{ color }}>
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={data} margin={commonMargin}>
-          <CartesianGrid vertical={false} stroke="var(--grey-300)" />
+          <CartesianGrid vertical={false} stroke="var(--border-strong)" />
           <XAxis
             dataKey="date"
             interval={interval}

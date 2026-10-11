@@ -5,7 +5,7 @@ import { renderToHtml } from "@/lib/note-body-utils";
 import type { Note } from "@/lib/queries";
 import { ActionModal, cn, isDarkSurface } from "@jf/ui";
 import { ArrowCounterClockwiseIcon, DotsThreeVerticalIcon, TrashIcon } from "@phosphor-icons/react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { type CSSProperties, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
@@ -23,11 +23,14 @@ export function ArchivedNoteCard({ note }: Props) {
   const [showDelete, setShowDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // dark-mode-fixed: the fallback colour for an archived note, a fixed swatch like stored ones.
   const bgColor = note.backgroundColor ?? "var(--grey-400)";
   const borderColor = getBorderColor(bgColor);
-  const isDark = isDarkSurface(bgColor);
-  const textStrong = isDark ? "var(--grey-100)" : "var(--grey-900)";
-  const textSoft = isDark ? "var(--grey-200)" : "var(--grey-700)";
+  // A strong (`-600` Blue, Purple or Red Dark) fill is dark in light mode. In dark mode every
+  // card is dark (see `.note-fill`), and the `--strong-fill-*` tokens fall back to the roles.
+  const strongFill = isDarkSurface(bgColor);
+  const textStrong = strongFill ? "var(--strong-fill-text)" : "var(--text)";
+  const textSoft = strongFill ? "var(--strong-fill-text-soft)" : "var(--text-secondary)";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -52,16 +55,22 @@ export function ArchivedNoteCard({ note }: Props) {
 
   const iconBtnClass = cn(
     "flex h-7 w-7 items-center justify-center rounded-lg",
-    isDark
-      ? "bg-white/15 hover:bg-white/25 text-(--grey-100)"
-      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-700)"
+    strongFill
+      ? "bg-(--strong-fill-chip) hover:bg-(--strong-fill-chip-hover) text-(--strong-fill-text)"
+      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--text-secondary)"
   );
 
   return (
     <>
       <div
-        className="relative flex h-[150px] flex-col rounded-[22px] border p-4 shadow-sm"
-        style={{ backgroundColor: bgColor, borderColor, opacity: isPending ? 0.5 : 1 }}
+        className="note-fill relative flex h-[150px] flex-col rounded-[22px] border p-4 shadow-sm"
+        style={
+          {
+            "--note-fill": bgColor,
+            "--note-border": borderColor,
+            opacity: isPending ? 0.5 : 1,
+          } as CSSProperties
+        }
       >
         <div
           className="flex-1 overflow-hidden pointer-events-none"
@@ -79,7 +88,7 @@ export function ArchivedNoteCard({ note }: Props) {
           )}
           {note.body && (
             <div
-              className="note-card-body text-sm"
+              className="jf-rich-text note-card-body text-sm"
               style={{ color: textSoft }}
               dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
             />
@@ -98,7 +107,7 @@ export function ArchivedNoteCard({ note }: Props) {
               style={{ color: textSoft }}
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-lg",
-                isDark ? "hover:bg-white/15" : "hover:bg-(--surface-150)"
+                strongFill ? "hover:bg-(--strong-fill-chip)" : "hover:bg-(--surface-150)"
               )}
             >
               <DotsThreeVerticalIcon size={16} />

@@ -82,6 +82,7 @@ function LineBadge({ lineId }: { lineId: string }) {
   if (!line) return null;
   return (
     <span
+      // dark-mode-fixed: dark text on the line's own colour, in both modes.
       className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-bold text-black"
       style={{ backgroundColor: line.color }}
     >
@@ -93,7 +94,7 @@ function LineBadge({ lineId }: { lineId: string }) {
 function renderTransitLeg(leg: TransitLeg, i: number) {
   if (leg.kind === "walk") {
     return (
-      <div key={i} className="flex items-center gap-2 text-xs text-(--grey-500)">
+      <div key={i} className="flex items-center gap-2 text-xs text-(--hud-text-muted)">
         <span>🚶</span>
         <span>Walk {formatDuration(leg.durationSec)}</span>
       </div>
@@ -101,7 +102,7 @@ function renderTransitLeg(leg: TransitLeg, i: number) {
   }
   if (leg.kind === "transfer") {
     return (
-      <div key={i} className="flex items-center gap-2 text-xs text-(--grey-500)">
+      <div key={i} className="flex items-center gap-2 text-xs text-(--hud-text-muted)">
         <span>🔁</span>
         <span>Transfer at {leg.from.label}</span>
       </div>
@@ -109,7 +110,7 @@ function renderTransitLeg(leg: TransitLeg, i: number) {
   }
   const line = leg.line ? LINES.find((l) => l.id === leg.line) : undefined;
   return (
-    <div key={i} className="flex items-center gap-2 text-xs text-white">
+    <div key={i} className="flex items-center gap-2 text-xs text-(--hud-ink)">
       <span>🚉</span>
       {leg.line && <LineBadge lineId={leg.line} />}
       <span className="truncate">
@@ -791,6 +792,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
         initialViewState={MAP_INITIAL_VIEW}
         style={{ width: "100%", height: "100%" }}
         mapStyle="mapbox://styles/haskkor/cmr6k3di9006x01r2erpzdftb"
+        // Night in both modes: the HUD is light text on dark glass, so the map stays dark.
         config={{ basemap: { lightPreset: "night", showRoadLabels: false } }}
         maxBounds={TOKYO_BOUNDS}
       >
@@ -892,13 +894,13 @@ export function GameMap({ characterSelected }: GameMapProps) {
 
       {shopOpen && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="w-80 rounded-xl bg-(--surface-200)/95 backdrop-blur-sm border border-(--surface-300) p-4 flex flex-col gap-3">
+          <div className="w-80 rounded-xl bg-(--hud-glass)/95 backdrop-blur-sm border border-(--hud-glass-strong) p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">🏪 Konbini</p>
+              <p className="text-sm font-semibold text-(--hud-ink)">🏪 Konbini</p>
               <button
                 type="button"
                 onClick={() => setShopOpen(false)}
-                className="text-xs text-(--grey-500) hover:text-white transition-colors"
+                className="text-xs text-(--hud-text-muted) hover:text-(--hud-ink) transition-colors"
               >
                 ✕
               </button>
@@ -909,8 +911,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
                   <div className="flex items-center gap-2">
                     <span className="text-base">{item.emoji}</span>
                     <div>
-                      <p className="text-xs font-semibold text-white">{item.name}</p>
-                      <p className="text-xs text-(--grey-500)">
+                      <p className="text-xs font-semibold text-(--hud-ink)">{item.name}</p>
+                      <p className="text-xs text-(--hud-text-muted)">
                         {itemEffectLabel(item.hungerRestore, item.thirstRestore)}
                       </p>
                     </div>
@@ -927,14 +929,14 @@ export function GameMap({ characterSelected }: GameMapProps) {
                         });
                       }
                     }}
-                    className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-3 py-1 transition-colors"
+                    className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-(--hud-ink) text-xs font-semibold px-3 py-1 transition-colors"
                   >
                     ¥{item.price}
                   </button>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-(--grey-500) text-right tabular-nums">
+            <p className="text-xs text-(--hud-text-muted) text-right tabular-nums">
               Balance: ¥{money.toLocaleString()}
             </p>
           </div>
@@ -942,31 +944,31 @@ export function GameMap({ characterSelected }: GameMapProps) {
       )}
 
       {action && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-80 rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-(--surface-300) p-3">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-80 rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-(--hud-glass-strong) p-3">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-white">
+              <p className="text-xs font-semibold text-(--hud-ink)">
                 {ACTION_LABELS[action.type] ?? action.type}
               </p>
-              <p className="text-xs text-(--grey-500) tabular-nums">
+              <p className="text-xs text-(--hud-text-muted) tabular-nums">
                 {formatMMSS(Math.round(t * action.duration))} / {formatMMSS(action.duration)}
               </p>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-white/10">
+            <div className="w-full h-1.5 rounded-full bg-(--hud-ink)/10">
               <div
                 className="h-full rounded-full bg-red-500 transition-all duration-1000"
                 style={{ width: `${t * 100}%` }}
               />
             </div>
             {action.type === "work" && (
-              <p className="text-xs text-(--grey-500) tabular-nums">
+              <p className="text-xs text-(--hud-text-muted) tabular-nums">
                 ¥{Math.floor(t * action.maxStatA).toLocaleString()} earned
               </p>
             )}
             <button
               type="button"
               onClick={() => stopAction()}
-              className="self-end rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
+              className="self-end rounded-lg bg-red-700 hover:bg-red-600 text-(--hud-ink) text-xs font-semibold px-4 py-1.5 transition-colors"
             >
               Stop
             </button>
@@ -975,11 +977,11 @@ export function GameMap({ characterSelected }: GameMapProps) {
       )}
 
       {(route || loading || isActive) && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-80 rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-(--surface-300) p-3">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-80 rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-(--hud-glass-strong) p-3">
           {loading ? (
-            <p className="text-xs text-(--grey-500)">Calculating route…</p>
+            <p className="text-xs text-(--hud-text-muted)">Calculating route…</p>
           ) : isActive ? (
-            <p className="text-xs text-(--grey-500)">Travelling…</p>
+            <p className="text-xs text-(--hud-text-muted)">Travelling…</p>
           ) : route && routePoi ? (
             <div className="flex flex-col gap-2">
               <div className="flex gap-1">
@@ -988,8 +990,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
                   onClick={() => setTravelMode("walking")}
                   className={`flex-1 rounded-lg text-xs font-semibold py-1 transition-colors ${
                     travelMode === "walking"
-                      ? "bg-white/20 text-white"
-                      : "text-(--grey-500) hover:text-white"
+                      ? "bg-(--hud-ink)/20 text-(--hud-ink)"
+                      : "text-(--hud-text-muted) hover:text-(--hud-ink)"
                   }`}
                 >
                   {activeVeh ? activeVeh.name : "On foot"}
@@ -1000,24 +1002,24 @@ export function GameMap({ characterSelected }: GameMapProps) {
                     onClick={handleSelectTransit}
                     className={`flex-1 rounded-lg text-xs font-semibold py-1 transition-colors ${
                       travelMode === "transit"
-                        ? "bg-white/20 text-white"
-                        : "text-(--grey-500) hover:text-white"
+                        ? "bg-(--hud-ink)/20 text-(--hud-ink)"
+                        : "text-(--hud-text-muted) hover:text-(--hud-ink)"
                     }`}
                   >
                     {transitLoading ? "…" : "Transit"}
                   </button>
                 )}
               </div>
-              <p className="text-xs font-semibold text-white">{routePoi.label}</p>
+              <p className="text-xs font-semibold text-(--hud-ink)">{routePoi.label}</p>
               {travelMode === "walking" ? (
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-(--grey-500)">
+                  <p className="text-xs text-(--hud-text-muted)">
                     {formatDuration(route.duration)} · {formatDistance(route.distance)}
                   </p>
                   <button
                     type="button"
                     onClick={handleConfirmTravel}
-                    className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
+                    className="shrink-0 rounded-lg bg-red-700 hover:bg-red-600 text-(--hud-ink) text-xs font-semibold px-4 py-1.5 transition-colors"
                   >
                     Go
                   </button>
@@ -1031,8 +1033,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
                         onClick={() => setTransitMode("best")}
                         className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
                           transitMode === "best"
-                            ? "bg-white/20 text-white"
-                            : "text-(--grey-500) hover:text-white"
+                            ? "bg-(--hud-ink)/20 text-(--hud-ink)"
+                            : "text-(--hud-text-muted) hover:text-(--hud-ink)"
                         }`}
                       >
                         <div className="text-[10px] uppercase tracking-wide">Best</div>
@@ -1046,8 +1048,8 @@ export function GameMap({ characterSelected }: GameMapProps) {
                         onClick={() => setTransitMode("alternative")}
                         className={`flex-1 rounded-lg text-left px-2 py-1 transition-colors ${
                           transitMode === "alternative"
-                            ? "bg-white/20 text-white"
-                            : "text-(--grey-500) hover:text-white"
+                            ? "bg-(--hud-ink)/20 text-(--hud-ink)"
+                            : "text-(--hud-text-muted) hover:text-(--hud-ink)"
                         }`}
                       >
                         <div className="text-[10px] uppercase tracking-wide">Alternative</div>
@@ -1058,7 +1060,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
                       </button>
                     </div>
                   ) : (
-                    <p className="text-xs text-(--grey-500)">
+                    <p className="text-xs text-(--hud-text-muted)">
                       {formatDuration(activePlan.totalDurationSec)} ·{" "}
                       {formatYen(activePlan.totalFareYen)}
                     </p>
@@ -1073,7 +1075,7 @@ export function GameMap({ characterSelected }: GameMapProps) {
                   <button
                     type="button"
                     onClick={handleConfirmTravel}
-                    className="self-end rounded-lg bg-red-700 hover:bg-red-600 text-white text-xs font-semibold px-4 py-1.5 transition-colors"
+                    className="self-end rounded-lg bg-red-700 hover:bg-red-600 text-(--hud-ink) text-xs font-semibold px-4 py-1.5 transition-colors"
                   >
                     Go
                   </button>

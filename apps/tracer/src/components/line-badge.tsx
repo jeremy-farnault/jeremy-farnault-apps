@@ -15,7 +15,7 @@ export function LineBadge({ code, color, enabled, title, onClick }: Props) {
       onClick={onClick}
       title={title}
       aria-pressed={enabled}
-      className="flex items-center justify-center w-7 h-7 rounded-md text-white text-[10px] font-bold tabular-nums cursor-pointer transition-opacity"
+      className="flex items-center justify-center w-7 h-7 rounded-md text-(--hud-ink) text-[10px] font-bold tabular-nums cursor-pointer transition-opacity"
       style={{
         backgroundColor: color,
         opacity: enabled ? 1 : 0.3,

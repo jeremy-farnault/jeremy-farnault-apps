@@ -79,14 +79,14 @@ export default function GamePage() {
       <button
         type="button"
         onClick={handleReset}
-        className="absolute top-4 left-4 z-10 text-xs text-(--grey-500) underline cursor-pointer hidden"
+        className="absolute top-4 left-4 z-10 text-xs text-(--hud-text-muted) underline cursor-pointer hidden"
       >
         Reset
       </button>
 
       {/* In-game time */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 px-4 py-1.5 rounded-lg bg-(--surface-200)/90 backdrop-blur-sm border border-(--surface-300)">
-        <p className="text-xs font-medium tabular-nums text-(--grey-200)">{time}</p>
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 px-4 py-1.5 rounded-lg bg-(--hud-glass)/90 backdrop-blur-sm border border-(--hud-glass-strong)">
+        <p className="text-xs font-medium tabular-nums text-(--hud-text)">{time}</p>
       </div>
 
       {/* Filters panel (top-right, below app header) */}
@@ -99,11 +99,11 @@ export default function GamePage() {
         {/* Inventory panel */}
         <button
           type="button"
-          className="rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-red-500 cursor-pointer select-none text-left w-full"
+          className="rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-red-500 cursor-pointer select-none text-left w-full"
           onClick={() => setInventoryExpanded((v) => !v)}
         >
           <div className="flex items-center justify-between p-4">
-            <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">
+            <p className="text-xs font-semibold text-(--hud-text-muted) uppercase tracking-wider">
               🎒 Inventory
             </p>
           </div>
@@ -111,14 +111,14 @@ export default function GamePage() {
           {inventoryExpanded && (
             <div className="px-4 pb-4 flex flex-col gap-2">
               {inventory.length === 0 ? (
-                <p className="text-xs text-(--grey-500) italic">Nothing here</p>
+                <p className="text-xs text-(--hud-text-muted) italic">Nothing here</p>
               ) : (
                 inventory.map((entry) => {
                   const item = itemMap[entry.itemId];
                   if (!item) return null;
                   return (
                     <div key={entry.itemId} className="flex items-center justify-between">
-                      <span className="text-xs text-(--grey-200)">
+                      <span className="text-xs text-(--hud-text)">
                         {item.emoji} {item.name}
                       </span>
                       <button
@@ -127,7 +127,7 @@ export default function GamePage() {
                           e.stopPropagation();
                           handleConsume(entry.itemId);
                         }}
-                        className="text-xs text-(--grey-500) hover:text-white tabular-nums transition-colors"
+                        className="text-xs text-(--hud-text-muted) hover:text-(--hud-ink) tabular-nums transition-colors"
                       >
                         ×{entry.quantity}
                       </button>
@@ -142,14 +142,14 @@ export default function GamePage() {
         {/* Character panel */}
         <button
           type="button"
-          className="rounded-xl bg-(--surface-200)/90 backdrop-blur-sm border border-red-500 cursor-pointer select-none text-left w-full"
+          className="rounded-xl bg-(--hud-glass)/90 backdrop-blur-sm border border-red-500 cursor-pointer select-none text-left w-full"
           onClick={() => {
             setCharacterSelected((v) => !v);
             requestCharacterFocus();
           }}
         >
           <div className="flex items-center justify-between p-4">
-            <p className="text-xs font-semibold text-(--grey-500) uppercase tracking-wider">
+            <p className="text-xs font-semibold text-(--hud-text-muted) uppercase tracking-wider">
               Character
             </p>
             {isCritical && !characterSelected && (
@@ -195,9 +195,9 @@ function StatRow({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs text-(--grey-500)">{label}</span>
+      <span className="text-xs text-(--hud-text-muted)">{label}</span>
       <span
-        className={`text-xs font-medium tabular-nums ${critical ? "text-red-500" : "text-(--grey-200)"}`}
+        className={`text-xs font-medium tabular-nums ${critical ? "text-red-500" : "text-(--hud-text)"}`}
       >
         {value}
       </span>

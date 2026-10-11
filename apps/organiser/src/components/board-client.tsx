@@ -618,8 +618,8 @@ export function BoardClient({
                   type="button"
                   onClick={() => setAddingColumn(true)}
                   className={cn(
-                    "flex w-full items-center gap-1 rounded-[16px] px-3 py-3 text-sm text-(--grey-500)",
-                    "bg-(--surface-100) hover:bg-(--surface-150) hover:text-(--grey-800)"
+                    "flex w-full items-center gap-1 rounded-[16px] px-3 py-3 text-sm text-(--text-muted)",
+                    "bg-(--surface-100) hover:bg-(--surface-150) hover:text-(--text)"
                   )}
                 >
                   <PlusIcon size={16} /> Add column
@@ -657,7 +657,7 @@ export function BoardClient({
             isDoneColumn={columns.find((c) => c.id === activeCard.columnId)?.isDone ?? false}
           />
         ) : activeColumn ? (
-          <div className="min-w-[85vw] max-w-[85vw] rounded-[16px] bg-(--surface-150) px-3 py-3 text-sm font-semibold text-(--grey-900) shadow-lg sm:min-w-[280px] sm:max-w-[280px]">
+          <div className="min-w-[85vw] max-w-[85vw] rounded-[16px] bg-(--surface-150) px-3 py-3 text-sm font-semibold text-(--text) shadow-lg sm:min-w-[280px] sm:max-w-[280px]">
             {activeColumn.name}
           </div>
         ) : null}

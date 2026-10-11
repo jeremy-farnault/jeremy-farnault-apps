@@ -33,6 +33,7 @@ export function EntryActionsMenu({ entry, menuVisible, onDelete }: Props) {
               type="button"
               onClick={() => setDeleteOpen(true)}
               aria-label="Delete entry"
+              // dark-mode-fixed: a dark chip over the entry image, in both modes.
               className="flex h-7 w-7 items-center justify-center rounded-full bg-(--grey-900) hover:bg-(--grey-700) text-white"
             >
               <TrashIcon size={14} />

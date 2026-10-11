@@ -41,6 +41,7 @@ export function PhotoLightbox({ photos, alt, startIndex, onClose }: Props) {
   return (
     <Dialog.Root defaultOpen onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
+        {/* dark-mode-fixed: the lightbox is black in both modes. */}
         <Dialog.Overlay className="fixed inset-0 z-[9000] bg-black/90 animate-[overlay-in_0.2s_ease-in-out]" />
         <Dialog.Content
           aria-describedby={undefined}
@@ -62,6 +63,7 @@ export function PhotoLightbox({ photos, alt, startIndex, onClose }: Props) {
 
           <Dialog.Close
             aria-label="Close"
+            // dark-mode-fixed: the lightbox is black in both modes.
             className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20"
           >
             <XIcon size={20} weight="bold" />
@@ -73,6 +75,7 @@ export function PhotoLightbox({ photos, alt, startIndex, onClose }: Props) {
                 type="button"
                 aria-label="Previous photo"
                 onClick={() => go(-1)}
+                // dark-mode-fixed: the lightbox is black in both modes.
                 className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20"
               >
                 <CaretLeftIcon size={22} weight="bold" />
@@ -81,10 +84,12 @@ export function PhotoLightbox({ photos, alt, startIndex, onClose }: Props) {
                 type="button"
                 aria-label="Next photo"
                 onClick={() => go(1)}
+                // dark-mode-fixed: the lightbox is black in both modes.
                 className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/20"
               >
                 <CaretRightIcon size={22} weight="bold" />
               </button>
+              {/* dark-mode-fixed: the lightbox is black in both modes. */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
                 {index + 1} / {count}
               </div>

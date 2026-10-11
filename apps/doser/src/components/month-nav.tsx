@@ -35,12 +35,12 @@ export function MonthNav({ year, month, currentYear, currentMonth }: Props) {
         type="button"
         onClick={() => navigate(-1)}
         aria-label="Previous month"
-        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) transition-colors hover:bg-(--surface-200)"
+        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) transition-colors hover:bg-(--surface-200)"
       >
         <ArrowLeftIcon size={16} />
       </button>
 
-      <span className="min-w-[120px] text-center text-sm font-medium text-(--grey-900)">
+      <span className="min-w-[120px] text-center text-sm font-medium text-(--text)">
         {formatMonthLabel(year, month)}
       </span>
 
@@ -48,7 +48,7 @@ export function MonthNav({ year, month, currentYear, currentMonth }: Props) {
         type="button"
         onClick={() => navigate(1)}
         aria-label="Next month"
-        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) transition-colors hover:bg-(--surface-200)"
+        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) transition-colors hover:bg-(--surface-200)"
       >
         <ArrowRightIcon size={16} />
       </button>
@@ -61,8 +61,8 @@ export function MonthNav({ year, month, currentYear, currentMonth }: Props) {
         className={cn(
           "rounded-[10px] px-3 py-2 text-sm font-medium transition-colors",
           isCurrentMonth
-            ? "cursor-default text-(--grey-400)"
-            : "text-(--grey-700) hover:bg-(--surface-150)"
+            ? "cursor-default text-(--text-subtle)"
+            : "text-(--text-secondary) hover:bg-(--surface-150)"
         )}
       >
         Today

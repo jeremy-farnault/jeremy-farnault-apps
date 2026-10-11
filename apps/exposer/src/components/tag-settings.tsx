@@ -39,7 +39,7 @@ export function TagSettings({ initialTags }: { initialTags: Tag[] }) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-(--grey-900)">Tags</h2>
+        <h2 className="text-sm font-semibold text-(--text)">Tags</h2>
         <div className="flex gap-2">
           <TextInput
             value={newName}
@@ -61,7 +61,7 @@ export function TagSettings({ initialTags }: { initialTags: Tag[] }) {
       </div>
 
       {initialTags.length === 0 ? (
-        <p className="text-sm text-(--grey-500)">
+        <p className="text-sm text-(--text-muted)">
           No tags yet. Add tags here, or create them while editing a post.
         </p>
       ) : (
@@ -105,7 +105,7 @@ function TagRow({
           aria-label="Set color"
           disabled={disabled}
           onClick={() => setColorOpen((v) => !v)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--grey-500) hover:bg-(--surface-200)"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--text-muted) hover:bg-(--surface-200)"
         >
           {tag.color ? (
             <span
@@ -137,7 +137,7 @@ function TagRow({
           aria-label={`Delete ${tag.name}`}
           disabled={disabled}
           onClick={() => setConfirmDelete(true)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--grey-500) hover:bg-(--surface-200) hover:text-(--red-500)"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--text-muted) hover:bg-(--surface-200) hover:text-(--red-500)"
         >
           <TrashIcon size={16} />
         </button>
@@ -165,7 +165,7 @@ function TagRow({
                   await setTagColorAction(tag.id, null);
                 });
               }}
-              className="self-start text-xs text-(--grey-500) hover:text-(--grey-900)"
+              className="self-start text-xs text-(--text-muted) hover:text-(--text)"
             >
               No color
             </button>

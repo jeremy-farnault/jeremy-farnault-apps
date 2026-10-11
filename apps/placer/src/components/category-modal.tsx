@@ -87,11 +87,11 @@ export function CategoryModal({ isOpen, onClose, categories }: CategoryModalProp
                 {nameError && <p className="text-xs text-red-500">{nameError}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs text-(--grey-500)">Color</p>
+                <p className="text-xs text-(--text-muted)">Color</p>
                 <ColorPicker palette={COLOR_PALETTE} value={color} onChange={setColor} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs text-(--grey-500)">Icon</p>
+                <p className="text-xs text-(--text-muted)">Icon</p>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(CATEGORY_ICONS).map(([key, IconComp]) => (
                     <button
@@ -102,7 +102,7 @@ export function CategoryModal({ isOpen, onClose, categories }: CategoryModalProp
                       className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                         icon === key
                           ? "bg-(--primary) text-(--primary-foreground)"
-                          : "text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                          : "text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                       }`}
                     >
                       <IconComp size={16} />
@@ -124,16 +124,16 @@ export function CategoryModal({ isOpen, onClose, categories }: CategoryModalProp
                           className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
                           style={{ backgroundColor: cat.color }}
                         >
-                          {IconComp && <IconComp size={14} className="text-white" />}
+                          {IconComp && (
+                            <IconComp size={14} className="text-(--text-on-strong-hue)" />
+                          )}
                         </span>
-                        <span className="flex-1 truncate text-sm text-(--grey-900)">
-                          {cat.name}
-                        </span>
+                        <span className="flex-1 truncate text-sm text-(--text)">{cat.name}</span>
                         <button
                           type="button"
                           onClick={() => setDeletingCategory(cat)}
                           aria-label={`Delete ${cat.name}`}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--grey-600) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                         >
                           <TrashIcon size={14} />
                         </button>
@@ -156,11 +156,11 @@ export function CategoryModal({ isOpen, onClose, categories }: CategoryModalProp
         title="Delete category?"
         content={
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-(--grey-700)">
+            <p className="text-sm text-(--text-secondary)">
               Are you sure you want to delete{" "}
               <span className="font-medium">{deletingCategory?.name}</span>?
             </p>
-            <p className="text-sm text-(--grey-500)">
+            <p className="text-sm text-(--text-muted)">
               This category will be removed. Its spots will become uncategorized.
             </p>
           </div>

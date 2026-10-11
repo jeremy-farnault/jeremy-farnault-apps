@@ -128,7 +128,7 @@ export function CardDetailModal({
             type="button"
             aria-label="Delete card"
             onClick={() => setConfirmingDelete(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-(--grey-500) hover:text-(--red-500)"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-(--text-muted) hover:text-(--red-500)"
           >
             <TrashIcon size={16} />
           </button>
@@ -144,7 +144,7 @@ export function CardDetailModal({
             />
 
             <div className="flex shrink-0 items-center justify-between rounded-[10px] bg-(--surface-150) px-3 py-2">
-              <span className="flex items-center gap-1.5 text-sm text-(--grey-900)">
+              <span className="flex items-center gap-1.5 text-sm text-(--text)">
                 <WarningIcon size={16} weight="fill" className="text-(--red-500)" />
                 Important
               </span>
@@ -152,13 +152,13 @@ export function CardDetailModal({
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-(--grey-500)">Description</span>
+              <span className="text-xs text-(--text-muted)">Description</span>
               <RichTextEditor editor={editor} />
               <FormattingToolbar editor={editor} />
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="text-xs text-(--grey-500)">Column</span>
+              <span className="text-xs text-(--text-muted)">Column</span>
               <Select value={columnId} onValueChange={setColumnId} placeholder="Choose a column">
                 {columns.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
@@ -177,12 +177,12 @@ export function CardDetailModal({
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-(--grey-500)">Deadline</span>
+                <span className="text-xs text-(--text-muted)">Deadline</span>
                 {deadline && (
                   <button
                     type="button"
                     onClick={() => setDeadline("")}
-                    className="text-xs text-(--grey-500) hover:text-(--grey-800)"
+                    className="text-xs text-(--text-muted) hover:text-(--text)"
                   >
                     Clear
                   </button>
@@ -198,11 +198,11 @@ export function CardDetailModal({
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-(--grey-500)">Colour</span>
+                <span className="text-xs text-(--text-muted)">Colour</span>
                 <button
                   type="button"
                   onClick={() => setColor(null)}
-                  className="text-xs text-(--grey-500) hover:text-(--grey-800)"
+                  className="text-xs text-(--text-muted) hover:text-(--text)"
                 >
                   No colour
                 </button>

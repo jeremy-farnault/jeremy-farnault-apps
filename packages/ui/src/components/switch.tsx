@@ -29,6 +29,7 @@ export function Switch({ label, className, ref, ...props }: SwitchProps) {
       >
         <SwitchPrimitive.Thumb
           className={cn(
+            // dark-mode-fixed: a white thumb reads on both the translucent and the primary track.
             "pointer-events-none block h-[18px] w-[18px] rounded-full bg-white shadow-none",
             "translate-x-[3px] data-[state=checked]:translate-x-[21px]"
           )}

@@ -1,6 +1,11 @@
 "use client";
 
-import { ASSET_SOURCE_COLORS, CATEGORY_COLORS, INCOME_SOURCE_COLORS } from "@/lib/constants";
+import {
+  ASSET_SOURCE_COLORS,
+  CATEGORY_COLORS,
+  FALLBACK_COLOR,
+  INCOME_SOURCE_COLORS,
+} from "@/lib/constants";
 import type { AssetSourceRow, IncomeSourceRow, MonthlyTotals } from "@/lib/queries";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -32,15 +37,17 @@ function ChartTooltip({
       style={{
         fontSize: 11,
         borderRadius: 12,
-        backgroundColor: "var(--grey-700)",
+        backgroundColor: "var(--text-secondary)",
         padding: "8px 12px",
       }}
     >
-      <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
+      <p style={{ color: "var(--text-inverse)", margin: "0 0 4px 0" }}>
+        {formatMonthLabel(label ?? "")}
+      </p>
       {items.map((item) => (
         <div
           key={item.dataKey}
-          style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}
+          style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-inverse)" }}
         >
           <span
             style={{
@@ -98,13 +105,18 @@ function AllChartTooltip({
       style={{
         fontSize: 11,
         borderRadius: 12,
-        backgroundColor: "var(--grey-700)",
+        backgroundColor: "var(--text-secondary)",
         padding: "8px 12px",
       }}
     >
-      <p style={{ color: "white", margin: "0 0 4px 0" }}>{formatMonthLabel(label ?? "")}</p>
+      <p style={{ color: "var(--text-inverse)", margin: "0 0 4px 0" }}>
+        {formatMonthLabel(label ?? "")}
+      </p>
       {entries.map(([prefix, { total, color }]) => (
-        <div key={prefix} style={{ display: "flex", alignItems: "center", gap: 6, color: "white" }}>
+        <div
+          key={prefix}
+          style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-inverse)" }}
+        >
           <span
             style={{
               width: 6,
@@ -157,16 +169,16 @@ export function OverviewChart({
     ),
   }));
 
-  const axisTickProps = { fontSize: 10, fill: "var(--grey-400)" };
+  const axisTickProps = { fontSize: 10, fill: "var(--text-subtle)" };
 
   return (
     <div className="flex flex-col gap-8">
       {/* Spending by category */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">Spending</h3>
+        <h3 className="text-sm font-medium text-(--text-secondary)">Spending</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthLabel}
@@ -185,7 +197,7 @@ export function OverviewChart({
                 key={category}
                 dataKey={`spending_${category}`}
                 stackId="spending"
-                fill={CATEGORY_COLORS[category] ?? "var(--grey-400)"}
+                fill={CATEGORY_COLORS[category] ?? FALLBACK_COLOR}
                 name={category}
                 radius={i === allCategories.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
               />
@@ -196,10 +208,10 @@ export function OverviewChart({
 
       {/* Assets by source */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">Assets</h3>
+        <h3 className="text-sm font-medium text-(--text-secondary)">Assets</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthLabel}
@@ -217,7 +229,7 @@ export function OverviewChart({
               const color =
                 assetSources.find((s) => s.name === sourceName)?.color ??
                 ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
+                FALLBACK_COLOR;
               return (
                 <Bar
                   key={sourceName}
@@ -235,10 +247,10 @@ export function OverviewChart({
 
       {/* Income by source */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">Income</h3>
+        <h3 className="text-sm font-medium text-(--text-secondary)">Income</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthLabel}
@@ -256,7 +268,7 @@ export function OverviewChart({
               const color =
                 incomeSources.find((s) => s.name === sourceName)?.color ??
                 INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
+                FALLBACK_COLOR;
               return (
                 <Bar
                   key={sourceName}
@@ -274,10 +286,10 @@ export function OverviewChart({
 
       {/* All: spending + income + assets */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-(--grey-600)">All</h3>
+        <h3 className="text-sm font-medium text-(--text-secondary)">All</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barGap={4} barCategoryGap="30%">
-            <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+            <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="month"
               tickFormatter={formatMonthLabel}
@@ -296,7 +308,7 @@ export function OverviewChart({
                 key={`all_spending_${category}`}
                 dataKey={`spending_${category}`}
                 stackId="spending"
-                fill={CATEGORY_COLORS[category] ?? "var(--grey-400)"}
+                fill={CATEGORY_COLORS[category] ?? FALLBACK_COLOR}
                 name={category}
                 radius={i === allCategories.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
               />
@@ -305,7 +317,7 @@ export function OverviewChart({
               const color =
                 incomeSources.find((s) => s.name === sourceName)?.color ??
                 INCOME_SOURCE_COLORS[i % INCOME_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
+                FALLBACK_COLOR;
               return (
                 <Bar
                   key={`all_income_${sourceName}`}
@@ -321,7 +333,7 @@ export function OverviewChart({
               const color =
                 assetSources.find((s) => s.name === sourceName)?.color ??
                 ASSET_SOURCE_COLORS[i % ASSET_SOURCE_COLORS.length] ??
-                "var(--grey-400)";
+                FALLBACK_COLOR;
               return (
                 <Bar
                   key={`all_assets_${sourceName}`}

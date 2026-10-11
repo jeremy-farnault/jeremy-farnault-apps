@@ -8,7 +8,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<NotepadIcon className="text-white" size={32} />}
+        appIcon={<NotepadIcon className="text-(--text-on-strong-hue)" size={32} />}
         appName="Noter"
         currentAppId="noter"
         titleHref="/"

@@ -9,3 +9,19 @@
 .greyscale-map img {
   filter: grayscale(100%);
 }
+
+/*
+ * OSM only serves light tiles, so dark mode inverts them: light land turns dark and roads turn
+ * light. Brightness and contrast take the edge off the pure black. The greyscale map keeps its
+ * grayscale step, so hue-rotate (which restores colours after an invert) has nothing to do there.
+ */
+.dark .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+.dark .greyscale-map .leaflet-tile {
+  filter: grayscale(100%) invert(1) brightness(0.95) contrast(0.9);
+}
+/* Leaflet's light grey shows through while tiles load. */
+.dark .leaflet-container {
+  background: var(--surface);
+}

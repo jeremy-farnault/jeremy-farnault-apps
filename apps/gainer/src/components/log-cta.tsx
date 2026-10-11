@@ -131,7 +131,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
       {/* Dual floating CTAs (idle) or countdown pill (running) */}
       {remaining !== null ? (
         <div
-          className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 h-14 px-6 rounded-xl bg-(--primary) text-white shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]"
+          className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 h-14 px-6 rounded-xl bg-(--primary) text-(--text-on-strong-hue) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]"
           style={{ animation: "cta-slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}
         >
           <span className="text-sm font-semibold tabular-nums">
@@ -141,7 +141,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
             <button
               type="button"
               onClick={cancelTimer}
-              className="text-white/70 hover:text-white transition-colors cursor-pointer"
+              className="text-(--text-on-strong-hue)/70 hover:text-(--text-on-strong-hue) transition-colors cursor-pointer"
             >
               <XIcon size={16} />
             </button>
@@ -156,7 +156,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
             type="button"
             onClick={() => setTimerPickerOpen(true)}
             aria-label="Rest timer"
-            className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--grey-700) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
+            className="flex h-14 w-14 items-center justify-center rounded-xl border border-(--border) bg-(--card) text-(--text-secondary) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--surface-150)"
           >
             <TimerIcon size={22} />
           </button>
@@ -164,7 +164,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
             type="button"
             onClick={() => setExercisePickerOpen(true)}
             aria-label="Add exercise"
-            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-white"
+            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
           >
             <BarbellIcon size={22} />
           </button>
@@ -198,8 +198,8 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
                   }}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     selectedPreset === preset && !customInput
-                      ? "bg-(--primary) text-white"
-                      : "bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200)"
+                      ? "bg-(--primary) text-(--text-on-strong-hue)"
+                      : "bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200)"
                   }`}
                 >
                   {formatTime(preset)}
@@ -265,8 +265,8 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
                     }}
                     className={`text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                       selected === exercise.name && !isNewExercise
-                        ? "bg-(--primary) text-white"
-                        : "hover:bg-(--surface-150) text-(--grey-900)"
+                        ? "bg-(--primary) text-(--text-on-strong-hue)"
+                        : "hover:bg-(--surface-150) text-(--text)"
                     }`}
                   >
                     {exercise.name}
@@ -276,7 +276,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
                   <button
                     type="button"
                     onClick={handleSelectCustom}
-                    className="text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer hover:bg-(--surface-150) text-(--grey-600)"
+                    className="text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer hover:bg-(--surface-150) text-(--text-secondary)"
                   >
                     Add &quot;{query.trim()}&quot; as custom
                   </button>
@@ -299,13 +299,13 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
                   onClick={() => setNewExerciseType(opt.value)}
                   className={`text-left px-3 py-3 rounded-lg text-sm transition-colors cursor-pointer ${
                     newExerciseType === opt.value
-                      ? "bg-(--primary) text-white"
-                      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--grey-900)"
+                      ? "bg-(--primary) text-(--text-on-strong-hue)"
+                      : "bg-(--surface-150) hover:bg-(--surface-200) text-(--text)"
                   }`}
                 >
                   <span className="font-medium">{opt.label}</span>
                   <span
-                    className={`ml-2 text-xs ${newExerciseType === opt.value ? "text-white/70" : "text-(--grey-500)"}`}
+                    className={`ml-2 text-xs ${newExerciseType === opt.value ? "text-(--text-on-strong-hue)/70" : "text-(--text-muted)"}`}
                   >
                     {opt.description}
                   </span>

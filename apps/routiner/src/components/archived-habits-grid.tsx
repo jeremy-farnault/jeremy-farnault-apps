@@ -83,7 +83,7 @@ export function ArchivedHabitsGrid({ habits: initialHabits, logs, sort }: Props)
       />
 
       {displayedHabits.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--grey-500)">
+        <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-(--text-muted)">
           <ArchiveIcon size={40} weight="thin" />
           <p className="text-sm">
             {searchQuery ? "No archived habits match your search." : "No archived habits."}

@@ -5,6 +5,20 @@
   --secondary: var(--red-800);
 }
 
+/*
+ * The HUD floats over the map, which uses the night preset in both modes, so it keeps one
+ * look whatever the theme: light text on dark glass. These are the values it used before dark
+ * mode, pinned so they don't follow the `.dark` surfaces and text roles.
+ */
+:root,
+.dark {
+  --hud-glass: #2222261f;
+  --hud-glass-strong: #22222633;
+  --hud-ink: #ffffff;
+  --hud-text: var(--grey-200);
+  --hud-text-muted: var(--grey-500);
+}
+
 .tracer-popup .mapboxgl-popup-content {
   background: rgba(34, 34, 38, 0.92);
   backdrop-filter: blur(8px);

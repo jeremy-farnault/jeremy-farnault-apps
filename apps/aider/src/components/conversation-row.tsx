@@ -82,7 +82,7 @@ export function ConversationRow({ conversation }: { conversation: ConversationLi
         onClick={() => setMobileOpen(false)}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "block flex-1 min-w-0 truncate rounded-[10px] px-3 py-2 pr-8 text-sm text-(--grey-900) hover:bg-(--surface-150) transition-colors",
+          "block flex-1 min-w-0 truncate rounded-[10px] px-3 py-2 pr-8 text-sm text-(--text) hover:bg-(--surface-150) transition-colors",
           isActive && "bg-(--surface-150)"
         )}
       >
@@ -95,7 +95,7 @@ export function ConversationRow({ conversation }: { conversation: ConversationLi
             type="button"
             aria-label="Conversation options"
             className={cn(
-              "absolute right-1 flex h-7 w-7 items-center justify-center rounded-[8px] text-(--grey-700) transition-opacity",
+              "absolute right-1 flex h-7 w-7 items-center justify-center rounded-[8px] text-(--text-secondary) transition-opacity",
               "hover:bg-(--surface-200) opacity-100 md:opacity-0 md:group-hover:opacity-100",
               menuOpen && "opacity-100"
             )}
@@ -117,7 +117,7 @@ export function ConversationRow({ conversation }: { conversation: ConversationLi
             <button
               type="button"
               onClick={startRename}
-              className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--grey-900) hover:bg-(--surface-150) transition-colors"
+              className="flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-(--text) hover:bg-(--surface-150) transition-colors"
             >
               <PencilSimpleIcon size={16} />
               Rename

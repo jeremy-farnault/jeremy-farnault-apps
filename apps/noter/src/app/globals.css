@@ -1,3 +1,36 @@
+/*
+ * Note and folder cards. Each card passes its palette colour as `--note-fill` and a derived
+ * edge as `--note-border`. Light mode fills the card with the colour. In dark mode the palette
+ * turns into mid-tones that only near-black text reads on, which would leave coloured text and
+ * soft text unreadable. So dark mode draws a dark card tinted with the colour, edged with it,
+ * and everything on the card uses the page roles.
+ */
+.note-fill {
+  background-color: var(--note-fill);
+  border-color: var(--note-border);
+}
+.dark .note-fill {
+  background-color: color-mix(in oklab, var(--note-fill) 14%, var(--surface-raised));
+  border-color: var(--note-fill);
+}
+
+/*
+ * Text and chips on a strong (`-600` Blue, Purple or Red Dark) fill, which is dark in light
+ * mode. In dark mode the card is dark whatever its colour, so they fall back to the roles.
+ */
+:root {
+  --strong-fill-text: var(--grey-100);
+  --strong-fill-text-soft: var(--grey-200);
+  --strong-fill-chip: #ffffff26;
+  --strong-fill-chip-hover: #ffffff40;
+}
+.dark {
+  --strong-fill-text: var(--text);
+  --strong-fill-text-soft: var(--text-secondary);
+  --strong-fill-chip: var(--surface-150);
+  --strong-fill-chip-hover: var(--surface-200);
+}
+
 .note-card-body p {
   margin: 0;
 }
@@ -64,10 +97,10 @@
   justify-content: center;
   width: 13px;
   height: 13px;
-  border: 1px solid var(--grey-400);
+  border: 1px solid var(--text-subtle);
   border-radius: 3px;
   flex-shrink: 0;
-  color: white;
+  color: var(--text-on-strong-hue);
 }
 
 .note-card-body .task-checkbox--checked {
@@ -112,6 +145,7 @@
 .note-card-body mark {
   /* The authored colour rides on an inline style from `renderToHtml`; dark text is legible on
      every `-200` marker swatch, including over a darker note colour. */
+  /* dark-mode-fixed: `-200` markers stay light fills in dark mode. */
   color: var(--grey-900);
   border-radius: 3px;
   padding: 0 0.1rem;

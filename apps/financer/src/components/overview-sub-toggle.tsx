@@ -29,7 +29,9 @@ export function OverviewSubToggle({ sub }: OverviewSubToggleProps) {
           onClick={() => setSub(v)}
           className={cn(
             "h-9 px-4 rounded-[10px] text-sm font-medium capitalize transition-colors",
-            sub === v ? "bg-(--primary) text-white" : "text-(--grey-700) hover:bg-(--surface-200)"
+            sub === v
+              ? "bg-(--primary) text-(--text-on-strong-hue)"
+              : "text-(--text-secondary) hover:bg-(--surface-200)"
           )}
         >
           {v}

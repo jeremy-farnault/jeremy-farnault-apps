@@ -7,7 +7,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider>
       <AppShell
-        appIcon={<BarbellIcon className="text-white" size={32} />}
+        appIcon={<BarbellIcon className="text-(--text-on-strong-hue)" size={32} />}
         appName="Gainer"
         currentAppId="gainer"
         titleHref="/"

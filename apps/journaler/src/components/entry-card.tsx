@@ -58,26 +58,33 @@ export function EntryCard({ entry, onEdit, onDelete }: Props) {
           />
         )}
         {hasImage && (
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+          <div
+            // dark-mode-fixed: shades the entry image, in both modes.
+            className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"
+          />
         )}
       </div>
 
       {/* Bottom 1/3: info area */}
       <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200)">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold truncate text-(--grey-900)">{entry.title}</p>
+          <p className="text-sm font-semibold truncate text-(--text)">{entry.title}</p>
           {entry.rating !== null && (
-            <span className="text-sm font-semibold text-(--grey-600) shrink-0">{entry.rating}</span>
+            <span className="text-sm font-semibold text-(--text-secondary) shrink-0">
+              {entry.rating}
+            </span>
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
           <span
-            className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
+            className="text-xs font-medium px-2 py-0.5 rounded-full text-(--text-on-strong-hue)"
             style={{ backgroundColor: CATEGORY_COLORS[entry.category] }}
           >
             {entry.category}
           </span>
-          <span className="text-xs text-(--grey-600) shrink-0">{entry.date.slice(0, 10)}</span>
+          <span className="text-xs text-(--text-secondary) shrink-0">
+            {entry.date.slice(0, 10)}
+          </span>
         </div>
       </div>
 

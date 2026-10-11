@@ -40,18 +40,18 @@ export function MonthNav({ month }: MonthNavProps) {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) transition-colors"
+        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) transition-colors"
         aria-label="Previous month"
       >
         <ArrowLeftIcon size={16} />
       </button>
-      <span className="text-sm font-medium text-(--grey-900) min-w-[120px] text-center">
+      <span className="text-sm font-medium text-(--text) min-w-[120px] text-center">
         {formatMonth(month)}
       </span>
       <button
         type="button"
         onClick={() => navigate(1)}
-        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--grey-700) hover:bg-(--surface-200) transition-colors"
+        className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-(--surface-150) text-(--text-secondary) hover:bg-(--surface-200) transition-colors"
         aria-label="Next month"
       >
         <ArrowRightIcon size={16} />

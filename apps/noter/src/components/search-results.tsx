@@ -24,7 +24,7 @@ export function SearchResults({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <SpinnerGapIcon size={32} className="animate-spin text-(--grey-500)" />
+        <SpinnerGapIcon size={32} className="animate-spin text-(--text-muted)" />
       </div>
     );
   }

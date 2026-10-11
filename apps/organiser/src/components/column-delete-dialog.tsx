@@ -59,11 +59,11 @@ export function ColumnDeleteDialog({
       content={
         hasCards ? (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-(--grey-700)">
+            <p className="text-sm text-(--text-secondary)">
               This column has {cardCount} {cardCount === 1 ? "card" : "cards"}. Choose what happens
               to them.
             </p>
-            <label className="flex items-center gap-2 text-sm text-(--grey-900)">
+            <label className="flex items-center gap-2 text-sm text-(--text)">
               <input
                 type="radio"
                 name="delete-mode"
@@ -81,7 +81,7 @@ export function ColumnDeleteDialog({
                 ))}
               </Select>
             )}
-            <label className="flex items-center gap-2 text-sm text-(--grey-900)">
+            <label className="flex items-center gap-2 text-sm text-(--text)">
               <input
                 type="radio"
                 name="delete-mode"

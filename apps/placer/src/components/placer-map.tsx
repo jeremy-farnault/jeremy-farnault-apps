@@ -25,7 +25,7 @@ function SpotHoverBubble({ spot, x, y }: { spot: SpotRow; x: number; y: number }
         style={spot.category?.color ? { border: `2px solid ${spot.category.color}` } : undefined}
       >
         <div className="px-3 py-2">
-          <p className="truncate text-sm font-medium text-(--grey-900)">{spot.name}</p>
+          <p className="truncate text-sm font-medium text-(--text)">{spot.name}</p>
         </div>
         {spot.photoUrl && (
           <img src={spot.photoUrl} alt={spot.name} className="h-[100px] w-full object-cover" />
@@ -53,11 +53,12 @@ function createSpotIcon(color: string, iconName: string) {
   const iconSvg = renderToStaticMarkup(
     createElement(Icon, {
       size: 14,
-      color: "white",
+      color: "currentColor",
     })
   );
   return L.divIcon({
-    html: `<div style="width:28px;height:28px;border-radius:6px;background:${color};border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">${iconSvg}</div>`,
+    // dark-mode-fixed: a white ring keeps markers distinct from the map in both modes.
+    html: `<div style="width:28px;height:28px;border-radius:6px;background:${color};color:var(--text-on-strong-hue);border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">${iconSvg}</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     className: "",
@@ -72,6 +73,7 @@ const pendingIcon = L.divIcon({
 });
 
 const userPosIcon = L.divIcon({
+  // dark-mode-fixed: a white ring keeps markers distinct from the map in both modes.
   html: `<div style="width:16px;height:16px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
@@ -79,7 +81,8 @@ const userPosIcon = L.divIcon({
 });
 
 const pinnableIcon = L.divIcon({
-  html: `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-400);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="white"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></div>`,
+  // dark-mode-fixed: a white ring keeps markers distinct from the map in both modes.
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-400);color:var(--text-on-strong-hue);border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
   className: "",
@@ -140,7 +143,7 @@ function LocateControl({ userPosition }: { userPosition: [number, number] | null
     btn.type = "button";
     btn.title = "Go to my location";
     btn.style.cssText =
-      "display:flex;align-items:center;justify-content:center;width:30px;height:30px;cursor:pointer;background:var(--card);border:none;border-radius:0.75rem;box-shadow:0 0 10px rgba(0,0,0,0.1);";
+      "display:flex;align-items:center;justify-content:center;width:30px;height:30px;cursor:pointer;background:var(--card);color:var(--text);border:none;border-radius:0.75rem;box-shadow:0 0 10px rgba(0,0,0,0.1);";
     btn.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"/></svg>';
 
@@ -327,6 +330,7 @@ export function PlacerMap({
                 key={spot.id}
                 position={[spot.lat, spot.lng]}
                 icon={createSpotIcon(
+                  // dark-mode-fixed: the fallback category colour, a fixed swatch like the stored ones.
                   spot.category?.color ?? "var(--grey-400)",
                   spot.category?.icon ?? DEFAULT_CATEGORY_ICON
                 )}

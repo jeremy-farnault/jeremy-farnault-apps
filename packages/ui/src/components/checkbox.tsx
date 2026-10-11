@@ -53,8 +53,9 @@ export function Checkbox({ checked, onChange, label, disabled, className }: Chec
           "inline-flex shrink-0 items-center justify-center rounded-md border transition-colors",
           "w-[18px] h-[18px]",
           checked
-            ? "bg-(--primary) border-(--primary) text-white"
-            : "bg-transparent border-(--grey-400)"
+            ? "bg-(--primary) border-(--primary) text-(--primary-foreground)"
+            : // --text-subtle rather than --border-strong: an empty box needs this much contrast.
+              "bg-transparent border-(--text-subtle)"
         )}
       >
         {checked && <CheckIcon />}

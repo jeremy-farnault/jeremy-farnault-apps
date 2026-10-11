@@ -9,12 +9,14 @@
   "packageManager": "pnpm@10.7.0",
   "scripts": {
     "build": "turbo run build",
+    "codemod:roles": "tsx scripts/dark-mode-codemod.ts",
     "generate:icon": "tsx scripts/generate-app-icon.ts",
     "generate:splash": "tsx scripts/generate-splash-screens.ts",
     "seed:gainer": "tsx scripts/seed-gainer-exercises.ts",
     "seed:doser": "tsx scripts/seed-doser-symptoms.ts",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint && pnpm lint:colors",
+    "lint:colors": "tsx scripts/check-raw-colors.ts",
     "lint:fix": "turbo run lint:fix",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
@@ -33,6 +35,7 @@
     "turbo": "^2.5.4"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,css,md}": ["biome check --write --no-errors-on-unmatched"]
+    "**/*.{js,jsx,ts,tsx,json,css,md}": ["biome check --write --no-errors-on-unmatched"],
+    "{apps,packages}/*/src/**/*.{ts,tsx}": ["tsx scripts/check-raw-colors.ts"]
   }
 }

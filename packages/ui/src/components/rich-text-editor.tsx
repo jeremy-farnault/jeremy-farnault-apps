@@ -77,7 +77,8 @@ function parseInitial(body: string | null): object | string {
  * with their own container chrome (background, padding, min-height) rather than restating it.
  */
 export const EDITOR_PROSE_CLASS = cn(
-  "prose prose-sm max-w-none",
+  // `jf-rich-text` is the hook for the dark-mode Grey text remap in `globals.css`.
+  "jf-rich-text prose prose-sm max-w-none",
   "[&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-1 [&_h1]:mt-2",
   "[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mb-1 [&_h2]:mt-2",
   "[&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-1 [&_h3]:mt-1",
@@ -88,18 +89,19 @@ export const EDITOR_PROSE_CLASS = cn(
   "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0",
   "[&_li]:my-0.5",
   "[&_p]:my-0 [&_p:empty]:min-h-[1.25rem]",
-  "[&_blockquote]:border-l-2 [&_blockquote]:border-(--grey-300) [&_blockquote]:pl-2.5 [&_blockquote]:text-(--grey-600)",
+  "[&_blockquote]:border-l-2 [&_blockquote]:border-(--border-strong) [&_blockquote]:pl-2.5 [&_blockquote]:text-(--text-secondary)",
   // Colours are set explicitly so code stays legible whatever surface it sits on, and the
   // `before:`/`after:` resets keep the typography plugin's backtick pseudo-elements away
   // should it ever be added.
-  "[&_code]:rounded [&_code]:bg-(--surface-200) [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:font-normal [&_code]:text-(--grey-900)",
+  "[&_code]:rounded [&_code]:bg-(--surface-200) [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:font-normal [&_code]:text-(--text)",
   "[&_code]:before:content-none [&_code]:after:content-none",
-  "[&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:rounded-lg [&_pre]:bg-(--surface-200) [&_pre]:p-3 [&_pre]:text-[0.8125rem] [&_pre]:text-(--grey-900)",
+  "[&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:rounded-lg [&_pre]:bg-(--surface-200) [&_pre]:p-3 [&_pre]:text-[0.8125rem] [&_pre]:text-(--text)",
   "[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-inherit",
-  "[&_hr]:my-3 [&_hr]:border-(--grey-200)",
+  "[&_hr]:my-3 [&_hr]:border-(--border)",
   "[&_a]:text-(--primary) [&_a]:underline [&_a]:underline-offset-2 [&_a]:cursor-pointer",
   // Every marker swatch is a `-200` token, so dark text is always the legible choice on top
   // — including on a note whose own colour is darker than the highlight.
+  // dark-mode-fixed: `-200` highlights stay light fills in dark mode, so the text stays dark.
   "[&_mark]:rounded-[3px] [&_mark]:px-0.5 [&_mark]:text-(--grey-900)",
   // `Placeholder` marks the empty node holding the cursor with `.is-empty` and a
   // `data-placeholder` attribute. Drawing it as a floated, zero-height pseudo-element keeps
@@ -107,7 +109,7 @@ export const EDITOR_PROSE_CLASS = cn(
   // document, so it cannot be selected, dragged or copied. It sits on the real node, which is
   // why it needs no padding offset and follows whatever chrome a consumer composes around it.
   "[&_.is-empty]:before:pointer-events-none [&_.is-empty]:before:float-left [&_.is-empty]:before:h-0",
-  "[&_.is-empty]:before:text-(--grey-400) [&_.is-empty]:before:content-[attr(data-placeholder)]"
+  "[&_.is-empty]:before:text-(--text-subtle) [&_.is-empty]:before:content-[attr(data-placeholder)]"
 );
 
 const DEFAULT_EDITOR_CLASS = cn("w-full outline-none", EDITOR_PROSE_CLASS);
@@ -340,8 +342,8 @@ export function ToolbarButton({
         className={cn(
           "flex h-7 w-7 items-center justify-center rounded text-xs font-semibold transition-colors",
           active
-            ? "bg-(--surface-300) text-(--grey-900)"
-            : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)",
+            ? "bg-(--surface-300) text-(--text)"
+            : "text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)",
           disabled && "pointer-events-none opacity-30"
         )}
       >
@@ -380,7 +382,7 @@ function CharacterCountText({ editor, className }: CharacterCountProps & { edito
   });
 
   return (
-    <span className={cn("shrink-0 text-xs text-(--grey-400) tabular-nums", className)}>
+    <span className={cn("shrink-0 text-xs text-(--text-subtle) tabular-nums", className)}>
       {words} {words === 1 ? "word" : "words"} · {characters}{" "}
       {characters === 1 ? "character" : "characters"}
     </span>
@@ -466,7 +468,7 @@ function SelectionBubble({
           )}
         >
           <InlineMarkButtons editor={editor} />
-          {showColors && <div className="mx-0.5 h-4 w-px bg-(--grey-200)" />}
+          {showColors && <div className="mx-0.5 h-4 w-px bg-(--border)" />}
           {features.highlight && <HighlightButton editor={editor} />}
           {features.textColor && <TextColorButton editor={editor} />}
         </div>
@@ -636,8 +638,8 @@ function LinkButton({ editor }: { editor: Editor }) {
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded transition-colors",
               isOnLink || open
-                ? "bg-(--surface-300) text-(--grey-900)"
-                : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                ? "bg-(--surface-300) text-(--text)"
+                : "text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
             )}
           >
             <LinkIcon size={14} />
@@ -677,8 +679,8 @@ function LinkButton({ editor }: { editor: Editor }) {
               }
             }}
             className={cn(
-              "h-9 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm text-(--grey-900) outline-none",
-              "placeholder:text-(--grey-400)",
+              "h-9 w-full rounded-[10px] bg-(--surface-150) px-3 text-sm text-(--text) outline-none",
+              "placeholder:text-(--text-subtle)",
               error && "ring-1 ring-(--red-400)"
             )}
           />
@@ -696,7 +698,7 @@ function LinkButton({ editor }: { editor: Editor }) {
                 <button
                   type="button"
                   onClick={remove}
-                  className="rounded-lg px-2.5 py-1.5 text-xs text-(--grey-700) hover:bg-(--surface-150)"
+                  className="rounded-lg px-2.5 py-1.5 text-xs text-(--text-secondary) hover:bg-(--surface-150)"
                 >
                   Remove
                 </button>
@@ -706,7 +708,7 @@ function LinkButton({ editor }: { editor: Editor }) {
                   rel="noopener noreferrer"
                   title="Open in a new tab"
                   aria-label="Open in a new tab"
-                  className="ml-auto flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                  className="ml-auto flex h-7 w-7 items-center justify-center rounded text-(--text-muted) hover:bg-(--surface-150) hover:text-(--text)"
                 >
                   <ArrowSquareOutIcon size={14} />
                 </a>
@@ -746,8 +748,8 @@ function HighlightButton({ editor }: { editor: Editor }) {
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded transition-colors",
               activeColor !== null || open
-                ? "bg-(--surface-300) text-(--grey-900)"
-                : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                ? "bg-(--surface-300) text-(--text)"
+                : "text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
             )}
           >
             <HighlighterCircleIcon size={14} />
@@ -783,7 +785,7 @@ function HighlightButton({ editor }: { editor: Editor }) {
               setOpen(false);
             }}
             className={cn(
-              "self-start rounded-lg px-2.5 py-1.5 text-xs text-(--grey-700) hover:bg-(--surface-150)",
+              "self-start rounded-lg px-2.5 py-1.5 text-xs text-(--text-secondary) hover:bg-(--surface-150)",
               activeColor === null && "pointer-events-none opacity-40"
             )}
           >
@@ -822,8 +824,8 @@ function TextColorButton({ editor }: { editor: Editor }) {
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded transition-colors",
               activeColor !== null || open
-                ? "bg-(--surface-300) text-(--grey-900)"
-                : "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+                ? "bg-(--surface-300) text-(--text)"
+                : "text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
             )}
           >
             <PaletteIcon size={14} {...(activeColor && { style: { color: activeColor } })} />
@@ -858,7 +860,7 @@ function TextColorButton({ editor }: { editor: Editor }) {
               setOpen(false);
             }}
             className={cn(
-              "self-start rounded-lg px-2.5 py-1.5 text-xs text-(--grey-700) hover:bg-(--surface-150)",
+              "self-start rounded-lg px-2.5 py-1.5 text-xs text-(--text-secondary) hover:bg-(--surface-150)",
               activeColor === null && "pointer-events-none opacity-40"
             )}
           >
@@ -991,8 +993,8 @@ function BlockTypePicker({ editor }: { editor: Editor }) {
             onMouseDown={(e) => e.preventDefault()}
             className={cn(
               "flex h-7 items-center gap-0.5 rounded px-1 transition-colors",
-              "text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)",
-              open && "bg-(--surface-300) text-(--grey-900)"
+              "text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)",
+              open && "bg-(--surface-300) text-(--text)"
             )}
           >
             <TriggerIcon size={14} />
@@ -1026,7 +1028,7 @@ function BlockTypePicker({ editor }: { editor: Editor }) {
                 }}
                 className={cn(
                   "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left",
-                  "text-sm text-(--grey-900) outline-none hover:bg-(--surface-150)",
+                  "text-sm text-(--text) outline-none hover:bg-(--surface-150)",
                   isActive && "font-medium"
                 )}
               >
@@ -1186,10 +1188,10 @@ function ToolbarContent({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-wrap items-center gap-0.5 border-t border-(--grey-200) pt-2">
+      <div className="flex flex-wrap items-center gap-0.5 border-t border-(--border) pt-2">
         {groups.map((group, i) => (
           <Fragment key={group.key}>
-            {i > 0 && <div className="mx-1 h-4 w-px bg-(--grey-200)" />}
+            {i > 0 && <div className="mx-1 h-4 w-px bg-(--border)" />}
             {group.buttons}
           </Fragment>
         ))}

@@ -20,7 +20,7 @@ export function CurrencySelector({ homeCurrency }: { homeCurrency: string }) {
         <button
           type="button"
           aria-label="Select home currency"
-          className="flex h-10 min-w-10 items-center justify-center rounded-full bg-(--surface-150) px-3 text-xs font-semibold text-(--grey-700) hover:bg-(--surface-200) hover:text-(--grey-900)"
+          className="flex h-10 min-w-10 items-center justify-center rounded-full bg-(--surface-150) px-3 text-xs font-semibold text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
         >
           {homeCurrency}
         </button>
@@ -44,8 +44,8 @@ export function CurrencySelector({ homeCurrency }: { homeCurrency: string }) {
               className={cn(
                 "flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm transition-colors",
                 c === homeCurrency
-                  ? "bg-(--primary) font-semibold text-white"
-                  : "text-(--grey-700) hover:bg-(--surface-100)"
+                  ? "bg-(--primary) font-semibold text-(--text-on-strong-hue)"
+                  : "text-(--text-secondary) hover:bg-(--surface-100)"
               )}
             >
               <span aria-hidden="true">{CURRENCY_FLAGS[c]}</span>

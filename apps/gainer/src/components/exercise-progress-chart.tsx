@@ -56,13 +56,13 @@ export function ExerciseProgressChart({ data, chartType, valueLabel }: ExerciseP
   const commonAxisProps = {
     tickLine: false as const,
     axisLine: false as const,
-    tick: { fontSize: 10, fill: "var(--grey-400)" },
+    tick: { fontSize: 10, fill: "var(--text-subtle)" },
   };
 
   return (
     <ResponsiveContainer width="95%" height={180}>
       <LineChart data={chartData} margin={{ top: 4, right: 24, left: -28, bottom: 8 }}>
-        <CartesianGrid vertical={false} stroke="var(--grey-200)" />
+        <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis
           dataKey="dateStr"
           interval={interval}
@@ -77,11 +77,12 @@ export function ExerciseProgressChart({ data, chartType, valueLabel }: ExerciseP
           contentStyle={{
             fontSize: 11,
             borderRadius: 12,
-            backgroundColor: "var(--grey-700)",
+            // grey-700 in light, so the tooltip looks the same; a light chip in dark.
+            backgroundColor: "var(--text-secondary)",
             border: "none",
           }}
-          labelStyle={{ color: "white" }}
-          itemStyle={{ color: "white" }}
+          labelStyle={{ color: "var(--text-inverse)" }}
+          itemStyle={{ color: "var(--text-inverse)" }}
           isAnimationActive={false}
         />
         <Line

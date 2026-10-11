@@ -109,7 +109,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         <AppShell
-          appIcon={<InfinityIcon className="text-(--grey-900)" size={26} weight="bold" />}
+          appIcon={<InfinityIcon className="text-(--text)" size={26} weight="bold" />}
           appName="Indexer"
           rightSlot={<HeaderAuth />}
         >

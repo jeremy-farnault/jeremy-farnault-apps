@@ -132,14 +132,14 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
     <NodeViewWrapper>
       <div
         className={cn(
-          "flex items-center gap-2 rounded-lg border border-(--grey-200)",
+          "flex items-center gap-2 rounded-lg border border-(--border)",
           "bg-(--surface-100) px-3 py-2 text-sm",
           isDone && "opacity-50",
           isDue && "border-red-300"
         )}
       >
-        <BellIcon size={14} className="shrink-0 text-(--grey-500)" />
-        <span className={cn("flex-1 truncate", isDone && "line-through text-(--grey-400)")}>
+        <BellIcon size={14} className="shrink-0 text-(--text-muted)" />
+        <span className={cn("flex-1 truncate", isDone && "line-through text-(--text-subtle)")}>
           {title || "Reminder"}
         </span>
         {formattedDate && (
@@ -149,13 +149,13 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
               e.preventDefault();
               setPickerOpen(true);
             }}
-            className="shrink-0 text-xs text-(--grey-500) hover:text-(--grey-900)"
+            className="shrink-0 text-xs text-(--text-muted) hover:text-(--text)"
           >
             {formattedDate}
           </button>
         )}
         {repeatRule !== "NONE" && (
-          <span className="shrink-0 rounded px-1.5 py-0.5 text-xs bg-(--surface-200) text-(--grey-600)">
+          <span className="shrink-0 rounded px-1.5 py-0.5 text-xs bg-(--surface-200) text-(--text-secondary)">
             {repeatRule.toLowerCase()}
           </span>
         )}
@@ -167,7 +167,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
                 e.preventDefault();
                 handleToggleDone();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
               title="Toggle done"
             >
               <CheckIcon size={14} />
@@ -178,7 +178,7 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
                 e.preventDefault();
                 handleDelete();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
               title="Delete reminder"
             >
               <TrashIcon size={14} />
@@ -188,8 +188,8 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
       </div>
 
       {pickerOpen && (
-        <div className="mt-1 rounded-lg border border-(--grey-200) bg-(--card) overflow-hidden">
-          <div className="flex flex-col gap-3 p-3 border-b border-(--grey-200)">
+        <div className="mt-1 rounded-lg border border-(--border) bg-(--card) overflow-hidden">
+          <div className="flex flex-col gap-3 p-3 border-b border-(--border)">
             <input
               value={localTitle}
               onChange={(e) => setLocalTitle(e.target.value)}
@@ -221,14 +221,14 @@ function ReminderItemNodeView({ node, updateAttributes, deleteNode, extension }:
             <button
               type="button"
               onClick={handleCancel}
-              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
             >
               <XIcon size={14} />
             </button>
             <button
               type="button"
               onClick={handlePickerConfirm}
-              className="flex h-7 w-7 items-center justify-center rounded text-(--grey-500) hover:bg-(--surface-200) hover:text-(--grey-900)"
+              className="flex h-7 w-7 items-center justify-center rounded text-(--text-muted) hover:bg-(--surface-200) hover:text-(--text)"
             >
               <CheckIcon size={14} />
             </button>

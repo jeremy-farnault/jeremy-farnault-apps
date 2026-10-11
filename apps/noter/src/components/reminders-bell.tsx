@@ -35,14 +35,14 @@ function ReminderRow({ item, onDone, onClose }: ReminderRowProps) {
   return (
     <div className="flex items-start gap-2 rounded-lg p-2 hover:bg-(--surface-100)">
       <a href={`/note/${item.noteId}`} onClick={onClose} className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-(--grey-900)">{item.title || "Reminder"}</p>
-        {item.noteTitle && <p className="truncate text-xs text-(--grey-500)">{item.noteTitle}</p>}
-        <p className="mt-0.5 text-xs text-(--grey-400)">{formatDate(item.scheduledAt)}</p>
+        <p className="truncate text-sm font-medium text-(--text)">{item.title || "Reminder"}</p>
+        {item.noteTitle && <p className="truncate text-xs text-(--text-muted)">{item.noteTitle}</p>}
+        <p className="mt-0.5 text-xs text-(--text-subtle)">{formatDate(item.scheduledAt)}</p>
       </a>
       <button
         type="button"
         onClick={() => onDone(item.id)}
-        className="mt-0.5 shrink-0 rounded p-1 text-(--grey-400) hover:bg-(--surface-200) hover:text-(--grey-700)"
+        className="mt-0.5 shrink-0 rounded p-1 text-(--text-subtle) hover:bg-(--surface-200) hover:text-(--text-secondary)"
         title="Mark done"
       >
         <CheckIcon size={14} />
@@ -113,8 +113,8 @@ export function RemindersBell() {
           aria-label="Reminders"
           className={cn(
             "relative flex h-10 w-10 items-center justify-center rounded-full",
-            "bg-(--surface-150) text-(--grey-700)",
-            "hover:bg-(--surface-200) hover:text-(--grey-900)"
+            "bg-(--surface-150) text-(--text-secondary)",
+            "hover:bg-(--surface-200) hover:text-(--text)"
           )}
         >
           <BellIcon size={20} />
@@ -135,14 +135,14 @@ export function RemindersBell() {
             "animate-[overlay-in_0.3s_ease-in-out]"
           )}
         >
-          <p className="mb-3 text-sm font-semibold text-(--grey-900)">Reminders</p>
+          <p className="mb-3 text-sm font-semibold text-(--text)">Reminders</p>
 
-          {loading && <p className="text-sm text-(--grey-400)">Loading…</p>}
+          {loading && <p className="text-sm text-(--text-subtle)">Loading…</p>}
 
           {!loading && error && <p className="text-sm text-red-500">Failed to load reminders</p>}
 
           {!loading && !error && items.length === 0 && (
-            <p className="text-sm text-(--grey-400)">No reminders</p>
+            <p className="text-sm text-(--text-subtle)">No reminders</p>
           )}
 
           {!loading && due.length > 0 && (
@@ -155,12 +155,12 @@ export function RemindersBell() {
           )}
 
           {!loading && due.length > 0 && upcoming.length > 0 && (
-            <div className="my-3 h-px bg-(--grey-200)" />
+            <div className="my-3 h-px bg-(--border)" />
           )}
 
           {!loading && upcoming.length > 0 && (
             <section>
-              <p className="mb-1 text-xs font-medium text-(--grey-500)">Upcoming</p>
+              <p className="mb-1 text-xs font-medium text-(--text-muted)">Upcoming</p>
               {upcoming.map((r) => (
                 <ReminderRow key={r.id} item={r} onDone={markDone} onClose={() => setOpen(false)} />
               ))}

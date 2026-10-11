@@ -29,13 +29,13 @@ export function HandleSettings({ currentHandle }: { currentHandle: string }) {
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-semibold text-(--grey-900)">Handle</h2>
-      <p className="text-xs text-(--grey-500)">
+      <h2 className="text-sm font-semibold text-(--text)">Handle</h2>
+      <p className="text-xs text-(--text-muted)">
         Your portfolio&apos;s public address. Changing it frees the old handle immediately.
       </p>
 
       <div className="flex items-center gap-1 rounded-xl bg-(--surface-150) px-3 py-2">
-        <span className="text-sm text-(--grey-500)">exposer.jeremyfarnault.com/</span>
+        <span className="text-sm text-(--text-muted)">exposer.jeremyfarnault.com/</span>
         <TextInput
           value={value}
           onChange={(v) => {

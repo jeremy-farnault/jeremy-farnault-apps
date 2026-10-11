@@ -82,8 +82,8 @@ export function LocationSearchModal({ isOpen, onClose, onSelect }: LocationSearc
             placeholder="Search for an address…"
             autoFocus
           />
-          {isLoading && <p className="text-xs text-(--grey-500)">Searching…</p>}
-          {showNoResults && <p className="text-xs text-(--grey-500)">No results found.</p>}
+          {isLoading && <p className="text-xs text-(--text-muted)">Searching…</p>}
+          {showNoResults && <p className="text-xs text-(--text-muted)">No results found.</p>}
           {results.length > 0 && (
             <ul className="flex flex-col gap-0.5">
               {results.map((r) => {
@@ -94,7 +94,7 @@ export function LocationSearchModal({ isOpen, onClose, onSelect }: LocationSearc
                       <button
                         type="button"
                         onClick={() => handleSelect(r)}
-                        className="w-full rounded-lg px-3 py-2 text-left text-sm text-(--grey-700) hover:bg-(--surface-150) hover:text-(--grey-900)"
+                        className="w-full rounded-lg px-3 py-2 text-left text-sm text-(--text-secondary) hover:bg-(--surface-150) hover:text-(--text)"
                       >
                         <span className="truncate">{short}</span>
                       </button>

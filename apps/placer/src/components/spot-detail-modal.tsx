@@ -124,16 +124,16 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
             style={{ backgroundColor: spot.category.color }}
           >
-            {IconComp && <IconComp size={14} className="text-white" />}
+            {IconComp && <IconComp size={14} className="text-(--text-on-strong-hue)" />}
           </span>
-          <span className="text-sm text-(--grey-700)">{spot.category.name}</span>
+          <span className="text-sm text-(--text-secondary)">{spot.category.name}</span>
         </div>
       )}
-      {spot.description && <p className="text-sm text-(--grey-700)">{spot.description}</p>}
+      {spot.description && <p className="text-sm text-(--text-secondary)">{spot.description}</p>}
       <div className="flex flex-col gap-1">
         {addressLoading && <Skeleton height={12} className="rounded" />}
-        {address && <p className="text-xs text-(--grey-500)">{address}</p>}
-        <p className="font-mono text-xs text-(--grey-400)">
+        {address && <p className="text-xs text-(--text-muted)">{address}</p>}
+        <p className="font-mono text-xs text-(--text-subtle)">
           {spot.lat.toFixed(5)}, {spot.lng.toFixed(5)}
         </p>
       </div>
@@ -143,7 +143,7 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
   const editContent = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-(--grey-700)">Photo</span>
+        <span className="text-sm font-medium text-(--text-secondary)">Photo</span>
         {editPreviewUrl ? (
           <div className="relative w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -158,6 +158,7 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
                 setEditImageState({ status: "removed" });
                 setFileInputKey((k) => k + 1);
               }}
+              // dark-mode-fixed: a scrim chip over the photo, in both modes.
               className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
               aria-label="Remove photo"
             >
@@ -175,6 +176,7 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
             <button
               type="button"
               onClick={() => setEditImageState({ status: "removed" })}
+              // dark-mode-fixed: a scrim chip over the photo, in both modes.
               className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
               aria-label="Remove photo"
             >
@@ -191,13 +193,13 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
               if (!file) return;
               setEditImageState({ status: "pending", file, previewUrl: URL.createObjectURL(file) });
             }}
-            className="text-sm text-(--grey-700) file:mr-3 file:cursor-pointer file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--grey-900) hover:file:bg-(--surface-200)"
+            className="text-sm text-(--text-secondary) file:mr-3 file:cursor-pointer file:rounded-[8px] file:border-0 file:bg-(--surface-150) file:px-3 file:py-1.5 file:text-sm file:text-(--text) hover:file:bg-(--surface-200)"
           />
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="edit-name" className="text-sm font-medium text-(--grey-700)">
+        <label htmlFor="edit-name" className="text-sm font-medium text-(--text-secondary)">
           Name
         </label>
         <TextInput
@@ -210,7 +212,7 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-(--grey-700)">Category</span>
+        <span className="text-sm font-medium text-(--text-secondary)">Category</span>
         <Select
           value={editForm.categoryId}
           onValueChange={(v) => setEditForm((f) => ({ ...f, categoryId: v }))}
@@ -226,7 +228,7 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="edit-description" className="text-sm font-medium text-(--grey-700)">
+        <label htmlFor="edit-description" className="text-sm font-medium text-(--text-secondary)">
           Description
         </label>
         <Textarea
@@ -239,19 +241,19 @@ export function SpotDetailModal({ spot, categories, onClose }: SpotDetailModalPr
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-(--grey-700)">Location</span>
+        <span className="text-sm font-medium text-(--text-secondary)">Location</span>
         <button
           type="button"
           onClick={() => setLocationSearchOpen(true)}
           disabled={submitting}
-          className="flex h-10 items-center justify-center rounded-xl border border-(--border) text-sm text-(--grey-700) hover:bg-(--surface-150) disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 items-center justify-center rounded-xl border border-(--border) text-sm text-(--text-secondary) hover:bg-(--surface-150) disabled:cursor-not-allowed disabled:opacity-50"
         >
           Change location
         </button>
         <div className="flex flex-col gap-1 mt-1">
           {editAddressLoading && <Skeleton height={12} className="rounded" />}
-          {editAddress && <p className="text-xs text-(--grey-500)">{editAddress}</p>}
-          <p className="font-mono text-xs text-(--grey-400)">
+          {editAddress && <p className="text-xs text-(--text-muted)">{editAddress}</p>}
+          <p className="font-mono text-xs text-(--text-subtle)">
             {editForm.lat.toFixed(5)}, {editForm.lng.toFixed(5)}
           </p>
         </div>

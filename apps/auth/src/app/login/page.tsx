@@ -49,21 +49,21 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
-      <h1 className="text-2xl font-semibold text-(--grey-900) mb-1">Sign in</h1>
+      <h1 className="text-2xl font-semibold text-(--text) mb-1">Sign in</h1>
       {error && <p className="text-sm text-(--red-500)">{error}</p>}
       <button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-(--surface-200) px-3 text-sm font-medium text-(--grey-900) shadow-sm disabled:opacity-50"
+        className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-(--surface-200) px-3 text-sm font-medium text-(--text) shadow-sm disabled:opacity-50"
       >
         <GoogleLogoIcon size={18} />
         Continue with Google
       </button>
       <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-(--grey-200)" />
-        <span className="text-xs text-(--grey-400)">or</span>
-        <div className="h-px flex-1 bg-(--grey-200)" />
+        <div className="h-px flex-1 bg-(--border)" />
+        <span className="text-xs text-(--text-subtle)">or</span>
+        <div className="h-px flex-1 bg-(--border)" />
       </div>
       <TextInput type="email" placeholder="Email" value={email} onChange={setEmail} required />
       <TextInput
@@ -76,11 +76,11 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="h-11 w-full rounded-[10px] bg-(--magenta-400) px-3 text-sm font-medium text-white disabled:opacity-50"
+        className="h-11 w-full rounded-[10px] bg-(--magenta-400) px-3 text-sm font-medium text-(--text-on-strong-hue) disabled:opacity-50"
       >
         {loading ? "Signing in…" : "Sign in"}
       </button>
-      <p className="text-center text-sm text-(--grey-600)">
+      <p className="text-center text-sm text-(--text-secondary)">
         No account yet?{" "}
         <Link href={signupHref} className="underline">
           Create one
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 />
               </a>
             ))}
-          <span className="text-l font-semibold text-(--grey-900)">Outils</span>
+          <span className="text-l font-semibold text-(--text)">Outils</span>
         </div>
       </header>
       <div className="flex flex-1 w-full items-center justify-center py-16">
