@@ -4,6 +4,7 @@ import { THEME_SCRIPT, applyTheme, getResolvedTheme, installThemeRuntime } from 
 
 const root = document.documentElement;
 let osDark = false;
+let reducedMotion = false;
 let osListener: (() => void) | undefined;
 let frames: FrameRequestCallback[] = [];
 
@@ -22,15 +23,16 @@ function setCookie(value: string | null) {
 
 beforeEach(() => {
   osDark = false;
+  reducedMotion = false;
   osListener = undefined;
   frames = [];
   vi.stubGlobal("matchMedia", (media: string) => ({
     media,
     get matches() {
-      return osDark;
+      return media.includes("reduced-motion") ? reducedMotion : osDark;
     },
     addEventListener: (_: string, listener: () => void) => {
-      osListener = listener;
+      if (media.includes("color-scheme")) osListener = listener;
     },
   }));
   vi.stubGlobal("requestAnimationFrame", (frame: FrameRequestCallback) => frames.push(frame));
@@ -45,6 +47,7 @@ afterEach(() => {
   root.removeAttribute("data-theme");
   root.removeAttribute("data-theme-switching");
   Reflect.deleteProperty(window, "__jfTheme");
+  Reflect.deleteProperty(document, "startViewTransition");
   vi.unstubAllGlobals();
 });
 
@@ -106,6 +109,33 @@ describe("installThemeRuntime", () => {
     expect(root.hasAttribute("data-theme-switching")).toBe(true);
     flushFrames();
     expect(root.hasAttribute("data-theme-switching")).toBe(false);
+  });
+
+  it("crossfades a switch in a view transition, but never the first render", () => {
+    const startViewTransition = vi.fn((update: () => void) => update());
+    Object.assign(document, { startViewTransition });
+    osDark = true;
+    installThemeRuntime("jf-theme");
+    expect(startViewTransition).not.toHaveBeenCalled();
+
+    applyTheme("light");
+    expect(startViewTransition).toHaveBeenCalledOnce();
+    expect(getResolvedTheme()).toBe("light");
+
+    applyTheme("system");
+    setOs(false);
+    expect(startViewTransition).toHaveBeenCalledTimes(3);
+  });
+
+  it("switches instantly with reduced motion on, even where view transitions exist", () => {
+    const startViewTransition = vi.fn((update: () => void) => update());
+    Object.assign(document, { startViewTransition });
+    reducedMotion = true;
+    installThemeRuntime("jf-theme");
+
+    applyTheme("dark");
+    expect(startViewTransition).not.toHaveBeenCalled();
+    expect(getResolvedTheme()).toBe("dark");
   });
 
   it("points the theme-color metas at the chosen scheme, and back to the OS on System", () => {

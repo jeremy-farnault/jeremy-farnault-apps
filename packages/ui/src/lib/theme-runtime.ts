@@ -4,7 +4,7 @@ import { type ResolvedTheme, THEME_COOKIE, type Theme } from "./theme";
 
 /** The runtime the head script installs on `window`, for the toggle and the sync to drive. */
 export type ThemeRuntime = {
-  /** Switches to a preference, instantly (no colour transition). */
+  /** Switches to a preference, with a crossfade where the browser supports it. */
   apply(preference: Theme): void;
   preference(): Theme;
 };
@@ -23,12 +23,15 @@ declare global {
  * the iOS status bar follows the preference rather than the OS.
  *
  * Every change after the first paint sets `data-theme-switching` on `<html>` for two frames,
- * which `globals.css` uses to drop the 300 ms colour transition: a theme switch is instant
- * instead of animating every element on the page.
+ * which `globals.css` uses to drop the 300 ms colour transition, so elements never animate one
+ * by one. Instead, a switch runs inside a view transition where the browser has one: the old
+ * and new page are crossfaded as two snapshots. Without the API, or with reduced motion on,
+ * the switch is instant. The first render is always instant: it runs before first paint.
  */
 export function installThemeRuntime(cookieName: string): void {
   const root = document.documentElement;
   const query = window.matchMedia("(prefers-color-scheme: dark)");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const match = document.cookie.match(new RegExp(`(?:^|; )${cookieName}=([^;]*)`));
   const initial = match ? decodeURIComponent(match[1] as string) : "";
   let current: Theme = initial === "light" || initial === "dark" ? initial : "system";
@@ -50,7 +53,7 @@ export function installThemeRuntime(cookieName: string): void {
     }
   }
 
-  function render() {
+  function swap() {
     const dark = current === "dark" || (current === "system" && query.matches);
     root.setAttribute("data-theme-switching", "");
     root.classList.toggle("dark", dark);
@@ -64,6 +67,14 @@ export function installThemeRuntime(cookieName: string): void {
     });
   }
 
+  function render() {
+    if (typeof document.startViewTransition === "function" && !reducedMotion.matches) {
+      document.startViewTransition(swap);
+    } else {
+      swap();
+    }
+  }
+
   window.__jfTheme = {
     apply: (preference) => {
       current = preference === "light" || preference === "dark" ? preference : "system";
@@ -75,7 +86,7 @@ export function installThemeRuntime(cookieName: string): void {
   query.addEventListener("change", () => {
     if (current === "system") render();
   });
-  render();
+  swap();
   // Next may stream the metadata in after this script; point the metas once they exist.
   document.addEventListener("DOMContentLoaded", () => {
     pointThemeColor(root.classList.contains("dark"));

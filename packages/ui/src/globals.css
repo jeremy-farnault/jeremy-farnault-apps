@@ -32,6 +32,13 @@
     transition: none !important;
   }
 
+  /* The theme runtime runs each switch in a view transition: one crossfade of the whole page. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 250ms;
+    animation-timing-function: ease-in-out;
+  }
+
   @keyframes modal-in {
     from {
       transform: translateY(16px);
