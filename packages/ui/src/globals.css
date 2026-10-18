@@ -252,6 +252,8 @@
      *   --surface-sunken  wells set into a raised surface: hover fills, skeletons, inputs
      *   --border          default dividers and outlines
      *   --border-strong   outlines that must read clearly: focused or checked controls
+     *   --card-edge       resting edge of a card on a tinted column or well. Transparent in
+     *                     light mode, where the shadow does the job; a faint line in dark
      *   --shadow-raised   resting lift of a card (`card-raised`)
      *   --shadow-lifted   hovered lift of a card (`card-hover-lift`)
      */
@@ -266,6 +268,7 @@
     --surface-sunken: var(--grey-150);
     --border: var(--grey-200);
     --border-strong: var(--grey-300);
+    --card-edge: transparent;
     --shadow-raised: 0 1px 2px #2222261a, 0 3px 8px #22222614;
     --shadow-lifted: 0 2px 4px #2222261a, 0 8px 18px #2222261f;
 
@@ -450,6 +453,7 @@
     --surface-sunken: #1f1f23;
     --border: #3a3a41;
     --border-strong: #53535a;
+    --card-edge: #ffffff12;
     --shadow-raised: 0 1px 2px #0000004d, 0 3px 8px #00000040;
     --shadow-lifted: 0 2px 4px #0000004d, 0 8px 18px #00000059;
   }
