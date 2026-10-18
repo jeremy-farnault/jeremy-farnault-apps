@@ -113,7 +113,7 @@ export function BoardColumn({
     >
       {column.color && <div className="h-1 w-full" style={{ backgroundColor: column.color }} />}
 
-      <div className="flex items-center gap-1 px-2 py-2">
+      <div className="flex items-center gap-1 px-2 pt-2 pb-1.5">
         <button
           type="button"
           {...attributes}
@@ -182,7 +182,7 @@ export function BoardColumn({
         </Popover.Root>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pt-0.5 pb-2">
         <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
             <SortableCard
