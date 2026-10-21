@@ -39,7 +39,7 @@ export function FolderCard({ folder, allFolders }: Props) {
 
   return (
     <div
-      className="note-fill surface-blur group relative flex h-[150px] w-full flex-col rounded-[22px] border p-4 shadow-sm hover:brightness-95 transition-[filter] duration-300 ease-in-out"
+      className="note-fill group relative flex h-[150px] w-full flex-col rounded-[22px] border p-4 shadow-sm hover:brightness-95 transition-[filter] duration-300 ease-in-out"
       style={{ "--note-fill": bgColor, "--note-border": borderColor } as CSSProperties}
       onMouseEnter={() => setMenuVisible(true)}
       onMouseLeave={() => setMenuVisible(false)}

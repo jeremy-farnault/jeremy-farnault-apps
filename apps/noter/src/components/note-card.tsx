@@ -56,7 +56,7 @@ export function NoteCard({
   return (
     <div
       className={cn(
-        "note-fill surface-blur group relative flex flex-col rounded-[22px] border p-4",
+        "note-fill group relative flex flex-col rounded-[22px] border p-4",
         hasBody ? "h-[150px]" : "h-fit self-start",
         "hover:brightness-95 transition-[filter] duration-300 ease-in-out",
         note.pinned ? "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]" : "shadow-sm"

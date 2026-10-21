@@ -5,14 +5,18 @@
  * soft text unreadable. So dark mode draws a dark card tinted with the colour, edged with it,
  * and everything on the card uses the page roles.
  *
- * The fill is slightly see-through (`--note-fill-opacity`) so that, with `surface-blur`, the
- * app's background scene shows through frosted. Lower it for more frost, at the cost of the
- * colour drifting toward the grey page.
+ * The fill is see-through (`--note-fill-opacity`) and blurs what's behind it
+ * (`--note-fill-blur`), so the app's background scene shows through frosted. A coloured fill
+ * hides the scene far more than the grey `surface-blur` containers do, so it takes a low
+ * opacity and a light blur for the scene to read at all — at the cost of the colour drifting
+ * toward the grey page.
  */
 .note-fill {
-  --note-fill-opacity: 90%;
+  --note-fill-opacity: 50%;
+  --note-fill-blur: 2px;
   background-color: color-mix(in oklab, var(--note-fill) var(--note-fill-opacity), transparent);
   border-color: var(--note-border);
+  backdrop-filter: blur(var(--note-fill-blur));
 }
 .dark .note-fill {
   background-color: color-mix(

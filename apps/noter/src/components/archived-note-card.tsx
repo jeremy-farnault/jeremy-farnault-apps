@@ -63,7 +63,7 @@ export function ArchivedNoteCard({ note }: Props) {
   return (
     <>
       <div
-        className="note-fill surface-blur relative flex h-[150px] flex-col rounded-[22px] border p-4 shadow-sm"
+        className="note-fill relative flex h-[150px] flex-col rounded-[22px] border p-4 shadow-sm"
         style={
           {
             "--note-fill": bgColor,
