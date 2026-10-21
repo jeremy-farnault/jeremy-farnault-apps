@@ -49,7 +49,7 @@ export function ArchivedFolderCard({ folder }: Props) {
   return (
     <>
       <div
-        className="relative flex h-[150px] flex-col rounded-[22px] border border-(--border) bg-(--surface-150) p-4 shadow-sm hover:bg-(--surface-200)"
+        className="relative flex h-[150px] flex-col rounded-[22px] border border-(--border) bg-(--surface-150) surface-blur p-4 shadow-sm hover:bg-(--surface-200)"
         style={{ opacity: isPending ? 0.5 : 1 }}
       >
         <div className="flex flex-1 flex-col">
