@@ -556,5 +556,5 @@
  * too adds nothing; give them a translucent fill instead.
  */
 @utility surface-blur {
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
 }
