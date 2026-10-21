@@ -6,10 +6,11 @@ import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { AppShell } from "@jf/ui";
 import { InfinityIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  axes: ["opsz"],
   subsets: ["latin"],
 });
 
@@ -106,7 +107,7 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
+        className={`${bricolage.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         <AppShell
           appIcon={<InfinityIcon className="text-(--text)" size={26} weight="bold" />}

@@ -3,10 +3,11 @@ import { ThemeScript, ThemedToaster } from "@jf/ui";
 import "@/app/globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  axes: ["opsz"],
   subsets: ["latin"],
 });
 
@@ -98,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeScript />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
+        className={`${bricolage.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         {children}
         <ThemedToaster toastOptions={{ classNames: { toast: "!w-fit" } }} />

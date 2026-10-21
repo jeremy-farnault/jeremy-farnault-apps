@@ -10,6 +10,14 @@
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
+/*
+ * `--font-bricolage` is set by next/font on <body> in each app's layout. `inline` makes
+ * `font-sans` emit the var() itself, so it resolves on <body> where the variable lives.
+ */
+@theme inline {
+  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
 @layer base {
   *,
   *::before,
