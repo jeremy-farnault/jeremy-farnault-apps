@@ -20,7 +20,7 @@ export function DataTab({ exercises }: DataTabProps) {
   return (
     <ul className="flex flex-col gap-2">
       {exercises.map((exercise) => (
-        <li key={exercise.id} className="rounded-[12px] bg-(--surface-100)">
+        <li key={exercise.id} className="rounded-[12px] bg-(--surface-100) surface-blur">
           <Link
             href={`/exercise/${exercise.id}`}
             className="px-4 py-3 flex items-center justify-between hover:bg-(--surface-150) rounded-[12px] transition-colors"

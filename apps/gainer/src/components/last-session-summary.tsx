@@ -62,7 +62,7 @@ export function LastSessionSummary({ session, exercisesWithSets }: LastSessionSu
           {exercisesWithSets.map((se) => (
             <div
               key={se.id}
-              className="flex flex-col gap-1 p-4 rounded-xl bg-(--surface-100) border border-(--surface-200)"
+              className="flex flex-col gap-1 p-4 rounded-xl bg-(--surface-100) surface-blur border border-(--surface-200)"
             >
               <p className="text-sm font-semibold text-(--text)">{se.exercise.name}</p>
               {se.sets.map((set) => (

@@ -166,7 +166,7 @@ export function ExerciseCard({ data, lastSession }: ExerciseCardProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--surface-100) border border-(--surface-200)">
+    <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--surface-100) surface-blur border border-(--surface-200)">
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-semibold text-(--text)">{data.exercise.name}</p>
         {lastSession && (
