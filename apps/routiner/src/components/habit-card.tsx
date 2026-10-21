@@ -35,7 +35,7 @@ export function HabitCard({
   const heatmapLogs = logs.map((l) => ({ date: l.date, value: l.value }));
 
   return (
-    <div className="group relative card-raised rounded-[22px] border border-(--border) bg-(--surface-150) p-4">
+    <div className="group relative card-raised rounded-[22px] border border-(--border) bg-(--surface-150) surface-blur p-4">
       {!measured && viewMode === "heatmap" && (
         <div className="absolute inset-0 animate-pulse rounded-[22px] bg-(--muted)" />
       )}
