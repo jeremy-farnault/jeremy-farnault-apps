@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "codemod:roles": "tsx scripts/dark-mode-codemod.ts",
+    "generate:background": "tsx scripts/generate-background.ts",
     "generate:icon": "tsx scripts/generate-app-icon.ts",
     "generate:splash": "tsx scripts/generate-splash-screens.ts",
     "seed:gainer": "tsx scripts/seed-gainer-exercises.ts",

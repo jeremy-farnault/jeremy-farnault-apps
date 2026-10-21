@@ -11,6 +11,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         appName="Organiser"
         currentAppId="organiser"
         titleHref="/"
+        background="/background.svg"
         rightSlot={<UserMenuConnected />}
         fullHeight
       >

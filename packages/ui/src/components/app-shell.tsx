@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AppBackground } from "./app-background";
 import { AppSwitcher } from "./app-switcher";
 
 interface AppShellProps {
@@ -13,6 +14,8 @@ interface AppShellProps {
   // their own scroll instead of the whole document scrolling. Opt-in: most apps
   // want normal page scroll; chat-style apps (aider) want a fixed frame.
   fullHeight?: boolean;
+  // URL of the app's background scene, usually "/background.svg" in its public folder.
+  background?: string;
 }
 
 export function AppShell({
@@ -24,6 +27,7 @@ export function AppShell({
   rightSlot,
   titleHref,
   fullHeight = false,
+  background,
 }: AppShellProps) {
   return (
     <div
@@ -31,6 +35,7 @@ export function AppShell({
         fullHeight ? "h-dvh overflow-hidden" : "min-h-screen"
       }`}
     >
+      {background && <AppBackground src={background} />}
       <header className="sticky top-0 z-[4000] flex h-14 items-center justify-between px-4 w-full pt-3">
         {titleHref ? (
           <a

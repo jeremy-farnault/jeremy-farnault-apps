@@ -12,6 +12,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         appName="Noter"
         currentAppId="noter"
         titleHref="/"
+        background="/background.svg"
         startSlot={<RemindersBell />}
         rightSlot={<UserMenuConnected />}
       >

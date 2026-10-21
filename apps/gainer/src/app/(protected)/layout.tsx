@@ -11,6 +11,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         appName="Gainer"
         currentAppId="gainer"
         titleHref="/"
+        background="/background.svg"
         rightSlot={<UserMenuConnected />}
       >
         <ThemeSync sync={syncThemeCookie} />
