@@ -89,7 +89,7 @@ export function BoardColumn({
         {...listeners}
         onClick={() => onToggleCollapsed(column.id, false)}
         aria-label={`Expand ${column.name}`}
-        className="flex min-w-[44px] max-w-[44px] flex-col items-center gap-2 rounded-[16px] bg-(--surface-150) py-3 snap-start touch-none sm:snap-align-none"
+        className="flex min-w-[44px] max-w-[44px] flex-col items-center gap-2 rounded-[16px] bg-(--surface-150) surface-blur py-3 snap-start touch-none sm:snap-align-none"
       >
         {column.color && (
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: column.color }} />
@@ -109,7 +109,7 @@ export function BoardColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex max-h-full min-w-[85vw] max-w-[85vw] snap-start flex-col overflow-hidden rounded-[16px] bg-(--surface-150) sm:min-w-[280px] sm:max-w-[280px] sm:snap-align-none"
+      className="flex max-h-full min-w-[85vw] max-w-[85vw] snap-start flex-col overflow-hidden rounded-[16px] bg-(--surface-150) surface-blur sm:min-w-[280px] sm:max-w-[280px] sm:snap-align-none"
     >
       {column.color && <div className="h-1 w-full" style={{ backgroundColor: column.color }} />}
 

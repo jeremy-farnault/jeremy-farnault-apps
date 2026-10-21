@@ -547,3 +547,14 @@
 .dark .app-background {
   opacity: 0.38;
 }
+
+/*
+ * Frosted glass for a translucent container that sits over the background scene: the scene's
+ * lines soften behind it instead of showing through sharp. Opt-in, on containers only (columns,
+ * panels) — not on every row of a long list, since the scene is fixed and the blur reruns on
+ * every scroll frame. A blurred container's children see only the container, so blurring them
+ * too adds nothing; give them a translucent fill instead.
+ */
+@utility surface-blur {
+  backdrop-filter: blur(6px);
+}
