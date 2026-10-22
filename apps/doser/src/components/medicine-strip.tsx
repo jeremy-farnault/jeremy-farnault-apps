@@ -270,7 +270,7 @@ export function MedicineStrip({ medicine, days: initialDays, today, year, month,
   const columnCount = getGridColumnCount(year, month);
 
   return (
-    <div className="flex flex-col gap-3 rounded-[14px] bg-(--card) p-4 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-[14px] bg-(--surface-150) surface-blur p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-(--text)">{medicine.name}</span>
         <button
