@@ -66,7 +66,7 @@ export function EntryCard({ entry, onEdit, onDelete }: Props) {
       </div>
 
       {/* Bottom 1/3: info area */}
-      <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200)">
+      <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200) surface-blur">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-semibold truncate text-(--text)">{entry.title}</p>
           {entry.rating !== null && (
