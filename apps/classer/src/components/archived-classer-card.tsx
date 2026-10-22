@@ -35,7 +35,7 @@ export function ArchivedClasserCard({ classer, onRestore, onDelete }: Props) {
         )}
       </div>
 
-      <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200)">
+      <div className="relative flex flex-col justify-center gap-1 px-3 py-2.5 bg-(--surface-200) surface-blur">
         <p className="text-sm font-semibold truncate text-(--text)">{classer.name}</p>
         <div className="flex items-center justify-end">
           <span className="text-xs text-(--text-secondary) shrink-0">
