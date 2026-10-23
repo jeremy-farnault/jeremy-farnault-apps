@@ -131,7 +131,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
       {/* Dual floating CTAs (idle) or countdown pill (running) */}
       {remaining !== null ? (
         <div
-          className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 h-14 px-6 rounded-xl bg-(--primary) text-(--text-on-strong-hue) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]"
+          className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 h-14 px-6 rounded-xl vivid bg-(--primary) text-(--text-on-strong-hue) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]"
           style={{ animation: "cta-slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}
         >
           <span className="text-sm font-semibold tabular-nums">
@@ -164,7 +164,7 @@ export function LogCta({ sessionId, exercises }: LogCtaProps) {
             type="button"
             onClick={() => setExercisePickerOpen(true)}
             aria-label="Add exercise"
-            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
+            className="vivid flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
           >
             <BarbellIcon size={22} />
           </button>

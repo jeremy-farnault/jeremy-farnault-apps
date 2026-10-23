@@ -12,7 +12,7 @@ export function AppBackground({ src }: AppBackgroundProps) {
   return (
     <div
       aria-hidden
-      className="app-background"
+      className="app-background vivid"
       style={{ "--app-background-src": `url("${src}")` } as CSSProperties}
     />
   );

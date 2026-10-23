@@ -341,7 +341,7 @@ export function UnifierClient({
             type="button"
             onClick={() => setPersonModalOpen(true)}
             aria-label="Add a person"
-            className="flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
+            className="vivid flex h-14 w-14 items-center justify-center rounded-xl bg-(--primary) text-(--primary-foreground) shadow-[0_25px_36px_0_rgba(0,0,0,0.25)] hover:bg-(--secondary) hover:text-(--text-on-strong-hue)"
           >
             <UserPlusIcon size={22} />
           </button>

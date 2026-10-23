@@ -1,5 +1,6 @@
 :root,
 .dark {
   --primary: var(--yellow-600);
+  --primary-vivid: var(--vivid-yellow-600);
   --secondary: var(--yellow-800);
 }

@@ -165,3 +165,9 @@
   border-radius: 3px;
   padding: 0 0.1rem;
 }
+
+/* The app pill, floating CTA and background scene stay vivid in dark mode (see `.vivid`). */
+:root,
+.dark {
+  --primary-vivid: var(--vivid-magenta-400);
+}

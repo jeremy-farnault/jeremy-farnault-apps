@@ -1,6 +1,8 @@
 :root,
 .dark {
   --primary: var(--blue-600);
+  --primary-vivid: var(--vivid-blue-600);
+  --primary-vivid-foreground: var(--grey-100);
   --primary-foreground: var(--text-on-strong-hue);
   --secondary: var(--blue-800);
 }

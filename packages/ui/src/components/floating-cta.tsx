@@ -24,7 +24,7 @@ export function FloatingCTA({ label, icon, onClick, disabled, loading }: Floatin
         className={cn(
           "flex h-14 items-center rounded-xl",
           label ? "gap-2 px-7 text-sm font-semibold" : "w-14 justify-center",
-          "bg-(--primary) text-(--primary-foreground)",
+          "vivid bg-(--primary) text-(--primary-foreground)",
           "shadow-[0_25px_36px_0_rgba(0,0,0,0.25)]",
           "hover:bg-(--secondary)",
           "disabled:cursor-not-allowed disabled:opacity-50"
