@@ -92,7 +92,7 @@ export function ArcSection({
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-[22px] bg-(--surface-150) p-5">
+    <section className="flex flex-col gap-3 rounded-[22px] bg-(--surface-150) surface-blur p-5">
       <div className="flex items-center gap-2.5">
         <span
           className="h-2.5 w-2.5 shrink-0 rounded-full"

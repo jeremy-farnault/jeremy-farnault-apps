@@ -12,6 +12,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         appName="Unifier"
         currentAppId="unifier"
         titleHref="/"
+        background="/background.svg"
         startSlot={<PersonJump />}
         rightSlot={<UserMenuConnected />}
       >

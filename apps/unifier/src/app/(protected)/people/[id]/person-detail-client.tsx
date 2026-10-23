@@ -245,7 +245,7 @@ export function PersonDetailClient({
       {/* The glance layer. Every slot in the arc's template renders for every person,
           in template order, blank ones included — that fixed order and fixed set is
           what lets the same field be scanned down a whole arc. */}
-      <section className="flex flex-col gap-2 rounded-[22px] bg-(--surface-150) p-5">
+      <section className="flex flex-col gap-2 rounded-[22px] bg-(--surface-150) surface-blur p-5">
         {orderedSlots.length === 0 ? (
           <PlainButton
             onClick={() => setSlotsOpen(true)}
