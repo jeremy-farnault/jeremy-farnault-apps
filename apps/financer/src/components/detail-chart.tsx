@@ -279,7 +279,7 @@ export function DetailChart({
               return (
                 <div
                   key={s.name}
-                  className="flex flex-col gap-1 rounded-[12px] bg-(--surface-150) px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-1 rounded-[12px] bg-(--surface-150) surface-blur px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex items-center gap-2 text-sm font-medium text-(--text)">
                     <span

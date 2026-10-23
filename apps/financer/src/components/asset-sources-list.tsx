@@ -189,7 +189,7 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
             <li
               key={source.id}
               style={{ borderLeft: `4px solid ${effectiveColor}` }}
-              className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) p-3"
+              className="flex flex-col gap-2 rounded-[12px] bg-(--surface-100) surface-blur p-3"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <button

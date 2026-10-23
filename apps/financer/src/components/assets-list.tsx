@@ -39,7 +39,7 @@ export function AssetsList({
         {data.map(({ sourceId, name, currency, total }) => (
           <li
             key={sourceId ?? name}
-            className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
+            className="flex items-center justify-between rounded-[12px] bg-(--surface-100) surface-blur px-4 py-3"
           >
             <span className="text-sm font-medium text-(--text)">{name}</span>
             <span className="text-sm font-semibold text-(--text)">

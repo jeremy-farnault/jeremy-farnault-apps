@@ -121,7 +121,7 @@ export function SpendingList({
                 <li
                   key={entry.id}
                   style={{ borderLeft: `4px solid ${categoryColors[entry.category]}` }}
-                  className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
+                  className="flex items-center justify-between rounded-[12px] bg-(--surface-100) surface-blur px-4 py-3"
                 >
                   <span className="text-sm font-medium text-(--text)">{entry.category}</span>
                   <span className="ml-auto flex items-center gap-3">
@@ -267,7 +267,7 @@ export function SpendingList({
           <li
             key={`${category}-${currency}`}
             style={{ borderLeft: `4px solid ${categoryColors[category]}` }}
-            className="flex items-center justify-between rounded-[12px] bg-(--surface-100) px-4 py-3"
+            className="flex items-center justify-between rounded-[12px] bg-(--surface-100) surface-blur px-4 py-3"
           >
             <span className="text-sm font-medium text-(--text)">{category}</span>
             <span className="ml-auto flex items-center gap-3">

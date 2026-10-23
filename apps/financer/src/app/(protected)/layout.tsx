@@ -19,6 +19,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         appName="Financer"
         currentAppId="financer"
         titleHref="/"
+        background="/background.svg"
         startSlot={<CurrencySelector homeCurrency={homeCurrency} />}
         rightSlot={<UserMenuConnected />}
       >
