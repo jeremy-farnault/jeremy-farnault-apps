@@ -234,3 +234,19 @@ export async function getItem(userId: string, itemId: string): Promise<ItemDetai
     }),
   };
 }
+
+/** Every wishlist link's match key with its item, for the "Add to <item>?" suggestion. */
+export async function getWishlistMatchKeys(
+  userId: string
+): Promise<{ matchKey: string; itemId: string; itemName: string }[]> {
+  return db
+    .select({
+      matchKey: scannerLinks.matchKey,
+      itemId: scannerItems.id,
+      itemName: scannerItems.name,
+    })
+    .from(scannerLinks)
+    .innerJoin(scannerItems, eq(scannerItems.id, scannerLinks.itemId))
+    .where(and(eq(scannerLinks.userId, userId), eq(scannerItems.status, "wishlist")))
+    .orderBy(desc(scannerItems.createdAt));
+}

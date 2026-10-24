@@ -46,6 +46,9 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
   // New items only: keep the shop's image, upload one, or go without.
   const [imageChoice, setImageChoice] = useState<"found" | "upload" | "none">("none");
   const [file, setFile] = useState<File | null>(null);
+  // With a suggestion: "existing" adds the link to the suggested item, "new" makes one.
+  // Neither is preselected, so nothing is merged unless the user picks it.
+  const [target, setTarget] = useState<"new" | "existing" | null>(null);
 
   // Reset between openings so an abandoned link doesn't linger.
   useEffect(() => {
@@ -57,6 +60,7 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
       setError(null);
       setImageChoice("none");
       setFile(null);
+      setTarget(null);
     }
   }, [isOpen]);
 
@@ -69,13 +73,14 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
     setBusy(true);
     setError(null);
     try {
-      const result = await previewLinkAction({ url, region: region ?? null });
+      const result = await previewLinkAction({ url, region: region ?? null, suggest: !item });
       if (!result.ok) {
         setError(result);
         return;
       }
       const { preview } = result;
       if (region === undefined) {
+        setTarget(preview.suggestion ? null : "new");
         setName(preview.name);
         setImageChoice(preview.imageUrl ? "found" : "none");
       }
@@ -90,7 +95,8 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
   }
 
   async function add(preview: LinkPreview) {
-    if (busy || (!item && !name.trim())) return;
+    const into = joinedItem(preview);
+    if (busy || target === null || (!into && !name.trim())) return;
     const several = preview.editions.length > 1;
     if (several && !editionId) return;
     setBusy(true);
@@ -100,14 +106,14 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
         editionId: several ? editionId : null,
         region: preview.store === "steam" ? preview.region : null,
       };
-      const result = item
-        ? await addLinkToItemAction({ ...link, itemId: item.id })
+      const result = into
+        ? await addLinkToItemAction({ ...link, itemId: into.id })
         : await addItemAction({ ...link, name, image: await imageForAdd() });
       if (!result.ok) {
         setError(result);
         return;
       }
-      toast.success(item ? "Link added" : `${name.trim()} added`);
+      toast.success(into ? `Link added to ${into.name}` : `${name.trim()} added`);
       onAdded();
       onClose();
     } catch {
@@ -115,6 +121,15 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
     } finally {
       setBusy(false);
     }
+  }
+
+  /** The item the link joins: the page's own item, or the suggested one if picked. */
+  function joinedItem(preview: LinkPreview): { id: string; name: string } | null {
+    if (item) return item;
+    if (target === "existing" && preview.suggestion) {
+      return { id: preview.suggestion.itemId, name: preview.suggestion.itemName };
+    }
+    return null;
   }
 
   async function imageForAdd(): Promise<ImageChoice> {
@@ -175,6 +190,7 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
 
   const { preview } = step;
   const several = preview.editions.length > 1;
+  const into = joinedItem(preview);
   const shown =
     preview.editions.find((e) => e.id === editionId) ?? (several ? null : preview.editions[0]);
 
@@ -187,9 +203,30 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
       size="small"
       content={
         <div className="flex flex-col gap-4">
-          {!item && <TextInput value={name} onChange={setName} placeholder="Name" />}
+          {preview.suggestion && (
+            <fieldset className="flex flex-col gap-1.5 rounded-xl bg-(--surface-sunken) px-3 py-2">
+              <legend className="sr-only">Add to an item you already track?</legend>
+              <p className="text-xs text-(--text-muted)">This looks like something you track.</p>
+              {(["existing", "new"] as const).map((value) => (
+                <label
+                  key={value}
+                  className="flex cursor-pointer items-center gap-2 text-sm text-(--text)"
+                >
+                  <input
+                    type="radio"
+                    name="target"
+                    checked={target === value}
+                    onChange={() => setTarget(value)}
+                  />
+                  {value === "existing" ? `Add to ${preview.suggestion?.itemName}` : "New item"}
+                </label>
+              ))}
+            </fieldset>
+          )}
 
-          {!item && (
+          {!into && <TextInput value={name} onChange={setName} placeholder="Name" />}
+
+          {!into && (
             <ImagePicker
               foundUrl={preview.imageUrl}
               choice={imageChoice}
@@ -274,11 +311,14 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
         </div>
       }
       primaryButton={{
-        label: item ? "Add link" : "Add to wishlist",
+        label: into ? "Add link" : "Add to wishlist",
         onClick: () => void add(preview),
         loading: busy,
         disabled:
-          (!item && !name.trim()) || (several && !editionId) || (imageChoice === "upload" && !file),
+          target === null ||
+          (!into && !name.trim()) ||
+          (several && !editionId) ||
+          (!into && imageChoice === "upload" && !file),
       }}
       secondaryButton={{ label: "Back", onClick: () => setStep({ kind: "paste" }) }}
     />

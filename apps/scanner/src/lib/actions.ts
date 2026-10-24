@@ -15,8 +15,11 @@ import {
   readPrice,
   storeFor,
 } from "./price-reader";
-import { findTrackedLinks } from "./queries";
+import { nameMatchKey } from "./price-reader/match-key";
+import { psMatchKey } from "./price-reader/ps-store";
+import { findTrackedLinks, getWishlistMatchKeys } from "./queries";
 import { copyImage, deleteImage, ownsKey, presignUpload } from "./s3";
+import { suggestItem } from "./summary";
 
 async function getUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -47,6 +50,8 @@ export type LinkPreview = {
   editions: PreviewEdition[];
   /** Editions on this page the user already tracks, which the picker shows as taken. */
   trackedEditionIds: string[];
+  /** A wishlist item this link looks like it belongs to, when asked for one. */
+  suggestion: { itemId: string; itemName: string } | null;
 };
 
 function rejection(reason: RejectionReason, detail?: string): Rejection {
@@ -85,6 +90,8 @@ export async function previewLinkAction(input: {
   url: string;
   /** The Steam storefront to price; defaults to the user's home-currency one. */
   region?: string | null;
+  /** From the main page: look for a wishlist item this link may belong to. */
+  suggest?: boolean;
 }): Promise<{ ok: true; preview: LinkPreview } | Rejection> {
   const userId = await getUserId();
 
@@ -113,6 +120,19 @@ export async function previewLinkAction(input: {
     };
   }
 
+  const suggestion = input.suggest
+    ? suggestItem(
+        {
+          labels:
+            reading.store === "ps-store"
+              ? [...new Set([reading.matchKey, ...reading.editions.map((e) => psMatchKey(e.id))])]
+              : [],
+          nameKey: nameMatchKey(reading.name),
+        },
+        await getWishlistMatchKeys(userId)
+      )
+    : null;
+
   return {
     ok: true,
     preview: {
@@ -123,6 +143,7 @@ export async function previewLinkAction(input: {
       region: reading.region,
       editions: reading.editions.map(toPreviewEdition),
       trackedEditionIds: trackedEditionIds.filter(Boolean),
+      suggestion,
     },
   };
 }
