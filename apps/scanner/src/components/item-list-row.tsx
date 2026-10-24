@@ -2,6 +2,7 @@ import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/forma
 import type { ItemSummary } from "@/lib/summary";
 import { cn } from "@jf/ui";
 import { CircleNotchIcon, ImageIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 
 type Props = {
   item: ItemSummary;
@@ -21,7 +22,10 @@ export function ItemListRow({ item, homeCurrency, checking = false }: Props) {
   const muted = lowest?.unavailable ?? false;
 
   return (
-    <div className="card-raised flex items-center gap-4 rounded-2xl bg-(--surface-100) p-3 surface-blur">
+    <Link
+      href={`/items/${item.id}`}
+      className="card-raised flex items-center gap-4 rounded-2xl bg-(--surface-100) p-3 surface-blur transition-transform hover:-translate-y-0.5"
+    >
       <div
         className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-(--surface-sunken) text-(--text-subtle)"
         aria-hidden
@@ -76,6 +80,6 @@ export function ItemListRow({ item, homeCurrency, checking = false }: Props) {
       ) : (
         <p className="shrink-0 text-xs text-(--text-subtle)">No price yet</p>
       )}
-    </div>
+    </Link>
   );
 }

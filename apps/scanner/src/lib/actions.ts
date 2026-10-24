@@ -2,7 +2,8 @@
 
 import { auth } from "@jf/auth";
 import { getUserSettings } from "@jf/auth/settings";
-import { scannerItems, scannerLinks, scannerPriceChecks, withTransaction } from "@jf/db";
+import { db, scannerItems, scannerLinks, scannerPriceChecks, withTransaction } from "@jf/db";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 import {
@@ -125,21 +126,47 @@ export async function previewLinkAction(input: {
   };
 }
 
+type AddInput = {
+  url: string;
+  editionId: string | null;
+  /** The Steam storefront chosen in the preview; ignored for other stores. */
+  region?: string | null;
+};
+
 /**
  * Adds a new item from a previewed link. The page is read again here rather than trusting
  * the preview's numbers from the client, and that reading becomes the first price check.
  */
-export async function addItemAction(input: {
-  url: string;
-  name: string;
-  editionId: string | null;
-  /** The Steam storefront chosen in the preview; ignored for other stores. */
-  region?: string | null;
-}): Promise<{ ok: true; itemId: string } | Rejection> {
+export async function addItemAction(
+  input: AddInput & { name: string }
+): Promise<{ ok: true; itemId: string } | Rejection> {
   const userId = await getUserId();
   const name = input.name.trim();
   if (!name) return { ok: false, reason: "unreadable", message: "Give the item a name." };
+  return saveLink(userId, input, { name });
+}
 
+/** Adds a previewed link to one of the user's wishlist items. */
+export async function addLinkToItemAction(
+  input: AddInput & { itemId: string }
+): Promise<{ ok: true; itemId: string } | Rejection> {
+  const userId = await getUserId();
+  const [item] = await db
+    .select({ id: scannerItems.id })
+    .from(scannerItems)
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)))
+    .limit(1);
+  if (!item)
+    return { ok: false, reason: "not-found", message: "That item doesn't exist any more." };
+  return saveLink(userId, input, { itemId: item.id });
+}
+
+/** Reads the link once more and saves it, with its first price check, in one transaction. */
+async function saveLink(
+  userId: string,
+  input: AddInput,
+  target: { name: string } | { itemId: string }
+): Promise<{ ok: true; itemId: string } | Rejection> {
   const url = parseLink(input.url);
   if (!url) return rejection("unreadable");
 
@@ -157,26 +184,37 @@ export async function addItemAction(input: {
   const normalizedUrl = normalizeUrl(url);
   // Only a page with several editions stores which one; a single-edition page may rename
   // its one offer without the link breaking.
-  const editionId = reading.editions.length > 1 ? edition.id : null;
+  const several = reading.editions.length > 1;
 
   try {
     const itemId = await withTransaction(async (tx) => {
-      const [item] = await tx
-        .insert(scannerItems)
-        .values({ userId, name })
-        .returning({ id: scannerItems.id });
-      if (!item) throw new Error("Failed to create item");
+      let itemId: string;
+      if ("itemId" in target) {
+        itemId = target.itemId;
+        await tx
+          .update(scannerItems)
+          .set({ updatedAt: new Date() })
+          .where(eq(scannerItems.id, itemId));
+      } else {
+        const [item] = await tx
+          .insert(scannerItems)
+          .values({ userId, name: target.name })
+          .returning({ id: scannerItems.id });
+        if (!item) throw new Error("Failed to create item");
+        itemId = item.id;
+      }
 
       const [link] = await tx
         .insert(scannerLinks)
         .values({
-          itemId: item.id,
+          itemId,
           userId,
           url: url.toString(),
           normalizedUrl,
           store: reading.store,
           region: reading.region,
-          editionId,
+          editionId: several ? edition.id : null,
+          editionName: several ? edition.name : null,
           matchKey: reading.matchKey,
         })
         .returning({ id: scannerLinks.id });
@@ -191,7 +229,7 @@ export async function addItemAction(input: {
         discountPercent: edition.discountPercent,
         saleEndsAt: edition.saleEndsAt,
       });
-      return item.id;
+      return itemId;
     });
     return { ok: true, itemId };
   } catch (err) {
@@ -206,6 +244,47 @@ export async function addItemAction(input: {
     }
     throw err;
   }
+}
+
+export async function renameItemAction(input: { itemId: string; name: string }): Promise<void> {
+  const userId = await getUserId();
+  const name = input.name.trim();
+  if (!name) throw new Error("Name is required");
+  await db
+    .update(scannerItems)
+    .set({ name, updatedAt: new Date() })
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)));
+}
+
+/** Deletes an item, its links and their price history. */
+export async function deleteItemAction(input: { itemId: string }): Promise<void> {
+  const userId = await getUserId();
+  await db
+    .delete(scannerItems)
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)));
+}
+
+/**
+ * Removes a link and its price history. An item never keeps zero links: removing the last
+ * one is refused here, and the page offers to delete the item instead.
+ */
+export async function removeLinkAction(input: { linkId: string }): Promise<{ ok: boolean }> {
+  const userId = await getUserId();
+  const [link] = await db
+    .select({ id: scannerLinks.id, itemId: scannerLinks.itemId })
+    .from(scannerLinks)
+    .where(and(eq(scannerLinks.id, input.linkId), eq(scannerLinks.userId, userId)))
+    .limit(1);
+  if (!link) return { ok: false };
+
+  const siblings = await db
+    .select({ id: scannerLinks.id })
+    .from(scannerLinks)
+    .where(eq(scannerLinks.itemId, link.itemId));
+  if (siblings.length <= 1) return { ok: false };
+
+  await db.delete(scannerLinks).where(eq(scannerLinks.id, link.id));
+  return { ok: true };
 }
 
 /** Postgres unique_violation: the link-uniqueness constraint caught a duplicate. */

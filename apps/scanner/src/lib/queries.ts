@@ -1,5 +1,5 @@
 import { db, scannerItems, scannerLinks, scannerPriceChecks } from "@jf/db";
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, max, min, sql } from "drizzle-orm";
 
 export type LinkRow = {
   id: string;
@@ -131,4 +131,94 @@ export async function getLatestCheck(linkId: string): Promise<LinkRow["latest"]>
     .orderBy(desc(scannerPriceChecks.checkedAt))
     .limit(1);
   return check ?? null;
+}
+
+export type ItemDetail = Omit<ItemRow, "links"> & {
+  status: "wishlist" | "bought";
+  links: (LinkRow & {
+    editionName: string | null;
+    createdAt: Date;
+    /** The lowest price this link has been checked at since it was added, or null. */
+    lowestSeen: { price: number; currency: string } | null;
+  })[];
+};
+
+/** One of the user's items with everything its page shows, or null if it isn't theirs. */
+export async function getItem(userId: string, itemId: string): Promise<ItemDetail | null> {
+  const [item] = await db
+    .select({
+      id: scannerItems.id,
+      name: scannerItems.name,
+      createdAt: scannerItems.createdAt,
+      status: scannerItems.status,
+    })
+    .from(scannerItems)
+    .where(and(eq(scannerItems.id, itemId), eq(scannerItems.userId, userId)))
+    .limit(1);
+  if (!item) return null;
+
+  const links = await db
+    .select({
+      id: scannerLinks.id,
+      url: scannerLinks.url,
+      store: scannerLinks.store,
+      region: scannerLinks.region,
+      editionName: scannerLinks.editionName,
+      lastStatus: scannerLinks.lastStatus,
+      lastCheckedAt: scannerLinks.lastCheckedAt,
+      lastSuccessAt: scannerLinks.lastSuccessAt,
+      createdAt: scannerLinks.createdAt,
+    })
+    .from(scannerLinks)
+    .where(eq(scannerLinks.itemId, item.id))
+    .orderBy(asc(scannerLinks.createdAt));
+  const ids = links.map((l) => l.id);
+  if (ids.length === 0) return { ...item, links: [] };
+
+  const [latest, lowest] = await Promise.all([
+    db
+      .selectDistinctOn([scannerPriceChecks.linkId], {
+        linkId: scannerPriceChecks.linkId,
+        normalPrice: scannerPriceChecks.normalPrice,
+        salePrice: scannerPriceChecks.salePrice,
+        currency: scannerPriceChecks.currency,
+        inStock: scannerPriceChecks.inStock,
+        discountPercent: scannerPriceChecks.discountPercent,
+        saleEndsAt: scannerPriceChecks.saleEndsAt,
+        checkedAt: scannerPriceChecks.checkedAt,
+      })
+      .from(scannerPriceChecks)
+      .where(inArray(scannerPriceChecks.linkId, ids))
+      .orderBy(scannerPriceChecks.linkId, desc(scannerPriceChecks.checkedAt)),
+    // The price paid at each check is the sale price when there was one. A link's checks
+    // all share its store's currency.
+    db
+      .select({
+        linkId: scannerPriceChecks.linkId,
+        price: min(
+          sql<number>`coalesce(${scannerPriceChecks.salePrice}, ${scannerPriceChecks.normalPrice})`
+        ),
+        currency: max(scannerPriceChecks.currency),
+      })
+      .from(scannerPriceChecks)
+      .where(inArray(scannerPriceChecks.linkId, ids))
+      .groupBy(scannerPriceChecks.linkId),
+  ]);
+  const latestByLink = new Map(latest.map(({ linkId, ...check }) => [linkId, check]));
+  const lowestByLink = new Map(lowest.map((l) => [l.linkId, l]));
+
+  return {
+    ...item,
+    links: links.map((link) => {
+      const low = lowestByLink.get(link.id);
+      return {
+        ...link,
+        latest: latestByLink.get(link.id) ?? null,
+        lowestSeen:
+          low?.price != null && low.currency
+            ? { price: Number(low.price), currency: low.currency }
+            : null,
+      };
+    }),
+  };
 }

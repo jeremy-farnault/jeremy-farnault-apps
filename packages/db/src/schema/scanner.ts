@@ -64,6 +64,8 @@ export const scannerLinks = pgTable(
     region: text("region"),
     // The chosen edition when the page sells several; null when it sells one.
     editionId: text("edition_id"),
+    // That edition's name as the store gave it, to tell links to one page apart.
+    editionName: text("edition_name"),
     // What "Add to existing item?" compares: a PS product label or a cleaned-up name.
     matchKey: text("match_key").notNull(),
     lastStatus: scannerLinkStatusEnum("last_status").notNull().default("ok"),

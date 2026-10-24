@@ -1,9 +1,16 @@
 "use client";
 
-import { type LinkPreview, type Rejection, addItemAction, previewLinkAction } from "@/lib/actions";
+import {
+  type LinkPreview,
+  type Rejection,
+  addItemAction,
+  addLinkToItemAction,
+  previewLinkAction,
+} from "@/lib/actions";
 import { formatPrice, storeLabel } from "@/lib/format";
 import { STEAM_REGIONS } from "@/lib/price-reader/steam";
 import { ActionModal, TextInput } from "@jf/ui";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,17 +18,21 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onAdded: () => void;
+  /** Adds the link to this item instead of creating a new one. */
+  item?: { id: string; name: string };
 };
 
 type Step = { kind: "paste" } | { kind: "preview"; preview: LinkPreview };
 
 /**
- * Paste a link, see what Scanner read from it, confirm. Nothing is saved until "Add to
- * wishlist": the preview is the user's check that the right product and price were found.
+ * Paste a link, see what Scanner read from it, confirm. Nothing is saved until the user
+ * confirms: the preview is their check that the right product and price were found. With
+ * `item`, the link joins that item (from its page) and the name field is left out.
  *
  * Enter is handled by ActionModal alone, which runs the primary button of the current step.
  */
-export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
+export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
+  const title = item ? "Add a link" : "Add to wishlist";
   const [step, setStep] = useState<Step>({ kind: "paste" });
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
@@ -67,22 +78,24 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
   }
 
   async function add(preview: LinkPreview) {
-    if (busy || !name.trim()) return;
+    if (busy || (!item && !name.trim())) return;
     const several = preview.editions.length > 1;
     if (several && !editionId) return;
     setBusy(true);
     try {
-      const result = await addItemAction({
+      const link = {
         url: preview.url,
-        name,
         editionId: several ? editionId : null,
         region: preview.store === "steam" ? preview.region : null,
-      });
+      };
+      const result = item
+        ? await addLinkToItemAction({ ...link, itemId: item.id })
+        : await addItemAction({ ...link, name });
       if (!result.ok) {
         setError(result);
         return;
       }
-      toast.success(`${name.trim()} added`);
+      toast.success(item ? "Link added" : `${name.trim()} added`);
       onAdded();
       onClose();
     } catch {
@@ -95,6 +108,14 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
   const errorLine = error && (
     <p role="alert" className="text-sm text-(--red-500)">
       {error.message}
+      {error.item && error.item.id !== item?.id && (
+        <>
+          {" "}
+          <Link href={`/items/${error.item.id}`} onClick={onClose} className="underline">
+            Open it
+          </Link>
+        </>
+      )}
     </p>
   );
 
@@ -103,8 +124,10 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
       <ActionModal
         isOpen={isOpen}
         onClose={onClose}
-        title="Add to wishlist"
-        paragraph="Paste the link to a product page."
+        title={title}
+        paragraph={
+          item ? `Another shop or region for ${item.name}.` : "Paste the link to a product page."
+        }
         size="small"
         content={
           <div className="flex flex-col gap-3">
@@ -140,12 +163,12 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
     <ActionModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add to wishlist"
+      title={title}
       paragraph={`Found on ${storeLabel(preview.store, preview.url)}${preview.region ? ` · ${preview.region}` : ""}`}
       size="small"
       content={
         <div className="flex flex-col gap-4">
-          <TextInput value={name} onChange={setName} placeholder="Name" />
+          {!item && <TextInput value={name} onChange={setName} placeholder="Name" />}
 
           {preview.store === "steam" && (
             <label className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
@@ -219,10 +242,10 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
         </div>
       }
       primaryButton={{
-        label: "Add to wishlist",
+        label: item ? "Add link" : "Add to wishlist",
         onClick: () => void add(preview),
         loading: busy,
-        disabled: !name.trim() || (several && !editionId),
+        disabled: (!item && !name.trim()) || (several && !editionId),
       }}
       secondaryButton={{ label: "Back", onClick: () => setStep({ kind: "paste" }) }}
     />

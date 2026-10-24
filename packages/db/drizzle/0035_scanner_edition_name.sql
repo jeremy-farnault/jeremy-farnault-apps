@@ -1,0 +1,1 @@
+ALTER TABLE "scanner_links" ADD COLUMN "edition_name" text;
