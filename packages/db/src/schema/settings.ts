@@ -14,6 +14,9 @@ export const userSettings = pgTable("user_settings", {
     .primaryKey()
     .references(() => user.id, { onDelete: "cascade" }),
   theme: themePreferenceEnum("theme").notNull().default("system"),
+  // One of SUPPORTED_CURRENCIES, checked by the action that writes it. Text, not an enum, so
+  // adding a currency needs no migration.
+  homeCurrency: text("home_currency").notNull().default("SEK"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

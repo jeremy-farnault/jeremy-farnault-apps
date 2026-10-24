@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "@jf/auth/client";
-import { setTheme } from "@jf/auth/settings-actions";
+import { getHomeCurrencySetting, setHomeCurrency, setTheme } from "@jf/auth/settings-actions";
 import { UserMenu } from "@jf/ui";
 
 export function UserMenuConnected() {
@@ -22,6 +22,8 @@ export function UserMenuConnected() {
       {...(session.user.image ? { image: session.user.image } : {})}
       onLogout={handleLogout}
       onThemeChange={setTheme}
+      loadHomeCurrency={getHomeCurrencySetting}
+      onHomeCurrencyChange={setHomeCurrency}
     />
   );
 }

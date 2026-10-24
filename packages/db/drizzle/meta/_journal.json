@@ -232,6 +232,13 @@
       "when": 1792838210555,
       "tag": "0032_shared_exchange_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792845484717,
+      "tag": "0033_home_currency",
+      "breakpoints": true
     }
   ]
 }

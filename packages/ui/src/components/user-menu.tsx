@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
 import type { Theme } from "../lib/theme";
 import { cn } from "../lib/utils";
+import { HomeCurrencySelect, type HomeCurrencySetting } from "./home-currency-select";
 import { ThemeToggle } from "./theme-toggle";
 
 const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:3014";
@@ -20,6 +21,12 @@ interface UserMenuProps {
    * menu shows the Light / Dark / System control.
    */
   onThemeChange?: (theme: Theme) => Promise<void>;
+  /**
+   * Reads and saves the home currency (`getHomeCurrencySetting` and `setHomeCurrency` from
+   * `@jf/auth/settings-actions`). When both are given, the menu shows the currency picker.
+   */
+  loadHomeCurrency?: () => Promise<HomeCurrencySetting | null>;
+  onHomeCurrencyChange?: (currency: string) => Promise<void>;
 }
 
 export function UserMenu({
@@ -29,6 +36,8 @@ export function UserMenu({
   settingsHref,
   onLogout,
   onThemeChange,
+  loadHomeCurrency,
+  onHomeCurrencyChange,
 }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
@@ -72,6 +81,12 @@ export function UserMenu({
           {onThemeChange && (
             <>
               <ThemeToggle onChange={onThemeChange} />
+              <div className="mx-2 my-1 h-px bg-(--border)" aria-hidden />
+            </>
+          )}
+          {loadHomeCurrency && onHomeCurrencyChange && (
+            <>
+              <HomeCurrencySelect load={loadHomeCurrency} onChange={onHomeCurrencyChange} />
               <div className="mx-2 my-1 h-px bg-(--border)" aria-hidden />
             </>
           )}

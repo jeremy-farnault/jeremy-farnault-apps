@@ -1,4 +1,4 @@
-import { db, userSettings } from "@jf/db";
+import { SUPPORTED_CURRENCIES, type SupportedCurrency, db, userSettings } from "@jf/db";
 import {
   DEFAULT_THEME,
   THEME_COOKIE,
@@ -13,18 +13,33 @@ import { cookies } from "next/headers";
 // `settings-actions.ts`: a "use server" module exposes every export as an action, and this
 // read takes a raw userId, so it must never be one.
 
-export type UserSettings = { theme: Theme };
+export type UserSettings = { theme: Theme; homeCurrency: SupportedCurrency };
 
-const DEFAULT_SETTINGS: UserSettings = { theme: DEFAULT_THEME };
+export const DEFAULT_HOME_CURRENCY: SupportedCurrency = "SEK";
+
+const DEFAULT_SETTINGS: UserSettings = {
+  theme: DEFAULT_THEME,
+  homeCurrency: DEFAULT_HOME_CURRENCY,
+};
 
 /** The user's settings, or the defaults when they have never changed one. Never inserts. */
 export async function getUserSettings(userId: string): Promise<UserSettings> {
   const [row] = await db
-    .select({ theme: userSettings.theme })
+    .select({ theme: userSettings.theme, homeCurrency: userSettings.homeCurrency })
     .from(userSettings)
     .where(eq(userSettings.userId, userId))
     .limit(1);
-  return row ?? DEFAULT_SETTINGS;
+  if (!row) return DEFAULT_SETTINGS;
+  return { theme: row.theme, homeCurrency: parseCurrency(row.homeCurrency) };
+}
+
+/** Narrows a stored currency to a supported one, falling back to the default. */
+export function parseCurrency(value: string | undefined): SupportedCurrency {
+  return isSupportedCurrency(value) ? value : DEFAULT_HOME_CURRENCY;
+}
+
+export function isSupportedCurrency(value: unknown): value is SupportedCurrency {
+  return (SUPPORTED_CURRENCIES as readonly unknown[]).includes(value);
 }
 
 /** The theme preference the request's cookie carries: System when missing or invalid. */

@@ -28,3 +28,4 @@ export * from "./components/theme-sync";
 export * from "./lib/theme";
 export * from "./lib/theme-runtime";
 export * from "./components/theme-toggle";
+export * from "./components/home-currency-select";

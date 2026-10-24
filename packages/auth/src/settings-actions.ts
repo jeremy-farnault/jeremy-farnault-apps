@@ -1,10 +1,10 @@
 "use server";
 
-import { db, userSettings } from "@jf/db";
+import { SUPPORTED_CURRENCIES, type SupportedCurrency, db, userSettings } from "@jf/db";
 import { THEME_COOKIE, type Theme, isTheme } from "@jf/ui/theme";
 import { cookies, headers } from "next/headers";
 import { auth } from "./auth";
-import { getUserSettings, themeCookieOptions } from "./settings";
+import { getUserSettings, isSupportedCurrency, themeCookieOptions } from "./settings";
 
 /**
  * Saves the signed-in user's theme and rewrites the theme cookie in the same step. The value
@@ -42,4 +42,38 @@ export async function syncThemeCookie(): Promise<Theme | null> {
   if (store.get(THEME_COOKIE)?.value !== theme)
     store.set(THEME_COOKIE, theme, themeCookieOptions());
   return theme;
+}
+
+/**
+ * The signed-in user's home currency, with the currencies they can pick from, for the user
+ * menu. Signed out, it returns null.
+ */
+export async function getHomeCurrencySetting(): Promise<{
+  currency: SupportedCurrency;
+  options: readonly SupportedCurrency[];
+} | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return null;
+
+  const { homeCurrency } = await getUserSettings(session.user.id);
+  return { currency: homeCurrency, options: SUPPORTED_CURRENCIES };
+}
+
+/**
+ * Saves the signed-in user's home currency, used by every app that converts amounts. The
+ * value arrives from the client, so it is checked before anything is written.
+ */
+export async function setHomeCurrency(currency: string): Promise<void> {
+  if (!isSupportedCurrency(currency)) throw new Error("Invalid currency");
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
+
+  await db
+    .insert(userSettings)
+    .values({ userId: session.user.id, homeCurrency: currency })
+    .onConflictDoUpdate({
+      target: userSettings.userId,
+      set: { homeCurrency: currency, updatedAt: new Date() },
+    });
 }
