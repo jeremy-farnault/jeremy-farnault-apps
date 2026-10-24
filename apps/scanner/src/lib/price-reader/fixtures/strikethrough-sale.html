@@ -1,0 +1,29 @@
+<!-- Hand-written in the shape Google recommends for sales: the current price on the Offer,
+     the old one as a StrikethroughPrice price specification. Inside a @graph, as WooCommerce
+     and Yoast publish it. -->
+<html><head>
+<title>Coffee machine</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebPage", "name": "Moccamaster KBG Select" },
+    {
+      "@type": "Product",
+      "name": "Moccamaster KBG Select",
+      "image": { "@type": "ImageObject", "url": "https://shop.example/moccamaster.jpg" },
+      "offers": {
+        "@type": "Offer",
+        "price": "2 495,00",
+        "priceCurrency": "SEK",
+        "availability": "https://schema.org/InStock",
+        "priceSpecification": [
+          { "@type": "UnitPriceSpecification", "price": "2495.00", "priceCurrency": "SEK" },
+          { "@type": "UnitPriceSpecification", "priceType": "https://schema.org/StrikethroughPrice", "price": "3295.00", "priceCurrency": "SEK" }
+        ]
+      }
+    }
+  ]
+}
+</script>
+</head><body></body></html>
