@@ -21,7 +21,7 @@ const ON_STRONG_HUE = "var(--text-on-strong-hue)";
  *
  * `foreground` is the recommended text/icon color to render *on* each background.
  * Note that the `-600` tokens are not uniformly dark in luminance: yellow and green
- * "dark" are mid-bright and still read best with dark text, so only blue/purple/red
+ * "dark" are mid-bright and still read best with dark text, so only blue/purple/magenta/red
  * dark carry a light foreground — and only in light mode. In dark mode every `-600` is a
  * lighter tint than its `-400` and takes dark text, which `ON_STRONG_HUE` follows.
  *
@@ -33,7 +33,8 @@ const ON_STRONG_HUE = "var(--text-on-strong-hue)";
  *   Teal 7.4 / 4.7       Teal Dark 4.2 / 6.8
  *   Blue 5.2 / 4.7       Blue Dark 6.3 / 6.8
  *   Purple 5.4 / 4.7     Purple Dark 5.9 / 6.8
- *   Magenta 5.3 / 4.7    Red 5.4 / 4.7        Red Dark 5.5 / 6.8
+ *   Magenta 5.3 / 4.7    Magenta Dark 5.5 / 6.8
+ *   Red 5.4 / 4.7        Red Dark 5.5 / 6.8
  *
  * Teal Dark is the one light-mode pairing under 4.5:1; it predates dark mode. Grey has no
  * dark scale — greys stay fixed and dark mode goes through the role tokens — so it reads
@@ -56,6 +57,7 @@ export const COLOR_PALETTE: readonly PaletteItem[] = [
   { label: "Purple", value: "var(--purple-400)", foreground: ON_LIGHT },
   { label: "Purple Dark", value: "var(--purple-600)", foreground: ON_STRONG_HUE },
   { label: "Magenta", value: "var(--magenta-400)", foreground: ON_LIGHT },
+  { label: "Magenta Dark", value: "var(--magenta-600)", foreground: ON_STRONG_HUE },
   { label: "Red", value: "var(--red-400)", foreground: ON_LIGHT },
   { label: "Red Dark", value: "var(--red-600)", foreground: ON_STRONG_HUE },
 ];

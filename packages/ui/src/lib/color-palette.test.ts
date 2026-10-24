@@ -11,14 +11,22 @@ import {
 } from "./color-palette";
 import type { ResolvedTheme } from "./theme";
 
+/** The `-600` swatches that take light text in light mode and dark text in dark mode. */
+const STRONG_DARK_SWATCHES = [
+  "var(--blue-600)",
+  "var(--purple-600)",
+  "var(--magenta-600)",
+  "var(--red-600)",
+];
+
 describe("getColorForeground", () => {
   it("pairs light swatches with dark text", () => {
     expect(getColorForeground("var(--yellow-400)")).toBe("var(--grey-900)");
     expect(getColorForeground("var(--green-600)")).toBe("var(--grey-900)");
   });
 
-  it("pairs the blue/purple/red dark swatches with the theme-following token", () => {
-    for (const value of ["var(--blue-600)", "var(--purple-600)", "var(--red-600)"]) {
+  it("pairs the blue/purple/magenta/red dark swatches with the theme-following token", () => {
+    for (const value of STRONG_DARK_SWATCHES) {
       expect(getColorForeground(value)).toBe("var(--text-on-strong-hue)");
     }
   });
@@ -34,8 +42,8 @@ describe("isDarkSurface", () => {
     expect(isDarkSurface("var(--blue-400)")).toBe(false);
   });
 
-  it("treats the blue/purple/red dark swatches as dark only in light mode", () => {
-    for (const value of ["var(--blue-600)", "var(--purple-600)", "var(--red-600)"]) {
+  it("treats the blue/purple/magenta/red dark swatches as dark only in light mode", () => {
+    for (const value of STRONG_DARK_SWATCHES) {
       expect(isDarkSurface(value, "light")).toBe(true);
       expect(isDarkSurface(value, "dark")).toBe(false);
     }
