@@ -293,7 +293,7 @@ export function ChatShell({
                 className={
                   message.role === "user"
                     ? "rounded-[12px] bg-(--primary) px-3 py-2 text-sm text-(--primary-foreground)"
-                    : "rounded-[12px] bg-(--surface-150) px-3 py-2 text-sm"
+                    : "rounded-[12px] bg-(--surface-150) surface-blur px-3 py-2 text-sm"
                 }
               >
                 {message.role === "assistant" ? (
@@ -307,7 +307,7 @@ export function ChatShell({
         )}
         {isSending && messages.at(-1)?.role === "user" && (
           <output
-            className="self-start flex items-center gap-1 h-9 max-w-[80%] rounded-[12px] bg-(--surface-150) px-3"
+            className="self-start flex items-center gap-1 h-9 max-w-[80%] rounded-[12px] bg-(--surface-150) surface-blur px-3"
             aria-label="Aider is thinking"
           >
             {[0, 1, 2].map((i) => (
@@ -342,11 +342,12 @@ export function ChatShell({
           onChange={setInput}
           onKeyDown={handleKeyDown}
           placeholder="Message Aider..."
-          className="flex-1"
+          className="flex-1 surface-blur"
           disabled={isSending}
         />
         <Button
           size="icon"
+          className="vivid"
           onClick={() => void handleSend()}
           disabled={!input.trim() || isSending}
           aria-label="Send message"

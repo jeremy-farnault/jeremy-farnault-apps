@@ -20,6 +20,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           appName="Aider"
           currentAppId="aider"
           titleHref="/"
+          background="/background.svg"
           rightSlot={<UserMenuConnected />}
           fullHeight
         >
