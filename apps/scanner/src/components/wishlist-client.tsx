@@ -11,6 +11,7 @@ import {
   sortItems,
   summarizeItem,
 } from "@/lib/summary";
+import { useOnline } from "@/lib/use-online";
 import { Button, FloatingCTA, Select, SelectItem, cn } from "@jf/ui";
 import { ArrowsClockwiseIcon, BarcodeIcon, PlusIcon, ShoppingBagIcon } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -40,6 +41,7 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [adding, setAdding] = useState(false);
+  const online = useOnline();
 
   // Fresh results per link, laid over the server's data until the next refresh replaces it.
   const [checked, setChecked] = useState<Map<string, CheckedLink>>(new Map());
@@ -81,14 +83,20 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
 
   const allLinks = useMemo(() => items.flatMap((i) => i.links), [items]);
 
-  // New server data (after a refresh or an add) replaces the overlay, then opening the page
-  // rechecks whatever is more than an hour old.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per server payload.
+  // New server data (after a refresh or an add) replaces the overlay.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the server data only.
   useEffect(() => {
     setChecked(new Map());
+  }, [allLinks]);
+
+  // Opening the page rechecks whatever is more than an hour old, and so does coming back
+  // online. Offline, the saved prices are all there is.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs per payload and on reconnect.
+  useEffect(() => {
+    if (!online) return;
     const now = new Date();
     enqueue(allLinks.filter((l) => needsRecheck(l, now)));
-  }, [allLinks]);
+  }, [allLinks, online]);
 
   // The order comes from the server's data, so it only changes on refresh.
   const order = useMemo(
@@ -131,7 +139,7 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
           <p className="max-w-sm text-sm leading-relaxed text-(--text-secondary)">
             Paste a link to a product page, from any shop, and Scanner keeps an eye on its price.
           </p>
-          <Button onClick={() => setAdding(true)} className="mt-2">
+          <Button onClick={() => setAdding(true)} disabled={!online} className="mt-2">
             Paste a link
           </Button>
           <Link href="/bought" className="text-sm text-(--text-muted) underline">
@@ -144,7 +152,7 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
             <Button
               variant="outline"
               onClick={() => enqueue(allLinks)}
-              disabled={busy}
+              disabled={busy || !online}
               className="gap-2"
             >
               <ArrowsClockwiseIcon size={18} className={cn(busy && "animate-spin")} />
@@ -164,6 +172,12 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
               ))}
             </Select>
           </div>
+          {!online && (
+            <output className="mb-3 block text-sm text-(--text-muted)">
+              You're offline: these are the last saved prices. Checking resumes when you're back
+              online.
+            </output>
+          )}
           <ul className="flex flex-col gap-3">
             {summaries.map((item) => (
               <li key={item.id}>
@@ -183,6 +197,7 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
           label="Add"
           icon={<PlusIcon size={20} weight="bold" />}
           onClick={() => setAdding(true)}
+          disabled={!online}
         />
       )}
 

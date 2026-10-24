@@ -16,5 +16,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon\\.ico).*)"],
+  matcher: [
+    // The service worker, manifest and icons must load without a session: the browser
+    // fetches them on its own, and an installed app needs them to start offline.
+    "/((?!api/auth|_next/static|_next/image|favicon\\.png|favicon\\.ico|sw\\.js|manifest\\.json|icons/).*)",
+  ],
 };

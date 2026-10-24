@@ -1,6 +1,12 @@
+import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 
-// The service worker (Serwist) comes with the PWA setup, Scanner ticket 14.
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
 const nextConfig: NextConfig = {
   transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db"],
   webpack: (config) => {
@@ -12,4 +18,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

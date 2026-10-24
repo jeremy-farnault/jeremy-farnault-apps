@@ -16,6 +16,7 @@ import { uploadItemImage } from "@/lib/item-image";
 import { minorDigits, toMinorUnits } from "@/lib/price-reader/money";
 import type { ItemDetail } from "@/lib/queries";
 import { type ItemSummary, type LinkSummary, convert, summarizeItem } from "@/lib/summary";
+import { useOnline } from "@/lib/use-online";
 import { ActionModal, Button, FloatingCTA, TextInput, cn } from "@jf/ui";
 import {
   ArrowLeftIcon,
@@ -43,6 +44,7 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
   const [removing, setRemoving] = useState<DetailLink | null>(null);
   const [changingImage, setChangingImage] = useState(false);
   const [buying, setBuying] = useState(false);
+  const online = useOnline();
 
   const linkSummaries = new Map(summary.links.map((l) => [l.id, l]));
 
@@ -97,7 +99,7 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
           </Button>
         </section>
       ) : (
-        <Button onClick={() => setBuying(true)} className="self-start gap-2">
+        <Button onClick={() => setBuying(true)} disabled={!online} className="self-start gap-2">
           <ShoppingBagIcon size={18} /> Mark as bought
         </Button>
       )}
@@ -127,6 +129,7 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
           label="Add link"
           icon={<PlusIcon size={20} weight="bold" />}
           onClick={() => setAdding(true)}
+          disabled={!online}
         />
       )}
 

@@ -5,6 +5,9 @@ import sharp from "sharp";
 const BARBELL_PATH =
   "M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z";
 
+const BARCODE_PATH =
+  "M232,48V88a8,8,0,0,1-16,0V56H184a8,8,0,0,1,0-16h40A8,8,0,0,1,232,48ZM72,200H40V168a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H72a8,8,0,0,0,0-16Zm152-40a8,8,0,0,0-8,8v32H184a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V168A8,8,0,0,0,224,160ZM32,96a8,8,0,0,0,8-8V56H72a8,8,0,0,0,0-16H32a8,8,0,0,0-8,8V88A8,8,0,0,0,32,96ZM80,80a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,80,80Zm104,88V88a8,8,0,0,0-16,0v80a8,8,0,0,0,16,0ZM144,80a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,144,80Zm-32,0a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,112,80Z";
+
 const RANKING_PATH =
   "M112.41,102.53a8,8,0,0,1,5.06-10.12l12-4A8,8,0,0,1,140,96v40a8,8,0,0,1-16,0V107.1l-1.47.49A8,8,0,0,1,112.41,102.53ZM248,208a8,8,0,0,1-8,8H16a8,8,0,0,1,0-16h8V104A16,16,0,0,1,40,88H80V56A16,16,0,0,1,96,40h64a16,16,0,0,1,16,16v72h40a16,16,0,0,1,16,16v56h8A8,8,0,0,1,248,208Zm-72-64v56h40V144ZM96,200h64V56H96Zm-56,0H80V104H40Z";
 
@@ -73,7 +76,7 @@ function parseArgs(): { color: string; out: string; icon: string } {
   const out = get("--out");
   if (!color || !out) {
     console.error(
-      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill|infinity|robot|aperture|kanban|atom]"
+      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill|infinity|robot|aperture|kanban|atom|barcode]"
     );
     process.exit(1);
   }
@@ -101,7 +104,9 @@ async function generate() {
                     ? KANBAN_PATH
                     : icon === "atom"
                       ? ATOM_PATH
-                      : RANKING_PATH;
+                      : icon === "barcode"
+                        ? BARCODE_PATH
+                        : RANKING_PATH;
   const iconsDir = resolve(out, "icons");
   const splashDir = resolve(iconsDir, "splash");
   await mkdir(splashDir, { recursive: true });
