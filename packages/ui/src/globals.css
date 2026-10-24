@@ -530,7 +530,18 @@
  * `--primary`, never redefined in `.dark`. Each app names its own as `--primary-vivid` (and
  * `--primary-vivid-foreground` when its light-mode text on the colour is light); without that
  * it falls back to the muted `--primary`. Light mode looks the same either way.
+ *
+ * The fallbacks sit in `@layer base` so an app's unlayered `--primary-vivid` always wins: the
+ * production build puts the app's globals.css before this file, so an unlayered fallback here
+ * would override it (dev serves the files in import order, which hides the problem).
  */
+@layer base {
+  :root {
+    --primary-vivid: var(--primary);
+    --primary-vivid-foreground: var(--grey-900);
+  }
+}
+
 :root {
   --vivid-green-400: #84cdb4;
   --vivid-green-600: #44a684;
@@ -546,14 +557,13 @@
   --vivid-blue-600: #3959ad;
   --vivid-magenta-400: #d576af;
   --vivid-magenta-600: #b0367f;
-  --primary-vivid: var(--primary);
-  --primary-vivid-foreground: var(--grey-900);
 }
 
-/* `--secondary` (the hover fill) set to the vivid colour too: the muted one would flash dull. */
+/* `--secondary` (the hover fill) is a darker vivid: the muted one would flash dull, and the
+   vivid colour itself would leave no visible hover. */
 .dark .vivid {
   --primary: var(--primary-vivid);
-  --secondary: var(--primary-vivid);
+  --secondary: color-mix(in oklab, var(--primary-vivid) 82%, black);
   --primary-foreground: var(--primary-vivid-foreground);
   --text-on-strong-hue: var(--grey-100);
 }
@@ -563,25 +573,28 @@
  * viewport that stays put while the page scrolls. The scene SVG is a stencil — its lines let
  * the app's --primary through. The layer covers the whole viewport so a tall scene is never
  * clipped. Negative z-index keeps it under all page content; the body's translucent ground
- * sits over it, which only softens it.
+ * sits over it, which only softens it. In `@layer components` so an app can restyle it (Indexer
+ * recolours it) whatever order the build puts the stylesheets in.
  */
-.app-background {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-color: var(--primary);
-  opacity: 0.45;
-  mask-image: var(--app-background-src);
-  /* Wider than a phone so the subject reads, capped so it doesn't tower on desktop. */
-  mask-size: min(125%, 960px) auto;
-  mask-repeat: no-repeat;
-  /* Lifted clear of the floating CTAs (bottom-8 + h-14 = 88px from the bottom). */
-  mask-position: left 50% bottom 96px;
-}
+@layer components {
+  .app-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--primary);
+    opacity: 0.45;
+    mask-image: var(--app-background-src);
+    /* Wider than a phone so the subject reads, capped so it doesn't tower on desktop. */
+    mask-size: min(125%, 960px) auto;
+    mask-repeat: no-repeat;
+    /* Lifted clear of the floating CTAs (bottom-8 + h-14 = 88px from the bottom). */
+    mask-position: left 50% bottom 96px;
+  }
 
-.dark .app-background {
-  opacity: 0.38;
+  .dark .app-background {
+    opacity: 0.38;
+  }
 }
 
 /*
