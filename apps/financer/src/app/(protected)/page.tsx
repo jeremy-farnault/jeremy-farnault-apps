@@ -34,7 +34,6 @@ import {
   getAssetEntriesForMonth,
   getAssetSources,
   getAssetsForMonth,
-  getExchangeRates,
   getHomeCurrency,
   getIncomeEntriesForMonth,
   getIncomeForMonth,
@@ -50,6 +49,7 @@ import {
   hasOpenIncomeEntries,
 } from "@/lib/queries";
 import { auth } from "@jf/auth";
+import { getExchangeRates } from "@jf/db";
 import { headers } from "next/headers";
 
 function convertSpendingRows(

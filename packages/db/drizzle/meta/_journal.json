@@ -225,6 +225,13 @@
       "when": 1791649815494,
       "tag": "0031_deep_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792838210555,
+      "tag": "0032_shared_exchange_rates",
+      "breakpoints": true
     }
   ]
 }

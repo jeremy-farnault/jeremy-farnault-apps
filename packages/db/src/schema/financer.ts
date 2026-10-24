@@ -126,6 +126,9 @@ export const financerUserSettings = pgTable("financer_user_settings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Superseded by the shared `exchange_rates` table and nothing in the repo reads it any more.
+// It stays until the aider-broker build on the Pi (which still reads it) is redeployed, then
+// it is dropped.
 export const financerExchangeRates = pgTable("financer_exchange_rates", {
   currency: text("currency").primaryKey(),
   rate: numeric("rate", { precision: 18, scale: 8 }).notNull(),

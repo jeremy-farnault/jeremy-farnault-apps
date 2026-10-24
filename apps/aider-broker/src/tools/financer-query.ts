@@ -3,8 +3,8 @@ import {
   financerAssetEntries,
   financerAssetSources,
   financerAssetSummaries,
-  financerExchangeRates,
   financerUserSettings,
+  getExchangeRates,
 } from "@jf/db";
 import { and, eq } from "drizzle-orm";
 
@@ -67,11 +67,7 @@ export async function getCurrentAssets(userId: string, month: string): Promise<C
     .limit(1);
   const homeCurrency = settings?.homeCurrency ?? "USD";
 
-  const rateRows = await db
-    .select({ currency: financerExchangeRates.currency, rate: financerExchangeRates.rate })
-    .from(financerExchangeRates);
-  const rates: Record<string, number> = {};
-  for (const row of rateRows) rates[row.currency] = Number(row.rate);
+  const rates = await getExchangeRates();
 
   return { rows, homeCurrency, rates };
 }
