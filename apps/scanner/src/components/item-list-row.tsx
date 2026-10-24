@@ -1,15 +1,17 @@
-import { formatPrice, storeLabel } from "@/lib/format";
-import type { ItemRow } from "@/lib/queries";
+import { formatPrice, formatShortDate, storeLabel } from "@/lib/format";
+import type { ItemSummary } from "@/lib/summary";
+import { cn } from "@jf/ui";
 import { ImageIcon } from "@phosphor-icons/react";
 
 /**
- * One wishlist item: name, store and the price of its first link, in the store's currency.
- * Comparing links and converting currencies arrives with the item summary (ticket 08).
+ * One wishlist item, showing where it's cheapest right now: the price in that store's
+ * currency (what you'd pay), your home currency beside it for comparison, and the sale
+ * when there is one. With nothing buyable, the last known price shows greyed out.
  */
-export function ItemListRow({ item }: { item: ItemRow }) {
-  const link = item.links[0];
-  const price = link?.latest;
-  const current = price ? (price.salePrice ?? price.normalPrice) : null;
+export function ItemListRow({ item, homeCurrency }: { item: ItemSummary; homeCurrency: string }) {
+  const lowest = item.lowest;
+  const check = lowest?.latest;
+  const muted = lowest?.unavailable ?? false;
 
   return (
     <div className="card-raised flex items-center gap-4 rounded-2xl bg-(--surface-100) p-3 surface-blur">
@@ -19,23 +21,39 @@ export function ItemListRow({ item }: { item: ItemRow }) {
       >
         <ImageIcon size={24} />
       </div>
+
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-(--text)">{item.name}</p>
-        {link && (
+        {lowest && (
           <p className="truncate text-xs text-(--text-muted)">
-            {storeLabel(link.store, link.url)}
-            {link.region ? ` · ${link.region}` : ""}
+            {storeLabel(lowest.store, lowest.url)}
+            {lowest.region ? ` · ${lowest.region}` : ""}
+            {muted && (lowest.stale ? " · last known price" : " · out of stock")}
           </p>
         )}
+        {!muted && check?.discountPercent ? (
+          <p className="mt-1 flex items-center gap-2 text-xs text-(--text-muted)">
+            <span className="vivid rounded-md bg-(--primary) px-1.5 py-0.5 font-semibold text-(--primary-foreground)">
+              −{check.discountPercent}%
+            </span>
+            {check.saleEndsAt && <span>ends {formatShortDate(check.saleEndsAt)}</span>}
+          </p>
+        ) : null}
       </div>
-      {price && current !== null && (
-        <p
-          className={
-            price.inStock ? "font-semibold text-(--text)" : "font-semibold text-(--text-subtle)"
-          }
-        >
-          {formatPrice(current, price.currency)}
-        </p>
+
+      {lowest ? (
+        <div className={cn("shrink-0 text-right", muted && "opacity-50")}>
+          <p className="font-semibold text-(--text)">
+            {formatPrice(lowest.current.price, lowest.current.currency)}
+          </p>
+          {lowest.current.currency !== homeCurrency && lowest.current.converted !== null && (
+            <p className="text-xs text-(--text-muted)">
+              ≈ {formatPrice(lowest.current.converted, homeCurrency, { round: true })}
+            </p>
+          )}
+        </div>
+      ) : (
+        <p className="shrink-0 text-xs text-(--text-subtle)">No price yet</p>
       )}
     </div>
   );

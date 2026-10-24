@@ -1,15 +1,28 @@
 import { minorDigits } from "./price-reader/money";
 import type { Store } from "./price-reader/types";
 
-/** A minor-unit price in its own currency, the way that country writes it ("¥2,990", "296,46 kr"). */
-export function formatPrice(minor: number, currency: string): string {
+/**
+ * A minor-unit price in its own currency, the way that country writes it ("¥2,990",
+ * "296,46 kr"). `round` drops the decimals, for converted amounts that are approximate anyway.
+ */
+export function formatPrice(minor: number, currency: string, { round = false } = {}): string {
   const digits = minorDigits(currency);
+  const whole = round || minor % 10 ** digits === 0;
   return new Intl.NumberFormat(localeFor(currency), {
     style: "currency",
     currency,
-    minimumFractionDigits: minor % 10 ** digits === 0 ? 0 : digits,
-    maximumFractionDigits: digits,
+    minimumFractionDigits: whole ? 0 : digits,
+    maximumFractionDigits: whole ? 0 : digits,
   }).format(minor / 10 ** digits);
+}
+
+/** "4 Nov", or "4 Nov 2027" outside the current year. */
+export function formatShortDate(date: Date, now = new Date()): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    ...(date.getFullYear() !== now.getFullYear() && { year: "numeric" }),
+  }).format(date);
 }
 
 function localeFor(currency: string): string {
