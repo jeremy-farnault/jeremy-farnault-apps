@@ -10,7 +10,8 @@
     "lint:fix": "biome check --write .",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rimraf .next dist"
+    "clean": "rimraf .next dist",
+    "live-check": "vitest run --config vitest.live.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.0.0",
