@@ -4,7 +4,7 @@ import { PencilSimpleIcon } from "@phosphor-icons/react";
 
 export function FeedItem({ item, onEdit }: { item: FeedItemData; onEdit?: () => void }) {
   return (
-    <article className="flex flex-col gap-2">
+    <article className="flex flex-col gap-2 p-4 rounded-xl bg-(--surface-100) surface-blur border border-(--surface-200)">
       {(item.title || item.isDraft || onEdit) && (
         <div className="flex items-center gap-2">
           {item.title && <h2 className="text-base font-semibold text-(--text)">{item.title}</h2>}

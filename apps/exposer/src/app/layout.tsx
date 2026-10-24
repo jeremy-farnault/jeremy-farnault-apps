@@ -113,6 +113,7 @@ export default function RootLayout({
           appName="Exposer"
           currentAppId="exposer"
           titleHref="/"
+          background="/background.svg"
           rightSlot={<HeaderAuth />}
         >
           {children}
