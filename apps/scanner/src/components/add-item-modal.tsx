@@ -2,6 +2,7 @@
 
 import { type LinkPreview, type Rejection, addItemAction, previewLinkAction } from "@/lib/actions";
 import { formatPrice, storeLabel } from "@/lib/format";
+import { STEAM_REGIONS } from "@/lib/price-reader/steam";
 import { ActionModal, TextInput } from "@jf/ui";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -39,18 +40,22 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
     }
   }, [isOpen]);
 
-  async function read() {
+  /**
+   * Reads the link for the preview. `region` re-reads a Steam link for another storefront,
+   * keeping the name the user may have edited; a failure there leaves the last good preview.
+   */
+  async function read(region?: string) {
     if (!url.trim() || busy) return;
     setBusy(true);
     setError(null);
     try {
-      const result = await previewLinkAction({ url });
+      const result = await previewLinkAction({ url, region: region ?? null });
       if (!result.ok) {
         setError(result);
         return;
       }
       const { preview } = result;
-      setName(preview.name);
+      if (region === undefined) setName(preview.name);
       const untracked = preview.editions.filter((e) => !preview.trackedEditionIds.includes(e.id));
       setEditionId(preview.editions.length > 1 ? null : (untracked[0]?.id ?? null));
       setStep({ kind: "preview", preview });
@@ -71,6 +76,7 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
         url: preview.url,
         name,
         editionId: several ? editionId : null,
+        region: preview.store === "steam" ? preview.region : null,
       });
       if (!result.ok) {
         setError(result);
@@ -140,6 +146,24 @@ export function AddItemModal({ isOpen, onClose, onAdded }: Props) {
       content={
         <div className="flex flex-col gap-4">
           <TextInput value={name} onChange={setName} placeholder="Name" />
+
+          {preview.store === "steam" && (
+            <label className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
+              <span>Steam store</span>
+              <select
+                value={preview.region ?? ""}
+                disabled={busy}
+                onChange={(e) => void read(e.target.value)}
+                className="cursor-pointer rounded-[10px] bg-(--surface-sunken) px-2 py-1 text-sm text-(--text) outline-none"
+              >
+                {STEAM_REGIONS.map((r) => (
+                  <option key={r.region} value={r.region}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {several ? (
             <fieldset className="flex flex-col gap-2">

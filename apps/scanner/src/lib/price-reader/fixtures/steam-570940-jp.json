@@ -1,0 +1,43 @@
+{
+  "570940": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "DARK SOULS™: REMASTERED",
+      "steam_appid": 570940,
+      "is_free": false,
+      "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/header.jpg?t=1778518110",
+      "price_overview": {
+        "currency": "JPY",
+        "initial": 473000,
+        "final": 473000,
+        "discount_percent": 0,
+        "initial_formatted": "",
+        "final_formatted": "¥ 4,730"
+      },
+      "package_groups": [
+        {
+          "name": "default",
+          "title": "Buy DARK SOULS™: REMASTERED",
+          "description": "",
+          "selection_text": "Select a purchase option",
+          "save_text": "",
+          "display_type": 0,
+          "is_recurring_subscription": "false",
+          "subs": [
+            {
+              "packageid": 262431,
+              "percent_savings_text": " ",
+              "percent_savings": 0,
+              "option_text": "DARK SOULS: REMASTERED - ¥ 4,730",
+              "option_description": "",
+              "can_get_free_license": "0",
+              "is_free_license": false,
+              "price_in_cents_with_discount": 473000
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

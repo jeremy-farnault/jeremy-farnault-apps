@@ -21,10 +21,14 @@ export function parseLink(input: string): URL | null {
 
 /**
  * The form duplicates are compared on: lowercased host without "www.", no tracking
- * parameters, no fragment, no trailing slash, remaining parameters sorted.
+ * parameters, no fragment, no trailing slash, remaining parameters sorted. Steam links
+ * reduce to their app id.
  */
 export function normalizeUrl(url: URL): string {
   const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  // A Steam game is its app id; the slug after it and any parameters are decoration.
+  const steamApp = host === "store.steampowered.com" && /^\/app\/(\d+)/.exec(url.pathname)?.[1];
+  if (steamApp) return `${host}/app/${steamApp}`;
   const params = [...url.searchParams.entries()]
     .filter(([key]) => !TRACKING_PARAM.test(key))
     .sort(([a], [b]) => a.localeCompare(b));

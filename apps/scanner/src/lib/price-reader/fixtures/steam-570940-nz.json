@@ -1,0 +1,43 @@
+{
+  "570940": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "DARK SOULS™: REMASTERED",
+      "steam_appid": 570940,
+      "is_free": false,
+      "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570940/header.jpg?t=1778518110",
+      "price_overview": {
+        "currency": "NZD",
+        "initial": 6799,
+        "final": 6799,
+        "discount_percent": 0,
+        "initial_formatted": "",
+        "final_formatted": "NZ$ 67.99"
+      },
+      "package_groups": [
+        {
+          "name": "default",
+          "title": "Buy DARK SOULS™: REMASTERED",
+          "description": "",
+          "selection_text": "Select a purchase option",
+          "save_text": "",
+          "display_type": 0,
+          "is_recurring_subscription": "false",
+          "subs": [
+            {
+              "packageid": 262430,
+              "percent_savings_text": " ",
+              "percent_savings": 0,
+              "option_text": "DARK SOULS: REMASTERED - NZ$ 67.99",
+              "option_description": "",
+              "can_get_free_license": "0",
+              "is_free_license": false,
+              "price_in_cents_with_discount": 6799
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

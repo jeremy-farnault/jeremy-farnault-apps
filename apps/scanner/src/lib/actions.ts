@@ -1,15 +1,18 @@
 "use server";
 
 import { auth } from "@jf/auth";
+import { getUserSettings } from "@jf/auth/settings";
 import { scannerItems, scannerLinks, scannerPriceChecks, withTransaction } from "@jf/db";
 import { headers } from "next/headers";
 
 import {
   type Edition,
   type RejectionReason,
+  defaultSteamRegion,
   normalizeUrl,
   parseLink,
   readPrice,
+  storeFor,
 } from "./price-reader";
 import { findTrackedLinks } from "./queries";
 
@@ -45,6 +48,9 @@ export type LinkPreview = {
 };
 
 function rejection(reason: RejectionReason, detail?: string): Rejection {
+  if (detail === "free") {
+    return { ok: false, reason, message: "That game is free, so there's no price to track." };
+  }
   if (detail === "en-jp") {
     return {
       ok: false,
@@ -75,13 +81,19 @@ function toPreviewEdition(e: Edition): PreviewEdition {
  */
 export async function previewLinkAction(input: {
   url: string;
+  /** The Steam storefront to price; defaults to the user's home-currency one. */
+  region?: string | null;
 }): Promise<{ ok: true; preview: LinkPreview } | Rejection> {
   const userId = await getUserId();
 
   const url = parseLink(input.url);
   if (!url) return rejection("unreadable");
 
-  const result = await readPrice(url.toString());
+  const region =
+    storeFor(url) === "steam"
+      ? (input.region ?? defaultSteamRegion((await getUserSettings(userId)).homeCurrency))
+      : null;
+  const result = await readPrice(url.toString(), { region });
   if (!result.ok) return rejection(result.reason, result.detail);
   const { reading } = result;
 
@@ -121,6 +133,8 @@ export async function addItemAction(input: {
   url: string;
   name: string;
   editionId: string | null;
+  /** The Steam storefront chosen in the preview; ignored for other stores. */
+  region?: string | null;
 }): Promise<{ ok: true; itemId: string } | Rejection> {
   const userId = await getUserId();
   const name = input.name.trim();
@@ -129,7 +143,10 @@ export async function addItemAction(input: {
   const url = parseLink(input.url);
   if (!url) return rejection("unreadable");
 
-  const result = await readPrice(url.toString(), { editionId: input.editionId });
+  const result = await readPrice(url.toString(), {
+    editionId: input.editionId,
+    region: input.region ?? null,
+  });
   if (!result.ok) return rejection(result.reason, result.detail);
   const { reading } = result;
   const edition = reading.edition;

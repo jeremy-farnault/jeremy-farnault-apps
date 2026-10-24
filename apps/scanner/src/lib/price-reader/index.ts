@@ -3,11 +3,13 @@ import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@jf/db";
 import { readGenericPage } from "./generic";
 import { nameMatchKey } from "./match-key";
 import { parsePsLink, psMatchKey, readPsStorePage } from "./ps-store";
+import { isSteamRegion, parseSteamAppId, readSteamApi, steamApiUrl } from "./steam";
 import type { Edition, PageReading, ReadResult, Store } from "./types";
 import { parseLink, storeFor } from "./url";
 
 export type { Edition, ReadResult, Reading, RejectionReason, Store } from "./types";
 export { normalizeUrl, parseLink, storeFor } from "./url";
+export { STEAM_REGIONS, defaultSteamRegion } from "./steam";
 
 // A desktop browser's user agent: shops serve their full page, structured data included,
 // to browsers.
@@ -16,7 +18,7 @@ const USER_AGENT =
 const TIMEOUT_MS = 15_000;
 
 export type ReadOptions = {
-  /** Country code, for stores whose price depends on it. Unused by web shops. */
+  /** Country code, for stores whose price depends on it (Steam). Unused by web shops. */
   region?: string | null;
   /** The edition to price, when the page sells several. */
   editionId?: string | null;
@@ -56,8 +58,23 @@ export async function readPrice(input: string, options: ReadOptions = {}): Promi
     });
   }
 
-  // The Steam adapter lands in ticket 07. Until then Steam pages go through the generic
-  // adapter like any other shop.
+  if (store === "steam") {
+    const appId = parseSteamAppId(url);
+    if (!appId) return { ok: false, reason: "unreadable", detail: "Not a Steam game page" };
+    const region = options.region ?? null;
+    if (!region || !isSteamRegion(region)) {
+      return { ok: false, reason: "unreadable", detail: "No Steam region" };
+    }
+
+    const api = await fetchPage(new URL(steamApiUrl(appId, region)), fetchFn);
+    if (!api.ok) return api;
+    const page = readSteamApi(api.html, appId);
+    if (!page.found) return { ok: false, reason: "not-found" };
+    if (page.free) return { ok: false, reason: "unreadable", detail: "free" };
+
+    return finish(page, { store, region, editionId });
+  }
+
   const page = await fetchPage(url, fetchFn);
   if (!page.ok) return page;
 
