@@ -4,6 +4,8 @@ import { AddItemModal } from "@/components/add-item-modal";
 import { ItemImage } from "@/components/item-image";
 import {
   deleteItemAction,
+  markBoughtAction,
+  moveToWishlistAction,
   presignImageUploadAction,
   removeLinkAction,
   renameItemAction,
@@ -11,14 +13,16 @@ import {
 } from "@/lib/actions";
 import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
 import { uploadItemImage } from "@/lib/item-image";
+import { minorDigits, toMinorUnits } from "@/lib/price-reader/money";
 import type { ItemDetail } from "@/lib/queries";
-import { type LinkSummary, convert, summarizeItem } from "@/lib/summary";
-import { ActionModal, FloatingCTA, TextInput, cn } from "@jf/ui";
+import { type ItemSummary, type LinkSummary, convert, summarizeItem } from "@/lib/summary";
+import { ActionModal, Button, FloatingCTA, TextInput, cn } from "@jf/ui";
 import {
   ArrowLeftIcon,
   ArrowSquareOutIcon,
   PencilSimpleIcon,
   PlusIcon,
+  ShoppingBagIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -38,6 +42,7 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [removing, setRemoving] = useState<DetailLink | null>(null);
   const [changingImage, setChangingImage] = useState(false);
+  const [buying, setBuying] = useState(false);
 
   const linkSummaries = new Map(summary.links.map((l) => [l.id, l]));
 
@@ -70,6 +75,33 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
         </IconButton>
       </header>
 
+      {item.bought ? (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-(--surface-sunken) px-4 py-3">
+          <p className="text-sm text-(--text)">
+            Bought for{" "}
+            <span className="font-semibold">
+              {formatPrice(item.bought.price, item.bought.currency)}
+            </span>{" "}
+            at {item.bought.store}, {formatShortDate(item.bought.at)}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() =>
+              void moveToWishlistAction({ itemId: item.id }).then(
+                () => router.refresh(),
+                () => toast.error("Something went wrong. Try again.")
+              )
+            }
+          >
+            Move back to wishlist
+          </Button>
+        </section>
+      ) : (
+        <Button onClick={() => setBuying(true)} className="self-start gap-2">
+          <ShoppingBagIcon size={18} /> Mark as bought
+        </Button>
+      )}
+
       <ul className="flex flex-col gap-3">
         {item.links.map((link) => {
           const s = linkSummaries.get(link.id);
@@ -90,10 +122,38 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
         })}
       </ul>
 
-      <FloatingCTA
-        label="Add link"
-        icon={<PlusIcon size={20} weight="bold" />}
-        onClick={() => setAdding(true)}
+      {!item.bought && (
+        <FloatingCTA
+          label="Add link"
+          icon={<PlusIcon size={20} weight="bold" />}
+          onClick={() => setAdding(true)}
+        />
+      )}
+
+      <MarkBoughtModal
+        isOpen={buying}
+        onClose={() => setBuying(false)}
+        name={item.name}
+        lowest={summary.lowest}
+        currencies={[
+          ...new Set([
+            homeCurrency,
+            ...summary.links.flatMap((l) => (l.current ? [l.current.currency] : [])),
+          ]),
+        ]}
+        shops={[
+          ...new Set(
+            item.links.map(
+              (l) => `${storeLabel(l.store, l.url)}${l.region ? ` · ${l.region}` : ""}`
+            )
+          ),
+        ]}
+        onSave={async (input) => {
+          const result = await markBoughtAction({ itemId: item.id, ...input });
+          if (!result.ok) throw new Error(result.message);
+          toast.success(`${item.name} moved to Bought`);
+          router.push("/");
+        }}
       />
 
       <AddItemModal
@@ -497,6 +557,146 @@ function ImageModal({
         loading: saving,
         disabled: !file,
       }}
+      secondaryButton={{ label: "Cancel", onClick: onClose }}
+    />
+  );
+}
+
+/**
+ * Records a purchase: what was paid (pre-filled with the current lowest price, in that
+ * store's currency), where, and when (today by default).
+ */
+function MarkBoughtModal({
+  isOpen,
+  onClose,
+  name,
+  lowest,
+  currencies,
+  shops,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  name: string;
+  lowest: ItemSummary["lowest"];
+  currencies: string[];
+  shops: string[];
+  onSave: (input: {
+    price: number;
+    currency: string;
+    store: string;
+    date: string;
+  }) => Promise<void>;
+}) {
+  const today = () => new Date().toLocaleDateString("sv-SE");
+  const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState(currencies[0] ?? "SEK");
+  const [store, setStore] = useState("");
+  const [date, setDate] = useState(today());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Pre-fill from the cheapest link each time the dialog opens.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only on open.
+  useEffect(() => {
+    if (!isOpen) return;
+    setError(null);
+    setDate(today());
+    if (lowest) {
+      const digits = minorDigits(lowest.current.currency);
+      setPrice((lowest.current.price / 10 ** digits).toFixed(digits));
+      setCurrency(lowest.current.currency);
+      setStore(
+        `${storeLabel(lowest.store, lowest.url)}${lowest.region ? ` · ${lowest.region}` : ""}`
+      );
+    } else {
+      setPrice("");
+      setStore(shops[0] ?? "");
+    }
+  }, [isOpen]);
+
+  async function save() {
+    const minor = toMinorUnits(price, currency);
+    if (minor === null) {
+      setError("Enter the price you paid.");
+      return;
+    }
+    if (!store.trim()) {
+      setError("Say where you bought it.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await onSave({ price: minor, currency, store, date });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const field = "rounded-[10px] bg-(--surface-sunken) px-2 py-2 text-sm text-(--text) outline-none";
+
+  return (
+    <ActionModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Bought ${name}?`}
+      paragraph="It moves to your Bought page and stops being checked."
+      size="small"
+      content={
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <TextInput value={price} onChange={setPrice} placeholder="Price paid" />
+            </div>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              aria-label="Currency"
+              className={field}
+            >
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <TextInput value={store} onChange={setStore} placeholder="Where" />
+          {shops.length > 1 && (
+            <div className="flex flex-wrap gap-1.5">
+              {shops.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStore(s)}
+                  className="rounded-full bg-(--surface-sunken) px-2.5 py-1 text-xs text-(--text-secondary) hover:text-(--text)"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <label className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
+            <span>Date</span>
+            <input
+              type="date"
+              value={date}
+              max={today()}
+              onChange={(e) => setDate(e.target.value)}
+              className={field}
+            />
+          </label>
+          {error && (
+            <p role="alert" className="text-sm text-(--red-500)">
+              {error}
+            </p>
+          )}
+        </div>
+      }
+      primaryButton={{ label: "Mark as bought", onClick: () => void save(), loading: saving }}
       secondaryButton={{ label: "Cancel", onClick: onClose }}
     />
   );

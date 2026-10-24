@@ -144,6 +144,7 @@ export async function getLatestCheck(linkId: string): Promise<LinkRow["latest"]>
 
 export type ItemDetail = Omit<ItemRow, "links"> & {
   status: "wishlist" | "bought";
+  bought: { price: number; currency: string; store: string; at: Date } | null;
   links: (LinkRow & {
     editionName: string | null;
     createdAt: Date;
@@ -161,13 +162,24 @@ export async function getItem(userId: string, itemId: string): Promise<ItemDetai
       imageKey: scannerItems.imageKey,
       createdAt: scannerItems.createdAt,
       status: scannerItems.status,
+      boughtPrice: scannerItems.boughtPrice,
+      boughtCurrency: scannerItems.boughtCurrency,
+      boughtStore: scannerItems.boughtStore,
+      boughtAt: scannerItems.boughtAt,
     })
     .from(scannerItems)
     .where(and(eq(scannerItems.id, itemId), eq(scannerItems.userId, userId)))
     .limit(1);
   if (!found) return null;
-  const { imageKey, ...rest } = found;
-  const item = { ...rest, imageUrl: imageKey ? getPublicImageUrl(imageKey) : null };
+  const { imageKey, boughtPrice, boughtCurrency, boughtStore, boughtAt, ...rest } = found;
+  const item = {
+    ...rest,
+    imageUrl: imageKey ? getPublicImageUrl(imageKey) : null,
+    bought:
+      rest.status === "bought" && boughtPrice !== null && boughtCurrency && boughtStore && boughtAt
+        ? { price: boughtPrice, currency: boughtCurrency, store: boughtStore, at: boughtAt }
+        : null,
+  };
 
   const links = await db
     .select({
@@ -249,4 +261,35 @@ export async function getWishlistMatchKeys(
     .innerJoin(scannerItems, eq(scannerItems.id, scannerLinks.itemId))
     .where(and(eq(scannerLinks.userId, userId), eq(scannerItems.status, "wishlist")))
     .orderBy(desc(scannerItems.createdAt));
+}
+
+export type BoughtRow = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  price: number | null;
+  currency: string | null;
+  store: string | null;
+  boughtAt: Date | null;
+};
+
+/** The user's bought items, most recently bought first. */
+export async function getBought(userId: string): Promise<BoughtRow[]> {
+  const rows = await db
+    .select({
+      id: scannerItems.id,
+      name: scannerItems.name,
+      imageKey: scannerItems.imageKey,
+      price: scannerItems.boughtPrice,
+      currency: scannerItems.boughtCurrency,
+      store: scannerItems.boughtStore,
+      boughtAt: scannerItems.boughtAt,
+    })
+    .from(scannerItems)
+    .where(and(eq(scannerItems.userId, userId), eq(scannerItems.status, "bought")))
+    .orderBy(desc(scannerItems.boughtAt));
+  return rows.map(({ imageKey, ...row }) => ({
+    ...row,
+    imageUrl: imageKey ? getPublicImageUrl(imageKey) : null,
+  }));
 }

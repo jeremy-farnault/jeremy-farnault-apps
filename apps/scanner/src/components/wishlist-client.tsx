@@ -12,7 +12,8 @@ import {
   summarizeItem,
 } from "@/lib/summary";
 import { Button, FloatingCTA, Select, SelectItem, cn } from "@jf/ui";
-import { ArrowsClockwiseIcon, BarcodeIcon, PlusIcon } from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, BarcodeIcon, PlusIcon, ShoppingBagIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AddItemModal } from "./add-item-modal";
@@ -133,6 +134,9 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
           <Button onClick={() => setAdding(true)} className="mt-2">
             Paste a link
           </Button>
+          <Link href="/bought" className="text-sm text-(--text-muted) underline">
+            See what you bought
+          </Link>
         </div>
       ) : (
         <>
@@ -146,6 +150,12 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
               <ArrowsClockwiseIcon size={18} className={cn(busy && "animate-spin")} />
               {busy ? `Checking ${checking.size}…` : "Check all"}
             </Button>
+            <Link
+              href="/bought"
+              className="ml-auto flex items-center gap-1.5 text-sm text-(--text-secondary) transition-colors hover:text-(--text)"
+            >
+              <ShoppingBagIcon size={16} /> Bought
+            </Link>
             <Select value={sort} onValueChange={handleSortChange} className="w-[200px]">
               {SORT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>

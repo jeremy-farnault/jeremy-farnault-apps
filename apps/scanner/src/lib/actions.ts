@@ -2,7 +2,14 @@
 
 import { auth } from "@jf/auth";
 import { getUserSettings } from "@jf/auth/settings";
-import { db, scannerItems, scannerLinks, scannerPriceChecks, withTransaction } from "@jf/db";
+import {
+  SUPPORTED_CURRENCIES,
+  db,
+  scannerItems,
+  scannerLinks,
+  scannerPriceChecks,
+  withTransaction,
+} from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -363,4 +370,60 @@ function isUniqueViolation(err: unknown): boolean {
     if ((e as { code?: string }).code === "23505") return true;
   }
   return false;
+}
+
+/**
+ * Marks an item bought, with what was paid, where and when. It leaves the wishlist and is
+ * no longer checked; its links and price history stay, for "move back to wishlist".
+ */
+export async function markBoughtAction(input: {
+  itemId: string;
+  /** Minor units of `currency`. */
+  price: number;
+  currency: string;
+  store: string;
+  /** ISO date (yyyy-mm-dd); today when left out. */
+  date?: string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
+  const userId = await getUserId();
+  if (!Number.isInteger(input.price) || input.price <= 0) {
+    return { ok: false, message: "Enter the price you paid." };
+  }
+  if (!(SUPPORTED_CURRENCIES as readonly string[]).includes(input.currency)) {
+    return { ok: false, message: "Pick a currency." };
+  }
+  const store = input.store.trim().slice(0, 120);
+  if (!store) return { ok: false, message: "Say where you bought it." };
+  const boughtAt = input.date ? new Date(`${input.date}T12:00:00`) : new Date();
+  if (Number.isNaN(boughtAt.getTime())) return { ok: false, message: "That date isn't valid." };
+
+  const updated = await db
+    .update(scannerItems)
+    .set({
+      status: "bought",
+      boughtPrice: input.price,
+      boughtCurrency: input.currency,
+      boughtStore: store,
+      boughtAt,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)))
+    .returning({ id: scannerItems.id });
+  return updated[0] ? { ok: true } : { ok: false, message: "That item doesn't exist any more." };
+}
+
+/** Puts a bought item back on the wishlist and forgets what was paid. */
+export async function moveToWishlistAction(input: { itemId: string }): Promise<void> {
+  const userId = await getUserId();
+  await db
+    .update(scannerItems)
+    .set({
+      status: "wishlist",
+      boughtPrice: null,
+      boughtCurrency: null,
+      boughtStore: null,
+      boughtAt: null,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)));
 }
