@@ -10,3 +10,8 @@
   --primary-foreground: var(--text);
   --secondary: var(--border-strong);
 }
+
+/* The scene is drawn in --primary, which is a faint grey here. --text keeps it neutral but visible. */
+.app-background {
+  background-color: var(--text);
+}

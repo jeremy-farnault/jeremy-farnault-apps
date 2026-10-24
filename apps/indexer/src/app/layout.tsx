@@ -113,6 +113,7 @@ export default function RootLayout({
         <AppShell
           appIcon={<InfinityIcon className="text-(--text)" size={26} weight="bold" />}
           appName="Indexer"
+          background="/background.svg"
           rightSlot={<HeaderAuth />}
         >
           <ThemeSync sync={syncThemeCookie} />
