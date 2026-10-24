@@ -1,5 +1,6 @@
 import "@jf/ui/globals.css";
-import { ThemeScript } from "@jf/ui";
+import { syncThemeCookie } from "@jf/auth/settings-actions";
+import { ThemeScript, ThemeSync } from "@jf/ui";
 import "./globals.css";
 import { HeaderAuth } from "@/components/header-auth";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
@@ -114,6 +115,7 @@ export default function RootLayout({
           appName="Indexer"
           rightSlot={<HeaderAuth />}
         >
+          <ThemeSync sync={syncThemeCookie} />
           {children}
           {modal}
         </AppShell>

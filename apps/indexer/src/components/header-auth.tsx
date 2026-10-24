@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "@jf/auth/client";
+import { setTheme } from "@jf/auth/settings-actions";
 import { Button, UserMenu } from "@jf/ui";
 
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
@@ -26,6 +27,7 @@ export function HeaderAuth() {
         name={session.user.name ?? undefined}
         {...(session.user.image ? { image: session.user.image } : {})}
         onLogout={handleLogout}
+        onThemeChange={setTheme}
       />
     );
   }
