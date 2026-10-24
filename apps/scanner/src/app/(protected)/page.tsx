@@ -1,6 +1,6 @@
 import { WishlistClient } from "@/components/wishlist-client";
 import { getWishlist } from "@/lib/queries";
-import { parseSort, sortItems, summarizeItem } from "@/lib/summary";
+import { parseSort } from "@/lib/summary";
 import { auth } from "@jf/auth";
 import { getUserSettings } from "@jf/auth/settings";
 import { getExchangeRates } from "@jf/db";
@@ -18,10 +18,9 @@ export default async function WishlistPage({ searchParams }: Props) {
     getExchangeRates(),
     getUserSettings(userId),
   ]);
-  const summaries = sortItems(
-    items.map((item) => summarizeItem(item, rates, settings.homeCurrency)),
-    sort
-  );
 
-  return <WishlistClient items={summaries} homeCurrency={settings.homeCurrency} sort={sort} />;
+  // Summarised on the client, so a row can be recomputed as soon as its check comes back.
+  return (
+    <WishlistClient items={items} rates={rates} homeCurrency={settings.homeCurrency} sort={sort} />
+  );
 }

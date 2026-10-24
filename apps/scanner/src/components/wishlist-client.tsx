@@ -1,20 +1,116 @@
 "use client";
 
-import { type ItemSummary, SORT_OPTIONS, type SortOption } from "@/lib/summary";
-import { Button, FloatingCTA, Select, SelectItem } from "@jf/ui";
-import { BarcodeIcon, PlusIcon } from "@phosphor-icons/react";
+import { requestCheck } from "@/lib/check-client";
+import type { CheckedLink } from "@/lib/check-link";
+import { createCheckQueue } from "@/lib/check-queue";
+import type { ItemRow } from "@/lib/queries";
+import {
+  SORT_OPTIONS,
+  type SortOption,
+  needsRecheck,
+  sortItems,
+  summarizeItem,
+} from "@/lib/summary";
+import { Button, FloatingCTA, Select, SelectItem, cn } from "@jf/ui";
+import { ArrowsClockwiseIcon, BarcodeIcon, PlusIcon } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddItemModal } from "./add-item-modal";
 import { ItemListRow } from "./item-list-row";
 
-type Props = { items: ItemSummary[]; homeCurrency: string; sort: SortOption };
+type Props = {
+  items: ItemRow[];
+  rates: Record<string, number>;
+  homeCurrency: string;
+  sort: SortOption;
+};
 
-export function WishlistClient({ items, homeCurrency, sort }: Props) {
+/** The store a link's requests go to, so the queue can keep to one at a time per store. */
+function storeKey(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [adding, setAdding] = useState(false);
+
+  // Fresh results per link, laid over the server's data until the next refresh replaces it.
+  const [checked, setChecked] = useState<Map<string, CheckedLink>>(new Map());
+  const [checking, setChecking] = useState<Set<string>>(new Set());
+  const anyResult = useRef(false);
+
+  const queue = useMemo(
+    () =>
+      createCheckQueue<CheckedLink | null>({
+        check: requestCheck,
+        onResult: (linkId, result) => {
+          if (result) {
+            anyResult.current = true;
+            setChecked((prev) => new Map(prev).set(linkId, result));
+          }
+          setChecking((prev) => {
+            const next = new Set(prev);
+            next.delete(linkId);
+            return next;
+          });
+        },
+      }),
+    []
+  );
+
+  function enqueue(links: { id: string; url: string }[]) {
+    const fresh = links.filter((l) => !queue.has(l.id));
+    if (fresh.length === 0) return;
+    setChecking((prev) => new Set([...prev, ...fresh.map((l) => l.id)]));
+    queue.add(fresh.map((l) => ({ linkId: l.id, store: storeKey(l.url) })));
+    // Re-sort once everything settles, so rows don't jump around while results come in.
+    void queue.whenIdle().then(() => {
+      if (anyResult.current) {
+        anyResult.current = false;
+        router.refresh();
+      }
+    });
+  }
+
+  const allLinks = useMemo(() => items.flatMap((i) => i.links), [items]);
+
+  // New server data (after a refresh or an add) replaces the overlay, then opening the page
+  // rechecks whatever is more than an hour old.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per server payload.
+  useEffect(() => {
+    setChecked(new Map());
+    const now = new Date();
+    enqueue(allLinks.filter((l) => needsRecheck(l, now)));
+  }, [allLinks]);
+
+  // The order comes from the server's data, so it only changes on refresh.
+  const order = useMemo(
+    () =>
+      sortItems(
+        items.map((i) => summarizeItem(i, rates, homeCurrency)),
+        sort
+      ).map((s) => s.id),
+    [items, rates, homeCurrency, sort]
+  );
+  const summaries = useMemo(() => {
+    const byId = new Map(
+      items.map((item) => [
+        item.id,
+        summarizeItem(
+          { ...item, links: item.links.map((l) => ({ ...l, ...checked.get(l.id) })) },
+          rates,
+          homeCurrency
+        ),
+      ])
+    );
+    return order.flatMap((id) => byId.get(id) ?? []);
+  }, [items, checked, order, rates, homeCurrency]);
 
   // The sort lives in the URL, as in Classer, so a reload or a shared link keeps it.
   function handleSortChange(value: string) {
@@ -22,6 +118,8 @@ export function WishlistClient({ items, homeCurrency, sort }: Props) {
     params.set("sort", value);
     router.replace(`${pathname}?${params.toString()}`);
   }
+
+  const busy = checking.size > 0;
 
   return (
     <div className="flex w-full max-w-3xl flex-1 flex-col px-4 pb-32 pt-4">
@@ -38,7 +136,16 @@ export function WishlistClient({ items, homeCurrency, sort }: Props) {
         </div>
       ) : (
         <>
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              onClick={() => enqueue(allLinks)}
+              disabled={busy}
+              className="gap-2"
+            >
+              <ArrowsClockwiseIcon size={18} className={cn(busy && "animate-spin")} />
+              {busy ? `Checking ${checking.size}…` : "Check all"}
+            </Button>
             <Select value={sort} onValueChange={handleSortChange} className="w-[200px]">
               {SORT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
@@ -48,9 +155,13 @@ export function WishlistClient({ items, homeCurrency, sort }: Props) {
             </Select>
           </div>
           <ul className="flex flex-col gap-3">
-            {items.map((item) => (
+            {summaries.map((item) => (
               <li key={item.id}>
-                <ItemListRow item={item} homeCurrency={homeCurrency} />
+                <ItemListRow
+                  item={item}
+                  homeCurrency={homeCurrency}
+                  checking={item.links.some((l) => checking.has(l.id))}
+                />
               </li>
             ))}
           </ul>

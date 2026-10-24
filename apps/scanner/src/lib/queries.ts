@@ -8,6 +8,7 @@ export type LinkRow = {
   region: string | null;
   lastStatus: "ok" | "failed";
   lastCheckedAt: Date;
+  lastSuccessAt: Date;
   /** The most recent successful check, or null if there has never been one. */
   latest: {
     normalPrice: number;
@@ -45,6 +46,7 @@ export async function getWishlist(userId: string): Promise<ItemRow[]> {
       region: scannerLinks.region,
       lastStatus: scannerLinks.lastStatus,
       lastCheckedAt: scannerLinks.lastCheckedAt,
+      lastSuccessAt: scannerLinks.lastSuccessAt,
     })
     .from(scannerLinks)
     .where(
@@ -110,4 +112,23 @@ export async function findTrackedLinks(
         region === null ? isNull(scannerLinks.region) : eq(scannerLinks.region, region)
       )
     );
+}
+
+/** A link's most recent successful check, or null if it has never had one. */
+export async function getLatestCheck(linkId: string): Promise<LinkRow["latest"]> {
+  const [check] = await db
+    .select({
+      normalPrice: scannerPriceChecks.normalPrice,
+      salePrice: scannerPriceChecks.salePrice,
+      currency: scannerPriceChecks.currency,
+      inStock: scannerPriceChecks.inStock,
+      discountPercent: scannerPriceChecks.discountPercent,
+      saleEndsAt: scannerPriceChecks.saleEndsAt,
+      checkedAt: scannerPriceChecks.checkedAt,
+    })
+    .from(scannerPriceChecks)
+    .where(eq(scannerPriceChecks.linkId, linkId))
+    .orderBy(desc(scannerPriceChecks.checkedAt))
+    .limit(1);
+  return check ?? null;
 }

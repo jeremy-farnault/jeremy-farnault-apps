@@ -1,14 +1,21 @@
-import { formatPrice, formatShortDate, storeLabel } from "@/lib/format";
+import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
 import type { ItemSummary } from "@/lib/summary";
 import { cn } from "@jf/ui";
-import { ImageIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon, ImageIcon } from "@phosphor-icons/react";
+
+type Props = {
+  item: ItemSummary;
+  homeCurrency: string;
+  /** One of the item's links is being checked right now. */
+  checking?: boolean;
+};
 
 /**
  * One wishlist item, showing where it's cheapest right now: the price in that store's
  * currency (what you'd pay), your home currency beside it for comparison, and the sale
  * when there is one. With nothing buyable, the last known price shows greyed out.
  */
-export function ItemListRow({ item, homeCurrency }: { item: ItemSummary; homeCurrency: string }) {
+export function ItemListRow({ item, homeCurrency, checking = false }: Props) {
   const lowest = item.lowest;
   const check = lowest?.latest;
   const muted = lowest?.unavailable ?? false;
@@ -28,7 +35,21 @@ export function ItemListRow({ item, homeCurrency }: { item: ItemSummary; homeCur
           <p className="truncate text-xs text-(--text-muted)">
             {storeLabel(lowest.store, lowest.url)}
             {lowest.region ? ` · ${lowest.region}` : ""}
-            {muted && (lowest.stale ? " · last known price" : " · out of stock")}
+            {muted && (lowest.stale ? " · check failed" : " · out of stock")}
+          </p>
+        )}
+        {lowest && (
+          <p className="truncate text-xs text-(--text-subtle)">
+            {checking ? (
+              <span className="inline-flex items-center gap-1">
+                <CircleNotchIcon size={12} className="animate-spin" aria-hidden />
+                Checking…
+              </span>
+            ) : lowest.stale && lowest.latest ? (
+              `Last worked ${formatAgo(lowest.latest.checkedAt)}`
+            ) : (
+              `Checked ${formatAgo(lowest.lastCheckedAt)}`
+            )}
           </p>
         )}
         {!muted && check?.discountPercent ? (
