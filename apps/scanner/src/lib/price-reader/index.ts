@@ -2,6 +2,7 @@ import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@jf/db";
 
 import { readGenericPage } from "./generic";
 import { nameMatchKey } from "./match-key";
+import { parsePsLink, psMatchKey, readPsStorePage } from "./ps-store";
 import type { Edition, PageReading, ReadResult, Store } from "./types";
 import { parseLink, storeFor } from "./url";
 
@@ -33,18 +34,34 @@ export async function readPrice(input: string, options: ReadOptions = {}): Promi
   if (!url) return { ok: false, reason: "unreadable", detail: "Not a web link" };
 
   const store = storeFor(url);
-  // The PS Store and Steam adapters land in tickets 06 and 07. Until then their pages go
-  // through the generic adapter like any other shop.
+  const fetchFn = options.fetch ?? fetch;
+  const editionId = options.editionId ?? null;
 
-  const page = await fetchPage(url, options.fetch ?? fetch);
+  if (store === "ps-store") {
+    const link = parsePsLink(url);
+    if (!link) return { ok: false, reason: "unreadable", detail: "Not a PS Store product page" };
+    if ("error" in link) return { ok: false, reason: "unreadable", detail: link.error };
+
+    const page = await fetchPage(url, fetchFn);
+    if (!page.ok) return page;
+    // The store answers a product it doesn't sell in this region with an error page.
+    if (page.url.pathname.includes("/error")) return { ok: false, reason: "not-found" };
+
+    return finish(readPsStorePage(page.html, link), {
+      store,
+      region: link.region,
+      editionId,
+      // A product link is its own edition; a concept link's key is its chosen edition's.
+      matchKey: (edition) => psMatchKey(edition?.id ?? link.id),
+    });
+  }
+
+  // The Steam adapter lands in ticket 07. Until then Steam pages go through the generic
+  // adapter like any other shop.
+  const page = await fetchPage(url, fetchFn);
   if (!page.ok) return page;
 
-  const reading = readGenericPage(page.html, page.url);
-  return finish(reading, {
-    store,
-    region: null,
-    editionId: options.editionId ?? null,
-  });
+  return finish(readGenericPage(page.html, page.url), { store, region: null, editionId });
 }
 
 type Fetched =
@@ -93,7 +110,13 @@ function isSupported(currency: string): currency is SupportedCurrency {
 /** Applies the shared rules to what an adapter read. Exported for the adapters' tests. */
 export function finish(
   page: PageReading,
-  context: { store: Store; region: string | null; editionId: string | null; matchKey?: string }
+  context: {
+    store: Store;
+    region: string | null;
+    editionId: string | null;
+    /** The store's own match key; web shops fall back to the cleaned-up name. */
+    matchKey?: (edition: Edition | null) => string;
+  }
 ): ReadResult {
   if (page.editions.length === 0) return { ok: false, reason: "unreadable" };
 
@@ -121,7 +144,7 @@ export function finish(
       region: context.region,
       name,
       imageUrl: page.imageUrl,
-      matchKey: context.matchKey ?? nameMatchKey(name),
+      matchKey: context.matchKey?.(edition) ?? nameMatchKey(name),
       editions,
       edition,
     },

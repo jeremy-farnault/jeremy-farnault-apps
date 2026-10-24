@@ -45,6 +45,14 @@ export type LinkPreview = {
 };
 
 function rejection(reason: RejectionReason, detail?: string): Rejection {
+  if (detail === "en-jp") {
+    return {
+      ok: false,
+      reason,
+      message:
+        "The English Japanese store shows US prices. Switch the store to Japanese (ja-jp) and paste that link.",
+    };
+  }
   const message = {
     unreadable: "Couldn't read a price from this page. Try another shop.",
     "unsupported-currency": `Scanner doesn't support prices in ${detail ?? "this currency"}.`,
