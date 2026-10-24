@@ -1,8 +1,9 @@
 import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
 import type { ItemSummary } from "@/lib/summary";
 import { cn } from "@jf/ui";
-import { CircleNotchIcon, ImageIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import Link from "next/link";
+import { ItemImage } from "./item-image";
 
 type Props = {
   item: ItemSummary;
@@ -26,12 +27,7 @@ export function ItemListRow({ item, homeCurrency, checking = false }: Props) {
       href={`/items/${item.id}`}
       className="card-raised flex items-center gap-4 rounded-2xl bg-(--surface-100) p-3 surface-blur transition-transform hover:-translate-y-0.5"
     >
-      <div
-        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-(--surface-sunken) text-(--text-subtle)"
-        aria-hidden
-      >
-        <ImageIcon size={24} />
-      </div>
+      <ItemImage url={item.imageUrl} size="sm" />
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-(--text)">{item.name}</p>

@@ -1,8 +1,16 @@
 "use client";
 
 import { AddItemModal } from "@/components/add-item-modal";
-import { deleteItemAction, removeLinkAction, renameItemAction } from "@/lib/actions";
+import { ItemImage } from "@/components/item-image";
+import {
+  deleteItemAction,
+  presignImageUploadAction,
+  removeLinkAction,
+  renameItemAction,
+  setItemImageAction,
+} from "@/lib/actions";
 import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
+import { uploadItemImage } from "@/lib/item-image";
 import type { ItemDetail } from "@/lib/queries";
 import { type LinkSummary, convert, summarizeItem } from "@/lib/summary";
 import { ActionModal, FloatingCTA, TextInput, cn } from "@jf/ui";
@@ -15,7 +23,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type Props = { item: ItemDetail; rates: Record<string, number>; homeCurrency: string };
@@ -29,6 +37,7 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [removing, setRemoving] = useState<DetailLink | null>(null);
+  const [changingImage, setChangingImage] = useState(false);
 
   const linkSummaries = new Map(summary.links.map((l) => [l.id, l]));
 
@@ -41,7 +50,15 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
         <ArrowLeftIcon size={16} /> Wishlist
       </Link>
 
-      <header className="flex items-center gap-2.5">
+      <header className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setChangingImage(true)}
+          aria-label={item.imageUrl ? "Change image" : "Add an image"}
+          className="rounded-xl transition-opacity hover:opacity-80"
+        >
+          <ItemImage url={item.imageUrl} size="lg" />
+        </button>
         <h1 className="min-w-0 flex-1 break-words text-2xl font-semibold text-(--text)">
           {item.name}
         </h1>
@@ -84,6 +101,16 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
         onClose={() => setAdding(false)}
         onAdded={() => router.refresh()}
         item={{ id: item.id, name: item.name }}
+      />
+      <ImageModal
+        isOpen={changingImage}
+        onClose={() => setChangingImage(false)}
+        currentUrl={item.imageUrl}
+        onSave={async (file) => {
+          const key = file ? await uploadItemImage(file, presignImageUploadAction) : null;
+          await setItemImageAction({ itemId: item.id, key });
+          router.refresh();
+        }}
       />
       <RenameModal
         isOpen={renaming}
@@ -378,6 +405,97 @@ function DeleteItemModal({
             toast.error("Couldn't delete it. Try again.");
           });
         },
+      }}
+      secondaryButton={{ label: "Cancel", onClick: onClose }}
+    />
+  );
+}
+
+/** Replaces the item's image with an uploaded one, or removes it. */
+function ImageModal({
+  isOpen,
+  onClose,
+  currentUrl,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  currentUrl: string | null;
+  /** A file to upload, or null to remove the image. */
+  onSave: (file: File | null) => Promise<void>;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setFile(null);
+  }, [isOpen]);
+  useEffect(() => {
+    if (!file) {
+      setFileUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setFileUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  async function save(next: File | null) {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await onSave(next);
+      onClose();
+    } catch {
+      toast.error("Couldn't save the image. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <ActionModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Image"
+      size="small"
+      content={
+        <div className="flex items-center gap-4">
+          <ItemImage url={fileUrl ?? currentUrl} size="lg" />
+          <div className="flex flex-col items-start gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => input.current?.click()}
+              className="font-medium text-(--text) hover:underline"
+            >
+              {file ? "Pick another…" : "Upload an image…"}
+            </button>
+            {currentUrl && !file && (
+              <button
+                type="button"
+                onClick={() => void save(null)}
+                className="text-(--text-muted) hover:text-(--red-500)"
+              >
+                Remove image
+              </button>
+            )}
+          </div>
+          <input
+            ref={input}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+        </div>
+      }
+      primaryButton={{
+        label: "Save",
+        onClick: () => void save(file),
+        loading: saving,
+        disabled: !file,
       }}
       secondaryButton={{ label: "Cancel", onClick: onClose }}
     />

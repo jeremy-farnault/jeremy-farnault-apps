@@ -41,7 +41,13 @@ function link(latest: SummaryCheck | null, extra: Partial<SummaryLink> = {}): Su
   };
 }
 function item(name: string, links: SummaryLink[], daysAgo = 0): SummaryItem {
-  return { id: name, name, createdAt: new Date(NOW.getTime() - daysAgo * 86_400_000), links };
+  return {
+    id: name,
+    name,
+    imageUrl: null,
+    createdAt: new Date(NOW.getTime() - daysAgo * 86_400_000),
+    links,
+  };
 }
 
 describe("convert", () => {

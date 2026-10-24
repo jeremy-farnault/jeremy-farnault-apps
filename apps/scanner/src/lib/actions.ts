@@ -16,6 +16,7 @@ import {
   storeFor,
 } from "./price-reader";
 import { findTrackedLinks } from "./queries";
+import { copyImage, deleteImage, ownsKey, presignUpload } from "./s3";
 
 async function getUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -137,13 +138,47 @@ type AddInput = {
  * Adds a new item from a previewed link. The page is read again here rather than trusting
  * the preview's numbers from the client, and that reading becomes the first price check.
  */
+/**
+ * The image a new item starts with: the one the shop's page shows, one the user uploaded
+ * (its S3 key), or none. "found" carries no URL: the server takes it from its own reading
+ * of the page, so the browser can't make the server fetch anything else.
+ */
+export type ImageChoice = "found" | "none" | { key: string };
+
 export async function addItemAction(
-  input: AddInput & { name: string }
+  input: AddInput & { name: string; image: ImageChoice }
 ): Promise<{ ok: true; itemId: string } | Rejection> {
   const userId = await getUserId();
   const name = input.name.trim();
   if (!name) return { ok: false, reason: "unreadable", message: "Give the item a name." };
-  return saveLink(userId, input, { name });
+  return saveLink(userId, input, { name, image: input.image });
+}
+
+/** Presigns the browser's upload of an image the user picked. */
+export async function presignImageUploadAction(): Promise<{ key: string; url: string }> {
+  return presignUpload(await getUserId());
+}
+
+/** Replaces an item's image with an uploaded one, or removes it; the old object is deleted. */
+export async function setItemImageAction(input: {
+  itemId: string;
+  key: string | null;
+}): Promise<void> {
+  const userId = await getUserId();
+  if (input.key !== null && !ownsKey(userId, input.key)) throw new Error("Forbidden");
+
+  const [item] = await db
+    .select({ imageKey: scannerItems.imageKey })
+    .from(scannerItems)
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)))
+    .limit(1);
+  if (!item) throw new Error("Item not found");
+
+  await db
+    .update(scannerItems)
+    .set({ imageKey: input.key, updatedAt: new Date() })
+    .where(eq(scannerItems.id, input.itemId));
+  if (item.imageKey && item.imageKey !== input.key) await deleteImage(userId, item.imageKey);
 }
 
 /** Adds a previewed link to one of the user's wishlist items. */
@@ -165,7 +200,7 @@ export async function addLinkToItemAction(
 async function saveLink(
   userId: string,
   input: AddInput,
-  target: { name: string } | { itemId: string }
+  target: { name: string; image: ImageChoice } | { itemId: string }
 ): Promise<{ ok: true; itemId: string } | Rejection> {
   const url = parseLink(input.url);
   if (!url) return rejection("unreadable");
@@ -186,6 +221,17 @@ async function saveLink(
   // its one offer without the link breaking.
   const several = reading.editions.length > 1;
 
+  // Copied before the transaction, so a slow image server doesn't hold it open. A failed
+  // copy just means no image.
+  let imageKey: string | null = null;
+  if ("name" in target) {
+    if (target.image === "found" && reading.imageUrl) {
+      imageKey = await copyImage(userId, reading.imageUrl);
+    } else if (typeof target.image === "object" && ownsKey(userId, target.image.key)) {
+      imageKey = target.image.key;
+    }
+  }
+
   try {
     const itemId = await withTransaction(async (tx) => {
       let itemId: string;
@@ -198,7 +244,7 @@ async function saveLink(
       } else {
         const [item] = await tx
           .insert(scannerItems)
-          .values({ userId, name: target.name })
+          .values({ userId, name: target.name, imageKey })
           .returning({ id: scannerItems.id });
         if (!item) throw new Error("Failed to create item");
         itemId = item.id;
@@ -233,6 +279,7 @@ async function saveLink(
     });
     return { ok: true, itemId };
   } catch (err) {
+    if (imageKey) await deleteImage(userId, imageKey);
     if (isUniqueViolation(err)) {
       const [tracked] = await findTrackedLinks(userId, normalizedUrl, reading.region);
       return {
@@ -256,12 +303,14 @@ export async function renameItemAction(input: { itemId: string; name: string }):
     .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)));
 }
 
-/** Deletes an item, its links and their price history. */
+/** Deletes an item, its links, their price history and its image. */
 export async function deleteItemAction(input: { itemId: string }): Promise<void> {
   const userId = await getUserId();
-  await db
+  const [deleted] = await db
     .delete(scannerItems)
-    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)));
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)))
+    .returning({ imageKey: scannerItems.imageKey });
+  if (deleted?.imageKey) await deleteImage(userId, deleted.imageKey);
 }
 
 /**

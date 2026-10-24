@@ -27,7 +27,13 @@ export type SummaryLink = {
   latest: SummaryCheck | null;
 };
 
-export type SummaryItem = { id: string; name: string; createdAt: Date; links: SummaryLink[] };
+export type SummaryItem = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  createdAt: Date;
+  links: SummaryLink[];
+};
 
 /** A price in the store's currency, and the same amount in the user's home currency. */
 export type DualPrice = {
@@ -49,6 +55,7 @@ export type LinkSummary = SummaryLink & {
 export type ItemSummary = {
   id: string;
   name: string;
+  imageUrl: string | null;
   createdAt: Date;
   links: LinkSummary[];
   /**
@@ -125,7 +132,14 @@ export function summarizeItem(
     : fallback
       ? { ...fallback, unavailable: true }
       : null;
-  return { id: item.id, name: item.name, createdAt: item.createdAt, links, lowest };
+  return {
+    id: item.id,
+    name: item.name,
+    imageUrl: item.imageUrl,
+    createdAt: item.createdAt,
+    links,
+    lowest,
+  };
 }
 
 /** True when a link's last check is older than an hour and opening the page should redo it. */

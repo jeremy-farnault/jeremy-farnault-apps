@@ -1,5 +1,6 @@
 import { db, scannerItems, scannerLinks, scannerPriceChecks } from "@jf/db";
 import { and, asc, desc, eq, inArray, isNull, max, min, sql } from "drizzle-orm";
+import { getPublicImageUrl } from "./s3-url";
 
 export type LinkRow = {
   id: string;
@@ -24,6 +25,8 @@ export type LinkRow = {
 export type ItemRow = {
   id: string;
   name: string;
+  /** Public URL of the item's image, resolved server-side; null shows the placeholder. */
+  imageUrl: string | null;
   createdAt: Date;
   links: LinkRow[];
 };
@@ -31,7 +34,12 @@ export type ItemRow = {
 /** The user's wishlist (not bought), newest first, each with its links and latest prices. */
 export async function getWishlist(userId: string): Promise<ItemRow[]> {
   const items = await db
-    .select({ id: scannerItems.id, name: scannerItems.name, createdAt: scannerItems.createdAt })
+    .select({
+      id: scannerItems.id,
+      name: scannerItems.name,
+      imageKey: scannerItems.imageKey,
+      createdAt: scannerItems.createdAt,
+    })
     .from(scannerItems)
     .where(and(eq(scannerItems.userId, userId), eq(scannerItems.status, "wishlist")))
     .orderBy(desc(scannerItems.createdAt));
@@ -83,8 +91,9 @@ export async function getWishlist(userId: string): Promise<ItemRow[]> {
     : [];
   const latestByLink = new Map(latest.map(({ linkId, ...check }) => [linkId, check]));
 
-  return items.map((item) => ({
+  return items.map(({ imageKey, ...item }) => ({
     ...item,
+    imageUrl: imageKey ? getPublicImageUrl(imageKey) : null,
     links: links
       .filter((l) => l.itemId === item.id)
       .map(({ itemId: _, ...link }) => ({ ...link, latest: latestByLink.get(link.id) ?? null })),
@@ -145,17 +154,20 @@ export type ItemDetail = Omit<ItemRow, "links"> & {
 
 /** One of the user's items with everything its page shows, or null if it isn't theirs. */
 export async function getItem(userId: string, itemId: string): Promise<ItemDetail | null> {
-  const [item] = await db
+  const [found] = await db
     .select({
       id: scannerItems.id,
       name: scannerItems.name,
+      imageKey: scannerItems.imageKey,
       createdAt: scannerItems.createdAt,
       status: scannerItems.status,
     })
     .from(scannerItems)
     .where(and(eq(scannerItems.id, itemId), eq(scannerItems.userId, userId)))
     .limit(1);
-  if (!item) return null;
+  if (!found) return null;
+  const { imageKey, ...rest } = found;
+  const item = { ...rest, imageUrl: imageKey ? getPublicImageUrl(imageKey) : null };
 
   const links = await db
     .select({

@@ -1,18 +1,22 @@
 "use client";
 
 import {
+  type ImageChoice,
   type LinkPreview,
   type Rejection,
   addItemAction,
   addLinkToItemAction,
+  presignImageUploadAction,
   previewLinkAction,
 } from "@/lib/actions";
 import { formatPrice, storeLabel } from "@/lib/format";
+import { uploadItemImage } from "@/lib/item-image";
 import { STEAM_REGIONS } from "@/lib/price-reader/steam";
 import { ActionModal, TextInput } from "@jf/ui";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ImagePicker } from "./image-picker";
 
 type Props = {
   isOpen: boolean;
@@ -39,6 +43,9 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
   const [editionId, setEditionId] = useState<string | null>(null);
   const [error, setError] = useState<Rejection | null>(null);
   const [busy, setBusy] = useState(false);
+  // New items only: keep the shop's image, upload one, or go without.
+  const [imageChoice, setImageChoice] = useState<"found" | "upload" | "none">("none");
+  const [file, setFile] = useState<File | null>(null);
 
   // Reset between openings so an abandoned link doesn't linger.
   useEffect(() => {
@@ -48,6 +55,8 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
       setName("");
       setEditionId(null);
       setError(null);
+      setImageChoice("none");
+      setFile(null);
     }
   }, [isOpen]);
 
@@ -66,7 +75,10 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
         return;
       }
       const { preview } = result;
-      if (region === undefined) setName(preview.name);
+      if (region === undefined) {
+        setName(preview.name);
+        setImageChoice(preview.imageUrl ? "found" : "none");
+      }
       const untracked = preview.editions.filter((e) => !preview.trackedEditionIds.includes(e.id));
       setEditionId(preview.editions.length > 1 ? null : (untracked[0]?.id ?? null));
       setStep({ kind: "preview", preview });
@@ -90,7 +102,7 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
       };
       const result = item
         ? await addLinkToItemAction({ ...link, itemId: item.id })
-        : await addItemAction({ ...link, name });
+        : await addItemAction({ ...link, name, image: await imageForAdd() });
       if (!result.ok) {
         setError(result);
         return;
@@ -103,6 +115,13 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function imageForAdd(): Promise<ImageChoice> {
+    if (imageChoice === "upload" && file) {
+      return { key: await uploadItemImage(file, presignImageUploadAction) };
+    }
+    return imageChoice === "found" ? "found" : "none";
   }
 
   const errorLine = error && (
@@ -169,6 +188,19 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
       content={
         <div className="flex flex-col gap-4">
           {!item && <TextInput value={name} onChange={setName} placeholder="Name" />}
+
+          {!item && (
+            <ImagePicker
+              foundUrl={preview.imageUrl}
+              choice={imageChoice}
+              file={file}
+              onChoice={setImageChoice}
+              onFile={(f) => {
+                setFile(f);
+                setImageChoice(f ? "upload" : preview.imageUrl ? "found" : "none");
+              }}
+            />
+          )}
 
           {preview.store === "steam" && (
             <label className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
@@ -245,7 +277,8 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
         label: item ? "Add link" : "Add to wishlist",
         onClick: () => void add(preview),
         loading: busy,
-        disabled: (!item && !name.trim()) || (several && !editionId),
+        disabled:
+          (!item && !name.trim()) || (several && !editionId) || (imageChoice === "upload" && !file),
       }}
       secondaryButton={{ label: "Back", onClick: () => setStep({ kind: "paste" }) }}
     />
