@@ -46,6 +46,8 @@ export const descriptions: Record<string, string> = {
     "Save the places that matter. Pin spots on the map and keep lists of where you've been and where you want to go.",
   routiner:
     "Build routines that fit you: done or not, amount of time achieved, or time-based. Set up your daily checklist and keep your streaks strong.",
+  scanner:
+    "Track the things you want to buy. Paste a link from any shop, PlayStation Store region or Steam, and see where each item is cheapest right now, converted to your currency.",
   unifier:
     "Keep your people close. Sort the ones who matter into arcs (family, friends, work...) and log a contact in a tap. The orbit puts you at the centre and everyone else at the distance they've drifted, so the person you haven't spoken to in months is impossible to miss.",
 };

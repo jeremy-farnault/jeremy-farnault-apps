@@ -6,6 +6,7 @@ import {
   ApertureIcon,
   AtomIcon,
   BarbellIcon,
+  BarcodeIcon,
   ChecksIcon,
   CoinsIcon,
   KanbanIcon,
@@ -103,6 +104,13 @@ export const apps: AppDefinition[] = [
     icon: ChecksIcon,
     href: process.env.NEXT_PUBLIC_ROUTINER_URL ?? "#",
     accentColor: "--yellow-400",
+  },
+  {
+    id: "scanner",
+    name: "Scanner",
+    icon: BarcodeIcon,
+    href: process.env.NEXT_PUBLIC_SCANNER_URL ?? "#",
+    accentColor: "--magenta-600",
   },
   {
     id: "tracer",

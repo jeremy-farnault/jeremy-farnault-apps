@@ -1,0 +1,29 @@
+"use client";
+
+import { signOut, useSession } from "@jf/auth/client";
+import { getHomeCurrencySetting, setHomeCurrency, setTheme } from "@jf/auth/settings-actions";
+import { UserMenu } from "@jf/ui";
+
+export function UserMenuConnected() {
+  const { data: session } = useSession();
+
+  if (!session?.user?.email) return null;
+
+  async function handleLogout() {
+    await signOut();
+    const authUrl = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:3003";
+    window.location.href = `${authUrl}/login`;
+  }
+
+  return (
+    <UserMenu
+      email={session.user.email}
+      name={session.user.name ?? undefined}
+      {...(session.user.image ? { image: session.user.image } : {})}
+      onLogout={handleLogout}
+      onThemeChange={setTheme}
+      loadHomeCurrency={getHomeCurrencySetting}
+      onHomeCurrencyChange={setHomeCurrency}
+    />
+  );
+}
