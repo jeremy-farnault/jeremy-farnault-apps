@@ -24,6 +24,10 @@ export interface AppDefinition {
   name: string;
   icon: Icon;
   href: string;
+  /**
+   * The app's palette token, e.g. "--magenta-600". Each accent belongs to one app: check the
+   * list below before picking one for a new app.
+   */
   accentColor?: string;
 }
 
