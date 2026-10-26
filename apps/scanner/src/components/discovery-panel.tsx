@@ -219,6 +219,7 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
                 {labelOf(row.target)}
               </p>
               <TargetResult
+                target={row.target}
                 result={row.result}
                 picks={picks}
                 onPick={(url, pick) =>
@@ -245,10 +246,12 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
 }
 
 function TargetResult({
+  target,
   result,
   picks,
   onPick,
 }: {
+  target: StoreRegion;
   result: Row["result"];
   picks: Map<string, Pick>;
   onPick: (url: string, pick: Pick | null) => void;
@@ -262,6 +265,13 @@ function TargetResult({
   }
   if (result.status === "nothing-found") {
     return <p className="text-sm text-(--text-muted)">Nothing found.</p>;
+  }
+  if (result.status === "unavailable") {
+    return (
+      <p className="text-sm text-(--text-muted)">
+        {storeLabel(target.store, "")} search is unavailable right now.
+      </p>
+    );
   }
   if (result.status === "failed") {
     return <p className="text-sm text-(--text-muted)">Couldn't look here right now.</p>;

@@ -21,6 +21,7 @@ export type DiscoveryReply =
       suggestions: SuggestionReply[];
     }
   | { status: "nothing-found" }
+  | { status: "unavailable" }
   | { status: "failed"; detail?: string };
 
 /** Asks the server to look for an item in one store and region. Failed on any error. */

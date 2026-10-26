@@ -1,0 +1,837 @@
+{
+  "data": {
+    "universalSearch": {
+      "__typename": "UniversalSearchResponse",
+      "results": [
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-MHWILDSSTANDARD0",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/c45256b1ce6612d2cd0a3b378b8ef734dc438c49930cc01a.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1002/db76ab694be57a4440a7a783bc8ac9a1eb169ad0188abf5a.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/1c544b6dc3cc8cf567db3313351e860c66e3023189a8c274.png"
+            }
+          ],
+          "name": "モンスターハンターワイルズ",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/c45256b1ce6612d2cd0a3b378b8ef734dc438c49930cc01a.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1002/db76ab694be57a4440a7a783bc8ac9a1eb169ad0188abf5a.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/1c544b6dc3cc8cf567db3313351e860c66e3023189a8c274.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/22b81c7c1b280be4d2586529fc086646fd5d3912c95f74f8.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/cc9d420763276453868b16b2fee542a992905dc3948dc4ab.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/ad5fa6b96324ad533229a4efa620e84b5c9935a35e8ee3f0.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/6eca11bf1cbeda40d7fbff267f42565b2030b6ca10a4f4c2.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/f653040b97ae0e2203bcc6291c2c904f72f08768d01ca125.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/e67705e75851d1423236257076fb113e9b278df1d7ee9235.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/f273cf7c1c38bcbfd334fb3abaaec6eb645f414a027f5d5e.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/a0f54ab37ba91b505c4edb98d42d7852bf92b3f03b0c2a80.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/aff652e15d91796b46e9edc36dd468c24db35bb1b4d45be1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/c1480589e13dccb9ff6892163430802ee0258f8f64c78950.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/9a6f0baddda2f4c96b5b1b009d33f2ce31d1cd599589c684.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/34b372ac3c15e5b922ca506774f1f6d0e2371a1903190333.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/1107/efc2dc682a520974836ac6ec8e39b2f7235f0da4b72f2ded.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202409/0506/aa5c40ba185302dfcc88edc276a876fdc6c516c4db07ec9d.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-MHWILDSSTANDARD0-J002",
+            "basePrice": "¥4,990",
+            "discountText": null,
+            "discountedPrice": "¥4,990",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP9000-PPSA01339_00-DEMONSSOULS00000",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/aQudhGjRwf4yCMUV6HktwmAC.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/lEQQ9AXMadW1BN8kruQbSy8S.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/M8cxD6UPmsU551lmNq9Lat9Y.png"
+            }
+          ],
+          "name": "Demon's Souls",
+          "npTitleId": "PPSA01339_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202011/1610/mqeSuS8DAKTfQAyicEv8kmcD.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202011/1610/vhnHLViAhImDXhJlCxjpOYPX.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/aQudhGjRwf4yCMUV6HktwmAC.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/lEQQ9AXMadW1BN8kruQbSy8S.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/M8cxD6UPmsU551lmNq9Lat9Y.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/brIXKBE5BqYgBSrsDn6Wo18O.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1723/sV2s15HNVNBEM4miKLGtWGtp.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/qHFrrJINxIfsvIyudYAyjfDq.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/OtTU8V9BfVqiy4jp0QhHp8ad.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/NE92EYZjGR8hU8ZcNDgEYEX1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/lK4tpxDNLfOxHly1yE5ceKNt.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/s1gIFpXqw8t18gzshEHkv8r2.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/qZUNNzWOxkdhay3pp6HzRSQ3.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/p3BNVCDOeLpb3bWAptk2Hi2t.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/sYFQ266gczqGyso9d8PjJ1Al.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1717/GemRaOZaCMhGxQ9dRhnQQyT5.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP9000-PPSA01339_00-DEMONSSOULS00000-J002",
+            "basePrice": "¥8,690",
+            "discountText": null,
+            "discountedPrice": "¥8,690",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["PS_PLUS"],
+            "upsellText": "エクストラ"
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP9000-PPSA01339_00-DEMONSSOULSDX000",
+          "localizedStoreDisplayClassification": "プレミアムエディション",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/e6mqsbIe1lxsEj9dke697Zq3.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/EDe0voGHjApiDnkKDJglxjCp.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/Z5BB8A0lIfImFfxGgX0aP1iu.png"
+            }
+          ],
+          "name": "Demon's Souls デジタルデラックスエディション",
+          "npTitleId": "PPSA01339_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202011/1610/mqeSuS8DAKTfQAyicEv8kmcD.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202011/1610/vhnHLViAhImDXhJlCxjpOYPX.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/e6mqsbIe1lxsEj9dke697Zq3.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/EDe0voGHjApiDnkKDJglxjCp.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/Z5BB8A0lIfImFfxGgX0aP1iu.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/HVPzUFmZP5yhs3qipmJUlgsC.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1922/x4RnTWYQkFJTDeaRKr2MaQEK.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/7F8C1RDH0h2wxjObPBXqacsl.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/OtTU8V9BfVqiy4jp0QhHp8ad.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/NE92EYZjGR8hU8ZcNDgEYEX1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/lK4tpxDNLfOxHly1yE5ceKNt.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/s1gIFpXqw8t18gzshEHkv8r2.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/qZUNNzWOxkdhay3pp6HzRSQ3.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/p3BNVCDOeLpb3bWAptk2Hi2t.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/0821/sYFQ266gczqGyso9d8PjJ1Al.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202011/1716/jVmaOY3kk482pAVusLKfIgLy.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP9000-PPSA01339_00-DEMONSSOULSDX000-J002",
+            "basePrice": "¥10,890",
+            "discountText": null,
+            "discountedPrice": "¥10,890",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "PREMIUM_EDITION"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-ITEMPACK00000015",
+          "localizedStoreDisplayClassification": "アイテム",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/a4dcaca863815a12c7c4f8a6ac89392db4de402758747cb8.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/4e3cfccaad7736377fd903868ef91d5d21cf1e32a376cf01.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "MASTER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/beddf63df4b0334a4fa9754c27a13e6f9128be080caa827d.png"
+            }
+          ],
+          "name": "モンスターハンターワイルズ - 【狩猟応援ギフト】ハンター歓迎パック",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/a4dcaca863815a12c7c4f8a6ac89392db4de402758747cb8.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/4e3cfccaad7736377fd903868ef91d5d21cf1e32a376cf01.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202502/1006/beddf63df4b0334a4fa9754c27a13e6f9128be080caa827d.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-ITEMPACK00000015-J001",
+            "basePrice": "無料",
+            "discountText": null,
+            "discountedPrice": "無料",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": true,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "ITEM"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-LAYER0PL00000008",
+          "localizedStoreDisplayClassification": "コスチューム",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0805/52235e5f681e03e3dd6b9f13999ef5a1b317ac177cc308f6.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2003/5372d3c041157a638c9475624ad70df97b394e561ae15abb.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2003/d14b4e01fc77d8975083d78f219286ed3f17bbb12ed7b8a5.jpg"
+            }
+          ],
+          "name": "モンスターハンターワイルズ - 追加ハンター重ね着装備「ブレイクキャット」シリーズ",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0805/52235e5f681e03e3dd6b9f13999ef5a1b317ac177cc308f6.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2003/5372d3c041157a638c9475624ad70df97b394e561ae15abb.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2003/d14b4e01fc77d8975083d78f219286ed3f17bbb12ed7b8a5.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0805/085530aa5bed591fa13c948d81cb166c353677bbaf69855b.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-LAYER0PL00000008-J002",
+            "basePrice": "¥800",
+            "discountText": null,
+            "discountedPrice": "¥800",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            },
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "COSTUME"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-HAIR000000000010",
+          "localizedStoreDisplayClassification": "コスチューム",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/2171784d064461420071b984db8d05f8959af94e4c302c52.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/b45502c7594369943f0dceff2cab8afa7119712e4cc9cc02.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SIXTEEN_BY_NINE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/c7199eb6c32331e2ecaf6b27237b83d2d130ee7b482c43ba.jpg"
+            }
+          ],
+          "name": "モンスターハンターワイルズ - 追加髪型「加工屋ヴェルナー」",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/2171784d064461420071b984db8d05f8959af94e4c302c52.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/b45502c7594369943f0dceff2cab8afa7119712e4cc9cc02.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/c7199eb6c32331e2ecaf6b27237b83d2d130ee7b482c43ba.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202510/3006/e6b7a0db3df4f376f6bb6925185936e2aa8bf481e25dd0be.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-HAIR000000000010-J001",
+            "basePrice": "¥200",
+            "discountText": null,
+            "discountedPrice": "¥200",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "COSTUME"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-MHWILDSDXPACK000",
+          "localizedStoreDisplayClassification": "追加コンテンツパック",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202501/0905/ede63529c95b0442f1069069b6651e949e67e2d78ed52501.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "MASTER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202501/0905/3a00108758c630acaffa2918f647158f8721653e2b43737b.png"
+            }
+          ],
+          "name": "モンスターハンターワイルズ デラックスパック",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202501/0905/ede63529c95b0442f1069069b6651e949e67e2d78ed52501.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202501/0905/3a00108758c630acaffa2918f647158f8721653e2b43737b.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-MHWILDSDXPACK000-J002",
+            "basePrice": "¥2,500",
+            "discountText": null,
+            "discountedPrice": "¥2,500",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "ADD_ON_PACK"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP0102-PPSA07862_00-HAIR000000000006",
+          "localizedStoreDisplayClassification": "コスチューム",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0806/5c556019937b73430a905c7a48189c2dc387ac1cbc0e7fb7.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2004/25379e2f4d595b442ddc7b50c2d8c9f979e16231024bb00d.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "MASTER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0806/5ae062dddafebfd7bd0975c61caf1f80e64273dc4919a1eb.png"
+            }
+          ],
+          "name": "モンスターハンターワイルズ - 追加髪型「編纂者アルマ」",
+          "npTitleId": "PPSA07862_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0806/5c556019937b73430a905c7a48189c2dc387ac1cbc0e7fb7.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2004/25379e2f4d595b442ddc7b50c2d8c9f979e16231024bb00d.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/0806/5ae062dddafebfd7bd0975c61caf1f80e64273dc4919a1eb.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP0102-PPSA07862_00-HAIR000000000006-J001",
+            "basePrice": "¥200",
+            "discountText": null,
+            "discountedPrice": "¥200",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "COSTUME"
+        }
+      ]
+    }
+  }
+}

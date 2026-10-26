@@ -2,7 +2,14 @@ import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@jf/db";
 
 import { readGenericPage } from "./generic";
 import { nameMatchKey } from "./match-key";
-import { parsePsLink, psMatchKey, readPsStorePage } from "./ps-store";
+import {
+  parsePsLink,
+  psLocale,
+  psMatchKey,
+  psSearchRequest,
+  readPsSearch,
+  readPsStorePage,
+} from "./ps-store";
 import {
   isSteamRegion,
   parseSteamAppId,
@@ -91,9 +98,12 @@ export async function readPrice(input: string, options: ReadOptions = {}): Promi
 }
 
 /** The stores that can look a product up by name. Web shops can't: there's no common search. */
-export const SEARCHABLE_STORES: readonly Store[] = ["steam"];
+export const SEARCHABLE_STORES: readonly Store[] = ["ps-store", "steam"];
 
-export type SearchResult = { ok: true; hits: SearchHit[] } | { ok: false; detail?: string };
+/** `unavailable`: the store refuses searches for now (the PS Store's query hash went stale). */
+export type SearchResult =
+  | { ok: true; hits: SearchHit[] }
+  | { ok: false; unavailable?: boolean; detail?: string };
 
 /**
  * Searches one store's storefront for a name. The hits are only links and names: reading
@@ -110,6 +120,24 @@ export async function searchStore(
     const res = await fetchPage(new URL(steamSearchUrl(term, region)), fetchFn);
     if (!res.ok) return { ok: false, detail: res.detail ?? res.reason };
     return { ok: true, hits: readSteamSearch(res.html) };
+  }
+  if (store === "ps-store") {
+    const locale = psLocale(region);
+    if (!locale) return { ok: false, detail: `No PS Store for ${region}` };
+    const request = psSearchRequest(term, locale);
+    let body: string;
+    try {
+      // Fetched directly: a refused query is an HTTP 400 whose body says why.
+      const res = await fetchFn(request.url, {
+        headers: { "User-Agent": USER_AGENT, ...request.headers },
+        cache: "no-store",
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      body = await res.text();
+    } catch (err) {
+      return { ok: false, detail: err instanceof Error ? err.message : String(err) };
+    }
+    return readPsSearch(body, locale);
   }
   return { ok: false, detail: `${store} can't search` };
 }

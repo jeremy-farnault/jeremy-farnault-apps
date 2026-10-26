@@ -1,5 +1,5 @@
 import { discountPercent } from "./money";
-import type { PageEdition, PageReading } from "./types";
+import type { PageEdition, PageReading, SearchHit } from "./types";
 
 // Reads the PS Store's server-rendered pages. The store embeds its Apollo cache in JSON
 // scripts (`env:*` ones, and `__NEXT_DATA__`'s apolloState): Product, Concept, Sku and
@@ -34,6 +34,75 @@ export function psConceptUrl(locale: string, conceptId: string): string {
 
 export function psProductUrl(locale: string, productId: string): string {
   return `https://store.playstation.com/${locale}/product/${encodeURIComponent(productId)}`;
+}
+
+// The store's own search query, which its API only accepts by hash (an allowlisted
+// persisted query). The hash changes when Sony redeploys the store's front end; search then
+// answers "not whitelisted" and shows as unavailable. To update it: open a search on
+// store.playstation.com with the browser's network tab, find the `getSearchResults` request
+// to web.np.playstation.com, and copy `sha256Hash` from its `extensions` parameter.
+const PS_SEARCH_HASH = "4df6284f982e57bec70f23c77e2c219dc792eb19af7fb3d3a81767aa3f1958aa";
+
+/** The search request for a locale ("sv-se"): its URL and the headers the API insists on. */
+export function psSearchRequest(
+  term: string,
+  locale: string
+): { url: string; headers: Record<string, string> } {
+  const [language = "", country = ""] = locale.split("-");
+  const params = new URLSearchParams({
+    operationName: "getSearchResults",
+    variables: JSON.stringify({
+      countryCode: country.toUpperCase(),
+      languageCode: language,
+      nextCursor: "",
+      pageOffset: 0,
+      pageSize: 24,
+      searchTerm: term,
+    }),
+    extensions: JSON.stringify({ persistedQuery: { version: 1, sha256Hash: PS_SEARCH_HASH } }),
+  });
+  return {
+    url: `https://web.np.playstation.com/api/graphql/v1/op?${params}`,
+    headers: {
+      // Without it the API refuses the request as a possible CSRF.
+      "content-type": "application/json",
+      "x-psn-store-locale-override": `${language}-${country.toUpperCase()}`,
+    },
+  };
+}
+
+export type PsSearchResult =
+  | { ok: true; hits: SearchHit[] }
+  | { ok: false; unavailable: boolean; detail: string };
+
+/**
+ * The products a search found, in the store's order, as product links for the locale. Its
+ * concept results are left out: they carry no kind or price and are mostly noise. A refused
+ * query (stale hash, or a request the API treats as CSRF) is `unavailable`.
+ */
+export function readPsSearch(body: string, locale: string): PsSearchResult {
+  if (/not whitelisted|PersistedQueryNotFound|Cross-Site Request Forgery/i.test(body)) {
+    return { ok: false, unavailable: true, detail: body.slice(0, 200) };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return { ok: false, unavailable: false, detail: "Not JSON" };
+  }
+  const data = isObject(parsed) && isObject(parsed.data) ? parsed.data : null;
+  const search = data && isObject(data.universalSearch) ? data.universalSearch : null;
+  if (!search || !Array.isArray(search.results)) {
+    return { ok: false, unavailable: false, detail: body.slice(0, 200) };
+  }
+  const hits = search.results.filter(isObject).flatMap((r) => {
+    const id = stringOf(r.id);
+    const name = stringOf(r.name);
+    if (r.__typename !== "Product" || !id || !name) return [];
+    const kind = stringOf(r.storeDisplayClassification);
+    return [{ url: psProductUrl(locale, id), name, ...(kind && { kind }) }];
+  });
+  return { ok: true, hits };
 }
 
 export type PsLink = { kind: "product" | "concept"; id: string; locale: string; region: string };

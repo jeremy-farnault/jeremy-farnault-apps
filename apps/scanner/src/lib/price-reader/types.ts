@@ -45,8 +45,11 @@ export type Reading = {
   edition: Edition | null;
 };
 
-/** A product a store search found: its link, to read like a pasted one, and its name. */
-export type SearchHit = { url: string; name: string };
+/**
+ * A product a store search found: its link, to read like a pasted one, and its name. Its
+ * kind when the search says, so add-ons can be skipped before reading them.
+ */
+export type SearchHit = { url: string; name: string; kind?: string };
 
 export type RejectionReason = "unreadable" | "unsupported-currency" | "blocked" | "not-found";
 

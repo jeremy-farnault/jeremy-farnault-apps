@@ -64,8 +64,25 @@ describe("live store check", () => {
   }
 });
 
+// A PS search that comes back "unavailable" means the store's query hash went stale: see
+// PS_SEARCH_HASH in ps-store.ts for how to update it.
 const SEARCHES: { label: string; term: string; target: DiscoveryTarget }[] = [
   { label: "Steam SE search", term: "Mortal Shell", target: { store: "steam", region: "SE" } },
+  {
+    label: "PS Store SE search",
+    term: "Mortal Shell",
+    target: { store: "ps-store", region: "SE" },
+  },
+  {
+    label: "PS Store NZ search",
+    term: "Horizon Forbidden West",
+    target: { store: "ps-store", region: "NZ" },
+  },
+  {
+    label: "PS Store JP search",
+    term: "Monster Hunter Wilds",
+    target: { store: "ps-store", region: "JP" },
+  },
 ];
 
 describe.skipIf(process.env.LIVE_URL)("live store search", () => {
