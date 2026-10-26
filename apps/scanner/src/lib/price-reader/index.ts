@@ -3,11 +3,18 @@ import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@jf/db";
 import { readGenericPage } from "./generic";
 import { nameMatchKey } from "./match-key";
 import { parsePsLink, psMatchKey, readPsStorePage } from "./ps-store";
-import { isSteamRegion, parseSteamAppId, readSteamApi, steamApiUrl } from "./steam";
-import type { Edition, PageReading, ReadResult, Store } from "./types";
+import {
+  isSteamRegion,
+  parseSteamAppId,
+  readSteamApi,
+  readSteamSearch,
+  steamApiUrl,
+  steamSearchUrl,
+} from "./steam";
+import type { Edition, PageReading, ReadResult, SearchHit, Store } from "./types";
 import { parseLink, storeFor } from "./url";
 
-export type { Edition, ReadResult, Reading, RejectionReason, Store } from "./types";
+export type { Edition, ReadResult, Reading, RejectionReason, SearchHit, Store } from "./types";
 export { normalizeUrl, parseLink, storeFor } from "./url";
 export { STEAM_REGIONS, defaultSteamRegion } from "./steam";
 
@@ -81,6 +88,30 @@ export async function readPrice(input: string, options: ReadOptions = {}): Promi
   if (!page.ok) return page;
 
   return finish(readGenericPage(page.html, page.url), { store, region: null, editionId });
+}
+
+/** The stores that can look a product up by name. Web shops can't: there's no common search. */
+export const SEARCHABLE_STORES: readonly Store[] = ["steam"];
+
+export type SearchResult = { ok: true; hits: SearchHit[] } | { ok: false; detail?: string };
+
+/**
+ * Searches one store's storefront for a name. The hits are only links and names: reading
+ * each one, as a pasted link is read, gives its prices, editions and kind.
+ */
+export async function searchStore(
+  store: Store,
+  term: string,
+  region: string,
+  options: { fetch?: typeof fetch } = {}
+): Promise<SearchResult> {
+  const fetchFn = options.fetch ?? fetch;
+  if (store === "steam") {
+    const res = await fetchPage(new URL(steamSearchUrl(term, region)), fetchFn);
+    if (!res.ok) return { ok: false, detail: res.detail ?? res.reason };
+    return { ok: true, hits: readSteamSearch(res.html) };
+  }
+  return { ok: false, detail: `${store} can't search` };
 }
 
 type Fetched =

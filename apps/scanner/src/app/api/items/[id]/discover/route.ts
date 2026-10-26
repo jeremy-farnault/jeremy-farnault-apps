@@ -1,16 +1,17 @@
 import { type DiscoverySource, type DiscoveryTarget, discover } from "@/lib/discovery";
 import type { DiscoveryReply } from "@/lib/discovery-client";
 import { toPreviewEdition } from "@/lib/preview-edition";
+import { getTrackedUrls } from "@/lib/queries";
 import { saveLink } from "@/lib/save-link";
 import { auth } from "@jf/auth";
 import { db, scannerItems } from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// A store page plus, on a certain match, the add's own read of the product page.
-export const maxDuration = 45;
+// A search and a few product reads, or a concept page plus the add's own read.
+export const maxDuration = 60;
 
-type Body = { target: DiscoveryTarget; source: DiscoverySource | null };
+type Body = { target: DiscoveryTarget; source: DiscoverySource | null; term: string };
 
 // Looks for one wishlist item in one store and region, and adds a certain match straight
 // away. A route handler rather than a server action so the panel can run every target at
@@ -34,8 +35,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .limit(1);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const { target, source } = (await request.json()) as Body;
-  const found = await discover(source, target);
+  const { target, source, term } = (await request.json()) as Body;
+  const tracked = await getTrackedUrls(userId, target.store, target.region);
+  const found = await discover({ source, term: String(term ?? ""), target, tracked });
   if (found.status !== "found") return NextResponse.json(found satisfies DiscoveryReply);
 
   let added: Extract<DiscoveryReply, { status: "found" }>["added"] = null;

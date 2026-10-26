@@ -26,7 +26,7 @@ export type DiscoveryReply =
 /** Asks the server to look for an item in one store and region. Failed on any error. */
 export async function requestDiscovery(
   itemId: string,
-  body: { target: { store: string; region: string }; source: unknown }
+  body: { target: { store: string; region: string }; source: unknown; term: string }
 ): Promise<DiscoveryReply> {
   try {
     const res = await fetch(`/api/items/${encodeURIComponent(itemId)}/discover`, {

@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions";
 import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
 import { uploadItemImage } from "@/lib/item-image";
+import { SEARCHABLE_STORES, STEAM_REGIONS, type Store } from "@/lib/price-reader";
 import { minorDigits, toMinorUnits } from "@/lib/price-reader/money";
 import { PS_REGIONS } from "@/lib/price-reader/ps-store";
 import type { ItemDetail } from "@/lib/queries";
@@ -72,17 +73,26 @@ export function ItemDetailClient({ item, rates, homeCurrency, userStores, discov
   }, []);
 
   // Other PS regions are found through the item's PS link, so only an item with one can
-  // look in them. Other stores join once they can search.
+  // look in them; stores that search by name can always be looked in.
   const hasPsLink = item.links.some((l) => l.store === "ps-store");
-  const canFind = (store: string) => store === "ps-store" && hasPsLink;
+  const canFind = (store: string) =>
+    (store === "ps-store" && hasPsLink) || SEARCHABLE_STORES.includes(store as Store);
   const offered = offeredStores(userStores, item.links, canFind);
-  const others = hasPsLink
-    ? PS_REGIONS.filter(
-        (r) =>
-          !item.links.some((l) => l.store === "ps-store" && l.region === r.region) &&
-          !offered.some((o) => o.store === "ps-store" && o.region === r.region)
-      ).map((r) => ({ store: "ps-store", region: r.region, label: `PS Store · ${r.label}` }))
-    : [];
+  const free = (store: string, region: string) =>
+    !item.links.some((l) => l.store === store && l.region === region) &&
+    !offered.some((o) => o.store === store && o.region === region);
+  const others = [
+    ...(canFind("ps-store") ? PS_REGIONS : []).map((r) => ({
+      store: "ps-store",
+      region: r.region,
+      label: `PS Store · ${r.label}`,
+    })),
+    ...(canFind("steam") ? STEAM_REGIONS : []).map((r) => ({
+      store: "steam",
+      region: r.region,
+      label: `Steam · ${r.label}`,
+    })),
+  ].filter((o) => free(o.store, o.region));
 
   const linkSummaries = new Map(summary.links.map((l) => [l.id, l]));
 

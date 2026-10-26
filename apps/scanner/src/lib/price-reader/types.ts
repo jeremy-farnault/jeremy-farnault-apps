@@ -20,7 +20,10 @@ export type Edition = {
   saleEndsAt: Date | null;
   /** PS Store only: the platforms it runs on ("PS4", "PS5"). */
   platforms?: string[];
-  /** PS Store only: the store's classification ("FULL_GAME", "PREMIUM_EDITION", "LEVEL"…). */
+  /**
+   * What the store says it is: on the PS Store "FULL_GAME", "PREMIUM_EDITION", "LEVEL"…, on
+   * Steam the app's type ("game", "dlc", "demo"). Web shops don't say.
+   */
   kind?: string;
 };
 
@@ -41,6 +44,9 @@ export type Reading = {
    */
   edition: Edition | null;
 };
+
+/** A product a store search found: its link, to read like a pasted one, and its name. */
+export type SearchHit = { url: string; name: string };
 
 export type RejectionReason = "unreadable" | "unsupported-currency" | "blocked" | "not-found";
 

@@ -1,0 +1,43 @@
+{
+  "1672210": {
+    "success": true,
+    "data": {
+      "type": "dlc",
+      "name": "Mortal Shell: The Virtuous Cycle",
+      "steam_appid": 1672210,
+      "is_free": false,
+      "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672210/2060c84b8b9c1ab932880c0d6a5e747060183f70/header.jpg?t=1785160812",
+      "price_overview": {
+        "currency": "EUR",
+        "initial": 399,
+        "final": 399,
+        "discount_percent": 0,
+        "initial_formatted": "",
+        "final_formatted": "3,99€"
+      },
+      "package_groups": [
+        {
+          "name": "default",
+          "title": "Buy Mortal Shell: The Virtuous Cycle",
+          "description": "",
+          "selection_text": "Select a purchase option",
+          "save_text": "",
+          "display_type": 0,
+          "is_recurring_subscription": "false",
+          "subs": [
+            {
+              "packageid": 594518,
+              "percent_savings_text": " ",
+              "percent_savings": 0,
+              "option_text": "Mortal Shell: The Virtuous Cycle - 3,99€",
+              "option_description": "",
+              "can_get_free_license": "0",
+              "is_free_license": false,
+              "price_in_cents_with_discount": 399
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { discountPercent, minorDigits, toMinorUnits } from "./money";
-import type { PageEdition, PageReading } from "./types";
+import type { PageEdition, PageReading, SearchHit } from "./types";
 
 // Reads Steam's public appdetails endpoint, which prices an app for a country code. A
 // Steam link carries no region, so the region is chosen when the link is added.
@@ -46,6 +46,32 @@ export function steamApiUrl(appId: string, region: string): string {
   return `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${region.toLowerCase()}&l=english`;
 }
 
+/** Steam's store search for one storefront. It matches the name stored on Steam, in English. */
+export function steamSearchUrl(term: string, region: string): string {
+  const params = new URLSearchParams({ term, cc: region.toLowerCase(), l: "english" });
+  return `https://store.steampowered.com/api/storesearch/?${params}`;
+}
+
+/**
+ * The apps a store search found, in Steam's order. Everything is an "app" here, games and
+ * DLC alike: only an app's own details say which it is.
+ */
+export function readSteamSearch(body: string): SearchHit[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return [];
+  }
+  const items =
+    isObject(parsed) && Array.isArray(parsed.items) ? parsed.items.filter(isObject) : [];
+  return items.flatMap((item) =>
+    typeof item.id === "number" && typeof item.name === "string"
+      ? [{ url: `https://store.steampowered.com/app/${item.id}/`, name: item.name }]
+      : []
+  );
+}
+
 export type SteamPage = PageReading & { found: boolean; free: boolean };
 
 export function readSteamApi(body: string, appId: string): SteamPage {
@@ -75,7 +101,15 @@ export function readSteamApi(body: string, appId: string): SteamPage {
     const edition = overview && editionFromOverview(overview, currency, name ?? appId);
     if (edition) editions.push(edition);
   }
-  return { name, imageUrl, editions, found: true, free: false };
+  // "game", "dlc", "demo"…: what tells a game from its add-ons when searching.
+  const kind = typeof data.type === "string" ? data.type : null;
+  return {
+    name,
+    imageUrl,
+    editions: kind ? editions.map((e) => ({ ...e, kind })) : editions,
+    found: true,
+    free: false,
+  };
 }
 
 /** One edition per paid package in the "default" group; subscriptions live elsewhere. */

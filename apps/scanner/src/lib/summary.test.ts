@@ -4,9 +4,11 @@ import {
   type SummaryItem,
   type SummaryLink,
   convert,
+  needsEnglishName,
   needsRecheck,
   offeredStores,
   parseSort,
+  searchTermFor,
   sortItems,
   suggestItem,
   summarizeItem,
@@ -258,5 +260,23 @@ describe("offeredStores", () => {
         (s) => `${s.store} ${s.region}`
       )
     ).toEqual(["ps-store SE", "ps-store JP", "ps-store NZ"]);
+  });
+});
+
+describe("searchTermFor", () => {
+  it("keeps a name with Latin letters, and swaps one without for its English name", () => {
+    expect(searchTermFor("Mortal Shell", "Mortal Shell")).toBe("Mortal Shell");
+    expect(searchTermFor("ホライゾン フォビドゥン ウェスト", "Horizon Forbidden West")).toBe(
+      "Horizon Forbidden West"
+    );
+    expect(searchTermFor("Horizon Forbidden West™ 完全版", "Horizon")).toBe(
+      "Horizon Forbidden West™ 完全版"
+    );
+    expect(searchTermFor("モンスターハンターワイルズ", null)).toBe("モンスターハンターワイルズ");
+  });
+
+  it("asks for an English name only when the name has no Latin letters", () => {
+    expect(needsEnglishName("ホライゾン フォビドゥン ウェスト")).toBe(true);
+    expect(needsEnglishName("Horizon Forbidden West™ 完全版")).toBe(false);
   });
 });

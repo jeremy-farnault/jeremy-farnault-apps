@@ -1,0 +1,43 @@
+{
+  "1110910": {
+    "success": true,
+    "data": {
+      "type": "game",
+      "name": "Mortal Shell",
+      "steam_appid": 1110910,
+      "is_free": false,
+      "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1110910/2695c5fe40198e5ada83472e0250f3e6b7e5726e/header.jpg?t=1785160664",
+      "price_overview": {
+        "currency": "EUR",
+        "initial": 2499,
+        "final": 2499,
+        "discount_percent": 0,
+        "initial_formatted": "",
+        "final_formatted": "24,99€"
+      },
+      "package_groups": [
+        {
+          "name": "default",
+          "title": "Buy Mortal Shell",
+          "description": "",
+          "selection_text": "Select a purchase option",
+          "save_text": "",
+          "display_type": 0,
+          "is_recurring_subscription": "false",
+          "subs": [
+            {
+              "packageid": 614771,
+              "percent_savings_text": " ",
+              "percent_savings": 0,
+              "option_text": "Mortal Shell - 24,99€",
+              "option_description": "",
+              "can_get_free_license": "0",
+              "is_free_license": false,
+              "price_in_cents_with_discount": 2499
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

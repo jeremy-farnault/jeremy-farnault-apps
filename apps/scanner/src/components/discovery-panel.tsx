@@ -15,7 +15,7 @@ import {
   MagnifyingGlassIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ItemImage } from "./item-image";
 
@@ -55,6 +55,23 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
 
+  // Got ready as the panel opens, so a search starts straight away and the box can offer
+  // the item's English name, unless the user already typed something.
+  const prepared = useRef<ReturnType<typeof prepareDiscoveryAction> | null>(null);
+  const edited = useRef(false);
+  useEffect(() => {
+    const ready = prepareDiscoveryAction({ itemId: item.id });
+    prepared.current = ready;
+    ready.then(
+      ({ term }) => {
+        if (!edited.current) setTerm(term);
+      },
+      () => {
+        prepared.current = null;
+      }
+    );
+  }, [item.id]);
+
   // A store added from "+ another" starts ticked.
   useEffect(() => {
     setTicked((prev) => new Set([...prev, ...extra.map(keyOf)]));
@@ -67,10 +84,10 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
     setPicks(new Map());
     setRows(new Map(chosen.map((t) => [keyOf(t), { target: t, result: "searching" as const }])));
     try {
-      const source = await prepareDiscoveryAction({ itemId: item.id });
+      const { source } = await (prepared.current ?? prepareDiscoveryAction({ itemId: item.id }));
       const replies = await Promise.all(
         chosen.map(async (target) => {
-          const result = await requestDiscovery(item.id, { target, source });
+          const result = await requestDiscovery(item.id, { target, source, term });
           setRows((prev) => new Map(prev).set(keyOf(target), { target, result }));
           return result;
         })
@@ -129,7 +146,14 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
         </button>
       </div>
 
-      <TextInput value={term} onChange={setTerm} placeholder="Search for" />
+      <TextInput
+        value={term}
+        onChange={(value) => {
+          edited.current = true;
+          setTerm(value);
+        }}
+        placeholder="Search for"
+      />
 
       {targets.length === 0 ? (
         <p className="text-sm text-(--text-muted)">

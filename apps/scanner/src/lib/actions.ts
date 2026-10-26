@@ -17,6 +17,7 @@ import {
   storeFor,
 } from "./price-reader";
 import { nameMatchKey } from "./price-reader/match-key";
+import { psConceptUrl } from "./price-reader/ps-store";
 import { findTrackedLinks, getPsLink, getWishlistMatchKeys } from "./queries";
 import { deleteImage, ownsKey, presignUpload } from "./s3";
 import {
@@ -27,7 +28,7 @@ import {
   rejection,
   saveLink,
 } from "./save-link";
-import { suggestItem } from "./summary";
+import { needsEnglishName, searchTermFor, suggestItem } from "./summary";
 
 export type { ImageChoice, Rejection } from "./save-link";
 
@@ -170,27 +171,45 @@ export async function addLinkToItemAction(
 }
 
 /**
- * What a search in other stores follows: the concept of the item's PS link, and the
- * platforms and kind of the edition it tracks. Read from the store again rather than saved,
- * so links that haven't learned their concept yet work too. Null when the item has no PS
- * link, or its page can't be read right now.
+ * Gets a search in other stores ready: what PS regions follow (the concept of the item's PS
+ * link, and the platforms and kind of the edition it tracks) and the term to search other
+ * stores for. The PS link is read from the store again rather than saved, so links that
+ * haven't learned their concept yet work too; no source when the item has no PS link, or
+ * its page can't be read right now.
  */
 export async function prepareDiscoveryAction(input: {
   itemId: string;
-}): Promise<DiscoverySource | null> {
+}): Promise<{ source: DiscoverySource | null; term: string }> {
   const userId = await getUserId();
+  const [item] = await db
+    .select({ name: scannerItems.name })
+    .from(scannerItems)
+    .where(and(eq(scannerItems.id, input.itemId), eq(scannerItems.userId, userId)))
+    .limit(1);
+  if (!item) throw new Error("Item not found");
+
   const link = await getPsLink(userId, input.itemId);
-  if (!link) return null;
-  const result = await readPrice(link.url, { region: link.region, editionId: link.editionId });
-  if (!result.ok) return null;
-  const { reading } = result;
-  const edition = reading.edition;
-  if (!reading.conceptId || !edition) return null;
-  return {
-    conceptId: reading.conceptId,
-    platforms: edition.platforms ?? [],
-    kind: edition.kind ?? null,
-  };
+  const result = link
+    ? await readPrice(link.url, { region: link.region, editionId: link.editionId })
+    : null;
+  const reading = result?.ok ? result.reading : null;
+  const edition = reading?.edition;
+  const source =
+    reading?.conceptId && edition
+      ? {
+          conceptId: reading.conceptId,
+          platforms: edition.platforms ?? [],
+          kind: edition.kind ?? null,
+        }
+      : null;
+
+  // A name in another script: the concept's name in the US store is its English one.
+  let englishName: string | null = null;
+  if (source && needsEnglishName(item.name)) {
+    const english = await readPrice(psConceptUrl("en-us", source.conceptId));
+    englishName = english.ok ? english.reading.name : null;
+  }
+  return { source, term: searchTermFor(item.name, englishName) };
 }
 
 export async function renameItemAction(input: { itemId: string; name: string }): Promise<void> {

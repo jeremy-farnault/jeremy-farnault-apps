@@ -1,4 +1,12 @@
-import { type Edition, type Store, readPrice } from "./price-reader";
+import {
+  type Edition,
+  type SearchHit,
+  type Store,
+  normalizeUrl,
+  readPrice,
+  searchStore,
+} from "./price-reader";
+import { nameMatchKey } from "./price-reader/match-key";
 import { psConceptUrl, psLocale, psProductUrl } from "./price-reader/ps-store";
 
 // Finds an item in another store or region. One call per target, so the panel can show
@@ -8,6 +16,10 @@ import { psConceptUrl, psLocale, psProductUrl } from "./price-reader/ps-store";
 // A PS target follows the item's concept, which every region shares: the edition with the
 // same platforms and kind as the tracked one is certain enough to add without asking.
 // Anything less certain comes back as a suggestion for the user to tick.
+//
+// Other stores are searched by name. A search only gives links and names, so the best few
+// are read like pasted links: that gives their real prices and editions, and their kind,
+// which is how DLC, demos and add-ons are left out.
 
 /** What the item is tracked as on the PS Store: its concept and the tracked edition. */
 export type DiscoverySource = {
@@ -36,12 +48,36 @@ export type Discovery =
   | { status: "nothing-found" }
   | { status: "failed"; detail?: string };
 
+/** How many suggestions one store and region gives at most. */
+export const MAX_SUGGESTIONS = 3;
+/** How many search hits are read to find them, as some turn out to be DLC or unpriced. */
+const MAX_READS = 6;
+
+/** The kinds that are the thing itself, as opposed to DLC, demos, add-ons or soundtracks. */
+const GAME_KINDS = new Set(["game", "FULL_GAME", "PREMIUM_EDITION", "GAME_BUNDLE"]);
+
+export type DiscoveryInput = {
+  source: DiscoverySource | null;
+  /** What to search for, in stores that search by name. */
+  term: string;
+  target: DiscoveryTarget;
+  /** Links the user already tracks (any item), left out of the suggestions. */
+  tracked: string[];
+};
+
 export async function discover(
-  source: DiscoverySource | null,
-  target: DiscoveryTarget,
+  { source, term, target, tracked }: DiscoveryInput,
   options: { fetch?: typeof fetch } = {}
 ): Promise<Discovery> {
-  if (target.store !== "ps-store") return { status: "failed", detail: "Store can't search" };
+  if (target.store === "ps-store") return followConcept(source, target, options);
+  return searchByName(term, target, tracked, options);
+}
+
+async function followConcept(
+  source: DiscoverySource | null,
+  target: DiscoveryTarget,
+  options: { fetch?: typeof fetch }
+): Promise<Discovery> {
   if (!source) return { status: "failed", detail: "No PS Store link to follow" };
   const locale = psLocale(target.region);
   if (!locale) return { status: "failed", detail: `No PS Store for ${target.region}` };
@@ -73,6 +109,59 @@ export async function discover(
       },
     ],
   };
+}
+
+async function searchByName(
+  term: string,
+  target: DiscoveryTarget,
+  tracked: string[],
+  options: { fetch?: typeof fetch }
+): Promise<Discovery> {
+  if (!term.trim()) return { status: "nothing-found" };
+  const search = await searchStore(target.store, term.trim(), target.region, options);
+  if (!search.ok) return { status: "failed", ...(search.detail && { detail: search.detail }) };
+
+  const trackedUrls = new Set(tracked.map((url) => normalizeUrl(new URL(url))));
+  const hits = rankByName(search.hits, term).filter(
+    (hit) => !trackedUrls.has(normalizeUrl(new URL(hit.url)))
+  );
+
+  const suggestions: Candidate[] = [];
+  for (const hit of hits.slice(0, MAX_READS)) {
+    if (suggestions.length === MAX_SUGGESTIONS) break;
+    const result = await readPrice(hit.url, { region: target.region, ...options });
+    if (!result.ok) continue;
+    const { reading } = result;
+    const editions = reading.editions.filter((e) => e.kind === undefined || GAME_KINDS.has(e.kind));
+    if (editions.length === 0) continue;
+    suggestions.push({ url: hit.url, name: reading.name, imageUrl: reading.imageUrl, editions });
+  }
+  return suggestions.length > 0
+    ? { status: "found", autoAdd: null, suggestions }
+    : { status: "nothing-found" };
+}
+
+/**
+ * Search hits closest to the term first: the same name, then names that start with it
+ * ("Mortal Shell II" for "Mortal Shell"), then names holding all its words. Hits with none
+ * of that are dropped. Stores order by their own idea of relevance, which puts a sequel
+ * above the game asked for, so their order only breaks ties.
+ */
+export function rankByName(hits: SearchHit[], term: string): SearchHit[] {
+  const wanted = nameMatchKey(term);
+  const words = wanted.split(" ").filter(Boolean);
+  const score = (name: string) => {
+    const key = nameMatchKey(name);
+    if (key === wanted) return 0;
+    if (key.startsWith(`${wanted} `)) return 1;
+    const keyWords = key.split(" ");
+    return words.length > 0 && words.every((w) => keyWords.includes(w)) ? 2 : null;
+  };
+  return hits
+    .map((hit, index) => ({ hit, index, score: score(hit.name) }))
+    .filter((h): h is typeof h & { score: number } => h.score !== null)
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .map((h) => h.hit);
 }
 
 /** Same platforms (in any order) and the same kind: the same thing to buy, another region. */

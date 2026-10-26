@@ -242,3 +242,17 @@ export function offeredStores(
   }
   return [...offered.values()];
 }
+
+/**
+ * What to search other stores for. Stores search the name they list, which is usually
+ * English, so a name written only in another script (a game added from the Japanese store)
+ * gives way to its English name when there is one.
+ */
+export function searchTermFor(itemName: string, englishName: string | null): string {
+  return needsEnglishName(itemName) && englishName ? englishName : itemName;
+}
+
+/** A name with no Latin letters at all, which stores searching in English won't find. */
+export function needsEnglishName(name: string): boolean {
+  return !/[a-z]/i.test(name);
+}

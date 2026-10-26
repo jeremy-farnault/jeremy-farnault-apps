@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { type DiscoveryTarget, discover } from "../discovery";
 import { readPrice } from "./index";
 
 // Reads one real page per adapter and prints what came back. Run it when a store seems
@@ -7,7 +8,8 @@ import { readPrice } from "./index";
 //   pnpm --filter @jf/scanner live-check
 //   LIVE_URL=<link> [LIVE_REGION=JP] pnpm --filter @jf/scanner live-check
 //
-// With LIVE_URL only that link is read; LIVE_REGION picks a Steam storefront.
+// With LIVE_URL only that link is read; LIVE_REGION picks a Steam storefront. Without it,
+// each store's search also runs once and prints what it suggests.
 
 const DEFAULTS: { label: string; url: string; region?: string }[] = [
   {
@@ -59,5 +61,34 @@ describe("live store check", () => {
       expect(result.ok, `${target.label} should read a price`).toBe(true);
       if (result.ok) expect(result.reading.editions.length).toBeGreaterThan(0);
     });
+  }
+});
+
+const SEARCHES: { label: string; term: string; target: DiscoveryTarget }[] = [
+  { label: "Steam SE search", term: "Mortal Shell", target: { store: "steam", region: "SE" } },
+];
+
+describe.skipIf(process.env.LIVE_URL)("live store search", () => {
+  for (const search of SEARCHES) {
+    it(search.label, async () => {
+      const result = await discover({
+        source: null,
+        term: search.term,
+        target: search.target,
+        tracked: [],
+      });
+      if (result.status !== "found") {
+        console.log(`✗ ${search.label} "${search.term}": ${result.status}`);
+      } else {
+        console.log(`✓ ${search.label} "${search.term}"`);
+        for (const s of result.suggestions) {
+          const prices = s.editions.map(
+            (e) => `${e.name} ${e.salePrice ?? e.normalPrice} ${e.currency}`
+          );
+          console.log(`    ${s.name} (${s.url}): ${prices.join("; ")}`);
+        }
+      }
+      expect(result.status, `${search.label} should find something`).toBe("found");
+    }, 60_000);
   }
 });

@@ -133,6 +133,25 @@ export async function getUserStores(
     .where(eq(scannerLinks.userId, userId));
 }
 
+/** The links the user tracks in one store and region, on any item. */
+export async function getTrackedUrls(
+  userId: string,
+  store: string,
+  region: string
+): Promise<string[]> {
+  const rows = await db
+    .select({ url: scannerLinks.url })
+    .from(scannerLinks)
+    .where(
+      and(
+        eq(scannerLinks.userId, userId),
+        eq(scannerLinks.store, store),
+        eq(scannerLinks.region, region)
+      )
+    );
+  return rows.map((r) => r.url);
+}
+
 /** The PS Store link an item's search in other regions follows: its oldest one. */
 export async function getPsLink(
   userId: string,
