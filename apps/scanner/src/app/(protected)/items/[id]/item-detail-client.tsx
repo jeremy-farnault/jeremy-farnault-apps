@@ -3,6 +3,7 @@
 import { AddItemModal } from "@/components/add-item-modal";
 import { DiscoveryPanel } from "@/components/discovery-panel";
 import { ItemImage } from "@/components/item-image";
+import { NativeSelect } from "@/components/native-select";
 import {
   deleteItemAction,
   markBoughtAction,
@@ -725,18 +726,18 @@ function MarkBoughtModal({
             <div className="flex-1">
               <TextInput value={price} onChange={setPrice} placeholder="Price paid" />
             </div>
-            <select
+            <NativeSelect
               value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
+              onChange={setCurrency}
               aria-label="Currency"
-              className={field}
+              className="py-2 text-(--text)"
             >
               {currencies.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <TextInput value={store} onChange={setStore} placeholder="Where" />
           {shops.length > 1 && (

@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ItemImage } from "./item-image";
+import { NativeSelect } from "./native-select";
 
 type Props = {
   item: { id: string; name: string };
@@ -182,15 +183,15 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
 
       <div className="flex flex-wrap items-center gap-3">
         {others.length > 0 && (
-          <select
+          <NativeSelect
             value=""
             disabled={searching}
-            onChange={(e) => {
-              const other = others.find((o) => keyOf(o) === e.target.value);
+            onChange={(value) => {
+              const other = others.find((o) => keyOf(o) === value);
               if (other)
                 setExtra((prev) => [...prev, { store: other.store, region: other.region }]);
             }}
-            className="cursor-pointer rounded-[10px] bg-(--surface-sunken) px-2 py-1.5 text-sm text-(--text-secondary) outline-none"
+            className="text-(--text-secondary)"
           >
             <option value="">+ another store or region</option>
             {others
@@ -200,7 +201,7 @@ export function DiscoveryPanel({ item, offered, others, online, onClose, onAdded
                   {o.label}
                 </option>
               ))}
-          </select>
+          </NativeSelect>
         )}
         <Button
           onClick={() => void search()}

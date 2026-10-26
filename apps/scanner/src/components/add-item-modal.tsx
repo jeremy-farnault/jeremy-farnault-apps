@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ImagePicker } from "./image-picker";
+import { NativeSelect } from "./native-select";
 
 type Props = {
   isOpen: boolean;
@@ -241,21 +242,22 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
           )}
 
           {preview.store === "steam" && (
-            <label className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
-              <span>Steam store</span>
-              <select
+            <div className="flex items-center justify-between gap-3 text-sm text-(--text-secondary)">
+              <span aria-hidden>Steam store</span>
+              <NativeSelect
+                aria-label="Steam store"
                 value={preview.region ?? ""}
                 disabled={busy}
-                onChange={(e) => void read(e.target.value)}
-                className="cursor-pointer rounded-[10px] bg-(--surface-sunken) px-2 py-1 text-sm text-(--text) outline-none"
+                onChange={(region) => void read(region)}
+                className="text-(--text)"
               >
                 {STEAM_REGIONS.map((r) => (
                   <option key={r.region} value={r.region}>
                     {r.label}
                   </option>
                 ))}
-              </select>
-            </label>
+              </NativeSelect>
+            </div>
           )}
 
           {several ? (
