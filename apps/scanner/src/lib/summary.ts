@@ -197,23 +197,26 @@ export function sortItems(items: ItemSummary[], sort: SortOption): ItemSummary[]
   });
 }
 
-/** What a new link can be matched on: PS product labels first, then its cleaned-up name. */
-export type MatchCandidates = { labels: string[]; nameKey: string };
+/**
+ * What a new link can be matched on: its store's own key (a PS link's concept) first, then
+ * its cleaned-up name.
+ */
+export type MatchCandidates = { storeKey: string | null; nameKey: string };
 
 export type TrackedMatchKey = { matchKey: string; itemId: string; itemName: string };
 
 /**
  * The wishlist item a new link most likely belongs to, for the "Add to <item>?" suggestion.
- * A PS label match (the same game in another region) wins over a name match; null when
+ * A concept match (the same PS game in another region) wins over a name match; null when
  * neither finds anything. Only a suggestion: the user always chooses.
  */
 export function suggestItem(
   candidates: MatchCandidates,
   tracked: TrackedMatchKey[]
 ): { itemId: string; itemName: string } | null {
-  const pick = (keys: string[]) => {
-    const hit = tracked.find((t) => keys.includes(t.matchKey));
+  const pick = (key: string | null) => {
+    const hit = key ? tracked.find((t) => t.matchKey === key) : undefined;
     return hit ? { itemId: hit.itemId, itemName: hit.itemName } : null;
   };
-  return pick(candidates.labels) ?? (candidates.nameKey ? pick([candidates.nameKey]) : null);
+  return pick(candidates.storeKey) ?? pick(candidates.nameKey);
 }

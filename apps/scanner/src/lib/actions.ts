@@ -23,7 +23,6 @@ import {
   storeFor,
 } from "./price-reader";
 import { nameMatchKey } from "./price-reader/match-key";
-import { psMatchKey } from "./price-reader/ps-store";
 import { findTrackedLinks, getWishlistMatchKeys } from "./queries";
 import { copyImage, deleteImage, ownsKey, presignUpload } from "./s3";
 import { suggestItem } from "./summary";
@@ -130,10 +129,7 @@ export async function previewLinkAction(input: {
   const suggestion = input.suggest
     ? suggestItem(
         {
-          labels:
-            reading.store === "ps-store"
-              ? [...new Set([reading.matchKey, ...reading.editions.map((e) => psMatchKey(e.id))])]
-              : [],
+          storeKey: reading.store === "ps-store" ? reading.matchKey : null,
           nameKey: nameMatchKey(reading.name),
         },
         await getWishlistMatchKeys(userId)
@@ -290,6 +286,7 @@ async function saveLink(
           editionId: several ? edition.id : null,
           editionName: several ? edition.name : null,
           matchKey: reading.matchKey,
+          conceptId: reading.conceptId ?? null,
         })
         .returning({ id: scannerLinks.id });
       if (!link) throw new Error("Failed to create link");

@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { readPrice } from "./index";
-import { parsePsLink, psMatchKey } from "./ps-store";
+import { parsePsLink } from "./ps-store";
 
 // The fixtures are trimmed copies of the real Horizon Forbidden West pages, fetched on
 // 2026-10-24 while the game was on sale: PS5 649 → 292.05 kr, PS4 549 → 296.46 kr, and the
@@ -56,16 +56,46 @@ describe("PS Store product links", () => {
     }
   );
 
-  it("gives the same match key in every region", async () => {
-    const keys = await Promise.all(
+  it("reads the same concept, and so the same match key, in every region", async () => {
+    const readings = await Promise.all(
       (["sv-se", "en-nz", "ja-jp"] as const).map(async (locale) => {
         const r = await readPrice(PRODUCT[locale], {
           fetch: servePage(`ps-product-${locale}.html`),
         });
-        return r.ok ? r.reading.matchKey : null;
+        return r.ok ? [r.reading.conceptId, r.reading.matchKey] : null;
       })
     );
-    expect(keys).toEqual(["ps:FORBIDDENWESTPS5", "ps:FORBIDDENWESTPS5", "ps:FORBIDDENWESTPS5"]);
+    expect(readings).toEqual([
+      ["10000886", "ps-concept:10000886"],
+      ["10000886", "ps-concept:10000886"],
+      ["10000886", "ps-concept:10000886"],
+    ]);
+  });
+
+  // Mortal Shell's product IDs share nothing across regions (MORTALSHELLGGAME in Sweden,
+  // MORTALSHELLJPPS5 in Japan), but its concept is the same. The concept pages, fetched on
+  // 2026-10-26, embed each product's record, so they stand in for the product pages here.
+  it("matches products whose IDs differ across regions through their concept", async () => {
+    const se = await readPrice(
+      "https://store.playstation.com/sv-se/product/EP3495-CUSA20133_00-MORTALSHELLGGAME",
+      { fetch: servePage("ps-concept-234489-sv-se.html") }
+    );
+    const jp = await readPrice(
+      "https://store.playstation.com/ja-jp/product/JP1201-PPSA02904_00-MORTALSHELLJPPS5",
+      { fetch: servePage("ps-concept-234489-ja-jp.html") }
+    );
+    expect(se.ok && se.reading.matchKey).toBe("ps-concept:234489");
+    expect(jp.ok && jp.reading.matchKey).toBe("ps-concept:234489");
+  });
+
+  it("gives the edition its platforms and kind", async () => {
+    const result = await readPrice(PRODUCT["sv-se"], {
+      fetch: servePage("ps-product-sv-se.html"),
+    });
+    expect(result.ok && result.reading.edition).toMatchObject({
+      platforms: ["PS4", "PS5"],
+      kind: "FULL_GAME",
+    });
   });
 
   it("reports a product the region doesn't sell as not found", async () => {
@@ -97,11 +127,17 @@ describe("PS Store concept links", () => {
       ["EP9000-CUSA24705_00-FORBIDDENWESTPS4", "Standard Edition · PS4", 54900, 29646],
       ["EP9000-PPSA17903_00-HFWCE00000000000", "Complete Edition · PS5", 76900, null],
     ]);
+    expect(result.reading.conceptId).toBe("10000886");
+    expect(result.reading.editions.map((e) => [e.platforms, e.kind])).toEqual([
+      [["PS4", "PS5"], "FULL_GAME"],
+      [["PS4"], "FULL_GAME"],
+      [["PS5"], "PREMIUM_EDITION"],
+    ]);
     // Nothing on the page is "Included" (0) or a member price.
     expect(result.reading.editions.every((e) => (e.salePrice ?? e.normalPrice) > 0)).toBe(true);
   });
 
-  it("prices the chosen edition and keys it by that edition", async () => {
+  it("prices the chosen edition and keys it by the concept", async () => {
     const result = await readPrice(CONCEPT("ja-jp"), {
       editionId: "JP9000-PPSA17907_00-HFWCE00000000000",
       fetch: servePage("ps-concept-ja-jp.html"),
@@ -112,7 +148,7 @@ describe("PS Store concept links", () => {
       currency: "JPY",
       saleEndsAt: null,
     });
-    expect(result.ok && result.reading.matchKey).toBe("ps:HFWCE00000000000");
+    expect(result.ok && result.reading.matchKey).toBe("ps-concept:10000886");
   });
 
   it("reports a chosen edition that left the page as not found", async () => {
@@ -146,11 +182,5 @@ describe("parsePsLink", () => {
 
   it("ignores store pages that aren't products", () => {
     expect(parsePsLink(new URL("https://store.playstation.com/sv-se/pages/latest"))).toBeNull();
-  });
-});
-
-describe("psMatchKey", () => {
-  it("keeps the label at the end of the product ID", () => {
-    expect(psMatchKey("EP9000-PPSA01521_00-FORBIDDENWESTPS5")).toBe("ps:FORBIDDENWESTPS5");
   });
 });

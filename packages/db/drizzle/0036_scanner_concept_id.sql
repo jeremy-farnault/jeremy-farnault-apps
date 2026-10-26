@@ -1,0 +1,1 @@
+ALTER TABLE "scanner_links" ADD COLUMN "concept_id" text;

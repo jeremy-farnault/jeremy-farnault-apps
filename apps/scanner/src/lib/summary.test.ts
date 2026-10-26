@@ -192,42 +192,42 @@ describe("parseSort", () => {
 
 describe("suggestItem", () => {
   const tracked = [
-    { matchKey: "ps:FORBIDDENWESTPS5", itemId: "hfw", itemName: "Horizon Forbidden West" },
+    { matchKey: "ps-concept:10000886", itemId: "hfw", itemName: "Horizon Forbidden West" },
+    { matchKey: "ps-concept:234489", itemId: "ms", itemName: "Mortal Shell" },
     { matchKey: "dark souls remastered", itemId: "ds", itemName: "Dark Souls" },
     { matchKey: "horizon forbidden west", itemId: "hfw-pc", itemName: "HFW on Steam" },
   ];
 
-  it("matches the same PS game across regions, even with a Japanese title", () => {
+  it("matches the same PS game across regions by concept, even with a Japanese title", () => {
     expect(
       suggestItem(
-        { labels: ["ps:FORBIDDENWESTPS5"], nameKey: "ホライゾン フォビドゥン ウェスト" },
+        { storeKey: "ps-concept:10000886", nameKey: "ホライゾン フォビドゥン ウェスト" },
         tracked
       )
     ).toEqual({ itemId: "hfw", itemName: "Horizon Forbidden West" });
   });
 
-  it("matches any of a concept page's editions", () => {
+  it("matches Mortal Shell JP to the SE item, whose product IDs share nothing", () => {
     expect(
-      suggestItem({ labels: ["ps:HFWCE00000000000", "ps:FORBIDDENWESTPS5"], nameKey: "x" }, tracked)
-        ?.itemId
-    ).toBe("hfw");
+      suggestItem({ storeKey: "ps-concept:234489", nameKey: "mortal shell" }, tracked)?.itemId
+    ).toBe("ms");
   });
 
-  it("prefers a PS label match over a name match", () => {
+  it("prefers a concept match over a name match", () => {
     expect(
-      suggestItem({ labels: ["ps:FORBIDDENWESTPS5"], nameKey: "horizon forbidden west" }, tracked)
+      suggestItem({ storeKey: "ps-concept:10000886", nameKey: "horizon forbidden west" }, tracked)
         ?.itemId
     ).toBe("hfw");
   });
 
   it("falls back to the cleaned-up name", () => {
-    expect(suggestItem({ labels: [], nameKey: "dark souls remastered" }, tracked)?.itemId).toBe(
+    expect(suggestItem({ storeKey: null, nameKey: "dark souls remastered" }, tracked)?.itemId).toBe(
       "ds"
     );
   });
 
   it("suggests nothing without a match", () => {
-    expect(suggestItem({ labels: ["ps:OTHER"], nameKey: "elden ring" }, tracked)).toBeNull();
-    expect(suggestItem({ labels: [], nameKey: "" }, tracked)).toBeNull();
+    expect(suggestItem({ storeKey: "ps-concept:999", nameKey: "elden ring" }, tracked)).toBeNull();
+    expect(suggestItem({ storeKey: null, nameKey: "" }, tracked)).toBeNull();
   });
 });

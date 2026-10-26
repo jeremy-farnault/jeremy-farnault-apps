@@ -66,8 +66,11 @@ export const scannerLinks = pgTable(
     editionId: text("edition_id"),
     // That edition's name as the store gave it, to tell links to one page apart.
     editionName: text("edition_name"),
-    // What "Add to existing item?" compares: a PS product label or a cleaned-up name.
+    // What "Add to existing item?" compares: a PS link's concept or a cleaned-up name.
     matchKey: text("match_key").notNull(),
+    // PS Store only: the concept, shared by the same game in every region. Links added
+    // before it was stored get it on their next successful check.
+    conceptId: text("concept_id"),
     lastStatus: scannerLinkStatusEnum("last_status").notNull().default("ok"),
     lastCheckedAt: timestamp("last_checked_at").notNull().defaultNow(),
     lastSuccessAt: timestamp("last_success_at").notNull().defaultNow(),

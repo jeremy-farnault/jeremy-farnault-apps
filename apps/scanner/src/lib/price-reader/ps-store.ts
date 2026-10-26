@@ -36,13 +36,12 @@ export function parsePsLink(url: URL): PsLink | { error: "en-jp" } | null {
 }
 
 /**
- * The cross-region match key: the label at the end of a product ID, which is the same in
- * every region ("EP9000-PPSA01521_00-FORBIDDENWESTPS5" and "JP9000-PPSA04073_00-
- * FORBIDDENWESTPS5" both give "FORBIDDENWESTPS5").
+ * The cross-region match key: the concept, which every region shares even when the product
+ * IDs don't ("EP3495-CUSA20133_00-MORTALSHELLGGAME" in Sweden and "JP1201-PPSA02904_00-
+ * MORTALSHELLJPPS5" in Japan are both concept 234489).
  */
-export function psMatchKey(productId: string): string {
-  const label = productId.split("-").at(-1) ?? productId;
-  return `ps:${label.toUpperCase()}`;
+export function psMatchKey(conceptId: string): string {
+  return `ps-concept:${conceptId}`;
 }
 
 export function readPsStorePage(html: string, link: PsLink): PageReading {
@@ -53,8 +52,10 @@ export function readPsStorePage(html: string, link: PsLink): PageReading {
     const product = cache.get(`Product:${link.id}`);
     if (!product) return { name: null, imageUrl: null, editions: [] };
     const edition = editionOf(product, prices, { withEditionName: false });
+    const conceptRef = isObject(product.concept) ? stringOf(product.concept.__ref) : null;
     return {
       name: stringOf(product.name),
+      ...(conceptRef && { conceptId: conceptRef.replace(/^Concept:/, "") }),
       imageUrl: imageOf(product.media),
       editions: edition ? [edition] : [],
     };
@@ -71,6 +72,7 @@ export function readPsStorePage(html: string, link: PsLink): PageReading {
   });
   return {
     name: stringOf(concept.name),
+    conceptId: link.id,
     imageUrl: imageOf(concept.media),
     editions,
   };
@@ -151,6 +153,8 @@ function editionOf(
   const onSale = price.discounted < price.base;
   const salePrice = onSale ? price.discounted : null;
   const endTime = onSale && price.endTime ? new Date(Number(price.endTime)) : null;
+  const platforms = platformsOf(product);
+  const kind = stringOf(product.storeDisplayClassification);
   return {
     id,
     name: withEditionName ? editionName(product) : (stringOf(product.name) ?? id),
@@ -161,17 +165,23 @@ function editionOf(
     inStock: true,
     discountPercent: discountPercent(price.base, salePrice),
     saleEndsAt: endTime && !Number.isNaN(endTime.getTime()) ? endTime : null,
+    ...(platforms.length > 0 && { platforms }),
+    ...(kind && { kind }),
   };
 }
 
 /** "Standard Edition · PS4/PS5": the edition and its platforms, which tell editions apart. */
 function editionName(product: Json): string {
   const edition = isObject(product.edition) ? stringOf(product.edition.name) : null;
-  const platforms = Array.isArray(product.platforms)
-    ? product.platforms.filter((p): p is string => typeof p === "string")
-    : [];
+  const platforms = platformsOf(product);
   const label = edition ?? stringOf(product.name) ?? stringOf(product.id) ?? "";
   return platforms.length ? `${label} · ${platforms.join("/")}` : label;
+}
+
+function platformsOf(product: Json): string[] {
+  return Array.isArray(product.platforms)
+    ? product.platforms.filter((p): p is string => typeof p === "string")
+    : [];
 }
 
 const IMAGE_ROLES = ["MASTER", "GAMEHUB_COVER_ART", "PORTRAIT_BANNER", "EDITION_KEY_ART"];

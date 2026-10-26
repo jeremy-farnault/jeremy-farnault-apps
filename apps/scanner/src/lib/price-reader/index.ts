@@ -49,12 +49,14 @@ export async function readPrice(input: string, options: ReadOptions = {}): Promi
     // The store answers a product it doesn't sell in this region with an error page.
     if (page.url.pathname.includes("/error")) return { ok: false, reason: "not-found" };
 
-    return finish(readPsStorePage(page.html, link), {
+    const reading = readPsStorePage(page.html, link);
+    const { conceptId } = reading;
+    return finish(reading, {
       store,
       region: link.region,
       editionId,
-      // A product link is its own edition; a concept link's key is its chosen edition's.
-      matchKey: (edition) => psMatchKey(edition?.id ?? link.id),
+      // Without a concept on the page, the name is all there is to match on.
+      ...(conceptId && { matchKey: psMatchKey(conceptId) }),
     });
   }
 
@@ -132,7 +134,7 @@ export function finish(
     region: string | null;
     editionId: string | null;
     /** The store's own match key; web shops fall back to the cleaned-up name. */
-    matchKey?: (edition: Edition | null) => string;
+    matchKey?: string;
   }
 ): ReadResult {
   if (page.editions.length === 0) return { ok: false, reason: "unreadable" };
@@ -161,7 +163,8 @@ export function finish(
       region: context.region,
       name,
       imageUrl: page.imageUrl,
-      matchKey: context.matchKey?.(edition) ?? nameMatchKey(name),
+      matchKey: context.matchKey ?? nameMatchKey(name),
+      ...(page.conceptId && { conceptId: page.conceptId }),
       editions,
       edition,
     },

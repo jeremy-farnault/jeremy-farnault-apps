@@ -18,6 +18,10 @@ export type Edition = {
   inStock: boolean;
   discountPercent: number | null;
   saleEndsAt: Date | null;
+  /** PS Store only: the platforms it runs on ("PS4", "PS5"). */
+  platforms?: string[];
+  /** PS Store only: the store's classification ("FULL_GAME", "PREMIUM_EDITION", "LEVEL"…). */
+  kind?: string;
 };
 
 export type Reading = {
@@ -27,6 +31,8 @@ export type Reading = {
   name: string;
   imageUrl: string | null;
   matchKey: string;
+  /** PS Store only: the concept, shared by the same game in every region. */
+  conceptId?: string;
   /** Every edition found on the page, in page order. */
   editions: Edition[];
   /**
@@ -49,6 +55,7 @@ export type ReadResult =
 export type PageEdition = Omit<Edition, "currency"> & { currency: string };
 export type PageReading = {
   name: string | null;
+  conceptId?: string;
   imageUrl: string | null;
   editions: PageEdition[];
 };

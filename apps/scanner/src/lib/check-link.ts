@@ -36,7 +36,13 @@ export async function checkLink(userId: string, linkId: string): Promise<Checked
   if (!link || link.status !== "wishlist") return null;
 
   const result = await readPrice(link.url, { region: link.region, editionId: link.editionId });
-  const edition = result.ok ? result.reading.edition : null;
+  const reading = result.ok ? result.reading : null;
+  const edition = reading?.edition ?? null;
+  // A PS link keeps its concept, and the match key built on it, up to date: links added
+  // before concepts were stored learn theirs here.
+  const concept = reading?.conceptId
+    ? { conceptId: reading.conceptId, matchKey: reading.matchKey }
+    : {};
 
   if (edition) {
     await db.insert(scannerPriceChecks).values({
@@ -53,7 +59,7 @@ export async function checkLink(userId: string, linkId: string): Promise<Checked
     .update(scannerLinks)
     .set(
       edition
-        ? { lastStatus: "ok", lastCheckedAt: sql`now()`, lastSuccessAt: sql`now()` }
+        ? { lastStatus: "ok", lastCheckedAt: sql`now()`, lastSuccessAt: sql`now()`, ...concept }
         : { lastStatus: "failed", lastCheckedAt: sql`now()` }
     )
     .where(eq(scannerLinks.id, link.id))

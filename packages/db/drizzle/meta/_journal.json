@@ -253,6 +253,13 @@
       "when": 1792850921371,
       "tag": "0035_scanner_edition_name",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793021752448,
+      "tag": "0036_scanner_concept_id",
+      "breakpoints": true
     }
   ]
 }
