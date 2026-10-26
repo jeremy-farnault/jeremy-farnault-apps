@@ -1,0 +1,95 @@
+{
+  "total": 5,
+  "items": [
+    {
+      "type": "app",
+      "name": "Mortal Shell II",
+      "id": 2584270,
+      "price": {
+        "currency": "EUR",
+        "initial": 4999,
+        "final": 4999
+      },
+      "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/671f4c21e66e7ccffa9b2d089e5ac806aea99e82/capsule_231x87_alt_assets_4.jpg?t=1792757901",
+      "metascore": "",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": false
+      },
+      "streamingvideo": false,
+      "controller_support": "full"
+    },
+    {
+      "type": "app",
+      "name": "Mortal Shell",
+      "id": 1110910,
+      "price": {
+        "currency": "EUR",
+        "initial": 2499,
+        "final": 2499
+      },
+      "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1110910/1f61bd0ef7b1f29a2c87a76572565f853ddf42c8/capsule_231x87.jpg?t=1785160664",
+      "metascore": "",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": false
+      },
+      "streamingvideo": false,
+      "controller_support": "full"
+    },
+    {
+      "type": "app",
+      "name": "Mortal Shell II: Devout Edition Upgrade",
+      "id": 4711720,
+      "price": {
+        "currency": "EUR",
+        "initial": 1099,
+        "final": 1099
+      },
+      "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4711720/7f34422f2e67eb7704527b47fe58dce0230a8048/capsule_231x87.jpg?t=1792449760",
+      "metascore": "",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": false
+      },
+      "streamingvideo": false,
+      "controller_support": "full"
+    },
+    {
+      "type": "app",
+      "name": "Mortal Shell: The Virtuous Cycle",
+      "id": 1672210,
+      "price": {
+        "currency": "EUR",
+        "initial": 399,
+        "final": 399
+      },
+      "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672210/73e80b4e31a14b799a4920b5a965d2c3c7194ae3/capsule_231x87.jpg?t=1785160812",
+      "metascore": "",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": false
+      },
+      "streamingvideo": false,
+      "controller_support": "full"
+    },
+    {
+      "type": "app",
+      "name": "Mortal Shell II - Open Beta",
+      "id": 4711740,
+      "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4711740/5e0e58e810e85cfd1f2e4789c8b4bc653cc4d8df/capsule_231x87.jpg?t=1790844953",
+      "metascore": "",
+      "platforms": {
+        "windows": true,
+        "mac": false,
+        "linux": false
+      },
+      "streamingvideo": false,
+      "controller_support": "full"
+    }
+  ]
+}

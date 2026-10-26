@@ -1,0 +1,1663 @@
+{
+  "data": {
+    "universalSearch": {
+      "__typename": "UniversalSearchResponse",
+      "results": [
+        {
+          "__typename": "Product",
+          "id": "JP1201-PPSA02904_00-MORTALSHELLJPPS5",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/img/rnd/202105/1801/DlQfHXPC444M8cZD1LOswsW8.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/bnhGIKyQq74MLyzY94Yknus2.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/AnzOxj3Lu9RpkvDlRDOiqj3Y.png"
+            }
+          ],
+          "name": "Mortal Shell",
+          "npTitleId": "PPSA02904_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202008/1815/Ko2DfZV938nvvW4gTuQe3O7d.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202008/1118/K9bwm0RrGHA3pBLsX0qHikD2.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202105/1801/DlQfHXPC444M8cZD1LOswsW8.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/bnhGIKyQq74MLyzY94Yknus2.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/AnzOxj3Lu9RpkvDlRDOiqj3Y.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202105/1811/y5Z3RMkSKg7h9mqgkToQNHTw.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/O1AUkt0kzCELCP3x5b8aMKvA.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/2oTzCY5r3qtAMXa3pqOIVJXw.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/06Jj0SubxXvicBtqwqlAlPvj.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/0D3uhxGgvcGU94pO66vtxGTQ.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/8BzpDbNwap32RGzEPJAB8ANf.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/IPleLCH5tbUgau6O7tpcoBRU.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/ol2mqB7J7otCnkTUJueFe3SB.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/Y3smDol1HiUveWNzpOKVl8MW.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/5Z8FwHsmwBIUZCUXBvbWCpz1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/kbjiSFNOtXTQV91M23YF3x6X.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202107/2814/J5ogcDZZRQZmAIn2RHOhKKFY.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202101/2517/vCb7WO6PmA0EUqa6h3Ftz4bT.png"
+              }
+            ]
+          },
+          "platforms": ["PS4", "PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP1201-PPSA02904_00-MORTALSHELLJPPS5-J004",
+            "basePrice": "¥4,378",
+            "discountText": null,
+            "discountedPrice": "¥4,378",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        },
+        {
+          "__typename": "Product",
+          "id": "EP3495-PPSA38671_00-000000000000BETA",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2014/b9e457aa006ca0deff3ed12dff864604b4f881c3c3cbb29e.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/13e3ba275c18b22ee47235c4a37bc0da71f8227b66f559bd.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/b7c47907dd4db2a3275e728c5510536360a89164fbe8c6ec.jpg"
+            }
+          ],
+          "name": "Mortal Shell II - オープンベータ版",
+          "npTitleId": "PPSA38671_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2510/ba8710afdaa43f5749f7d0251abc9336d1f9dc9b2757eb7d.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2014/b9e457aa006ca0deff3ed12dff864604b4f881c3c3cbb29e.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/13e3ba275c18b22ee47235c4a37bc0da71f8227b66f559bd.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/b7c47907dd4db2a3275e728c5510536360a89164fbe8c6ec.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2014/fcc40508893feec58461fa37acf2ec4133f155567c202890.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/9ff9e3966bdef633b93c76cdde45ab162af3593c9158692e.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/78297f7f891117cf9d456445135e5ec50e00e8e9f3a3e827.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/c8fb8d937b9ce90863fb50085db2bdadfd023286112f8268.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/ffd3d365b512a8bb9876052f046d904009736e623292bcf3.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/181b9c6c54229eb09571459ebfa7b4f8fbb74898226f04ee.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/f7a62f91a32a036115f8dff71bd49f5003778c49ff4e6f26.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/c3b1838d7bfcd1750e0ea3e327f47c79215dae112be615ac.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/362592af4d8ac68d195831dec2ecf8db36d3448316413538.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/ffddf4394b79f9f73dd03849267385077501b3fbf0dc1bce.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/2eb697502490ca3d48a5b9ba99aa50001cb666d1bc2962d6.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/ff72a815bfba6671c3e364f521155b8147283c84922058b7.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/269cf48e04be0fabb9528bbb390c866dcbecf8786f867537.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/2313/fc64ffc0ca600e0457556f4dd5560b5e1c9ba8fa2149ce19.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "EP3495-PPSA38671_00-000000000000BETA-J001",
+            "basePrice": "無料",
+            "discountText": null,
+            "discountedPrice": "無料",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": true,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        },
+        {
+          "__typename": "Product",
+          "id": "EP3495-PPSA34008_00-0114153686334597",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/267998f1c31cbfe58459ad0a1fc6ed189cba2532803127eb.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/9febf4db6f6ee391d3a6024a5ec65a1c2ed9b94186f37a27.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/32b4c8c2027b5ef8f22819c6765ebb0cf4505beec19d50e5.jpg"
+            }
+          ],
+          "name": "Mortal Shell II",
+          "npTitleId": "PPSA34008_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202610/2013/28a76495ea9a57d8b6431706d9096e54661c77d434f473bd.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2013/677675fcd87ad5467d45197e0bfd2fa1fbc2d77b543733d6.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2608/360223e6e011c40ab0dcbe13eed0dc31855667c24372215d.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2013/66a84f95cf70c9010c11e122dc710260f222ae0f5e6d1db0.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2112/14439e4fd047b3bc768fa0d6afff649363d4636a0343bf29.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/267998f1c31cbfe58459ad0a1fc6ed189cba2532803127eb.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/9febf4db6f6ee391d3a6024a5ec65a1c2ed9b94186f37a27.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/32b4c8c2027b5ef8f22819c6765ebb0cf4505beec19d50e5.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/683b7357f5573f742ef49d7fc6b1ef35e61328dfe9e5a4d7.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/00ab2f35d14aa6e2d930cb92b7c119d31fc47b10de15a7dc.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/7edba21774aafa203ec3fbda279abc521fe2393df0a355f2.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/c416509f8015c0f0f98c9460a0084bd0d0d27475acf89fd6.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/9f0e57f8f9bc4db88fb760fde4c59fc56969dba5b00431ea.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/2a735bf2493545afb9f4a3548370802dc96d1cf08f815913.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/012697daaa6da9e72beed0101db8b0977ad9cc31142f444a.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/18f83589ce76301dfdcd29e517aba93cd40bccd8229d98ed.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/9c6dd46cb0ac6ef7dc26a9bc3841f41d03ed742504141681.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/b37fd901e0f345ed2c06a319a891e71360c6b1186a8c0ea7.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/024e9a7ae99c3e7c8e89c6faa9ed11edbb1bfa3e93cea234.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/7a631f3aca0a0dc55e5c131891edd2e3bafb6f9160b1afe1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/282d135a3e6ddc94990855c2b709ffaefc61eaae1696e9ba.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/ea89d55edb4ca475ed8faba9cbe515eb5d78e0ef73c965d9.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202610/1916/852dc66c2129e0e30c769130cf912aa03b7cb5ef3cc6f73f.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "EP3495-PPSA34008_00-0114153686334597-J002",
+            "basePrice": "¥6,490",
+            "discountText": null,
+            "discountedPrice": "¥6,490",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["PS_PLUS"],
+            "upsellText": "プレミアム"
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            },
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP1201-CUSA24600_00-MORTALSHELLDLC01",
+          "localizedStoreDisplayClassification": "追加コンテンツ",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/N8v3EbcZFZh5RT1KZDHiplXj.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/Xg0eiKwXGFZHBZez3mqz62OP.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/55UxMvSanrKLRCWE2WaR9r0Z.jpg"
+            }
+          ],
+          "name": "Mortal Shell: Rotting Christパック",
+          "npTitleId": "CUSA24600_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202010/2215/AYvAKmOw1Um9X0oQvHu69oDw.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/N8v3EbcZFZh5RT1KZDHiplXj.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/Xg0eiKwXGFZHBZez3mqz62OP.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/55UxMvSanrKLRCWE2WaR9r0Z.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/zcvNw7VoGWem2foxsbNQTjGM.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/dOGQC7uOeYVbeT98r7pDQ867.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/W0YasznxKRTQDZDFFAkm02YC.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/HthTOqd6uTivcFG9mPQwiVRX.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202010/3106/jP9wRtd9X7zhMYhBypTB5jEj.png"
+              }
+            ]
+          },
+          "platforms": ["PS4"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP1201-CUSA24600_00-MORTALSHELLDLC01-J002",
+            "basePrice": "無料",
+            "discountText": null,
+            "discountedPrice": "無料",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": true,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "OTHER"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP1201-PPSA02904_00-4874270551832185",
+          "localizedStoreDisplayClassification": "追加コンテンツ",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/E1qQkrzC8qPtyiLcbNItV7YI.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/RdiLoifI7zfbqmLxJPIfBjQt.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/7R5Q3DibHrp0BNWbJSfEobC4.jpg"
+            }
+          ],
+          "name": "Mortal Shell: The Virtuous Cycle",
+          "npTitleId": "PPSA02904_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/E1qQkrzC8qPtyiLcbNItV7YI.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/RdiLoifI7zfbqmLxJPIfBjQt.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/7R5Q3DibHrp0BNWbJSfEobC4.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/XUtc82wY3OIu1PlhPNoM9UcS.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/AjuSwpRhx7pj0ZRkrsKNd9XU.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/aags7idsYfiNjFkLFWElGMh6.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/gstVSJTIDfQhUedcRbgrDIoY.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/3DQpB9PbwweqwP63bsWyx1ke.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/gYKWs3rg1zIUAX24S56WdjNC.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/zHqcwKjuMPvFUMKWEs5NjAnY.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/Ih51uuL8j6Aerp9QzES9M9dR.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/IdP0bFo7NdPbHmAgaP9KsjnA.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP1201-PPSA02904_00-4874270551832185-J003",
+            "basePrice": "¥880",
+            "discountText": null,
+            "discountedPrice": "¥880",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "OTHER"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP1201-PPSA02904_00-9362579997761940",
+          "localizedStoreDisplayClassification": "追加コンテンツ",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/N8v3EbcZFZh5RT1KZDHiplXj.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/Xg0eiKwXGFZHBZez3mqz62OP.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/55UxMvSanrKLRCWE2WaR9r0Z.jpg"
+            }
+          ],
+          "name": "Mortal Shell: Rotting Christパック",
+          "npTitleId": "PPSA02904_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202010/2215/AYvAKmOw1Um9X0oQvHu69oDw.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/N8v3EbcZFZh5RT1KZDHiplXj.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/Xg0eiKwXGFZHBZez3mqz62OP.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/55UxMvSanrKLRCWE2WaR9r0Z.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/zcvNw7VoGWem2foxsbNQTjGM.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/dOGQC7uOeYVbeT98r7pDQ867.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/W0YasznxKRTQDZDFFAkm02YC.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202010/1210/HthTOqd6uTivcFG9mPQwiVRX.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/img/rnd/202010/3106/jP9wRtd9X7zhMYhBypTB5jEj.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP1201-PPSA02904_00-9362579997761940-J002",
+            "basePrice": "無料",
+            "discountText": null,
+            "discountedPrice": "無料",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": true,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "OTHER"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP1201-CUSA24600_00-ADDCONT000000002",
+          "localizedStoreDisplayClassification": "追加コンテンツ",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/E1qQkrzC8qPtyiLcbNItV7YI.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/RdiLoifI7zfbqmLxJPIfBjQt.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/7R5Q3DibHrp0BNWbJSfEobC4.jpg"
+            }
+          ],
+          "name": "Mortal Shell: The Virtuous Cycle",
+          "npTitleId": "CUSA24600_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/E1qQkrzC8qPtyiLcbNItV7YI.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/RdiLoifI7zfbqmLxJPIfBjQt.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/7R5Q3DibHrp0BNWbJSfEobC4.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/XUtc82wY3OIu1PlhPNoM9UcS.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/AjuSwpRhx7pj0ZRkrsKNd9XU.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/aags7idsYfiNjFkLFWElGMh6.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/gstVSJTIDfQhUedcRbgrDIoY.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/3DQpB9PbwweqwP63bsWyx1ke.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/gYKWs3rg1zIUAX24S56WdjNC.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/zHqcwKjuMPvFUMKWEs5NjAnY.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/Ih51uuL8j6Aerp9QzES9M9dR.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202108/0301/IdP0bFo7NdPbHmAgaP9KsjnA.png"
+              }
+            ]
+          },
+          "platforms": ["PS4"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP1201-CUSA24600_00-ADDCONT000000002-J003",
+            "basePrice": "¥880",
+            "discountText": null,
+            "discountedPrice": "¥880",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "OTHER"
+        },
+        {
+          "__typename": "Product",
+          "id": "EP3495-PPSA34008_00-0281085410214617",
+          "localizedStoreDisplayClassification": "プレミアムエディション",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/c2433c4159d9a75e86d30bf32d26930b8cfabec80df10169.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "EDITION_KEY_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/59403054cf3f7b66e437a553abd4d9e02a5733b28bfae8da.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/7560a923c6e43a577a02f8917105427e197159e91cf9ce9e.jpg"
+            }
+          ],
+          "name": "Mortal Shell II: Devout Edition",
+          "npTitleId": "PPSA34008_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2013/677675fcd87ad5467d45197e0bfd2fa1fbc2d77b543733d6.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2608/360223e6e011c40ab0dcbe13eed0dc31855667c24372215d.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2013/66a84f95cf70c9010c11e122dc710260f222ae0f5e6d1db0.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202608/2112/14439e4fd047b3bc768fa0d6afff649363d4636a0343bf29.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/c2433c4159d9a75e86d30bf32d26930b8cfabec80df10169.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "EDITION_KEY_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/59403054cf3f7b66e437a553abd4d9e02a5733b28bfae8da.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/7560a923c6e43a577a02f8917105427e197159e91cf9ce9e.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/abe9f4dea001c645e529e67716002a2aa0e26d2dddcb93d0.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/9005b29dc860e4ed1ad2c7a1b880966e26e82265650a9f80.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/7c69efe872a7d33efd6bf58123b14e4bccdb64ba49f6f142.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/b30da12d0e8c62936f0548d866624c4ede73c4bb826473c3.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/c416509f8015c0f0f98c9460a0084bd0d0d27475acf89fd6.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/9f0e57f8f9bc4db88fb760fde4c59fc56969dba5b00431ea.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/2a735bf2493545afb9f4a3548370802dc96d1cf08f815913.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/012697daaa6da9e72beed0101db8b0977ad9cc31142f444a.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/18f83589ce76301dfdcd29e517aba93cd40bccd8229d98ed.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/9c6dd46cb0ac6ef7dc26a9bc3841f41d03ed742504141681.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202604/0115/b37fd901e0f345ed2c06a319a891e71360c6b1186a8c0ea7.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/024e9a7ae99c3e7c8e89c6faa9ed11edbb1bfa3e93cea234.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202506/0514/7a631f3aca0a0dc55e5c131891edd2e3bafb6f9160b1afe1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/190a055f3b85fef6d0920234bdce03712acf9e4131dc9100.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0510/42b7a5fe53d79df2c65438d6b436374d44839304dca08027.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "EP3495-PPSA34008_00-0281085410214617-J002",
+            "basePrice": "¥7,260",
+            "discountText": null,
+            "discountedPrice": "¥7,260",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "PREMIUM_EDITION"
+        },
+        {
+          "__typename": "Product",
+          "id": "EP3495-PPSA34008_00-0181022662770215",
+          "localizedStoreDisplayClassification": "コスチューム",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/f9187962b41426055bb407989ce38dd23b7c0508e47a0e78.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/b30da12d0e8c62936f0548d866624c4ede73c4bb826473c3.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/1fc8b327b080c8b52cdf4fe62f5f201a4d945e42796e2b1b.jpg"
+            }
+          ],
+          "name": "『Mortal Shell II: Devout Edition』アップグレード",
+          "npTitleId": "PPSA34008_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/f9187962b41426055bb407989ce38dd23b7c0508e47a0e78.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/b30da12d0e8c62936f0548d866624c4ede73c4bb826473c3.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/1fc8b327b080c8b52cdf4fe62f5f201a4d945e42796e2b1b.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/07ba6ebf1054ebe4e497d437cfc96ed64dba108968555195.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/f5bd531aea9eec5f0978cb09f241a4af874ddbbc57471829.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/35104d1a38c59e85bfdbf1e72fd9da8da9b2e01d3c7dc3db.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/a7083cbea5db6ccb71e14976784c4b4a378a19d665b31a3b.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0508/5606a0304ef1477d1bbe4fe15ce33b09eb9a907ea0f52797.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0816/c197171abd438e7b5fb3b1e1622ca49ca647a7612a71fade.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202607/0816/ed53acbb86837c1229bfc5567f48f75ca08966c91cb5fccf.png"
+              }
+            ]
+          },
+          "platforms": ["PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "EP3495-PPSA34008_00-0181022662770215-J001",
+            "basePrice": "¥990",
+            "discountText": null,
+            "discountedPrice": "¥990",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "COSTUME"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP0559-PPSA23009_00-0232937041904467",
+          "localizedStoreDisplayClassification": "キャラクター",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1213/a7daa8356f1dd1c20d1bc846f1226b4c8fd8c7a01354bc9f.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/b5e44b7eb0f8a7a8cc9da42a35182bf0420ab512b7430e00.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/37aee8733eb3cbb5b8babc593e9b95b43fe8c92599f45b73.jpg"
+            }
+          ],
+          "name": "Monsters & Mortals - US Creators",
+          "npTitleId": "PPSA23009_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1213/a7daa8356f1dd1c20d1bc846f1226b4c8fd8c7a01354bc9f.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/b5e44b7eb0f8a7a8cc9da42a35182bf0420ab512b7430e00.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/37aee8733eb3cbb5b8babc593e9b95b43fe8c92599f45b73.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/02de1b52b6030df776691313c7cf43c535f0cd83769bad58.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/b6fd9fe43e8b6ca79883b5bb88304982aa300dc00c7af74d.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2303/14ef0833499a13a5e9417a2a81bb2dc7e11684af389cfc05.png"
+              }
+            ]
+          },
+          "platforms": ["PS4", "PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP0559-PPSA23009_00-0232937041904467-J003",
+            "basePrice": "¥550",
+            "discountText": null,
+            "discountedPrice": "¥550",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "CHARACTER"
+        },
+        {
+          "__typename": "Product",
+          "id": "JP0559-CUSA48789_00-0257258683955281",
+          "localizedStoreDisplayClassification": "マップ",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/07cefd5eac2e5f14e72e0dbe62915cdae71fe5e09eda0c42.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/a44f5a243930e58fc1bdfa21bb7be64adddb03eb369ce646.jpg"
+            },
+            {
+              "__typename": "Media",
+              "role": "SCREENSHOT",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/732dc623fb4e80a47f987be971bbf971404716bdfa4b4865.jpg"
+            }
+          ],
+          "name": "Monsters & Mortals - Monstrum",
+          "npTitleId": "CUSA48789_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202505/1922/d3e08afe68bb744f18e7a9ea0268d493e6673a4cdc5cafd5.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/07cefd5eac2e5f14e72e0dbe62915cdae71fe5e09eda0c42.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/a44f5a243930e58fc1bdfa21bb7be64adddb03eb369ce646.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/732dc623fb4e80a47f987be971bbf971404716bdfa4b4865.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/043a1dfba2c035104615507f64019a195f7c115a64252352.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/d94f58cf6b4018de9b8ed064600c7c67a8b32b8242541f81.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/aebb4739407e0ce5ec4f2243d978deef6587827bcc64bd39.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/e61c9b620b2e3bd278a224ce8f4bb2fa0c3b8a1a46e3d812.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/1723/f1f8636b9ccf632904f914114e7fb04fd3f0759ef60a5214.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202505/2302/36c532f700ad37ac5eb127bc2d8ad2041a74189a681fca62.png"
+              }
+            ]
+          },
+          "platforms": ["PS4"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "JP0559-CUSA48789_00-0257258683955281-J001",
+            "basePrice": "¥990",
+            "discountText": null,
+            "discountedPrice": "¥990",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "MAP"
+        },
+        {
+          "__typename": "Product",
+          "id": "UP5155-PPSA27356_00-KINGDOMSHELL0000",
+          "localizedStoreDisplayClassification": "製品版",
+          "media": [
+            {
+              "__typename": "Media",
+              "role": "BACKGROUND",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/7fe30c5abed58a451ba72e7296d81cbef65e1a1462f2932a.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "FOUR_BY_THREE_BANNER",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/40d0e5f2d6356aab78e855152dde7fc9888e6e37dc73faec.png"
+            },
+            {
+              "__typename": "Media",
+              "role": "GAMEHUB_COVER_ART",
+              "type": "IMAGE",
+              "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/04f0ebaf13caf915a1e78d70230418c27440c4d8b14f938e.png"
+            }
+          ],
+          "name": "Kingdom Shell",
+          "npTitleId": "PPSA27356_00",
+          "personalizedMeta": {
+            "__typename": "PersonalizedMeta",
+            "hasMediaOverrides": false,
+            "media": [
+              {
+                "__typename": "Media",
+                "role": "PREVIEW",
+                "type": "VIDEO",
+                "url": "https://vulcan.dl.playstation.net/img/rnd/202509/1514/867893a1afbd9a30104c569bafbbf4e4f99ae5681f93091c.mp4"
+              },
+              {
+                "__typename": "Media",
+                "role": "BACKGROUND",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/7fe30c5abed58a451ba72e7296d81cbef65e1a1462f2932a.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "FOUR_BY_THREE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/40d0e5f2d6356aab78e855152dde7fc9888e6e37dc73faec.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "GAMEHUB_COVER_ART",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/04f0ebaf13caf915a1e78d70230418c27440c4d8b14f938e.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "LOGO",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/c3598271bfff8cf9ca8433144ac8eabceb607ee47bf8faf1.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "PORTRAIT_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/e53b0d5600cc18693c9469babab1508416498401a8cc2b0d.png"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/c0de66087d1bedb30436ab6dfe64cb5e3758af9c7bc23c62.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/41ad5df3b65ebd1b185f184372f231715be7404c938c16ed.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/a52e3e59e5df65b2009887d33314267d79b83e41d42b826f.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/2cb6802336689d997d4f859b31cddbb08ef0804dc322917b.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/6dee1dfe88c29869bbac0eaa4e0e93faaae082981d178eb5.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/ec469aa1d6a2d588dfb8787ebe5fec3673982c3c42b64ef1.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/778c3ac37b2853ce02556affbaf2045e47258332c2a2548f.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SCREENSHOT",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/a0ea1b4a0fd2f5d7c8ec9cbbb07af046d96f619cb25accb7.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "SIXTEEN_BY_NINE_BANNER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2718/aa3bb03ec842713304f891fd4bbd2b5e784c9d392636cc87.jpg"
+              },
+              {
+                "__typename": "Media",
+                "role": "MASTER",
+                "type": "IMAGE",
+                "url": "https://image.api.playstation.com/vulcan/ap/rnd/202508/2117/d006e1c9d31c86580d965342c75a527b9806c932c502da95.png"
+              }
+            ]
+          },
+          "platforms": ["PS4", "PS5"],
+          "price": {
+            "__typename": "SkuPrice",
+            "skuId": "UP5155-PPSA27356_00-KINGDOMSHELL0000-J001",
+            "basePrice": "¥1,980",
+            "discountText": null,
+            "discountedPrice": "¥1,980",
+            "includesBundleOffer": false,
+            "isExclusive": false,
+            "isFree": false,
+            "isTiedToSubscription": false,
+            "serviceBranding": ["NONE"],
+            "upsellServiceBranding": ["NONE"],
+            "upsellText": null
+          },
+          "skus": [
+            {
+              "__typename": "Sku",
+              "type": "STANDARD"
+            }
+          ],
+          "storeDisplayClassification": "FULL_GAME"
+        }
+      ]
+    }
+  }
+}
