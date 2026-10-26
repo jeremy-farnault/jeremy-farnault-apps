@@ -148,6 +148,7 @@ export function needsRecheck(link: { lastCheckedAt: Date }, now: Date): boolean 
 }
 
 export const SORT_OPTIONS = [
+  { value: "discount-desc", label: "Biggest discount" },
   { value: "added-desc", label: "Recently added" },
   { value: "name-asc", label: "Name A–Z" },
   { value: "price-asc", label: "Price ↑" },
@@ -157,16 +158,18 @@ export const SORT_OPTIONS = [
 export type SortOption = (typeof SORT_OPTIONS)[number]["value"];
 
 export function parseSort(value: string | undefined): SortOption {
-  return SORT_OPTIONS.some((o) => o.value === value) ? (value as SortOption) : "added-desc";
+  return SORT_OPTIONS.some((o) => o.value === value) ? (value as SortOption) : "discount-desc";
 }
 
 /**
  * Orders the wishlist. Price sorts use the converted lowest price; items without a current
- * one (no eligible link) go last either way, in date-added order.
+ * one (no eligible link) go last either way, in date-added order. The discount sort uses the
+ * lowest price's discount (the badge on the row), then the price for equal discounts.
  */
 export function sortItems(items: ItemSummary[], sort: SortOption): ItemSummary[] {
   const priced = (i: ItemSummary) =>
     i.lowest && !i.lowest.unavailable ? i.lowest.current.converted : null;
+  const discountOf = (i: ItemSummary) => i.lowest?.latest?.discountPercent ?? 0;
   const byAdded = (a: ItemSummary, b: ItemSummary) => b.createdAt.getTime() - a.createdAt.getTime();
 
   return [...items].sort((a, b) => {
@@ -176,12 +179,17 @@ export function sortItems(items: ItemSummary[], sort: SortOption): ItemSummary[]
       case "added-desc":
         return byAdded(a, b);
       case "price-asc":
-      case "price-desc": {
+      case "price-desc":
+      case "discount-desc": {
         const pa = priced(a);
         const pb = priced(b);
         if (pa === null || pb === null) {
           if (pa === pb) return byAdded(a, b);
           return pa === null ? 1 : -1;
+        }
+        if (sort === "discount-desc") {
+          const discount = discountOf(b) - discountOf(a);
+          return discount !== 0 ? discount : pa - pb;
         }
         return sort === "price-asc" ? pa - pb : pb - pa;
       }

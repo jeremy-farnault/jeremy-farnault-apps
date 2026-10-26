@@ -150,13 +150,43 @@ describe("sortItems", () => {
     expect(names("price-asc")).toEqual(["Banana", "apple", "Date", "Cherry"]);
     expect(names("price-desc")).toEqual(["apple", "Banana", "Date", "Cherry"]);
   });
+
+  it("sorts by discount, then by price, with price-less items last", () => {
+    const sale = (name: string, price: number, discountPercent: number | null, daysAgo: number) =>
+      summarizeItem(
+        item(name, [link(check(price, "SEK", { discountPercent }))], daysAgo),
+        RATES,
+        "SEK"
+      );
+    const big = sale("Big sale", 5000, 50, 5);
+    const smallPricey = sale("Small sale, pricey", 9000, 20, 4);
+    const smallCheap = sale("Small sale, cheap", 2000, 20, 6);
+    const goneOnSale = summarizeItem(
+      item("Gone", [link(check(10, "SEK", { inStock: false, discountPercent: 90 }))], 7),
+      RATES,
+      "SEK"
+    );
+    const order = sortItems(
+      [cheap, smallPricey, unpriced, big, goneOnSale, smallCheap, pricey],
+      "discount-desc"
+    );
+    expect(order.map((i) => i.name)).toEqual([
+      "Big sale",
+      "Small sale, cheap",
+      "Small sale, pricey",
+      "Banana",
+      "apple",
+      "Date",
+      "Gone",
+    ]);
+  });
 });
 
 describe("parseSort", () => {
-  it("falls back to recently added", () => {
+  it("falls back to biggest discount", () => {
     expect(parseSort("price-asc")).toBe("price-asc");
-    expect(parseSort("nope")).toBe("added-desc");
-    expect(parseSort(undefined)).toBe("added-desc");
+    expect(parseSort("nope")).toBe("discount-desc");
+    expect(parseSort(undefined)).toBe("discount-desc");
   });
 });
 
