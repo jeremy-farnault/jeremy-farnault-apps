@@ -6,6 +6,8 @@ import { SUPPORTED_CURRENCIES, db, scannerItems, scannerLinks } from "@jf/db";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
+import type { DiscoverySource } from "./discovery";
+import { type PreviewEdition, toPreviewEdition } from "./preview-edition";
 import {
   type Edition,
   defaultSteamRegion,
@@ -15,9 +17,16 @@ import {
   storeFor,
 } from "./price-reader";
 import { nameMatchKey } from "./price-reader/match-key";
-import { findTrackedLinks, getWishlistMatchKeys } from "./queries";
+import { findTrackedLinks, getPsLink, getWishlistMatchKeys } from "./queries";
 import { deleteImage, ownsKey, presignUpload } from "./s3";
-import { type AddInput, type ImageChoice, type Rejection, rejection, saveLink } from "./save-link";
+import {
+  type AddInput,
+  type ImageChoice,
+  type Rejection,
+  type Saved,
+  rejection,
+  saveLink,
+} from "./save-link";
 import { suggestItem } from "./summary";
 
 export type { ImageChoice, Rejection } from "./save-link";
@@ -27,8 +36,6 @@ async function getUserId(): Promise<string> {
   if (!session) throw new Error("Unauthorized");
   return session.user.id;
 }
-
-export type PreviewEdition = Omit<Edition, "saleEndsAt"> & { saleEndsAt: string | null };
 
 export type LinkPreview = {
   url: string;
@@ -43,10 +50,6 @@ export type LinkPreview = {
   /** A wishlist item this link looks like it belongs to, when asked for one. */
   suggestion: { itemId: string; itemName: string } | null;
 };
-
-function toPreviewEdition(e: Edition): PreviewEdition {
-  return { ...e, saleEndsAt: e.saleEndsAt?.toISOString() ?? null };
-}
 
 /**
  * Reads a pasted link for the add preview. Nothing is saved: the preview only shows what
@@ -117,7 +120,7 @@ export async function previewLinkAction(input: {
  */
 export async function addItemAction(
   input: AddInput & { name: string; image: ImageChoice }
-): Promise<{ ok: true; itemId: string } | Rejection> {
+): Promise<Saved | Rejection> {
   const userId = await getUserId();
   const name = input.name.trim();
   if (!name) return { ok: false, reason: "unreadable", message: "Give the item a name." };
@@ -154,7 +157,7 @@ export async function setItemImageAction(input: {
 /** Adds a previewed link to one of the user's wishlist items. */
 export async function addLinkToItemAction(
   input: AddInput & { itemId: string }
-): Promise<{ ok: true; itemId: string } | Rejection> {
+): Promise<Saved | Rejection> {
   const userId = await getUserId();
   const [item] = await db
     .select({ id: scannerItems.id })
@@ -164,6 +167,30 @@ export async function addLinkToItemAction(
   if (!item)
     return { ok: false, reason: "not-found", message: "That item doesn't exist any more." };
   return saveLink(userId, input, { itemId: item.id });
+}
+
+/**
+ * What a search in other stores follows: the concept of the item's PS link, and the
+ * platforms and kind of the edition it tracks. Read from the store again rather than saved,
+ * so links that haven't learned their concept yet work too. Null when the item has no PS
+ * link, or its page can't be read right now.
+ */
+export async function prepareDiscoveryAction(input: {
+  itemId: string;
+}): Promise<DiscoverySource | null> {
+  const userId = await getUserId();
+  const link = await getPsLink(userId, input.itemId);
+  if (!link) return null;
+  const result = await readPrice(link.url, { region: link.region, editionId: link.editionId });
+  if (!result.ok) return null;
+  const { reading } = result;
+  const edition = reading.edition;
+  if (!reading.conceptId || !edition) return null;
+  return {
+    conceptId: reading.conceptId,
+    platforms: edition.platforms ?? [],
+    kind: edition.kind ?? null,
+  };
 }
 
 export async function renameItemAction(input: { itemId: string; name: string }): Promise<void> {

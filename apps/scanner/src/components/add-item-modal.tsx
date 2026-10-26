@@ -21,7 +21,8 @@ import { ImagePicker } from "./image-picker";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onAdded: () => void;
+  /** `newItem` is false when the link joined an item that already existed. */
+  onAdded: (added: { itemId: string; newItem: boolean; store: string }) => void;
   /** Adds the link to this item instead of creating a new one. */
   item?: { id: string; name: string };
 };
@@ -114,7 +115,7 @@ export function AddItemModal({ isOpen, onClose, onAdded, item }: Props) {
         return;
       }
       toast.success(into ? `Link added to ${into.name}` : `${name.trim()} added`);
-      onAdded();
+      onAdded({ itemId: result.itemId, newItem: !into, store: preview.store });
       onClose();
     } catch {
       toast.error("Something went wrong. Try again.");

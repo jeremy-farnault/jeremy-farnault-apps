@@ -1,6 +1,7 @@
 "use client";
 
 import { AddItemModal } from "@/components/add-item-modal";
+import { DiscoveryPanel } from "@/components/discovery-panel";
 import { ItemImage } from "@/components/item-image";
 import {
   deleteItemAction,
@@ -14,29 +15,46 @@ import {
 import { formatAgo, formatPrice, formatShortDate, storeLabel } from "@/lib/format";
 import { uploadItemImage } from "@/lib/item-image";
 import { minorDigits, toMinorUnits } from "@/lib/price-reader/money";
+import { PS_REGIONS } from "@/lib/price-reader/ps-store";
 import type { ItemDetail } from "@/lib/queries";
-import { type ItemSummary, type LinkSummary, convert, summarizeItem } from "@/lib/summary";
+import {
+  type ItemSummary,
+  type LinkSummary,
+  convert,
+  offeredStores,
+  summarizeItem,
+} from "@/lib/summary";
 import { useOnline } from "@/lib/use-online";
 import { ActionModal, Button, FloatingCTA, TextInput, cn } from "@jf/ui";
 import {
   ArrowLeftIcon,
   ArrowSquareOutIcon,
+  MagnifyingGlassIcon,
   PencilSimpleIcon,
   PlusIcon,
   ShoppingBagIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-type Props = { item: ItemDetail; rates: Record<string, number>; homeCurrency: string };
+type Props = {
+  item: ItemDetail;
+  rates: Record<string, number>;
+  homeCurrency: string;
+  /** Every store and region the user has links in. */
+  userStores: { store: string; region: string | null }[];
+  /** Open the search in other stores straight away (after adding a new item). */
+  discover: boolean;
+};
 
 type DetailLink = ItemDetail["links"][number];
 
-export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
+export function ItemDetailClient({ item, rates, homeCurrency, userStores, discover }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const summary = summarizeItem(item, rates, homeCurrency);
   const [adding, setAdding] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -45,6 +63,26 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
   const [changingImage, setChangingImage] = useState(false);
   const [buying, setBuying] = useState(false);
   const online = useOnline();
+  const [discovering, setDiscovering] = useState(discover && !item.bought);
+
+  // The flag has done its job once the panel is open; a reload shouldn't reopen it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only on arrival.
+  useEffect(() => {
+    if (discover) router.replace(pathname, { scroll: false });
+  }, []);
+
+  // Other PS regions are found through the item's PS link, so only an item with one can
+  // look in them. Other stores join once they can search.
+  const hasPsLink = item.links.some((l) => l.store === "ps-store");
+  const canFind = (store: string) => store === "ps-store" && hasPsLink;
+  const offered = offeredStores(userStores, item.links, canFind);
+  const others = hasPsLink
+    ? PS_REGIONS.filter(
+        (r) =>
+          !item.links.some((l) => l.store === "ps-store" && l.region === r.region) &&
+          !offered.some((o) => o.store === "ps-store" && o.region === r.region)
+      ).map((r) => ({ store: "ps-store", region: r.region, label: `PS Store · ${r.label}` }))
+    : [];
 
   const linkSummaries = new Map(summary.links.map((l) => [l.id, l]));
 
@@ -99,9 +137,32 @@ export function ItemDetailClient({ item, rates, homeCurrency }: Props) {
           </Button>
         </section>
       ) : (
-        <Button onClick={() => setBuying(true)} disabled={!online} className="self-start gap-2">
-          <ShoppingBagIcon size={18} /> Mark as bought
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={() => setBuying(true)} disabled={!online} className="gap-2">
+            <ShoppingBagIcon size={18} /> Mark as bought
+          </Button>
+          {!discovering && (
+            <Button
+              variant="outline"
+              onClick={() => setDiscovering(true)}
+              disabled={!online}
+              className="gap-2"
+            >
+              <MagnifyingGlassIcon size={18} /> Find in other stores
+            </Button>
+          )}
+        </div>
+      )}
+
+      {discovering && !item.bought && (
+        <DiscoveryPanel
+          item={{ id: item.id, name: item.name }}
+          offered={offered}
+          others={others}
+          online={online}
+          onClose={() => setDiscovering(false)}
+          onAdded={() => router.refresh()}
+        />
       )}
 
       <ul className="flex flex-col gap-3">

@@ -204,7 +204,12 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
       <AddItemModal
         isOpen={adding}
         onClose={() => setAdding(false)}
-        onAdded={() => router.refresh()}
+        onAdded={({ itemId, newItem, store }) =>
+          // A new game opens on its page, ready to look for it in the user's other stores.
+          newItem && (store === "ps-store" || store === "steam")
+            ? router.push(`/items/${itemId}?discover=1`)
+            : router.refresh()
+        }
       />
     </div>
   );

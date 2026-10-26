@@ -220,3 +220,25 @@ export function suggestItem(
   };
   return pick(candidates.storeKey) ?? pick(candidates.nameKey);
 }
+
+export type StoreRegion = { store: string; region: string };
+
+/**
+ * The stores and regions to look for an item in: the ones the user already has links in,
+ * which tells Scanner where they shop, keeping only stores that can look an item up, and
+ * leaving out where the item already is.
+ */
+export function offeredStores(
+  userLinks: { store: string; region: string | null }[],
+  itemLinks: { store: string; region: string | null }[],
+  canFind: (store: string) => boolean
+): StoreRegion[] {
+  const key = (l: { store: string; region: string | null }) => `${l.store}:${l.region}`;
+  const taken = new Set(itemLinks.map(key));
+  const offered = new Map<string, StoreRegion>();
+  for (const link of userLinks) {
+    if (link.region === null || !canFind(link.store) || taken.has(key(link))) continue;
+    offered.set(key(link), { store: link.store, region: link.region });
+  }
+  return [...offered.values()];
+}

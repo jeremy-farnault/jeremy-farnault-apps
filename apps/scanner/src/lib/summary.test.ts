@@ -5,6 +5,7 @@ import {
   type SummaryLink,
   convert,
   needsRecheck,
+  offeredStores,
   parseSort,
   sortItems,
   suggestItem,
@@ -229,5 +230,33 @@ describe("suggestItem", () => {
   it("suggests nothing without a match", () => {
     expect(suggestItem({ storeKey: "ps-concept:999", nameKey: "elden ring" }, tracked)).toBeNull();
     expect(suggestItem({ storeKey: null, nameKey: "" }, tracked)).toBeNull();
+  });
+});
+
+describe("offeredStores", () => {
+  const userLinks = [
+    { store: "ps-store", region: "SE" },
+    { store: "ps-store", region: "JP" },
+    { store: "steam", region: "SE" },
+    { store: "ps-store", region: "JP" },
+    { store: "ps-store", region: "NZ" },
+    { store: "web", region: null },
+  ];
+
+  it("offers the user's stores that can search, once each, minus the item's own", () => {
+    expect(
+      offeredStores(userLinks, [{ store: "ps-store", region: "SE" }], (s) => s === "ps-store")
+    ).toEqual([
+      { store: "ps-store", region: "JP" },
+      { store: "ps-store", region: "NZ" },
+    ]);
+  });
+
+  it("keeps the same region in another store apart", () => {
+    expect(
+      offeredStores(userLinks, [{ store: "steam", region: "SE" }], () => true).map(
+        (s) => `${s.store} ${s.region}`
+      )
+    ).toEqual(["ps-store SE", "ps-store JP", "ps-store NZ"]);
   });
 });

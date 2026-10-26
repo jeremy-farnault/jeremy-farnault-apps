@@ -3,7 +3,13 @@ import "server-only";
 import { db, scannerItems, scannerLinks, scannerPriceChecks, withTransaction } from "@jf/db";
 import { eq } from "drizzle-orm";
 
-import { type RejectionReason, normalizeUrl, parseLink, readPrice } from "./price-reader";
+import {
+  type Edition,
+  type RejectionReason,
+  normalizeUrl,
+  parseLink,
+  readPrice,
+} from "./price-reader";
 import { findTrackedLinks } from "./queries";
 import { copyImage, deleteImage, ownsKey } from "./s3";
 
@@ -59,12 +65,15 @@ export type AddInput = {
  */
 export type ImageChoice = "found" | "none" | { key: string };
 
+/** A saved link: its item, and the product and edition it was read as. */
+export type Saved = { ok: true; itemId: string; name: string; edition: Edition };
+
 /** Reads the link once more and saves it, with its first price check, in one transaction. */
 export async function saveLink(
   userId: string,
   input: AddInput,
   target: { name: string; image: ImageChoice } | { itemId: string }
-): Promise<{ ok: true; itemId: string } | Rejection> {
+): Promise<Saved | Rejection> {
   const url = parseLink(input.url);
   if (!url) return rejection("unreadable");
 
@@ -141,7 +150,7 @@ export async function saveLink(
       });
       return itemId;
     });
-    return { ok: true, itemId };
+    return { ok: true, itemId, name: reading.name, edition };
   } catch (err) {
     if (imageKey) await deleteImage(userId, imageKey);
     if (isUniqueViolation(err)) {

@@ -123,6 +123,40 @@ export async function findTrackedLinks(
     );
 }
 
+/** Every store and region the user has a link in, which tells Scanner where they shop. */
+export async function getUserStores(
+  userId: string
+): Promise<{ store: string; region: string | null }[]> {
+  return db
+    .selectDistinct({ store: scannerLinks.store, region: scannerLinks.region })
+    .from(scannerLinks)
+    .where(eq(scannerLinks.userId, userId));
+}
+
+/** The PS Store link an item's search in other regions follows: its oldest one. */
+export async function getPsLink(
+  userId: string,
+  itemId: string
+): Promise<{ url: string; region: string | null; editionId: string | null } | null> {
+  const [link] = await db
+    .select({
+      url: scannerLinks.url,
+      region: scannerLinks.region,
+      editionId: scannerLinks.editionId,
+    })
+    .from(scannerLinks)
+    .where(
+      and(
+        eq(scannerLinks.userId, userId),
+        eq(scannerLinks.itemId, itemId),
+        eq(scannerLinks.store, "ps-store")
+      )
+    )
+    .orderBy(asc(scannerLinks.createdAt))
+    .limit(1);
+  return link ?? null;
+}
+
 /** A link's most recent successful check, or null if it has never had one. */
 export async function getLatestCheck(linkId: string): Promise<LinkRow["latest"]> {
   const [check] = await db

@@ -14,6 +14,28 @@ import type { PageEdition, PageReading } from "./types";
 type Json = Record<string, unknown>;
 type Cache = Map<string, Json>;
 
+/** The PS Store regions Scanner offers, one per supported currency, with their locale. */
+export const PS_REGIONS = [
+  { region: "SE", locale: "sv-se", label: "Sweden (SEK)" },
+  { region: "NZ", locale: "en-nz", label: "New Zealand (NZD)" },
+  { region: "JP", locale: "ja-jp", label: "Japan (JPY)" },
+  { region: "US", locale: "en-us", label: "United States (USD)" },
+  { region: "GB", locale: "en-gb", label: "United Kingdom (GBP)" },
+  { region: "DE", locale: "de-de", label: "Germany (EUR)" },
+] as const;
+
+export function psLocale(region: string): string | null {
+  return PS_REGIONS.find((r) => r.region === region)?.locale ?? null;
+}
+
+export function psConceptUrl(locale: string, conceptId: string): string {
+  return `https://store.playstation.com/${locale}/concept/${encodeURIComponent(conceptId)}`;
+}
+
+export function psProductUrl(locale: string, productId: string): string {
+  return `https://store.playstation.com/${locale}/product/${encodeURIComponent(productId)}`;
+}
+
 export type PsLink = { kind: "product" | "concept"; id: string; locale: string; region: string };
 
 /**
