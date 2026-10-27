@@ -148,19 +148,20 @@ export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
         </div>
       ) : (
         <>
+          {/* Two rows: the button's label changes width while checking, and mustn't move the rest. */}
+          <Button
+            variant="outline"
+            onClick={() => enqueue(allLinks)}
+            disabled={busy || !online}
+            className="mb-3 gap-2 self-start tabular-nums"
+          >
+            <ArrowsClockwiseIcon size={18} className={cn(busy && "animate-spin")} />
+            {busy ? `Checking ${checking.size}…` : "Check all"}
+          </Button>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <Button
-              variant="outline"
-              onClick={() => enqueue(allLinks)}
-              disabled={busy || !online}
-              className="gap-2"
-            >
-              <ArrowsClockwiseIcon size={18} className={cn(busy && "animate-spin")} />
-              {busy ? `Checking ${checking.size}…` : "Check all"}
-            </Button>
             <Link
               href="/bought"
-              className="ml-auto flex items-center gap-1.5 text-sm text-(--text-secondary) transition-colors hover:text-(--text)"
+              className="flex items-center gap-1.5 text-sm text-(--text-secondary) transition-colors hover:text-(--text)"
             >
               <ShoppingBagIcon size={16} /> Bought
             </Link>
