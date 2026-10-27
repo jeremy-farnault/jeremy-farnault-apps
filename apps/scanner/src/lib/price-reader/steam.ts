@@ -17,6 +17,7 @@ export const STEAM_REGIONS = [
   { region: "US", label: "United States (USD)" },
   { region: "GB", label: "United Kingdom (GBP)" },
   { region: "DE", label: "Germany (EUR)" },
+  { region: "CA", label: "Canada (CAD)" },
 ] as const;
 
 const REGION_FOR_CURRENCY: Record<string, string> = {
@@ -26,6 +27,7 @@ const REGION_FOR_CURRENCY: Record<string, string> = {
   USD: "US",
   GBP: "GB",
   EUR: "DE",
+  CAD: "CA",
 };
 
 /** The Steam storefront a user most likely buys from, from their home currency. */

@@ -22,6 +22,7 @@ export const PS_REGIONS = [
   { region: "US", locale: "en-us", label: "United States (USD)" },
   { region: "GB", locale: "en-gb", label: "United Kingdom (GBP)" },
   { region: "DE", locale: "de-de", label: "Germany (EUR)" },
+  { region: "CA", locale: "en-ca", label: "Canada (CAD)" },
 ] as const;
 
 export function psLocale(region: string): string | null {

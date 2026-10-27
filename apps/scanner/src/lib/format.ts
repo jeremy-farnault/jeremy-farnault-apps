@@ -46,6 +46,8 @@ function localeFor(currency: string): string {
       return "en-NZ";
     case "GBP":
       return "en-GB";
+    case "CAD":
+      return "en-CA";
     case "EUR":
       return "de-DE";
     default:

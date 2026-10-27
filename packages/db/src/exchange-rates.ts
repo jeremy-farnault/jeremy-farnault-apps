@@ -3,7 +3,7 @@ import { inArray } from "drizzle-orm";
 import { db } from "./client";
 import { exchangeRates } from "./schema/exchange-rates";
 
-export const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "SEK", "NZD", "JPY"] as const;
+export const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "SEK", "NZD", "JPY", "CAD"] as const;
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
 
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
