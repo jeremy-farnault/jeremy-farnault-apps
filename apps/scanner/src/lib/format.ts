@@ -16,9 +16,13 @@ export function formatPrice(minor: number, currency: string, { round = false } =
   }).format(minor / 10 ** digits);
 }
 
-/** "4 Nov", or "4 Nov 2027" outside the current year. */
-export function formatShortDate(date: Date, now = new Date()): string {
+/**
+ * "4 Nov", or "4 Nov 2027" outside the current year. In the device's timezone unless one
+ * is given (the server has no device, so the email passes Stockholm's).
+ */
+export function formatShortDate(date: Date, now = new Date(), timeZone?: string): string {
   return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
     day: "numeric",
     month: "short",
     ...(date.getFullYear() !== now.getFullYear() && { year: "numeric" }),

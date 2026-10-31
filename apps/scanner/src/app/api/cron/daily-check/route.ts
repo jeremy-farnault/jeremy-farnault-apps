@@ -23,6 +23,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ skipped: "not 7:00 in Stockholm" });
   }
 
+  // Item links in the email point back at whichever deployment the workflow called.
+  const appUrl = new URL(request.url).origin;
   const [recipients, rates] = await Promise.all([getDigestRecipients(), getExchangeRates()]);
   let sent = 0;
   for (const { userId, email } of recipients) {
@@ -30,7 +32,8 @@ export async function GET(request: Request) {
 
     const [items, settings] = await Promise.all([getWishlist(userId), getUserSettings(userId)]);
     const digest = buildDigest(
-      items.map((item) => summarizeItem(item, rates, settings.homeCurrency))
+      items.map((item) => summarizeItem(item, rates, settings.homeCurrency)),
+      { homeCurrency: settings.homeCurrency, appUrl, now: new Date() }
     );
     if (!digest) continue;
     await sendEmail({ to: email, ...digest });
