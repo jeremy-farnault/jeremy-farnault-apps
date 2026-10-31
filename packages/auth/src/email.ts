@@ -11,7 +11,10 @@ function getResend(): Resend {
   return resendClient;
 }
 
-/** Sends an email from RESEND_FROM_EMAIL. */
+/**
+ * Sends an email from RESEND_FROM_EMAIL. Throws when Resend refuses it, which its client
+ * reports as a returned error rather than a thrown one.
+ */
 export async function sendEmail({
   to,
   subject,
@@ -21,10 +24,11 @@ export async function sendEmail({
   subject: string;
   html: string;
 }): Promise<void> {
-  await getResend().emails.send({
+  const { error } = await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL ?? "",
     to,
     subject,
     html,
   });
+  if (error) throw new Error(`Resend refused the email: ${error.message}`);
 }
