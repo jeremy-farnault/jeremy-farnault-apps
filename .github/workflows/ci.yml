@@ -52,8 +52,10 @@ jobs:
       # - name: Unit tests
       #   run: pnpm turbo run test
 
+      # Two at a time: each Next.js build takes 1.5–2 GB, and turbo's default of ten at once
+      # ran the 16 GB runner out of memory.
       - name: Build
-        run: pnpm turbo run build
+        run: pnpm turbo run build --concurrency=2
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_CI }}
           BETTER_AUTH_SECRET: "ci-secret-placeholder-32-characters"
