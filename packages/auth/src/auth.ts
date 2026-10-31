@@ -1,18 +1,8 @@
 import { db } from "@jf/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { Resend } from "resend";
 
-// Constructed lazily so a missing RESEND_API_KEY doesn't crash module
-// evaluation (e.g. local dev without email configured); the key is only
-// required when a verification email is actually sent.
-let resendClient: Resend | null = null;
-function getResend(): Resend {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY is not set");
-  resendClient ??= new Resend(apiKey);
-  return resendClient;
-}
+import { sendEmail } from "./email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -22,8 +12,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
-      await getResend().emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? "",
+      await sendEmail({
         to: user.email,
         subject: "Verify your email",
         html: `<p>Click <a href="${url}">here</a> to verify your email address.</p>`,
