@@ -8,6 +8,15 @@ export type CheckJob = {
   store: string;
 };
 
+/** The store a link's requests go to, so the queue can keep to one at a time per store. */
+export function storeKey(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
 export type QueueOptions<R> = {
   concurrency?: number;
   check: (linkId: string) => Promise<R>;

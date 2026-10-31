@@ -18,7 +18,8 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // The service worker, manifest and icons must load without a session: the browser
-    // fetches them on its own, and an installed app needs them to start offline.
-    "/((?!api/auth|_next/static|_next/image|favicon\\.png|favicon\\.ico|background\\.svg|sw\\.js|manifest\\.json|icons/).*)",
+    // fetches them on its own, and an installed app needs them to start offline. The cron
+    // route checks its own bearer token.
+    "/((?!api/auth|api/cron|_next/static|_next/image|favicon\\.png|favicon\\.ico|background\\.svg|sw\\.js|manifest\\.json|icons/).*)",
   ],
 };

@@ -2,7 +2,7 @@
 
 import { requestCheck } from "@/lib/check-client";
 import type { CheckedLink } from "@/lib/check-link";
-import { createCheckQueue } from "@/lib/check-queue";
+import { createCheckQueue, storeKey } from "@/lib/check-queue";
 import type { ItemRow } from "@/lib/queries";
 import {
   SORT_OPTIONS,
@@ -26,15 +26,6 @@ type Props = {
   homeCurrency: string;
   sort: SortOption;
 };
-
-/** The store a link's requests go to, so the queue can keep to one at a time per store. */
-function storeKey(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-}
 
 export function WishlistClient({ items, rates, homeCurrency, sort }: Props) {
   const router = useRouter();

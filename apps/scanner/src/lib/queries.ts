@@ -1,4 +1,4 @@
-import { db, scannerItems, scannerLinks, scannerPriceChecks } from "@jf/db";
+import { db, scannerItems, scannerLinks, scannerPriceChecks, user } from "@jf/db";
 import { and, asc, desc, eq, inArray, isNull, max, min, sql } from "drizzle-orm";
 import { getPublicImageUrl } from "./s3-url";
 
@@ -345,4 +345,14 @@ export async function getBought(userId: string): Promise<BoughtRow[]> {
     ...row,
     imageUrl: imageKey ? getPublicImageUrl(imageKey) : null,
   }));
+}
+
+/** Everyone with a link on their wishlist, and where to send their daily discount email. */
+export async function getDigestRecipients(): Promise<{ userId: string; email: string }[]> {
+  return db
+    .selectDistinct({ userId: user.id, email: user.email })
+    .from(scannerLinks)
+    .innerJoin(scannerItems, eq(scannerItems.id, scannerLinks.itemId))
+    .innerJoin(user, eq(user.id, scannerLinks.userId))
+    .where(eq(scannerItems.status, "wishlist"));
 }
