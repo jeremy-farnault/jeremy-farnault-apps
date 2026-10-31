@@ -52,11 +52,13 @@ jobs:
       # - name: Unit tests
       #   run: pnpm turbo run test
 
-      # Two at a time: each Next.js build takes 1.5–2 GB, and turbo's default of ten at once
-      # ran the 16 GB runner out of memory.
+      # Only the packages a change touches, and the apps that depend on them: compared with the
+      # PR's base, or on main with the previous head. Two at a time: each Next.js build takes
+      # 1.5–2 GB, and turbo's default of ten at once ran the 16 GB runner out of memory.
       - name: Build
-        run: pnpm turbo run build --concurrency=2
+        run: pnpm turbo run build --affected --concurrency=2
         env:
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           DATABASE_URL: ${{ secrets.DATABASE_URL_CI }}
           BETTER_AUTH_SECRET: "ci-secret-placeholder-32-characters"
           BETTER_AUTH_URL: "https://placeholder.vercel.app"
