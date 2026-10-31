@@ -13,8 +13,17 @@ jobs:
     name: Trigger daily check endpoint
     runs-on: ubuntu-latest
     steps:
+      # Fails on anything but a 2xx. `curl -f` alone lets a redirect through as success, so a
+      # SCANNER_URL that redirects (http://, or a domain Vercel forwards) never reached the route.
       - name: Call daily check cron
         run: |
-          curl -f -X GET --max-time 320 \
+          status=$(curl -sS -o response.txt -w '%{http_code}' -X GET --max-time 320 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.SCANNER_URL }}/api/cron/daily-check${{ github.event_name == 'workflow_dispatch' && '?force=1' || '' }}"
+            "${{ secrets.SCANNER_URL }}/api/cron/daily-check${{ github.event_name == 'workflow_dispatch' && '?force=1' || '' }}")
+          echo "HTTP $status"
+          cat response.txt; echo
+          case "$status" in
+            2??) ;;
+            3??) echo "::error::SCANNER_URL redirects: set it to the final https:// address"; exit 1 ;;
+            *) exit 1 ;;
+          esac
