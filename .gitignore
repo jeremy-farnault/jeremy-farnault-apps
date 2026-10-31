@@ -48,3 +48,6 @@ public/workbox-*.js.map
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
