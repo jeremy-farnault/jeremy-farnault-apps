@@ -33,6 +33,8 @@ export type DigestOptions = {
   /** Scanner's origin, for links to item pages. */
   appUrl: string;
   now: Date;
+  /** Links the morning run ran out of time for: they keep yesterday's price. */
+  unchecked?: string[];
 };
 
 type OnSaleItem = { item: ItemSummary; links: LinkSummary[] };
@@ -53,8 +55,28 @@ export function buildDigest(items: ItemSummary[], options: DigestOptions): Diges
   const subject = `${count} ${count === 1 ? "item" : "items"} on sale`;
   const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">${onSale
     .map((entry) => itemHtml(entry, options))
-    .join("")}</div>`;
+    .join("")}${footerHtml(items, options.unchecked ?? [])}</div>`;
   return { subject, html };
+}
+
+/**
+ * The links without a fresh price: the ones whose check failed this morning (often a store
+ * that changed its page), then the ones the run didn't get to. Empty when every check worked.
+ */
+function footerHtml(items: ItemSummary[], unchecked: string[]): string {
+  const skipped = new Set(unchecked);
+  const named = (pick: (link: LinkSummary) => boolean) =>
+    items.flatMap((item) => item.links.filter(pick).map((l) => `${item.name} (${linkLabel(l)})`));
+  const failed = named((l) => l.lastStatus === "failed" && !skipped.has(l.id));
+  const notChecked = named((l) => skipped.has(l.id));
+  const section = (title: string, names: string[]) =>
+    names.length
+      ? `<p style="margin:12px 0 0">${title}: ${names.map(escapeHtml).join(", ")}</p>`
+      : "";
+  const body =
+    section("Couldn't be checked this morning", failed) +
+    section("Not checked today, showing yesterday's price", notChecked);
+  return body ? `<div style="padding-top:8px;font-size:12px;color:#666">${body}</div>` : "";
 }
 
 function itemHtml({ item, links }: OnSaleItem, options: DigestOptions): string {

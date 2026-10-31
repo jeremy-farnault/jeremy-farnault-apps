@@ -90,6 +90,69 @@ describe("createCheckQueue", () => {
 
   it("is idle straight away with nothing to do", async () => {
     const queue = createCheckQueue({ check: async () => null, onResult: () => {} });
-    await expect(queue.whenIdle()).resolves.toBeUndefined();
+    await expect(queue.whenIdle()).resolves.toEqual([]);
+  });
+
+  it("starts nothing after the deadline, lets running checks finish, and reports the rest", async () => {
+    const checks = controlledChecks();
+    const results: string[] = [];
+    let clock = 0;
+    const queue = createCheckQueue({
+      concurrency: 1,
+      check: checks.check,
+      onResult: (id) => results.push(id),
+      deadline: 100,
+      now: () => clock,
+    });
+    queue.add([
+      { linkId: "a", store: "x" },
+      { linkId: "b", store: "y" },
+      { linkId: "c", store: "z" },
+    ]);
+    const idle = queue.whenIdle();
+
+    await checks.finish("a");
+    expect(checks.running()).toEqual(["b"]);
+
+    clock = 100;
+    await checks.finish("b");
+    expect(checks.started).toEqual(["a", "b"]);
+    expect(results).toEqual(["a", "b"]);
+    await expect(idle).resolves.toEqual(["c"]);
+    expect(queue.has("c")).toBe(false);
+  });
+
+  it("drops everything when added after the deadline", async () => {
+    const checks = controlledChecks();
+    const queue = createCheckQueue({
+      check: checks.check,
+      onResult: () => {},
+      deadline: 100,
+      now: () => 200,
+    });
+    queue.add([
+      { linkId: "a", store: "x" },
+      { linkId: "b", store: "y" },
+    ]);
+    expect(checks.started).toEqual([]);
+    await expect(queue.whenIdle()).resolves.toEqual(["a", "b"]);
+  });
+
+  it("runs everything without a deadline, however long it takes", async () => {
+    let clock = 0;
+    const queue = createCheckQueue({
+      concurrency: 1,
+      check: async (id) => {
+        clock += 1_000_000;
+        return id;
+      },
+      onResult: () => {},
+      now: () => clock,
+    });
+    queue.add([
+      { linkId: "a", store: "x" },
+      { linkId: "b", store: "x" },
+    ]);
+    await expect(queue.whenIdle()).resolves.toEqual([]);
   });
 });

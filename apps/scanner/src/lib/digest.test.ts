@@ -147,6 +147,46 @@ describe("buildDigest", () => {
     expect(digestOf([without])?.html).not.toContain("<img");
   });
 
+  it("lists failed and unchecked links in the footer", () => {
+    const onSale = link(sale(20000, 15000, "SEK"));
+    const failed = link(check(29900, "SEK"), { region: "JP", lastStatus: "failed" });
+    const neverRead = link(null, {
+      store: "web",
+      url: "https://www.kjell.com/x",
+      region: null,
+      lastStatus: "failed",
+    });
+    const skipped = link(check(59900, "SEK"), { store: "steam", lastStatus: "failed" });
+    const html =
+      buildDigest([item("Kena", [onSale, failed]), item("Cable", [neverRead, skipped])], {
+        ...OPTIONS,
+        unchecked: [skipped.id],
+      })?.html ?? "";
+    expect(html).toContain(
+      "Couldn't be checked this morning: Kena (PS Store JP), Cable (kjell.com)"
+    );
+    expect(html).toContain("Not checked today, showing yesterday's price: Cable (Steam SE)");
+  });
+
+  it("has no footer when every check worked", () => {
+    const html = digestOf([item("Kena", [link(sale(20000, 15000, "SEK"))])])?.html ?? "";
+    expect(html).not.toContain("checked");
+  });
+
+  it("sends nothing on a day with only failed links and no sale", () => {
+    const failed = link(check(29900, "SEK"), { lastStatus: "failed" });
+    expect(buildDigest([item("Kena", [failed])], { ...OPTIONS, unchecked: ["x"] })).toBeNull();
+  });
+
+  it("keeps an unchecked link's sale from yesterday", () => {
+    const skipped = link(sale(20000, 15000, "SEK"));
+    const digest = buildDigest([item("Kena", [skipped])], { ...OPTIONS, unchecked: [skipped.id] });
+    expect(digest?.subject).toBe("1 item on sale");
+    expect(digest?.html).toContain(
+      "Not checked today, showing yesterday's price: Kena (PS Store SE)"
+    );
+  });
+
   it("escapes the item name", () => {
     const html = digestOf([item("<b>Tom & Jerry</b>", [link(sale(100, 50, "SEK"))])])?.html;
     expect(html).toContain("&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;");

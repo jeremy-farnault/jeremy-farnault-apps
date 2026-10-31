@@ -21,16 +21,37 @@ export type QueueOptions<R> = {
   concurrency?: number;
   check: (linkId: string) => Promise<R>;
   onResult: (linkId: string, result: R | null) => void;
+  /**
+   * When to stop starting checks, in epoch ms. Checks already running finish; the ones still
+   * waiting are dropped, and `whenIdle` reports them. The morning run uses it to send its
+   * email before the function's time limit.
+   */
+  deadline?: number;
+  /** Injected so tests control the clock. */
+  now?: () => number;
 };
 
-export function createCheckQueue<R>({ concurrency = 3, check, onResult }: QueueOptions<R>) {
+export function createCheckQueue<R>({
+  concurrency = 3,
+  check,
+  onResult,
+  deadline,
+  now = Date.now,
+}: QueueOptions<R>) {
   const waiting: CheckJob[] = [];
   const known = new Set<string>();
   const busyStores = new Set<string>();
+  const dropped: string[] = [];
   let running = 0;
-  let idle: (() => void)[] = [];
+  let idle: ((dropped: string[]) => void)[] = [];
 
   function pump() {
+    if (deadline !== undefined && now() >= deadline) {
+      for (const job of waiting.splice(0)) {
+        known.delete(job.linkId);
+        dropped.push(job.linkId);
+      }
+    }
     while (running < concurrency) {
       const index = waiting.findIndex((job) => !busyStores.has(job.store));
       if (index === -1) break;
@@ -53,7 +74,7 @@ export function createCheckQueue<R>({ concurrency = 3, check, onResult }: QueueO
     if (running === 0 && waiting.length === 0) {
       const done = idle;
       idle = [];
-      for (const resolve of done) resolve();
+      for (const resolve of done) resolve([...dropped]);
     }
   }
 
@@ -74,9 +95,9 @@ export function createCheckQueue<R>({ concurrency = 3, check, onResult }: QueueO
     has(linkId: string): boolean {
       return known.has(linkId);
     },
-    /** Resolves once nothing is waiting or running. */
-    whenIdle(): Promise<void> {
-      if (running === 0 && waiting.length === 0) return Promise.resolve();
+    /** Resolves once nothing is waiting or running, with the links the deadline dropped. */
+    whenIdle(): Promise<string[]> {
+      if (running === 0 && waiting.length === 0) return Promise.resolve([...dropped]);
       return new Promise((resolve) => idle.push(resolve));
     },
   };
