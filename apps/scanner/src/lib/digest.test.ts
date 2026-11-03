@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDigest, isSendHour } from "./digest";
+import { buildDigest } from "./digest";
 import { formatPrice } from "./format";
 import { type SummaryCheck, type SummaryLink, summarizeItem } from "./summary";
 
@@ -190,38 +190,5 @@ describe("buildDigest", () => {
   it("escapes the item name", () => {
     const html = digestOf([item("<b>Tom & Jerry</b>", [link(sale(100, 50, "SEK"))])])?.html;
     expect(html).toContain("&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;");
-  });
-});
-
-describe("isSendHour", () => {
-  // Stockholm is UTC+2 until the last Sunday of October (25 Oct 2026), then UTC+1 until the
-  // last Sunday of March (28 Mar 2027).
-  const utc = (iso: string) => new Date(`${iso}Z`);
-
-  it("is true at 7:xx in Stockholm in summer time (05:xx UTC)", () => {
-    expect(isSendHour(utc("2026-07-15T05:00:00"))).toBe(true);
-    expect(isSendHour(utc("2026-07-15T05:59:00"))).toBe(true);
-    expect(isSendHour(utc("2026-07-15T04:59:00"))).toBe(false);
-    expect(isSendHour(utc("2026-07-15T06:00:00"))).toBe(false);
-  });
-
-  it("is true at 7:xx in Stockholm in winter time (06:xx UTC)", () => {
-    expect(isSendHour(utc("2027-01-15T06:00:00"))).toBe(true);
-    expect(isSendHour(utc("2027-01-15T05:00:00"))).toBe(false);
-    expect(isSendHour(utc("2027-01-15T07:00:00"))).toBe(false);
-  });
-
-  it("follows the October clock change", () => {
-    // Saturday 24 Oct, still summer time; Sunday 25 Oct, winter time from 03:00.
-    expect(isSendHour(utc("2026-10-24T05:10:00"))).toBe(true);
-    expect(isSendHour(utc("2026-10-25T05:10:00"))).toBe(false);
-    expect(isSendHour(utc("2026-10-25T06:10:00"))).toBe(true);
-  });
-
-  it("follows the March clock change", () => {
-    // Saturday 27 Mar, still winter time; Sunday 28 Mar, summer time from 02:00.
-    expect(isSendHour(utc("2027-03-27T06:10:00"))).toBe(true);
-    expect(isSendHour(utc("2027-03-28T06:10:00"))).toBe(false);
-    expect(isSendHour(utc("2027-03-28T05:10:00"))).toBe(true);
   });
 });

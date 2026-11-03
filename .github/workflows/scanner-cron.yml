@@ -2,10 +2,9 @@ name: Scanner Daily Discount Email
 
 on:
   schedule:
-    # 7:00 in Stockholm: 05:00 UTC in summer time, 06:00 UTC in winter time. The route only
-    # acts on the run that lands at 7:xx.
-    - cron: '0 5 * * *'
-    - cron: '0 6 * * *'
+    # Once a day. GitHub often starts scheduled runs hours late, so the email lands whenever
+    # this run does. Off the top of the hour, where delays are worst.
+    - cron: '17 5 * * *'
   workflow_dispatch:
 
 jobs:
@@ -24,7 +23,7 @@ jobs:
           base=${base%/}
           status=$(curl -sS -o response.txt -w '%{http_code}' -X GET --max-time 320 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "$base/api/cron/daily-check${{ github.event_name == 'workflow_dispatch' && '?force=1' || '' }}")
+            "$base/api/cron/daily-check")
           echo "HTTP $status"
           cat response.txt; echo
           case "$status" in

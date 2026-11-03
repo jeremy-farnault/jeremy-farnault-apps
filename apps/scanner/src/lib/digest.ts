@@ -5,21 +5,6 @@ import type { ItemSummary, LinkSummary } from "./summary";
 // come in already summarised, and "now" is an argument, so every rule is testable.
 
 const SEND_TIME_ZONE = "Europe/Stockholm";
-const SEND_HOUR = 7;
-
-/**
- * True during the hour the email goes out (7:xx in Stockholm). The workflow runs at both
- * 05:00 and 06:00 UTC, one for summer time and one for winter time, and this picks the
- * run that lands at 7.
- */
-export function isSendHour(now: Date): boolean {
-  const hour = new Intl.DateTimeFormat("en-GB", {
-    timeZone: SEND_TIME_ZONE,
-    hour: "numeric",
-    hourCycle: "h23",
-  }).format(now);
-  return Number(hour) === SEND_HOUR;
-}
 
 /** On sale today: a sale price on its latest check, in stock, and that check is fresh. */
 export function isOnSale(link: LinkSummary): boolean {

@@ -1,6 +1,6 @@
 import { checkLink } from "@/lib/check-link";
 import { createCheckQueue, storeKey } from "@/lib/check-queue";
-import { buildDigest, isSendHour } from "@/lib/digest";
+import { buildDigest } from "@/lib/digest";
 import { getDigestRecipients, getWishlist } from "@/lib/queries";
 import { summarizeItem } from "@/lib/summary";
 import { sendEmail } from "@jf/auth";
@@ -14,17 +14,12 @@ export const maxDuration = 300;
 // for checks already running, and for building and sending the emails.
 const CHECK_BUDGET_MS = 240_000;
 
-// The morning run, called by the Scanner cron workflow at 05:00 and 06:00 UTC: checks every
-// wishlist link, then emails each user their items on sale. Only the run that lands at 7:xx
-// in Stockholm does anything; `force=1` (manual runs) skips that.
+// The daily run, called once a day by the Scanner cron workflow: checks every wishlist link,
+// then emails each user their items on sale.
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const force = new URL(request.url).searchParams.get("force") === "1";
-  if (!force && !isSendHour(new Date())) {
-    return NextResponse.json({ skipped: "not 7:00 in Stockholm" });
   }
 
   const deadline = Date.now() + CHECK_BUDGET_MS;
