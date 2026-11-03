@@ -97,7 +97,7 @@ export const EDITOR_PROSE_CLASS = cn(
   "[&_code]:before:content-none [&_code]:after:content-none",
   "[&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_pre]:rounded-lg [&_pre]:bg-(--surface-200) [&_pre]:p-3 [&_pre]:text-[0.8125rem] [&_pre]:text-(--text)",
   "[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-inherit",
-  "[&_hr]:my-3 [&_hr]:border-(--border)",
+  "[&_hr]:my-3 [&_hr]:border-(--text-subtle)",
   "[&_a]:text-(--primary) [&_a]:underline [&_a]:underline-offset-2 [&_a]:cursor-pointer",
   // Every marker swatch is a `-200` token, so dark text is always the legible choice on top
   // — including on a note whose own colour is darker than the highlight.
