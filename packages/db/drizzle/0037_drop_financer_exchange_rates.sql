@@ -1,0 +1,1 @@
+DROP TABLE "financer_exchange_rates" CASCADE;

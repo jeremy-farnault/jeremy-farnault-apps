@@ -260,6 +260,13 @@
       "when": 1793021752448,
       "tag": "0036_scanner_concept_id",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793886067954,
+      "tag": "0037_drop_financer_exchange_rates",
+      "breakpoints": true
     }
   ]
 }
