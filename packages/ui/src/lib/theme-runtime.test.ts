@@ -151,6 +151,32 @@ describe("installThemeRuntime", () => {
     applyTheme("system");
     expect(metaMedia()).toEqual(["(prefers-color-scheme: light)", "(prefers-color-scheme: dark)"]);
   });
+
+  it("puts the theme back when React strips <html>'s attributes on a client re-render", async () => {
+    setCookie("dark");
+    installThemeRuntime("jf-theme");
+    flushFrames();
+
+    // What `acquireSingletonInstance` does when hydration fails and React mounts <html> itself.
+    for (const { name } of [...root.attributes]) root.removeAttribute(name);
+    root.setAttribute("lang", "en");
+    await Promise.resolve();
+
+    expect(getResolvedTheme()).toBe("dark");
+    expect(root.dataset.theme).toBe("dark");
+    expect(root.getAttribute("lang")).toBe("en");
+  });
+
+  it("stops watching <html> once its runtime is replaced", async () => {
+    setCookie("dark");
+    installThemeRuntime("jf-theme");
+    Reflect.deleteProperty(window, "__jfTheme");
+
+    root.className = "";
+    await Promise.resolve();
+
+    expect(getResolvedTheme()).toBe("light");
+  });
 });
 
 describe("THEME_SCRIPT", () => {

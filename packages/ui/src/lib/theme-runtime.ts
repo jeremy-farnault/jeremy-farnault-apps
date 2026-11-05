@@ -75,18 +75,31 @@ export function installThemeRuntime(cookieName: string): void {
     }
   }
 
-  window.__jfTheme = {
+  const runtime: ThemeRuntime = {
     apply: (preference) => {
       current = preference === "light" || preference === "dark" ? preference : "system";
       render();
     },
     preference: () => current,
   };
+  window.__jfTheme = runtime;
 
   query.addEventListener("change", () => {
     if (current === "system") render();
   });
   swap();
+
+  // When hydration fails, React mounts <html> itself and strips every attribute it didn't
+  // render, `dark` included, while the toggle still reads Dark. Put the theme back, instantly.
+  const observer = new MutationObserver(() => {
+    if (window.__jfTheme !== runtime) return observer.disconnect();
+    const dark = current === "dark" || (current === "system" && query.matches);
+    if (root.classList.contains("dark") === dark && root.getAttribute("data-theme") === current)
+      return;
+    root.classList.toggle("dark", dark);
+    root.setAttribute("data-theme", current);
+  });
+  observer.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
   // Next may stream the metadata in after this script; point the metas once they exist.
   document.addEventListener("DOMContentLoaded", () => {
     pointThemeColor(root.classList.contains("dark"));
