@@ -11,9 +11,10 @@ import {
   PushPinSlashIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { MoveNoteModal } from "./move-note-modal";
+import { useOptimisticItems } from "./optimistic-items";
 
 type Props = {
   note: Note;
@@ -36,6 +37,9 @@ export function NoteActionsMenu({
   const [modal, setModal] = useState<"move" | "delete" | "archive" | null>(null);
   const shouldMount = alwaysVisible || modal !== null || (menuVisible ?? true);
   const [isPending, startTransition] = useTransition();
+  // Local copy so the icon flips on the note page too, where there's no grid to update.
+  const [pinned, setOptimisticPinned] = useOptimistic(note.pinned);
+  const applyOptimistic = useOptimisticItems();
 
   function handleCopyLink() {
     navigator.clipboard
@@ -46,9 +50,11 @@ export function NoteActionsMenu({
 
   function handleTogglePin() {
     startTransition(async () => {
+      setOptimisticPinned(!pinned);
+      applyOptimistic({ type: "toggle-pin", noteId: note.id });
       try {
         await toggleNotePin(note.id);
-        toast.success(note.pinned ? "Note unpinned" : "Note pinned");
+        toast.success(pinned ? "Note unpinned" : "Note pinned");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
@@ -56,11 +62,12 @@ export function NoteActionsMenu({
   }
 
   function handleArchiveConfirm() {
+    setModal(null);
     startTransition(async () => {
+      applyOptimistic({ type: "remove-note", noteId: note.id });
       try {
         await archiveNote(note.id);
         toast.success("Note archived");
-        setModal(null);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
@@ -122,15 +129,15 @@ export function NoteActionsMenu({
               <FolderOpenIcon size={14} />
             </button>
           </Tooltip>
-          <Tooltip content={note.pinned ? "Unpin" : "Pin"}>
+          <Tooltip content={pinned ? "Unpin" : "Pin"}>
             <button
               type="button"
               onClick={handleTogglePin}
               disabled={isPending}
-              aria-label={note.pinned ? "Unpin" : "Pin"}
+              aria-label={pinned ? "Unpin" : "Pin"}
               className={iconBtnClass}
             >
-              {note.pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+              {pinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
             </button>
           </Tooltip>
           <Tooltip content="Archive">
@@ -170,7 +177,6 @@ export function NoteActionsMenu({
         paragraph="This will move the note to your archive."
         primaryButton={{
           label: "Archive",
-          loading: isPending,
           onClick: handleArchiveConfirm,
         }}
         secondaryButton={{

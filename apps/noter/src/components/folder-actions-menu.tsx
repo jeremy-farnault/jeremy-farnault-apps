@@ -15,6 +15,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { ColorPicker } from "./color-picker";
 import { MoveFolderModal } from "./move-folder-modal";
+import { useOptimisticItems } from "./optimistic-items";
 import { RenameFolderModal } from "./rename-folder-modal";
 
 type Props = {
@@ -38,13 +39,15 @@ export function FolderActionsMenu({
   );
   const shouldMount = modal !== null || (menuVisible ?? true);
   const [isPending, startTransition] = useTransition();
+  const applyOptimistic = useOptimisticItems();
 
   function handleArchiveConfirm() {
+    setModal(null);
     startTransition(async () => {
+      applyOptimistic({ type: "remove-folder", folderId: folder.id });
       try {
         await archiveFolder(folder.id);
         toast.success("Folder archived");
-        setModal(null);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Something went wrong");
       }
@@ -188,7 +191,6 @@ export function FolderActionsMenu({
         paragraph="This will move the folder and its contents to your archive."
         primaryButton={{
           label: "Archive",
-          loading: isPending,
           onClick: handleArchiveConfirm,
         }}
         secondaryButton={{
