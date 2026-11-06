@@ -35,6 +35,9 @@ const ATOM_PATH =
 const APERTURE_PATH =
   "M204.41,51.63a108,108,0,1,0,0,152.74A107.38,107.38,0,0,0,204.41,51.63Zm-17,17A83.85,83.85,0,0,1,196.26,79L169,111.09l-23.3-65.21A83.52,83.52,0,0,1,187.43,68.6Zm-118.85,0a83.44,83.44,0,0,1,51.11-24.2l14.16,39.65L65.71,71.61C66.64,70.59,67.59,69.59,68.58,68.6ZM48,153.7a84.48,84.48,0,0,1,3.4-60.3L92.84,101Zm20.55,33.7A83.94,83.94,0,0,1,59.74,177L87,144.91l23.3,65.21A83.53,83.53,0,0,1,68.58,187.4Zm36.36-63.61,15.18-17.85,23.06,4.21,7.88,22.06-15.17,17.85-23.06-4.21Zm82.49,63.61a83.49,83.49,0,0,1-51.11,24.2L122.15,172l68.14,12.44C189.36,185.41,188.41,186.41,187.43,187.4ZM163.16,155,208,102.3a84.43,84.43,0,0,1-3.41,60.3Z";
 
+const MAP_TRIFOLD_PATH =
+  "M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69ZM104,52.94l48,24V203.06l-48-24ZM40,62.25l48-12v127.5l-48,12Zm176,131.5-48,12V78.25l48-12Z";
+
 function buildSvg(color: string, iconPath: string, size: number): string {
   const padding = size * 0.2;
   const iconSize = size - padding * 2;
@@ -76,7 +79,7 @@ function parseArgs(): { color: string; out: string; icon: string } {
   const out = get("--out");
   if (!color || !out) {
     console.error(
-      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill|infinity|robot|aperture|kanban|atom|barcode]"
+      "Usage: tsx scripts/generate-app-icon.ts --color <hex> --out <dir> [--icon barbell|coins|ranking|map-pin|pill|infinity|robot|aperture|kanban|atom|barcode|map-trifold]"
     );
     process.exit(1);
   }
@@ -106,7 +109,9 @@ async function generate() {
                       ? ATOM_PATH
                       : icon === "barcode"
                         ? BARCODE_PATH
-                        : RANKING_PATH;
+                        : icon === "map-trifold"
+                          ? MAP_TRIFOLD_PATH
+                          : RANKING_PATH;
   const iconsDir = resolve(out, "icons");
   const splashDir = resolve(iconsDir, "splash");
   await mkdir(splashDir, { recursive: true });

@@ -19,6 +19,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Tracer",
   description: "Tokyo territory game",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icons/icon-192x192.png",
+  },
 };
 
 export const viewport: Viewport = {
