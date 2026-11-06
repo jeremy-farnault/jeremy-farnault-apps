@@ -21,7 +21,7 @@ export interface ShowcaseApp {
 }
 
 /** Apps intentionally hidden from the landing grid. */
-export const EXCLUDED_APP_IDS = new Set<string>(["tracer"]);
+export const EXCLUDED_APP_IDS = new Set<string>([]);
 
 export const descriptions: Record<string, string> = {
   aider:
@@ -48,6 +48,8 @@ export const descriptions: Record<string, string> = {
     "Build routines that fit you: done or not, amount of time achieved, or time-based. Set up your daily checklist and keep your streaks strong.",
   scanner:
     "Keep an eye on the things you want to buy. Paste a product link from a shop, the PlayStation Store or Steam, in any region, and see where each item is cheapest right now, converted to your own currency. Sales show when they end, and the lowest price you've seen tells you whether the deal is actually any good.",
+  tracer:
+    "Early build. An idle conquest game on a real map of Tokyo, in real time: travel by foot or train, train your character, and fight for control of the city one zone at a time. Every trip takes as long as it would in life, so it plays in the background while you get on with your day.",
   unifier:
     "Keep your people close. Sort the ones who matter into arcs (family, friends, work...) and log a contact in a tap. The orbit puts you at the centre and everyone else at the distance they've drifted, so the person you haven't spoken to in months is impossible to miss.",
 };
