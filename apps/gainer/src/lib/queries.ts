@@ -176,10 +176,10 @@ export async function getLoggedExercises(userId: string): Promise<LoggedExercise
 }
 
 export type LastSessionSummary = {
-  maxWeight: string | null;
-  maxReps: number | null;
-  maxDurationSeconds: number | null;
-  maxDistanceMeters: number | null;
+  weight: string | null;
+  reps: number | null;
+  durationSeconds: number | null;
+  distanceMeters: number | null;
 };
 
 export async function getLastSessionSummaries(
@@ -217,31 +217,33 @@ export async function getLastSessionSummaries(
   const latestIds = Object.values(latestByExercise);
   if (latestIds.length === 0) return {};
 
-  const stats = await db
+  // Last set (highest set number) of the most recent session, per exercise
+  const sets = await db
     .select({
       sessionExerciseId: gainerSets.sessionExerciseId,
-      maxWeight: max(gainerSets.weight),
-      maxReps: max(gainerSets.reps),
-      maxDurationSeconds: max(gainerSets.durationSeconds),
-      maxDistanceMeters: max(gainerSets.distanceMeters),
+      weight: gainerSets.weight,
+      reps: gainerSets.reps,
+      durationSeconds: gainerSets.durationSeconds,
+      distanceMeters: gainerSets.distanceMeters,
     })
     .from(gainerSets)
     .where(inArray(gainerSets.sessionExerciseId, latestIds))
-    .groupBy(gainerSets.sessionExerciseId);
+    .orderBy(desc(gainerSets.setNumber), desc(gainerSets.createdAt));
 
   const seIdToExerciseId = Object.fromEntries(
     Object.entries(latestByExercise).map(([exerciseId, seId]) => [seId, exerciseId])
   );
 
-  return Object.fromEntries(
-    stats.map((row) => [
-      seIdToExerciseId[row.sessionExerciseId],
-      {
-        maxWeight: row.maxWeight ?? null,
-        maxReps: row.maxReps ?? null,
-        maxDurationSeconds: row.maxDurationSeconds ?? null,
-        maxDistanceMeters: row.maxDistanceMeters ?? null,
-      },
-    ])
-  );
+  const result: Record<string, LastSessionSummary> = {};
+  for (const row of sets) {
+    const exerciseId = seIdToExerciseId[row.sessionExerciseId];
+    if (!exerciseId || result[exerciseId]) continue;
+    result[exerciseId] = {
+      weight: row.weight ?? null,
+      reps: row.reps ?? null,
+      durationSeconds: row.durationSeconds ?? null,
+      distanceMeters: row.distanceMeters ?? null,
+    };
+  }
+  return result;
 }

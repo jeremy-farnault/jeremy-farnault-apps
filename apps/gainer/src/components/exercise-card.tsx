@@ -53,18 +53,18 @@ function SetDisplay({
 
 function formatLastSession(last: LastSessionSummary, type: ExerciseType): string {
   if (type === "standard") {
-    const weight = last.maxWeight != null ? `${last.maxWeight} kg` : null;
-    const reps = last.maxReps != null ? `${last.maxReps}` : null;
+    const weight = last.weight != null ? `${last.weight} kg` : null;
+    const reps = last.reps != null ? `${last.reps}` : null;
     if (weight && reps) return `${weight} × ${reps}`;
     if (weight) return weight;
     if (reps) return `${reps} reps`;
   } else if (type === "pdc") {
-    if (last.maxReps != null) return `${last.maxReps} reps`;
+    if (last.reps != null) return `${last.reps} reps`;
   } else if (type === "duration") {
-    if (last.maxDurationSeconds != null) return formatDuration(last.maxDurationSeconds);
+    if (last.durationSeconds != null) return formatDuration(last.durationSeconds);
   } else if (type === "cardio") {
-    const dist = last.maxDistanceMeters != null ? formatDistance(last.maxDistanceMeters) : null;
-    const dur = last.maxDurationSeconds != null ? formatDuration(last.maxDurationSeconds) : null;
+    const dist = last.distanceMeters != null ? formatDistance(last.distanceMeters) : null;
+    const dur = last.durationSeconds != null ? formatDuration(last.durationSeconds) : null;
     if (dist && dur) return `${dist} in ${dur}`;
     if (dist) return dist;
     if (dur) return dur;
