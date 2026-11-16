@@ -140,6 +140,15 @@ export const MANIFESTS: Record<string, Shot[]> = {
     },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
+  scanner: [
+    { name: "wishlist", viewport: "desktop", path: "/" },
+    {
+      name: "item",
+      viewport: "desktop",
+      path: ({ fixtureId }) => `/items/${fixtureId("scanner:item:baldurs-gate-3")}`,
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   unifier: [
     { name: "orbit", viewport: "desktop", path: "/", settleMs: 1200 },
     {

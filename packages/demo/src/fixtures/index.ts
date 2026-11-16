@@ -8,6 +8,7 @@ import { type NoterFixtures, buildNoterFixtures } from "./noter";
 import { type OrganiserFixtures, buildOrganiserFixtures } from "./organiser";
 import { type PlacerFixtures, buildPlacerFixtures } from "./placer";
 import { type RoutinerFixtures, buildRoutinerFixtures } from "./routiner";
+import { type ScannerFixtures, buildScannerFixtures } from "./scanner";
 import { type UnifierFixtures, buildUnifierFixtures } from "./unifier";
 
 export interface DemoFixtures {
@@ -20,6 +21,7 @@ export interface DemoFixtures {
   organiser: OrganiserFixtures;
   placer: PlacerFixtures;
   routiner: RoutinerFixtures;
+  scanner: ScannerFixtures;
   unifier: UnifierFixtures;
 }
 
@@ -35,6 +37,7 @@ export const DEMO_APPS = [
   "organiser",
   "placer",
   "routiner",
+  "scanner",
   "unifier",
 ] as const satisfies readonly DemoApp[];
 
@@ -61,6 +64,7 @@ export function buildDemoFixtures({
     organiser: buildOrganiserFixtures(input),
     placer: buildPlacerFixtures(input),
     routiner: buildRoutinerFixtures(input),
+    scanner: buildScannerFixtures(input),
     unifier: buildUnifierFixtures(input),
   };
 }

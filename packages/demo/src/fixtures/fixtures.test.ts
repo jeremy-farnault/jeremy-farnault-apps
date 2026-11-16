@@ -16,7 +16,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** How far back any fixture may reach. */
 const MAX_DAYS_BACK = 730;
 /** Fields that are meant to be in the future, and how far ahead they may go. */
-const FUTURE_FIELDS = new Set(["deadline"]);
+const FUTURE_FIELDS = new Set(["deadline", "saleEndsAt"]);
 const MAX_DAYS_AHEAD = 90;
 
 type Row = Record<string, unknown>;
@@ -572,5 +572,59 @@ describe("noter fixtures", () => {
   it("gives the note shot's note an id the manifest can find", () => {
     const pancakes = makeShotContext(USER_ID).fixtureId("noter:note:pancakes");
     expect(noter.notes.some((n) => n.id === pancakes && !n.archivedAt)).toBe(true);
+  });
+});
+
+describe("scanner fixtures", () => {
+  const scanner = buildDemoFixtures({ userId: USER_ID, today: TODAY }).scanner;
+
+  it("points links at items and checks at links", () => {
+    const itemIds = new Set(scanner.items.map((i) => i.id));
+    const linkIds = new Set(scanner.links.map((l) => l.id));
+    for (const link of scanner.links) expect(itemIds.has(link.itemId), link.url).toBe(true);
+    for (const check of scanner.checks) expect(linkIds.has(check.linkId)).toBe(true);
+  });
+
+  it("tracks real Steam pages, normalised the way Scanner compares them, once per region", () => {
+    for (const link of scanner.links) {
+      const appId = /^https:\/\/store\.steampowered\.com\/app\/(\d+)\//.exec(link.url)?.[1];
+      expect(appId, link.url).toBeTruthy();
+      expect(link.normalizedUrl).toBe(`store.steampowered.com/app/${appId}`);
+      expect(link.store).toBe("steam");
+      expect(["SE", "NZ", "JP", "US"]).toContain(link.region);
+    }
+    const keys = scanner.links.map((l) => `${l.normalizedUrl}:${l.region}:${l.editionId}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("stores prices as whole minor units, with sales below the normal price", () => {
+    for (const check of scanner.checks) {
+      expect(Number.isInteger(check.normalPrice), check.id).toBe(true);
+      if (check.salePrice !== null && check.salePrice !== undefined) {
+        expect(Number.isInteger(check.salePrice)).toBe(true);
+        expect(check.salePrice).toBeLessThan(check.normalPrice);
+        expect(check.discountPercent).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("has items on sale today and one bought item with its price", () => {
+    const latestOnSale = scanner.checks.filter(
+      (c) => c.salePrice !== null && c.checkedAt?.toISOString().slice(0, 10) === TODAY
+    );
+    expect(latestOnSale.length).toBeGreaterThanOrEqual(3);
+    const bought = scanner.items.filter((i) => i.status === "bought");
+    expect(bought).toHaveLength(1);
+    expect(bought[0]?.boughtPrice).toBeGreaterThan(0);
+    expect(bought[0]?.boughtAt).toBeInstanceOf(Date);
+  });
+
+  it("gives every link a check, the latest no older than its link's last check", () => {
+    for (const link of scanner.links) {
+      const checks = scanner.checks.filter((c) => c.linkId === link.id);
+      expect(checks.length, link.url).toBeGreaterThan(0);
+      const newest = Math.max(...checks.map((c) => c.checkedAt?.getTime() ?? 0));
+      expect(newest).toBe(link.lastCheckedAt?.getTime());
+    }
   });
 });

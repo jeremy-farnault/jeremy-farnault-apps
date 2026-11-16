@@ -2,6 +2,7 @@ import { checkLink } from "@/lib/check-link";
 import { createCheckQueue, storeKey } from "@/lib/check-queue";
 import { buildDigest } from "@/lib/digest";
 import { getDigestRecipients, getWishlist } from "@/lib/queries";
+import { withoutDemoUser } from "@/lib/recipients";
 import { summarizeItem } from "@/lib/summary";
 import { sendEmail } from "@jf/auth";
 import { getUserSettings } from "@jf/auth/settings";
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
   const deadline = Date.now() + CHECK_BUDGET_MS;
   // Item links in the email point back at whichever deployment the workflow called.
   const appUrl = new URL(request.url).origin;
-  const [recipients, rates] = await Promise.all([getDigestRecipients(), getExchangeRates()]);
+  const [allRecipients, rates] = await Promise.all([getDigestRecipients(), getExchangeRates()]);
+  const recipients = withoutDemoUser(allRecipients);
   let sent = 0;
   let failed = 0;
   // One user's error is logged and doesn't stop the others; any error fails the response,

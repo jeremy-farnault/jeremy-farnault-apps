@@ -1051,6 +1051,9 @@ importers:
       '@jf/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@jf/demo':
+        specifier: workspace:*
+        version: link:../../packages/demo
       '@jf/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -34,6 +34,9 @@ import {
   reminders,
   routinerHabits,
   routinerLogs,
+  scannerItems,
+  scannerLinks,
+  scannerPriceChecks,
   unifierArcs,
   unifierPersons,
   unifierSlotValues,
@@ -189,6 +192,34 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.delete(routinerHabits).where(eq(routinerHabits.userId, userId));
     await insertInChunks(habits, (chunk) => tx.insert(routinerHabits).values(chunk));
     await insertInChunks(logs, (chunk) => tx.insert(routinerLogs).values(chunk));
+  },
+  scanner: async (tx, userId, fixtures) => {
+    // Links and price checks go with their items (cascade).
+    await tx.delete(scannerItems).where(eq(scannerItems.userId, userId));
+
+    // Stamp each wishlist link's latest check with the seeding time: Scanner rechecks links
+    // older than an hour when the wishlist opens, so a capture right after seeding stays
+    // offline. Bought items keep their old dates.
+    const now = new Date();
+    const bought = new Set(fixtures.items.filter((i) => i.status === "bought").map((i) => i.id));
+    const fresh = new Set(fixtures.links.filter((l) => !bought.has(l.itemId)).map((l) => l.id));
+    const links = fixtures.links.map((link) =>
+      fresh.has(link.id ?? "") ? { ...link, lastCheckedAt: now, lastSuccessAt: now } : link
+    );
+    const newest = new Map<string, number>();
+    for (const check of fixtures.checks) {
+      const time = check.checkedAt?.getTime() ?? 0;
+      if (time > (newest.get(check.linkId) ?? -1)) newest.set(check.linkId, time);
+    }
+    const checks = fixtures.checks.map((check) =>
+      fresh.has(check.linkId) && check.checkedAt?.getTime() === newest.get(check.linkId)
+        ? { ...check, checkedAt: now }
+        : check
+    );
+
+    await tx.insert(scannerItems).values(fixtures.items);
+    await tx.insert(scannerLinks).values(links);
+    await insertInChunks(checks, (c) => tx.insert(scannerPriceChecks).values(c));
   },
   unifier: async (tx, userId, fixtures) => {
     // Slots, persons, values and touches go with their arcs (cascade).
