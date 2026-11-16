@@ -28,6 +28,18 @@ export interface Shot {
 
 /** Each app's shots, in carousel order. Apps without an entry keep their hand-made screenshots. */
 export const MANIFESTS: Record<string, Shot[]> = {
+  financer: [
+    { name: "spending", viewport: "desktop", path: "/?view=spending", settleMs: 1500 },
+    { name: "assets", viewport: "desktop", path: "/?view=assets", settleMs: 1500 },
+    { name: "overview", viewport: "desktop", path: "/?view=overview", settleMs: 1500 },
+    {
+      name: "category",
+      viewport: "desktop",
+      path: "/?view=overview&sub=spending",
+      settleMs: 1500,
+    },
+    { name: "mobile", viewport: "mobile", path: "/?view=spending", settleMs: 1500 },
+  ],
   routiner: [
     { name: "home", viewport: "desktop", path: "/" },
     {
