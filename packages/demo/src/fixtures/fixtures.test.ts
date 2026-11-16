@@ -5,6 +5,7 @@ import { DEMO_APPS, buildDemoFixtures } from ".";
 
 import { addDays } from "./dates";
 import { FINANCER_MONTHS, monthBefore } from "./financer";
+import { GAINER_EXERCISE_NAMES } from "./gainer";
 
 const USER_ID = "demo-user-id";
 const TODAY = "2026-11-15";
@@ -215,5 +216,87 @@ describe("financer fixtures", () => {
   it("has one settings row with a home currency", () => {
     expect(financer.settings).toHaveLength(1);
     expect(financer.settings[0]?.homeCurrency).toBe("SEK");
+  });
+});
+
+describe("gainer fixtures", () => {
+  const { sessions, sessionExercises, sets } = buildDemoFixtures({
+    userId: USER_ID,
+    today: TODAY,
+  }).gainer;
+  // The predefined exercises `pnpm seed:gainer` creates, with their types.
+  const PREDEFINED: Record<string, "standard" | "pdc" | "duration"> = {
+    "Bench Press": "standard",
+    "Overhead Press": "standard",
+    Dips: "pdc",
+    "Tricep Pushdown": "standard",
+    Deadlift: "standard",
+    "Pull-Up": "pdc",
+    "Barbell Row": "standard",
+    "Bicep Curl": "standard",
+    Squat: "standard",
+    "Romanian Deadlift": "standard",
+    "Leg Press": "standard",
+    Plank: "duration",
+  };
+
+  it("only uses predefined exercises, by name", () => {
+    for (const name of GAINER_EXERCISE_NAMES) expect(PREDEFINED, name).toHaveProperty(name);
+    for (const row of sessionExercises) expect(row).not.toHaveProperty("exerciseId");
+  });
+
+  it("points every set at a session exercise and every exercise at a session", () => {
+    const sessionIds = new Set(sessions.map((s) => s.id));
+    const exerciseIds = new Set(sessionExercises.map((e) => e.id));
+    for (const row of sessionExercises) expect(sessionIds.has(row.sessionId), row.id).toBe(true);
+    for (const row of sets) expect(exerciseIds.has(row.sessionExerciseId), row.id).toBe(true);
+  });
+
+  it("has exactly one session in progress, started today, and the rest finished", () => {
+    const active = sessions.filter((s) => s.finishedAt === null);
+    expect(active).toHaveLength(1);
+    expect(active[0]?.startedAt?.toISOString().slice(0, 10)).toBe(TODAY);
+    for (const session of sessions.filter((s) => s.finishedAt)) {
+      expect(session.finishedAt?.getTime(), session.name).toBeGreaterThan(
+        session.startedAt?.getTime() ?? 0
+      );
+    }
+    expect(sessions.length).toBeGreaterThan(20);
+  });
+
+  it("logs sets in the shape each exercise type reads", () => {
+    const nameById = new Map(sessionExercises.map((e) => [e.id, e.exerciseName]));
+    for (const set of sets) {
+      const type = PREDEFINED[nameById.get(set.sessionExerciseId) ?? ""];
+      if (type === "standard") {
+        expect(set.weight, set.id).toMatch(/^\d+\.\d{2}$/);
+        expect(set.reps, set.id).toBeGreaterThan(0);
+      } else if (type === "pdc") {
+        expect(set.weight ?? null, set.id).toBeNull();
+        expect(set.reps, set.id).toBeGreaterThan(0);
+      } else {
+        expect(set.durationSeconds, set.id).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("numbers sets from 1 within each session exercise", () => {
+    const byExercise = new Map<string, number[]>();
+    for (const set of sets) {
+      byExercise.set(set.sessionExerciseId, [
+        ...(byExercise.get(set.sessionExerciseId) ?? []),
+        set.setNumber,
+      ]);
+    }
+    for (const numbers of byExercise.values()) {
+      expect(numbers).toEqual(numbers.map((_, i) => i + 1));
+    }
+  });
+
+  it("gets stronger over time", () => {
+    const benchWeights = sessionExercises
+      .filter((e) => e.exerciseName === "Bench Press")
+      .map((e) => Number(sets.find((s) => s.sessionExerciseId === e.id)?.weight));
+    expect(benchWeights.at(-1)).toBeGreaterThan(benchWeights[0] ?? 0);
   });
 });

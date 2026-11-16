@@ -7,10 +7,14 @@ import {
   financerSpendingCategories,
   financerSummaries,
   financerUserSettings,
+  gainerExercises,
+  gainerSessionExercises,
+  gainerSessions,
+  gainerSets,
   routinerHabits,
   routinerLogs,
 } from "@jf/db";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DemoApp, DemoFixtures } from "../fixtures";
 import type { Tx } from "./types";
@@ -54,6 +58,35 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.insert(financerAssetSources).values(fixtures.assetSources);
     await insertInChunks(fixtures.incomeEntries, (c) => tx.insert(financerIncomeEntries).values(c));
     await insertInChunks(fixtures.assetEntries, (c) => tx.insert(financerAssetEntries).values(c));
+  },
+  gainer: async (tx, userId, fixtures) => {
+    // Session exercises and sets go with their sessions (cascade); custom exercises are the
+    // demo user's own. Predefined exercises (no user id) are only read.
+    await tx.delete(gainerSessions).where(eq(gainerSessions.userId, userId));
+    await tx.delete(gainerExercises).where(eq(gainerExercises.userId, userId));
+
+    const names = [...new Set(fixtures.sessionExercises.map((row) => row.exerciseName))];
+    const predefined = await tx
+      .select({ id: gainerExercises.id, name: gainerExercises.name })
+      .from(gainerExercises)
+      .where(and(isNull(gainerExercises.userId), inArray(gainerExercises.name, names)));
+    const idByName = new Map(predefined.map((row) => [row.name, row.id]));
+    const missing = names.filter((name) => !idByName.has(name));
+    if (missing.length > 0) {
+      throw new Error(
+        `Gainer's predefined exercises are missing (${missing.join(", ")}). Run pnpm seed:gainer.`
+      );
+    }
+
+    await insertInChunks(fixtures.sessions, (c) => tx.insert(gainerSessions).values(c));
+    await insertInChunks(
+      fixtures.sessionExercises.map(({ exerciseName, ...row }) => ({
+        ...row,
+        exerciseId: idByName.get(exerciseName) as string,
+      })),
+      (c) => tx.insert(gainerSessionExercises).values(c)
+    );
+    await insertInChunks(fixtures.sets, (c) => tx.insert(gainerSets).values(c));
   },
   routiner: async (tx, userId, { habits, logs }) => {
     await tx.delete(routinerLogs).where(eq(routinerLogs.userId, userId));

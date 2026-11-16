@@ -40,6 +40,31 @@ export const MANIFESTS: Record<string, Shot[]> = {
     },
     { name: "mobile", viewport: "mobile", path: "/?view=spending", settleMs: 1500 },
   ],
+  gainer: [
+    { name: "log", viewport: "desktop", path: "/" },
+    {
+      name: "detail",
+      viewport: "desktop",
+      // The detail page's URL carries the predefined exercise's database id, so go through
+      // the Data tab's list.
+      path: "/?view=data",
+      before: async (page) => {
+        await page
+          .getByRole("link", { name: /Bench Press/ })
+          .first()
+          .click();
+        await page.waitForURL(/\/exercise\//);
+      },
+      settleMs: 1500,
+    },
+    {
+      name: "timer",
+      viewport: "desktop",
+      path: "/",
+      before: (page) => page.getByRole("button", { name: "Rest timer" }).click(),
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   routiner: [
     { name: "home", viewport: "desktop", path: "/" },
     {
