@@ -9,7 +9,7 @@ type EntryRow = typeof journalerEntries.$inferInsert;
 export interface JournalerFixtures {
   entries: EntryRow[];
   /**
-   * Generated art behind every `imageKey`, uploaded by the seeder under Journaler's prefix.
+   * Generated art behind every `imageKey`, drawn by the capture (see `images/serve.ts`).
    * Abstract landscapes, not covers: real covers are copyrighted.
    */
   images: { key: string; art: ArtSpec }[];
@@ -71,7 +71,7 @@ export function buildJournalerFixtures({
   const images: JournalerFixtures["images"] = [];
   const entries = ENTRIES.map(([title, category, daysAgo, rating, comment], index): EntryRow => {
     const date = addDays(today, -daysAgo);
-    // Its own upload prefix: Journaler's image config only allows /journaler/**.
+    // Its own prefix: Journaler's image config only allows /journaler/**.
     const key = `journaler/${userId}/demo/entry-${index + 1}.jpg`;
     images.push({ key, art: artFor(`journaler:${title}`, 900, 600) });
     return {

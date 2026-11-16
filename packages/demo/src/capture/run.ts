@@ -12,6 +12,7 @@ import {
 } from "@playwright/test";
 
 import { DEMO_USER, isDemoEmail } from "../identity";
+import { serveDemoImages } from "../images/serve";
 import {
   MANIFESTS,
   type Shot,
@@ -195,6 +196,8 @@ export async function captureApps(apps: readonly string[], password: string): Pr
           colorScheme: theme,
           storageState,
         });
+        // Demo images aren't uploaded anywhere: the capture draws them.
+        await serveDemoImages(context, userId);
         contexts.set(key, context);
       }
       return context;

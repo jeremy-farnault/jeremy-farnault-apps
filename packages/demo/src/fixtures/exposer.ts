@@ -10,9 +10,9 @@ type PhotoRow = typeof exposerPhotos.$inferInsert;
 export interface ExposerFixtures {
   items: (typeof exposerItems.$inferInsert)[];
   /**
-   * Each photo carries the art it shows: the seeder renders it and uploads it to the photo's
-   * storage key (under `exposer/<userId>/demo/`, which Exposer's image config allows) before
-   * inserting the rows. Classer and Journaler can reuse these images later.
+   * Each photo carries the art it shows. Nothing is uploaded: during the capture, requests for
+   * the photo's storage key (under `exposer/<userId>/demo/`, which Exposer's image config
+   * allows) are answered with the art, drawn on the spot (see `images/serve.ts`).
    */
   photos: (PhotoRow & { art: ArtSpec })[];
   tags: (typeof exposerTags.$inferInsert)[];
@@ -153,7 +153,7 @@ export function buildExposerFixtures({
       fixtures.photos.push({
         id: id(`photo:${name}`),
         itemId,
-        // Named after the art, not the date, so re-seeding reuses what's already uploaded.
+        // Named after the art, not the date, so a key always shows the same picture.
         storageKey: `exposer/${userId}/demo/${name}.jpg`,
         position,
         width: photo.size.width,

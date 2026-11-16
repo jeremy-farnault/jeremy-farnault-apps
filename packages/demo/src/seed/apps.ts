@@ -52,7 +52,6 @@ import {
 import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DemoApp, DemoFixtures } from "../fixtures";
-import { uploadDemoImages } from "../images/upload";
 import type { Tx } from "./types";
 
 type Reset<A extends DemoApp> = (
@@ -68,12 +67,6 @@ async function insertInChunks<T>(rows: T[], insert: (chunk: T[]) => Promise<unkn
   }
 }
 
-/** Images first: the rows point at them. Already-uploaded keys are skipped. */
-async function uploadAndLog(images: Parameters<typeof uploadDemoImages>[0]) {
-  const uploaded = await uploadDemoImages(images);
-  if (uploaded > 0) console.log(`    uploaded ${uploaded} demo image(s)`);
-}
-
 /**
  * Per app: delete every row the demo user owns, children first, then insert the fixtures.
  * Shared rows (no user id) are never touched.
@@ -86,7 +79,6 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.insert(aiderMessages).values(fixtures.messages);
   },
   classer: async (tx, userId, fixtures) => {
-    await uploadAndLog(fixtures.images);
     await tx.delete(classerItems).where(eq(classerItems.userId, userId));
     await tx.delete(classers).where(eq(classers.userId, userId));
     await tx.insert(classers).values(fixtures.classers);
@@ -126,8 +118,6 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     );
   },
   exposer: async (tx, userId, fixtures) => {
-    await uploadAndLog(fixtures.photos.map((photo) => ({ key: photo.storageKey, art: photo.art })));
-
     // Photos and item tags go with their items (cascade).
     await tx.delete(exposerItems).where(eq(exposerItems.userId, userId));
     await tx.delete(exposerTags).where(eq(exposerTags.userId, userId));
@@ -188,7 +178,6 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await insertInChunks(fixtures.sets, (c) => tx.insert(gainerSets).values(c));
   },
   journaler: async (tx, userId, fixtures) => {
-    await uploadAndLog(fixtures.images);
     await tx.delete(journalerEntries).where(eq(journalerEntries.userId, userId));
     await insertInChunks(fixtures.entries, (c) => tx.insert(journalerEntries).values(c));
   },

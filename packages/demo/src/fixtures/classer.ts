@@ -7,7 +7,7 @@ import { stableUuid } from "./determinism";
 export interface ClasserFixtures {
   classers: (typeof classers.$inferInsert)[];
   items: (typeof classerItems.$inferInsert)[];
-  /** Generated art behind every `imageKey`, uploaded by the seeder under Classer's prefix. */
+  /** Generated art behind every `imageKey`, drawn by the capture (see `images/serve.ts`). */
   images: { key: string; art: ArtSpec }[];
 }
 
@@ -135,7 +135,7 @@ export function buildClasserFixtures({
   today: IsoDate;
 }): ClasserFixtures {
   const fixtures: ClasserFixtures = { classers: [], items: [], images: [] };
-  // Under Classer's own upload prefix: its image config only allows /classer/**.
+  // Under Classer's own prefix: its image config only allows /classer/**.
   const image = (name: string, art: Art, size: { width: number; height: number }) => {
     const key = `classer/${userId}/demo/${name}.jpg`;
     fixtures.images.push({ key, art: { ...art, ...size, seed: `classer:${name}` } });

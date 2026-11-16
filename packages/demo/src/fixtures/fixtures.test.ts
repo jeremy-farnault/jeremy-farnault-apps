@@ -666,7 +666,7 @@ describe("exposer fixtures", () => {
     expect(exposer.items.filter((i) => i.visibility === "public").length).toBeGreaterThanOrEqual(4);
   });
 
-  it("keeps image keys stable when today moves, so re-seeding reuses the uploads", () => {
+  it("keeps image keys stable when today moves, so each key always shows the same art", () => {
     const later = buildDemoFixtures({ userId: USER_ID, today: addDays(TODAY, 30) }).exposer;
     expect(later.photos.map((p) => p.storageKey)).toEqual(exposer.photos.map((p) => p.storageKey));
   });
@@ -689,12 +689,12 @@ describe("demo images", () => {
   ];
 
   it.each(apps)(
-    "$app: every image key has art to upload, under the app's own demo prefix",
+    "$app: every image key has art to draw, under the app's own demo prefix",
     ({ app, keys, images }) => {
-      const uploaded = new Set(images.map((image) => image.key));
+      const drawn = new Set(images.map((image) => image.key));
       for (const key of keys.filter((k) => k !== null && k !== undefined)) {
         expect(key).toMatch(new RegExp(`^${app}/${USER_ID}/demo/[a-z0-9-]+\\.jpg$`));
-        expect(uploaded.has(key as string), key as string).toBe(true);
+        expect(drawn.has(key as string), key as string).toBe(true);
       }
       expect(new Set(images.map((i) => i.key)).size).toBe(images.length);
     }
@@ -711,7 +711,7 @@ describe("demo images", () => {
     expect(items.every((i) => i.imageKey)).toBe(true);
   });
 
-  it("keeps image keys stable when today moves, so re-seeding reuses the uploads", () => {
+  it("keeps image keys stable when today moves, so each key always shows the same art", () => {
     const later = buildDemoFixtures({ userId: USER_ID, today: addDays(TODAY, 30) });
     expect(later.classer.images).toEqual(fixtures.classer.images);
     expect(later.journaler.images).toEqual(fixtures.journaler.images);
