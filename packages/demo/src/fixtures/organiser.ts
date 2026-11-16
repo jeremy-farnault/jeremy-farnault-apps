@@ -5,7 +5,7 @@ import type {
   organiserColumns,
   organiserTags,
 } from "@jf/db";
-import { seedKeys } from "@jf/ui/ordering";
+import { seedKeys } from "./ordering";
 
 import { type IsoDate, addDays, atHour } from "./dates";
 import { stableUuid } from "./determinism";
