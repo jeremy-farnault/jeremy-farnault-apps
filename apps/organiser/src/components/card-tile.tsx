@@ -1,3 +1,4 @@
+import { formatDeadline } from "@/lib/deadline";
 import type { CardRow, TagRow } from "@/lib/queries";
 import { cn, getColorForeground } from "@jf/ui";
 import { extractPlainText } from "@jf/ui/rich-text";
@@ -11,15 +12,6 @@ function daysUntil(deadline: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return Math.round((due.getTime() - today.getTime()) / 86_400_000);
-}
-
-// Static, human-readable deadline (e.g. "3 Oct"), parsed date-only like daysUntil.
-function formatDeadline(deadline: string): string {
-  const [y, m, d] = deadline.split("-").map(Number);
-  return new Date(y as number, (m as number) - 1, d as number).toLocaleDateString(undefined, {
-    day: "numeric",
-    month: "short",
-  });
 }
 
 export function CardTile({
