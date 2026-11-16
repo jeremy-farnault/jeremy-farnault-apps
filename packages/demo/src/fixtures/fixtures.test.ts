@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SUPPORTED_CURRENCIES } from "@jf/db";
 import { DEMO_APPS, buildDemoFixtures } from ".";
 
+import { makeShotContext } from "../capture/manifest";
 import { addDays } from "./dates";
 import { DOSER_SYMPTOM_NAMES } from "./doser";
 import { FINANCER_MONTHS, monthBefore } from "./financer";
@@ -351,5 +352,54 @@ describe("doser fixtures", () => {
 
   it("logs symptoms for today, so the symptoms shot opens a filled-in day", () => {
     expect(doser.symptomLogs.some((log) => log.date === TODAY)).toBe(true);
+  });
+});
+
+describe("journaler fixtures", () => {
+  const { entries } = buildDemoFixtures({ userId: USER_ID, today: TODAY }).journaler;
+
+  it("covers every category, with ratings Journaler accepts", () => {
+    expect(new Set(entries.map((e) => e.category))).toEqual(
+      new Set(["Movie", "TV Show", "Book", "Game", "Manga"])
+    );
+    for (const entry of entries) {
+      if (entry.rating !== null && entry.rating !== undefined) {
+        expect(entry.rating, entry.title).toBeGreaterThanOrEqual(1);
+        expect(entry.rating, entry.title).toBeLessThanOrEqual(10);
+      }
+    }
+  });
+
+  it("has enough entries to fill the grid, with no images", () => {
+    expect(entries.length).toBeGreaterThanOrEqual(30);
+    expect(entries.every((e) => e.imageKey === null)).toBe(true);
+  });
+});
+
+describe("classer fixtures", () => {
+  const fixtures = buildDemoFixtures({ userId: USER_ID, today: TODAY }).classer;
+
+  it("points every item at a list in the output", () => {
+    const ids = new Set(fixtures.classers.map((c) => c.id));
+    for (const item of fixtures.items) expect(ids.has(item.classerId), item.name).toBe(true);
+  });
+
+  it("ranks each list's items 1, 2, 3… with no gaps or ties", () => {
+    for (const classer of fixtures.classers) {
+      const ranks = fixtures.items
+        .filter((item) => item.classerId === classer.id)
+        .map((item) => item.rank);
+      expect(ranks, classer.name).toEqual(ranks.map((_, i) => i + 1));
+    }
+  });
+
+  it("keeps one archived list and several active ones", () => {
+    expect(fixtures.classers.filter((c) => c.archivedAt).length).toBe(1);
+    expect(fixtures.classers.filter((c) => !c.archivedAt).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("gives the detail shot's list an id the manifest can find", () => {
+    const hikes = makeShotContext(USER_ID).fixtureId("classer:list:hikes");
+    expect(fixtures.classers.some((c) => c.id === hikes && !c.archivedAt)).toBe(true);
   });
 });

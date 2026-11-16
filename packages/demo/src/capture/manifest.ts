@@ -29,6 +29,15 @@ export interface Shot {
 
 /** Each app's shots, in carousel order. Apps without an entry keep their hand-made screenshots. */
 export const MANIFESTS: Record<string, Shot[]> = {
+  classer: [
+    { name: "home", viewport: "desktop", path: "/" },
+    {
+      name: "detail",
+      viewport: "desktop",
+      path: ({ fixtureId }) => `/classers/${fixtureId("classer:list:hikes")}`,
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   doser: [
     { name: "month", viewport: "desktop", path: "/" },
     {
@@ -81,6 +90,10 @@ export const MANIFESTS: Record<string, Shot[]> = {
       path: "/",
       before: (page) => page.getByRole("button", { name: "Rest timer" }).click(),
     },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
+  journaler: [
+    { name: "grid", viewport: "desktop", path: "/" },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
   routiner: [

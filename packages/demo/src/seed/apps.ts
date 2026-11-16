@@ -1,4 +1,6 @@
 import {
+  classerItems,
+  classers,
   doserDayOverrides,
   doserDoseLogs,
   doserMedicines,
@@ -18,6 +20,7 @@ import {
   gainerSessionExercises,
   gainerSessions,
   gainerSets,
+  journalerEntries,
   routinerHabits,
   routinerLogs,
 } from "@jf/db";
@@ -44,6 +47,12 @@ async function insertInChunks<T>(rows: T[], insert: (chunk: T[]) => Promise<unkn
  * Shared rows (no user id) are never touched.
  */
 export const RESETS: { [A in DemoApp]: Reset<A> } = {
+  classer: async (tx, userId, fixtures) => {
+    await tx.delete(classerItems).where(eq(classerItems.userId, userId));
+    await tx.delete(classers).where(eq(classers.userId, userId));
+    await tx.insert(classers).values(fixtures.classers);
+    await insertInChunks(fixtures.items, (c) => tx.insert(classerItems).values(c));
+  },
   doser: async (tx, userId, fixtures) => {
     // Pill types, overrides and dose logs go with their medicines, entries with their logs
     // (cascade). The demo user's custom symptoms go too; predefined ones are only read.
@@ -127,6 +136,10 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
       (c) => tx.insert(gainerSessionExercises).values(c)
     );
     await insertInChunks(fixtures.sets, (c) => tx.insert(gainerSets).values(c));
+  },
+  journaler: async (tx, userId, fixtures) => {
+    await tx.delete(journalerEntries).where(eq(journalerEntries.userId, userId));
+    await insertInChunks(fixtures.entries, (c) => tx.insert(journalerEntries).values(c));
   },
   routiner: async (tx, userId, { habits, logs }) => {
     await tx.delete(routinerLogs).where(eq(routinerLogs.userId, userId));
