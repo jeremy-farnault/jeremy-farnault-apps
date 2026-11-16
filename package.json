@@ -16,6 +16,7 @@
     "seed:gainer": "tsx scripts/seed-gainer-exercises.ts",
     "seed:doser": "tsx scripts/seed-doser-symptoms.ts",
     "seed:demo": "tsx --env-file-if-exists=.env packages/demo/src/cli/seed.ts",
+    "screenshots": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.production packages/demo/src/cli/screenshots.ts",
     "dev": "turbo run dev",
     "lint": "turbo run lint && pnpm lint:colors",
     "lint:colors": "tsx scripts/check-raw-colors.ts",

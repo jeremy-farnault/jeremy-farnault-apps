@@ -1350,6 +1350,9 @@ importers:
       '@jf/testing':
         specifier: workspace:*
         version: link:../testing
+      '@playwright/test':
+        specifier: ^1.50.0
+        version: 1.59.1
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.15
