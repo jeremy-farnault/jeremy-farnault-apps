@@ -4,6 +4,7 @@ import { type DoserFixtures, buildDoserFixtures } from "./doser";
 import { type FinancerFixtures, buildFinancerFixtures } from "./financer";
 import { type GainerFixtures, buildGainerFixtures } from "./gainer";
 import { type JournalerFixtures, buildJournalerFixtures } from "./journaler";
+import { type NoterFixtures, buildNoterFixtures } from "./noter";
 import { type OrganiserFixtures, buildOrganiserFixtures } from "./organiser";
 import { type PlacerFixtures, buildPlacerFixtures } from "./placer";
 import { type RoutinerFixtures, buildRoutinerFixtures } from "./routiner";
@@ -15,6 +16,7 @@ export interface DemoFixtures {
   financer: FinancerFixtures;
   gainer: GainerFixtures;
   journaler: JournalerFixtures;
+  noter: NoterFixtures;
   organiser: OrganiserFixtures;
   placer: PlacerFixtures;
   routiner: RoutinerFixtures;
@@ -29,6 +31,7 @@ export const DEMO_APPS = [
   "financer",
   "gainer",
   "journaler",
+  "noter",
   "organiser",
   "placer",
   "routiner",
@@ -54,6 +57,7 @@ export function buildDemoFixtures({
     financer: buildFinancerFixtures(input),
     gainer: buildGainerFixtures(input),
     journaler: buildJournalerFixtures(input),
+    noter: buildNoterFixtures(input),
     organiser: buildOrganiserFixtures(input),
     placer: buildPlacerFixtures(input),
     routiner: buildRoutinerFixtures(input),

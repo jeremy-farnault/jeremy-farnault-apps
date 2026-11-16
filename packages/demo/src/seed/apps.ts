@@ -16,11 +16,13 @@ import {
   financerSpendingCategories,
   financerSummaries,
   financerUserSettings,
+  folders,
   gainerExercises,
   gainerSessionExercises,
   gainerSessions,
   gainerSets,
   journalerEntries,
+  notes,
   organiserBoards,
   organiserCardTags,
   organiserCards,
@@ -28,6 +30,8 @@ import {
   organiserTags,
   placerCategories,
   placerSpots,
+  pushSubscriptions,
+  reminders,
   routinerHabits,
   routinerLogs,
   unifierArcs,
@@ -152,6 +156,17 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
   journaler: async (tx, userId, fixtures) => {
     await tx.delete(journalerEntries).where(eq(journalerEntries.userId, userId));
     await insertInChunks(fixtures.entries, (c) => tx.insert(journalerEntries).values(c));
+  },
+  noter: async (tx, userId, fixtures) => {
+    // Reminders and push subscriptions too, in case someone clicked around as the demo user:
+    // the fixtures have none, so the reminder cron never has anything to send.
+    await tx.delete(reminders).where(eq(reminders.userId, userId));
+    await tx.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+    await tx.delete(notes).where(eq(notes.userId, userId));
+    await tx.delete(folders).where(eq(folders.userId, userId));
+    // Parents before children: folders are listed top-level first.
+    await tx.insert(folders).values(fixtures.folders);
+    await tx.insert(notes).values(fixtures.notes);
   },
   organiser: async (tx, userId, fixtures) => {
     // Columns, cards and card tags go with the board and tags (cascade).

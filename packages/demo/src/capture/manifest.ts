@@ -96,6 +96,15 @@ export const MANIFESTS: Record<string, Shot[]> = {
     { name: "grid", viewport: "desktop", path: "/" },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
+  noter: [
+    { name: "grid", viewport: "desktop", path: "/" },
+    {
+      name: "note",
+      viewport: "desktop",
+      path: ({ fixtureId }) => `/note/${fixtureId("noter:note:pancakes")}`,
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   organiser: [
     { name: "board", viewport: "desktop", path: "/" },
     {

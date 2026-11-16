@@ -537,3 +537,40 @@ describe("placer fixtures", () => {
     }
   });
 });
+
+describe("noter fixtures", () => {
+  const noter = buildDemoFixtures({ userId: USER_ID, today: TODAY }).noter;
+  const folderIds = noter.folders.map((f) => f.id);
+
+  it("files notes and sub-folders under folders that exist, parents listed first", () => {
+    for (const note of noter.notes.filter((n) => n.parentFolderId)) {
+      expect(folderIds, note.title ?? "").toContain(note.parentFolderId);
+    }
+    noter.folders.forEach((folder, index) => {
+      if (folder.parentFolderId) {
+        expect(folderIds.slice(0, index), folder.name).toContain(folder.parentFolderId);
+      }
+    });
+  });
+
+  it("stores every body as a rich-text document, with no reminder blocks", () => {
+    for (const note of noter.notes) {
+      expect(JSON.parse(note.body ?? "").type, note.title ?? "").toBe("doc");
+      expect(note.body, note.title ?? "").not.toMatch(/reminder/i);
+    }
+  });
+
+  it("has pinned, coloured, foldered and archived notes, and a nested and an archived folder", () => {
+    expect(noter.notes.filter((n) => n.pinned).length).toBeGreaterThanOrEqual(2);
+    expect(noter.notes.some((n) => n.backgroundColor)).toBe(true);
+    expect(noter.notes.some((n) => n.parentFolderId)).toBe(true);
+    expect(noter.notes.some((n) => n.archivedAt)).toBe(true);
+    expect(noter.folders.some((f) => f.parentFolderId)).toBe(true);
+    expect(noter.folders.some((f) => f.archivedAt)).toBe(true);
+  });
+
+  it("gives the note shot's note an id the manifest can find", () => {
+    const pancakes = makeShotContext(USER_ID).fixtureId("noter:note:pancakes");
+    expect(noter.notes.some((n) => n.id === pancakes && !n.archivedAt)).toBe(true);
+  });
+});
