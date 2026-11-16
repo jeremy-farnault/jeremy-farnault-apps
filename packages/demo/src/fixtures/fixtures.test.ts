@@ -377,9 +377,8 @@ describe("journaler fixtures", () => {
     }
   });
 
-  it("has enough entries to fill the grid, with no images", () => {
+  it("has enough entries to fill the grid", () => {
     expect(entries.length).toBeGreaterThanOrEqual(30);
-    expect(entries.every((e) => e.imageKey === null)).toBe(true);
   });
 });
 
@@ -670,5 +669,51 @@ describe("exposer fixtures", () => {
   it("keeps image keys stable when today moves, so re-seeding reuses the uploads", () => {
     const later = buildDemoFixtures({ userId: USER_ID, today: addDays(TODAY, 30) }).exposer;
     expect(later.photos.map((p) => p.storageKey)).toEqual(exposer.photos.map((p) => p.storageKey));
+  });
+});
+
+describe("demo images", () => {
+  const fixtures = buildDemoFixtures({ userId: USER_ID, today: TODAY });
+  // Each app's image config only allows its own prefix.
+  const apps = [
+    {
+      app: "classer",
+      keys: [...fixtures.classer.classers, ...fixtures.classer.items].map((r) => r.imageKey),
+      images: fixtures.classer.images,
+    },
+    {
+      app: "journaler",
+      keys: fixtures.journaler.entries.map((r) => r.imageKey),
+      images: fixtures.journaler.images,
+    },
+  ];
+
+  it.each(apps)(
+    "$app: every image key has art to upload, under the app's own demo prefix",
+    ({ app, keys, images }) => {
+      const uploaded = new Set(images.map((image) => image.key));
+      for (const key of keys.filter((k) => k !== null && k !== undefined)) {
+        expect(key).toMatch(new RegExp(`^${app}/${USER_ID}/demo/[a-z0-9-]+\\.jpg$`));
+        expect(uploaded.has(key as string), key as string).toBe(true);
+      }
+      expect(new Set(images.map((i) => i.key)).size).toBe(images.length);
+    }
+  );
+
+  it("gives every Classer list a cover and every Journaler entry an image", () => {
+    expect(fixtures.classer.classers.every((c) => c.imageKey)).toBe(true);
+    expect(fixtures.journaler.entries.every((e) => e.imageKey)).toBe(true);
+  });
+
+  it("gives the Hikes list's items thumbnails, for the detail shot", () => {
+    const hikes = makeShotContext(USER_ID).fixtureId("classer:list:hikes");
+    const items = fixtures.classer.items.filter((i) => i.classerId === hikes);
+    expect(items.every((i) => i.imageKey)).toBe(true);
+  });
+
+  it("keeps image keys stable when today moves, so re-seeding reuses the uploads", () => {
+    const later = buildDemoFixtures({ userId: USER_ID, today: addDays(TODAY, 30) });
+    expect(later.classer.images).toEqual(fixtures.classer.images);
+    expect(later.journaler.images).toEqual(fixtures.journaler.images);
   });
 });

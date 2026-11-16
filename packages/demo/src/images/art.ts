@@ -132,6 +132,25 @@ ${parts.join("\n")}
 </svg>`;
 }
 
+const COMPOSITIONS: ArtSpec["composition"][] = ["ridges", "sea", "dunes", "forest", "night"];
+const PALETTE_NAMES = Object.keys(PALETTES) as ArtSpec["palette"][];
+
+/**
+ * Art picked from a seed alone, for images that only need to look good (Journaler's entries):
+ * the composition and palette come from the seed, so the same seed always gives the same art.
+ * Night skies only get the midnight palette, and midnight only goes with night or sea.
+ */
+export function artFor(seed: string, width: number, height: number): ArtSpec {
+  const random = seededRandom(`pick:${seed}`);
+  const composition = COMPOSITIONS[Math.floor(random() * COMPOSITIONS.length)] ?? "ridges";
+  const daytime = PALETTE_NAMES.filter((name) => name !== "midnight");
+  const palette =
+    composition === "night"
+      ? "midnight"
+      : (daytime[Math.floor(random() * daytime.length)] ?? "dawn");
+  return { composition, palette, width, height, seed };
+}
+
 /** The art as a JPEG, at its declared size. */
 export async function renderArt(spec: ArtSpec): Promise<Buffer> {
   return sharp(Buffer.from(artSvg(spec)))

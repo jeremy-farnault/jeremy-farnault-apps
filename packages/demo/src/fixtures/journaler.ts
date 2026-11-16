@@ -1,5 +1,6 @@
 import type { journalerEntries } from "@jf/db";
 
+import { type ArtSpec, artFor } from "../images/art";
 import { type IsoDate, addDays, atHour } from "./dates";
 import { stableUuid } from "./determinism";
 
@@ -7,6 +8,11 @@ type EntryRow = typeof journalerEntries.$inferInsert;
 
 export interface JournalerFixtures {
   entries: EntryRow[];
+  /**
+   * Generated art behind every `imageKey`, uploaded by the seeder under Journaler's prefix.
+   * Abstract landscapes, not covers: real covers are copyrighted.
+   */
+  images: { key: string; art: ArtSpec }[];
 }
 
 type Category = EntryRow["category"];
@@ -62,21 +68,24 @@ export function buildJournalerFixtures({
   userId: string;
   today: IsoDate;
 }): JournalerFixtures {
-  return {
-    entries: ENTRIES.map(([title, category, daysAgo, rating, comment]) => {
-      const date = addDays(today, -daysAgo);
-      return {
-        id: stableUuid(userId, `journaler:entry:${title}`),
-        userId,
-        title,
-        category,
-        date,
-        rating,
-        comment,
-        imageKey: null,
-        createdAt: atHour(date, 21),
-        updatedAt: atHour(date, 21),
-      };
-    }),
-  };
+  const images: JournalerFixtures["images"] = [];
+  const entries = ENTRIES.map(([title, category, daysAgo, rating, comment], index): EntryRow => {
+    const date = addDays(today, -daysAgo);
+    // Its own upload prefix: Journaler's image config only allows /journaler/**.
+    const key = `journaler/${userId}/demo/entry-${index + 1}.jpg`;
+    images.push({ key, art: artFor(`journaler:${title}`, 900, 600) });
+    return {
+      id: stableUuid(userId, `journaler:entry:${title}`),
+      userId,
+      title,
+      category,
+      date,
+      rating,
+      comment,
+      imageKey: key,
+      createdAt: atHour(date, 21),
+      updatedAt: atHour(date, 21),
+    };
+  });
+  return { entries, images };
 }
