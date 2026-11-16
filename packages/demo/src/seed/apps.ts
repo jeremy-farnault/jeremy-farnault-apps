@@ -26,6 +26,8 @@ import {
   organiserCards,
   organiserColumns,
   organiserTags,
+  placerCategories,
+  placerSpots,
   routinerHabits,
   routinerLogs,
   unifierArcs,
@@ -160,6 +162,12 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.insert(organiserColumns).values(fixtures.columns);
     await tx.insert(organiserCards).values(fixtures.cards);
     await tx.insert(organiserCardTags).values(fixtures.cardTags);
+  },
+  placer: async (tx, userId, fixtures) => {
+    await tx.delete(placerSpots).where(eq(placerSpots.userId, userId));
+    await tx.delete(placerCategories).where(eq(placerCategories.userId, userId));
+    await tx.insert(placerCategories).values(fixtures.categories);
+    await tx.insert(placerSpots).values(fixtures.spots);
   },
   routiner: async (tx, userId, { habits, logs }) => {
     await tx.delete(routinerLogs).where(eq(routinerLogs.userId, userId));

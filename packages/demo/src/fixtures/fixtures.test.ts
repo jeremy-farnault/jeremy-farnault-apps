@@ -489,3 +489,51 @@ describe("unifier fixtures", () => {
     expect(days).toContain(TODAY);
   });
 });
+
+describe("placer fixtures", () => {
+  const placer = buildDemoFixtures({ userId: USER_ID, today: TODAY }).placer;
+  // Placer's category icon names.
+  const ICONS = [
+    "House",
+    "Heart",
+    "Star",
+    "MapPin",
+    "Airplane",
+    "Car",
+    "Train",
+    "Camera",
+    "Coffee",
+    "Utensils",
+    "Mountain",
+    "Tree",
+    "Beach",
+    "Museum",
+    "ShoppingBag",
+    "Flag",
+  ];
+
+  it("puts every spot in a category from the output, with an icon Placer knows", () => {
+    const ids = new Set(placer.categories.map((c) => c.id));
+    for (const spot of placer.spots) expect(ids.has(spot.categoryId ?? ""), spot.name).toBe(true);
+    for (const category of placer.categories) expect(ICONS).toContain(category.icon);
+  });
+
+  it("places spots on the globe, in both hemispheres, each with a description", () => {
+    for (const spot of placer.spots) {
+      expect(Math.abs(spot.lat), spot.name).toBeLessThanOrEqual(90);
+      expect(Math.abs(spot.lng), spot.name).toBeLessThanOrEqual(180);
+      expect(spot.description, spot.name).toBeTruthy();
+    }
+    expect(placer.spots.some((s) => s.lat < 0)).toBe(true);
+    expect(placer.spots.some((s) => s.lat > 0)).toBe(true);
+  });
+
+  it("uses every category", () => {
+    for (const category of placer.categories) {
+      expect(
+        placer.spots.some((s) => s.categoryId === category.id),
+        category.name
+      ).toBe(true);
+    }
+  });
+});

@@ -106,6 +106,20 @@ export const MANIFESTS: Record<string, Shot[]> = {
     },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
+  placer: [
+    // Map tiles load over the network, so settling (network idle) waits for them.
+    { name: "map", viewport: "desktop", path: "/", settleMs: 1500 },
+    {
+      name: "spot",
+      viewport: "desktop",
+      path: "/",
+      // At world zoom the markers overlap, so a real click could land on a neighbour or time
+      // out; dispatch it on one marker. Every demo spot has a description, so any one works.
+      before: (page) => page.locator(".leaflet-marker-icon").first().dispatchEvent("click"),
+      settleMs: 1500,
+    },
+    { name: "mobile", viewport: "mobile", path: "/", settleMs: 1500 },
+  ],
   routiner: [
     { name: "home", viewport: "desktop", path: "/" },
     {

@@ -5,6 +5,7 @@ import { type FinancerFixtures, buildFinancerFixtures } from "./financer";
 import { type GainerFixtures, buildGainerFixtures } from "./gainer";
 import { type JournalerFixtures, buildJournalerFixtures } from "./journaler";
 import { type OrganiserFixtures, buildOrganiserFixtures } from "./organiser";
+import { type PlacerFixtures, buildPlacerFixtures } from "./placer";
 import { type RoutinerFixtures, buildRoutinerFixtures } from "./routiner";
 import { type UnifierFixtures, buildUnifierFixtures } from "./unifier";
 
@@ -15,6 +16,7 @@ export interface DemoFixtures {
   gainer: GainerFixtures;
   journaler: JournalerFixtures;
   organiser: OrganiserFixtures;
+  placer: PlacerFixtures;
   routiner: RoutinerFixtures;
   unifier: UnifierFixtures;
 }
@@ -28,6 +30,7 @@ export const DEMO_APPS = [
   "gainer",
   "journaler",
   "organiser",
+  "placer",
   "routiner",
   "unifier",
 ] as const satisfies readonly DemoApp[];
@@ -52,6 +55,7 @@ export function buildDemoFixtures({
     gainer: buildGainerFixtures(input),
     journaler: buildJournalerFixtures(input),
     organiser: buildOrganiserFixtures(input),
+    placer: buildPlacerFixtures(input),
     routiner: buildRoutinerFixtures(input),
     unifier: buildUnifierFixtures(input),
   };
