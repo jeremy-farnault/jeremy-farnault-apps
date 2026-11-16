@@ -1,9 +1,11 @@
 import { type IsoDate, assertIsoDate } from "./dates";
+import { type DoserFixtures, buildDoserFixtures } from "./doser";
 import { type FinancerFixtures, buildFinancerFixtures } from "./financer";
 import { type GainerFixtures, buildGainerFixtures } from "./gainer";
 import { type RoutinerFixtures, buildRoutinerFixtures } from "./routiner";
 
 export interface DemoFixtures {
+  doser: DoserFixtures;
   financer: FinancerFixtures;
   gainer: GainerFixtures;
   routiner: RoutinerFixtures;
@@ -11,7 +13,12 @@ export interface DemoFixtures {
 
 export type DemoApp = keyof DemoFixtures;
 
-export const DEMO_APPS = ["financer", "gainer", "routiner"] as const satisfies readonly DemoApp[];
+export const DEMO_APPS = [
+  "doser",
+  "financer",
+  "gainer",
+  "routiner",
+] as const satisfies readonly DemoApp[];
 
 /**
  * Every app's rows for the demo user, dated relative to `today`. Pure: no database, no clock,
@@ -27,6 +34,7 @@ export function buildDemoFixtures({
 }): DemoFixtures {
   const input = { userId, today: assertIsoDate(today) };
   return {
+    doser: buildDoserFixtures(input),
     financer: buildFinancerFixtures(input),
     gainer: buildGainerFixtures(input),
     routiner: buildRoutinerFixtures(input),

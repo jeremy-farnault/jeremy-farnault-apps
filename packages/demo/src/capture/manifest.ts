@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 
+import { todayInStockholm } from "../fixtures/dates";
 import { stableUuid } from "../fixtures/determinism";
 
 export type Viewport = "desktop" | "mobile";
@@ -28,6 +29,23 @@ export interface Shot {
 
 /** Each app's shots, in carousel order. Apps without an entry keep their hand-made screenshots. */
 export const MANIFESTS: Record<string, Shot[]> = {
+  doser: [
+    { name: "month", viewport: "desktop", path: "/" },
+    {
+      name: "symptoms",
+      viewport: "desktop",
+      path: "/",
+      // Today always has a symptom log, so its day opens a filled-in modal.
+      before: (page) =>
+        page
+          .getByRole("button", {
+            name: `Log symptoms for day ${Number(todayInStockholm().slice(8))}`,
+            exact: true,
+          })
+          .click(),
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   financer: [
     { name: "spending", viewport: "desktop", path: "/?view=spending", settleMs: 1500 },
     { name: "assets", viewport: "desktop", path: "/?view=assets", settleMs: 1500 },

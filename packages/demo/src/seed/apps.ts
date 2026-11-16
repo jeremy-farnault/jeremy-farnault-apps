@@ -1,4 +1,11 @@
 import {
+  doserDayOverrides,
+  doserDoseLogs,
+  doserMedicines,
+  doserPillTypes,
+  doserSymptomLogEntries,
+  doserSymptomLogs,
+  doserSymptoms,
   financerAssetEntries,
   financerAssetSources,
   financerEntries,
@@ -37,6 +44,39 @@ async function insertInChunks<T>(rows: T[], insert: (chunk: T[]) => Promise<unkn
  * Shared rows (no user id) are never touched.
  */
 export const RESETS: { [A in DemoApp]: Reset<A> } = {
+  doser: async (tx, userId, fixtures) => {
+    // Pill types, overrides and dose logs go with their medicines, entries with their logs
+    // (cascade). The demo user's custom symptoms go too; predefined ones are only read.
+    await tx.delete(doserMedicines).where(eq(doserMedicines.userId, userId));
+    await tx.delete(doserSymptomLogs).where(eq(doserSymptomLogs.userId, userId));
+    await tx.delete(doserSymptoms).where(eq(doserSymptoms.userId, userId));
+
+    const names = [...new Set(fixtures.symptomLogEntries.map((row) => row.symptomName))];
+    const predefined = await tx
+      .select({ id: doserSymptoms.id, name: doserSymptoms.name })
+      .from(doserSymptoms)
+      .where(and(isNull(doserSymptoms.userId), inArray(doserSymptoms.name, names)));
+    const idByName = new Map(predefined.map((row) => [row.name, row.id]));
+    const missing = names.filter((name) => !idByName.has(name));
+    if (missing.length > 0) {
+      throw new Error(
+        `Doser's predefined symptoms are missing (${missing.join(", ")}). Run pnpm seed:doser.`
+      );
+    }
+
+    await tx.insert(doserMedicines).values(fixtures.medicines);
+    await tx.insert(doserPillTypes).values(fixtures.pillTypes);
+    await tx.insert(doserDayOverrides).values(fixtures.dayOverrides);
+    await insertInChunks(fixtures.doseLogs, (c) => tx.insert(doserDoseLogs).values(c));
+    await insertInChunks(fixtures.symptomLogs, (c) => tx.insert(doserSymptomLogs).values(c));
+    await insertInChunks(
+      fixtures.symptomLogEntries.map(({ symptomName, ...row }) => ({
+        ...row,
+        symptomId: idByName.get(symptomName) as string,
+      })),
+      (c) => tx.insert(doserSymptomLogEntries).values(c)
+    );
+  },
   financer: async (tx, userId, fixtures) => {
     // Entries before their sources; every table filtered on the demo user.
     await tx.delete(financerAssetEntries).where(eq(financerAssetEntries.userId, userId));

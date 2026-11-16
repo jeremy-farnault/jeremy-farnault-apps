@@ -4,6 +4,7 @@ import { SUPPORTED_CURRENCIES } from "@jf/db";
 import { DEMO_APPS, buildDemoFixtures } from ".";
 
 import { addDays } from "./dates";
+import { DOSER_SYMPTOM_NAMES } from "./doser";
 import { FINANCER_MONTHS, monthBefore } from "./financer";
 import { GAINER_EXERCISE_NAMES } from "./gainer";
 
@@ -298,5 +299,57 @@ describe("gainer fixtures", () => {
       .filter((e) => e.exerciseName === "Bench Press")
       .map((e) => Number(sets.find((s) => s.sessionExerciseId === e.id)?.weight));
     expect(benchWeights.at(-1)).toBeGreaterThan(benchWeights[0] ?? 0);
+  });
+});
+
+describe("doser fixtures", () => {
+  const doser = buildDemoFixtures({ userId: USER_ID, today: TODAY }).doser;
+  const medicineIds = new Set(doser.medicines.map((m) => m.id));
+
+  it("points pill types, overrides and doses at a medicine in the output", () => {
+    for (const row of [...doser.pillTypes, ...doser.dayOverrides, ...doser.doseLogs]) {
+      expect(medicineIds.has(row.medicineId), row.id).toBe(true);
+    }
+  });
+
+  it("points every symptom entry at a log, naming a predefined symptom", () => {
+    const logIds = new Set(doser.symptomLogs.map((log) => log.id));
+    for (const row of doser.symptomLogEntries) {
+      expect(logIds.has(row.symptomLogId), row.id).toBe(true);
+      expect(DOSER_SYMPTOM_NAMES as readonly string[]).toContain(row.symptomName);
+      expect(row).not.toHaveProperty("symptomId");
+    }
+  });
+
+  it("keeps one dose per medicine per day, one override per medicine per day, one log per day", () => {
+    const unique = (keys: string[]) => new Set(keys).size === keys.length;
+    expect(unique(doser.doseLogs.map((r) => `${r.medicineId}:${r.date}`))).toBe(true);
+    expect(unique(doser.dayOverrides.map((r) => `${r.medicineId}:${r.date}`))).toBe(true);
+    expect(unique(doser.symptomLogs.map((r) => r.date))).toBe(true);
+    expect(unique(doser.symptomLogEntries.map((r) => `${r.symptomLogId}:${r.symptomName}`))).toBe(
+      true
+    );
+  });
+
+  it("numbers pill types from 0 within each medicine", () => {
+    for (const medicine of doser.medicines) {
+      const positions = doser.pillTypes
+        .filter((type) => type.medicineId === medicine.id)
+        .map((type) => type.position);
+      expect(positions).toEqual(positions.map((_, i) => i));
+    }
+  });
+
+  it("never logs a dose before a cycle started or on a day switched off", () => {
+    const startById = new Map(doser.medicines.map((m) => [m.id, m.cycleStartDate]));
+    const off = new Set(doser.dayOverrides.map((r) => `${r.medicineId}:${r.date}`));
+    for (const dose of doser.doseLogs) {
+      expect(dose.date >= (startById.get(dose.medicineId) ?? ""), dose.id).toBe(true);
+      expect(off.has(`${dose.medicineId}:${dose.date}`), dose.id).toBe(false);
+    }
+  });
+
+  it("logs symptoms for today, so the symptoms shot opens a filled-in day", () => {
+    expect(doser.symptomLogs.some((log) => log.date === TODAY)).toBe(true);
   });
 });
