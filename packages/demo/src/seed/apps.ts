@@ -21,8 +21,18 @@ import {
   gainerSessions,
   gainerSets,
   journalerEntries,
+  organiserBoards,
+  organiserCardTags,
+  organiserCards,
+  organiserColumns,
+  organiserTags,
   routinerHabits,
   routinerLogs,
+  unifierArcs,
+  unifierPersons,
+  unifierSlotValues,
+  unifierSlots,
+  unifierTouches,
 } from "@jf/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 
@@ -141,10 +151,29 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.delete(journalerEntries).where(eq(journalerEntries.userId, userId));
     await insertInChunks(fixtures.entries, (c) => tx.insert(journalerEntries).values(c));
   },
+  organiser: async (tx, userId, fixtures) => {
+    // Columns, cards and card tags go with the board and tags (cascade).
+    await tx.delete(organiserBoards).where(eq(organiserBoards.userId, userId));
+    await tx.delete(organiserTags).where(eq(organiserTags.userId, userId));
+    await tx.insert(organiserBoards).values(fixtures.boards);
+    await tx.insert(organiserTags).values(fixtures.tags);
+    await tx.insert(organiserColumns).values(fixtures.columns);
+    await tx.insert(organiserCards).values(fixtures.cards);
+    await tx.insert(organiserCardTags).values(fixtures.cardTags);
+  },
   routiner: async (tx, userId, { habits, logs }) => {
     await tx.delete(routinerLogs).where(eq(routinerLogs.userId, userId));
     await tx.delete(routinerHabits).where(eq(routinerHabits.userId, userId));
     await insertInChunks(habits, (chunk) => tx.insert(routinerHabits).values(chunk));
     await insertInChunks(logs, (chunk) => tx.insert(routinerLogs).values(chunk));
+  },
+  unifier: async (tx, userId, fixtures) => {
+    // Slots, persons, values and touches go with their arcs (cascade).
+    await tx.delete(unifierArcs).where(eq(unifierArcs.userId, userId));
+    await tx.insert(unifierArcs).values(fixtures.arcs);
+    await tx.insert(unifierSlots).values(fixtures.slots);
+    await tx.insert(unifierPersons).values(fixtures.persons);
+    await tx.insert(unifierSlotValues).values(fixtures.slotValues);
+    await tx.insert(unifierTouches).values(fixtures.touches);
   },
 };

@@ -15,6 +15,9 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** How far back any fixture may reach. */
 const MAX_DAYS_BACK = 730;
+/** Fields that are meant to be in the future, and how far ahead they may go. */
+const FUTURE_FIELDS = new Set(["deadline"]);
+const MAX_DAYS_AHEAD = 90;
 
 type Row = Record<string, unknown>;
 
@@ -68,12 +71,13 @@ describe("buildDemoFixtures", () => {
     }
   });
 
-  it("dates everything within the last two years, never after today", () => {
+  it("dates everything within the last two years, never after today except deadlines", () => {
     const offsets = dateOffsets(fixtures, TODAY);
     expect(offsets.size).toBeGreaterThan(0);
     for (const [field, offset] of offsets) {
+      const name = field.slice(field.lastIndexOf(".") + 1);
       // Timestamps fall during the day, so allow up to one day past today's midnight.
-      expect(offset, field).toBeLessThan(1);
+      expect(offset, field).toBeLessThan(FUTURE_FIELDS.has(name) ? MAX_DAYS_AHEAD : 1);
       expect(offset, field).toBeGreaterThanOrEqual(-MAX_DAYS_BACK);
     }
   });
@@ -89,7 +93,10 @@ describe("buildDemoFixtures", () => {
   });
 
   it("gives every row a unique id", () => {
-    const ids = allRows(fixtures).map(({ row }) => row.id);
+    // Join rows (Organiser's card tags) have no id of their own.
+    const ids = allRows(fixtures)
+      .map(({ row }) => row.id)
+      .filter((id) => id !== undefined);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -401,5 +408,84 @@ describe("classer fixtures", () => {
   it("gives the detail shot's list an id the manifest can find", () => {
     const hikes = makeShotContext(USER_ID).fixtureId("classer:list:hikes");
     expect(fixtures.classers.some((c) => c.id === hikes && !c.archivedAt)).toBe(true);
+  });
+});
+
+describe("organiser fixtures", () => {
+  const organiser = buildDemoFixtures({ userId: USER_ID, today: TODAY }).organiser;
+
+  it("has one board, and every column and card on it", () => {
+    expect(organiser.boards).toHaveLength(1);
+    const boardId = organiser.boards[0]?.id;
+    const columnIds = new Set(organiser.columns.map((c) => c.id));
+    for (const column of organiser.columns) expect(column.boardId).toBe(boardId);
+    for (const card of organiser.cards) {
+      expect(card.boardId, card.title).toBe(boardId);
+      expect(columnIds.has(card.columnId), card.title).toBe(true);
+    }
+  });
+
+  it("orders columns and each column's cards by strictly increasing positions", () => {
+    const increasing = (keys: string[]) =>
+      keys.every((key, i) => i === 0 || key > (keys[i - 1] ?? ""));
+    expect(increasing(organiser.columns.map((c) => c.position))).toBe(true);
+    for (const column of organiser.columns) {
+      const keys = organiser.cards.filter((c) => c.columnId === column.id).map((c) => c.position);
+      expect(increasing(keys), column.name).toBe(true);
+    }
+  });
+
+  it("tags cards with tags that exist, once each", () => {
+    const tagIds = new Set(organiser.tags.map((t) => t.id));
+    const cardIds = new Set(organiser.cards.map((c) => c.id));
+    for (const link of organiser.cardTags) {
+      expect(tagIds.has(link.tagId)).toBe(true);
+      expect(cardIds.has(link.cardId)).toBe(true);
+    }
+    const keys = organiser.cardTags.map((l) => `${l.cardId}:${l.tagId}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("marks exactly one done column, and stores bodies as rich-text documents", () => {
+    expect(organiser.columns.filter((c) => c.isDone)).toHaveLength(1);
+    for (const card of organiser.cards.filter((c) => c.body)) {
+      expect(JSON.parse(card.body ?? "").type, card.title).toBe("doc");
+    }
+  });
+
+  it("has overdue and upcoming deadlines", () => {
+    const deadlines = organiser.cards.flatMap((c) => (c.deadline ? [c.deadline] : []));
+    expect(deadlines.some((d) => d < TODAY)).toBe(true);
+    expect(deadlines.some((d) => d > TODAY)).toBe(true);
+  });
+});
+
+describe("unifier fixtures", () => {
+  const unifier = buildDemoFixtures({ userId: USER_ID, today: TODAY }).unifier;
+  const personIds = new Set(unifier.persons.map((p) => p.id));
+
+  it("points slots and people at arcs, values at their person's arc's slots, touches at people", () => {
+    const arcIds = new Set(unifier.arcs.map((a) => a.id));
+    const arcOfSlot = new Map(unifier.slots.map((s) => [s.id, s.arcId]));
+    const arcOfPerson = new Map(unifier.persons.map((p) => [p.id, p.arcId]));
+    for (const slot of unifier.slots) expect(arcIds.has(slot.arcId)).toBe(true);
+    for (const person of unifier.persons) expect(arcIds.has(person.arcId)).toBe(true);
+    for (const value of unifier.slotValues) {
+      expect(arcOfSlot.get(value.slotId), value.id).toBe(arcOfPerson.get(value.personId));
+    }
+    for (const touch of unifier.touches) expect(personIds.has(touch.personId)).toBe(true);
+  });
+
+  it("keeps the important flag and its date together", () => {
+    for (const person of unifier.persons) {
+      expect(person.important, person.name).toBe(person.flaggedAt !== null);
+    }
+  });
+
+  it("spreads drift from today to never", () => {
+    const touched = new Set(unifier.touches.map((t) => t.personId));
+    expect(unifier.persons.some((p) => !touched.has(p.id ?? ""))).toBe(true);
+    const days = unifier.touches.map((t) => t.occurredAt?.toISOString().slice(0, 10));
+    expect(days).toContain(TODAY);
   });
 });

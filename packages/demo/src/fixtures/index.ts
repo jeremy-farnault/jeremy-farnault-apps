@@ -4,7 +4,9 @@ import { type DoserFixtures, buildDoserFixtures } from "./doser";
 import { type FinancerFixtures, buildFinancerFixtures } from "./financer";
 import { type GainerFixtures, buildGainerFixtures } from "./gainer";
 import { type JournalerFixtures, buildJournalerFixtures } from "./journaler";
+import { type OrganiserFixtures, buildOrganiserFixtures } from "./organiser";
 import { type RoutinerFixtures, buildRoutinerFixtures } from "./routiner";
+import { type UnifierFixtures, buildUnifierFixtures } from "./unifier";
 
 export interface DemoFixtures {
   classer: ClasserFixtures;
@@ -12,7 +14,9 @@ export interface DemoFixtures {
   financer: FinancerFixtures;
   gainer: GainerFixtures;
   journaler: JournalerFixtures;
+  organiser: OrganiserFixtures;
   routiner: RoutinerFixtures;
+  unifier: UnifierFixtures;
 }
 
 export type DemoApp = keyof DemoFixtures;
@@ -23,7 +27,9 @@ export const DEMO_APPS = [
   "financer",
   "gainer",
   "journaler",
+  "organiser",
   "routiner",
+  "unifier",
 ] as const satisfies readonly DemoApp[];
 
 /**
@@ -45,7 +51,9 @@ export function buildDemoFixtures({
     financer: buildFinancerFixtures(input),
     gainer: buildGainerFixtures(input),
     journaler: buildJournalerFixtures(input),
+    organiser: buildOrganiserFixtures(input),
     routiner: buildRoutinerFixtures(input),
+    unifier: buildUnifierFixtures(input),
   };
 }
 

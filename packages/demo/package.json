@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@jf/db": "workspace:*",
+    "@jf/ui": "workspace:*",
     "better-auth": "^1.2.0",
     "drizzle-orm": "^0.45.2"
   },

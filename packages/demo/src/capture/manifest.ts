@@ -96,6 +96,16 @@ export const MANIFESTS: Record<string, Shot[]> = {
     { name: "grid", viewport: "desktop", path: "/" },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
+  organiser: [
+    { name: "board", viewport: "desktop", path: "/" },
+    {
+      name: "card",
+      viewport: "desktop",
+      path: "/",
+      before: (page) => page.getByText("Book summer trip to Japan", { exact: true }).click(),
+    },
+    { name: "mobile", viewport: "mobile", path: "/" },
+  ],
   routiner: [
     { name: "home", viewport: "desktop", path: "/" },
     {
@@ -106,6 +116,16 @@ export const MANIFESTS: Record<string, Shot[]> = {
       settleMs: 1500,
     },
     { name: "mobile", viewport: "mobile", path: "/" },
+  ],
+  unifier: [
+    { name: "orbit", viewport: "desktop", path: "/", settleMs: 1200 },
+    {
+      name: "list",
+      viewport: "desktop",
+      path: "/",
+      before: (page) => page.getByRole("button", { name: "List", exact: true }).click(),
+    },
+    { name: "mobile", viewport: "mobile", path: "/", settleMs: 1200 },
   ],
 };
 
