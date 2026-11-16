@@ -1,3 +1,4 @@
+import { type AiderFixtures, buildAiderFixtures } from "./aider";
 import { type ClasserFixtures, buildClasserFixtures } from "./classer";
 import { type IsoDate, assertIsoDate } from "./dates";
 import { type DoserFixtures, buildDoserFixtures } from "./doser";
@@ -13,6 +14,7 @@ import { type ScannerFixtures, buildScannerFixtures } from "./scanner";
 import { type UnifierFixtures, buildUnifierFixtures } from "./unifier";
 
 export interface DemoFixtures {
+  aider: AiderFixtures;
   classer: ClasserFixtures;
   doser: DoserFixtures;
   exposer: ExposerFixtures;
@@ -30,6 +32,7 @@ export interface DemoFixtures {
 export type DemoApp = keyof DemoFixtures;
 
 export const DEMO_APPS = [
+  "aider",
   "classer",
   "doser",
   "exposer",
@@ -57,17 +60,23 @@ export function buildDemoFixtures({
   today: IsoDate;
 }): DemoFixtures {
   const input = { userId, today: assertIsoDate(today) };
+  const routiner = buildRoutinerFixtures(input);
+  const classer = buildClasserFixtures(input);
+  const gainer = buildGainerFixtures(input);
+  const financer = buildFinancerFixtures(input);
   return {
-    classer: buildClasserFixtures(input),
+    // Aider's answers are computed from the other apps' demo data, so they match.
+    aider: buildAiderFixtures({ ...input, sources: { routiner, classer, gainer, financer } }),
+    classer,
     doser: buildDoserFixtures(input),
     exposer: buildExposerFixtures(input),
-    financer: buildFinancerFixtures(input),
-    gainer: buildGainerFixtures(input),
+    financer,
+    gainer,
     journaler: buildJournalerFixtures(input),
     noter: buildNoterFixtures(input),
     organiser: buildOrganiserFixtures(input),
     placer: buildPlacerFixtures(input),
-    routiner: buildRoutinerFixtures(input),
+    routiner,
     scanner: buildScannerFixtures(input),
     unifier: buildUnifierFixtures(input),
   };

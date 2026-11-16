@@ -1,4 +1,6 @@
 import {
+  aiderConversations,
+  aiderMessages,
   classerItems,
   classers,
   doserDayOverrides,
@@ -77,6 +79,12 @@ async function uploadAndLog(images: Parameters<typeof uploadDemoImages>[0]) {
  * Shared rows (no user id) are never touched.
  */
 export const RESETS: { [A in DemoApp]: Reset<A> } = {
+  aider: async (tx, userId, fixtures) => {
+    // Messages go with their conversations (cascade).
+    await tx.delete(aiderConversations).where(eq(aiderConversations.userId, userId));
+    await tx.insert(aiderConversations).values(fixtures.conversations);
+    await tx.insert(aiderMessages).values(fixtures.messages);
+  },
   classer: async (tx, userId, fixtures) => {
     await uploadAndLog(fixtures.images);
     await tx.delete(classerItems).where(eq(classerItems.userId, userId));

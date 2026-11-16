@@ -717,3 +717,64 @@ describe("demo images", () => {
     expect(later.journaler.images).toEqual(fixtures.journaler.images);
   });
 });
+
+describe("aider fixtures", () => {
+  const fixtures = buildDemoFixtures({ userId: USER_ID, today: TODAY });
+  const { conversations, messages } = fixtures.aider;
+  const TOOLS = [
+    "get_habit_log_count",
+    "get_workouts_in_range",
+    "get_top_items_in_list",
+    "get_current_assets",
+    "get_media_in_range",
+    "get_exercises_on_day",
+  ];
+
+  it("uses Aider's models, and alternates user and assistant from the user", () => {
+    for (const conversation of conversations) {
+      expect(["qwen2.5:3b-instruct", "llama3.1:8b"]).toContain(conversation.model);
+      const roles = messages.filter((m) => m.conversationId === conversation.id).map((m) => m.role);
+      expect(roles, conversation.title).toEqual(
+        roles.map((_, i) => (i % 2 === 0 ? "user" : "assistant"))
+      );
+    }
+  });
+
+  it("only puts known tools, with JSON arguments, on assistant replies", () => {
+    for (const message of messages.filter((m) => m.toolName)) {
+      expect(message.role).toBe("assistant");
+      expect(TOOLS).toContain(message.toolName);
+      expect(() => JSON.parse(message.toolArguments ?? "")).not.toThrow();
+    }
+    expect(messages.some((m) => m.toolName)).toBe(true);
+  });
+
+  it("answers with the numbers the other apps' demo data shows", () => {
+    const runId = fixtures.routiner.habits.find((h) => h.name === "Morning run")?.id;
+    const runs = fixtures.routiner.logs.filter(
+      (l) => l.habitId === runId && l.date.startsWith(TODAY.slice(0, 7))
+    ).length;
+    const answer = (tool: string) => messages.find((m) => m.toolName === tool)?.content ?? "";
+    expect(answer("get_habit_log_count")).toContain(`${runs} time`);
+    expect(answer("get_top_items_in_list")).toContain("Tongariro Alpine Crossing");
+    expect(answer("get_current_assets")).toContain("Nordnet");
+  });
+
+  it("orders each conversation's messages in time, and dates conversations by their last one", () => {
+    for (const conversation of conversations) {
+      const times = messages
+        .filter((m) => m.conversationId === conversation.id)
+        .map((m) => m.createdAt?.getTime() ?? 0);
+      expect(times).toEqual([...times].sort((a, b) => a - b));
+      expect(conversation.updatedAt?.getTime()).toBe(times.at(-1));
+    }
+  });
+
+  it("gives the shots' conversations ids the manifest can find", () => {
+    const { fixtureId } = makeShotContext(USER_ID);
+    const ids = new Set(conversations.map((c) => c.id));
+    for (const key of ["runs", "rainy-sunday", "hikes"]) {
+      expect(ids.has(fixtureId(`aider:conversation:${key}`)), key).toBe(true);
+    }
+  });
+});

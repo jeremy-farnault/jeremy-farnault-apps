@@ -29,6 +29,24 @@ export interface Shot {
 
 /** Each app's shots, in carousel order. Apps without an entry keep their hand-made screenshots. */
 export const MANIFESTS: Record<string, Shot[]> = {
+  // Stored conversations only: no step sends a message, so no shot depends on the model.
+  aider: [
+    {
+      name: "data",
+      viewport: "desktop",
+      path: ({ fixtureId }) => `/chat/${fixtureId("aider:conversation:runs")}`,
+    },
+    {
+      name: "chat",
+      viewport: "desktop",
+      path: ({ fixtureId }) => `/chat/${fixtureId("aider:conversation:rainy-sunday")}`,
+    },
+    {
+      name: "mobile",
+      viewport: "mobile",
+      path: ({ fixtureId }) => `/chat/${fixtureId("aider:conversation:hikes")}`,
+    },
+  ],
   classer: [
     { name: "home", viewport: "desktop", path: "/" },
     {
