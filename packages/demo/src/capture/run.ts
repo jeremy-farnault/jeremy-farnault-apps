@@ -103,6 +103,14 @@ async function settle(page: Page, extraMs: number) {
   await page.waitForTimeout(extraMs);
 }
 
+/**
+ * React's hydration-mismatch errors (#418 text, #423 recoverable, #425 text content) and their
+ * dev-mode wording. React recovers by re-rendering on the client, so the page still renders
+ * correctly: they're reported as warnings, not failures. Any other uncaught error fails the app.
+ */
+const HYDRATION_ERROR =
+  /Minified React error #(418|423|425)\b|Hydration failed|hydrat(ed|ion) .*didn't match/i;
+
 const ERROR_TEXTS = ["Application error", "This page could not be found", "Internal Server Error"];
 
 async function captureShot(
@@ -132,7 +140,15 @@ async function captureShot(
     const bodyText = await page.locator("body").innerText();
     const errorText = ERROR_TEXTS.find((text) => bodyText.includes(text));
     if (errorText) throw fail(`the page shows "${errorText}"`);
-    if (pageErrors.length > 0) throw fail(`the page threw: ${pageErrors[0]}`);
+    const hydration = pageErrors.filter((message) => HYDRATION_ERROR.test(message));
+    const fatal = pageErrors.filter((message) => !HYDRATION_ERROR.test(message));
+    if (fatal.length > 0) throw fail(`the page threw: ${fatal[0]}`);
+    if (hydration.length > 0) {
+      console.warn(
+        `  ! Shot "${shot.name}" (${target}): hydration mismatch, React re-rendered on the client. ` +
+          `Captured anyway; worth fixing in the app. ${hydration[0]?.slice(0, 120)}`
+      );
+    }
 
     await page.screenshot({ path: file, animations: "disabled", caret: "hide" });
   } finally {
