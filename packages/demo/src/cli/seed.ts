@@ -22,6 +22,9 @@ async function main() {
 }
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : error);
+  // AWS SDK errors can carry a bare name ("UnknownError"), so show the status too.
+  const status = (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+  const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  console.error(status ? `${message} (HTTP ${status})` : message);
   process.exit(1);
 });
