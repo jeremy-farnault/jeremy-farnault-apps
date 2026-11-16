@@ -89,8 +89,17 @@ async function signIn(browser: Browser, password: string) {
 }
 
 /** Waits until data has loaded: no network traffic, no skeletons, fonts ready. */
-async function settle(page: Page, extraMs: number) {
-  await page.waitForLoadState("networkidle");
+async function settle(page: Page, shot: Shot) {
+  const extraMs = shot.settleMs ?? 500;
+  if (shot.idleTimeoutMs === undefined) {
+    await page.waitForLoadState("networkidle");
+  } else {
+    await page
+      .waitForLoadState("networkidle", { timeout: shot.idleTimeoutMs })
+      .catch(() =>
+        console.warn(`  ! Shot "${shot.name}": the network never went idle, capturing anyway.`)
+      );
+  }
   await page.waitForFunction(
     () =>
       Array.from(document.querySelectorAll(".animate-pulse")).every(
@@ -132,10 +141,10 @@ async function captureShot(
     if (new URL(page.url()).origin !== new URL(baseUrl).origin) {
       throw fail(`redirected to ${page.url()}, so the session wasn't accepted`);
     }
-    await settle(page, shot.settleMs ?? 500);
+    await settle(page, shot);
     if (shot.before) {
       await shot.before(page);
-      await settle(page, shot.settleMs ?? 500);
+      await settle(page, shot);
     }
     const bodyText = await page.locator("body").innerText();
     const errorText = ERROR_TEXTS.find((text) => bodyText.includes(text));

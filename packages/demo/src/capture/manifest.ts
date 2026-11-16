@@ -25,6 +25,11 @@ export interface Shot {
   before?: (page: Page) => Promise<void>;
   /** Extra wait after settling, for JS-driven animations such as chart transitions. */
   settleMs?: number;
+  /**
+   * For pages that never go quiet on the network (a live map game): how long to wait for
+   * network idle before capturing anyway, with a warning. Unset, a page must go idle.
+   */
+  idleTimeoutMs?: number;
 }
 
 /** Each app's shots, in carousel order. Apps without an entry keep their hand-made screenshots. */
@@ -172,6 +177,11 @@ export const MANIFESTS: Record<string, Shot[]> = {
       path: ({ fixtureId }) => `/items/${fixtureId("scanner:item:baldurs-gate-3")}`,
     },
     { name: "mobile", viewport: "mobile", path: "/" },
+  ],
+  // A fresh save, no game state: the map as a new player sees it.
+  tracer: [
+    { name: "map", viewport: "desktop", path: "/", settleMs: 3000, idleTimeoutMs: 15_000 },
+    { name: "mobile", viewport: "mobile", path: "/", settleMs: 3000, idleTimeoutMs: 15_000 },
   ],
   unifier: [
     { name: "orbit", viewport: "desktop", path: "/", settleMs: 1200 },
