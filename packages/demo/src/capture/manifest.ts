@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { stableUuid } from "../fixtures/determinism";
 
 export type Viewport = "desktop" | "mobile";
+export type Theme = "light" | "dark";
 
 /** What a shot can know about the run: the demo user, and the ids its fixtures were given. */
 export interface ShotContext {
@@ -15,6 +16,8 @@ export interface Shot {
   /** Becomes the file name (`01-home.png`). Mobile shots are named for you. */
   name: string;
   viewport: Viewport;
+  /** Light unless set. Every app also gets a dark copy of its first desktop shot: see `withDarkShot`. */
+  theme?: Theme;
   /** Path on the app's deployed URL. */
   path: string | ((context: ShotContext) => string);
   /** Steps to run once the page has settled, before the capture (open a modal, start a timer). */
@@ -30,7 +33,8 @@ export const MANIFESTS: Record<string, Shot[]> = {
     {
       name: "charts",
       viewport: "desktop",
-      path: ({ fixtureId }) => `/habit/${fixtureId("routiner:habit:read")}`,
+      path: "/",
+      before: (page) => page.getByRole("button", { name: "Chart view" }).click(),
       settleMs: 1500,
     },
     { name: "mobile", viewport: "mobile", path: "/" },
@@ -39,6 +43,18 @@ export const MANIFESTS: Record<string, Shot[]> = {
 
 export function makeShotContext(userId: string): ShotContext {
   return { userId, fixtureId: (key) => stableUuid(userId, key) };
+}
+
+/**
+ * The app's shots plus a dark copy of its first desktop shot, placed right after the last
+ * desktop shot, so every app shows one screenshot in dark mode.
+ */
+export function withDarkShot(shots: readonly Shot[]): Shot[] {
+  const first = shots.find((shot) => shot.viewport === "desktop" && shot.theme !== "dark");
+  if (!first || shots.some((shot) => shot.theme === "dark")) return [...shots];
+  const lastDesktop = shots.map((shot) => shot.viewport).lastIndexOf("desktop");
+  const dark: Shot = { ...first, name: `${first.name}-dark`, theme: "dark" };
+  return [...shots.slice(0, lastDesktop + 1), dark, ...shots.slice(lastDesktop + 1)];
 }
 
 /**

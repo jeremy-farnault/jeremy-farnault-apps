@@ -16,9 +16,11 @@ import {
   MANIFESTS,
   type Shot,
   type ShotContext,
+  type Theme,
   type Viewport,
   fileNames,
   makeShotContext,
+  withDarkShot,
 } from "./manifest";
 
 /** Where Indexer reads each app's screenshots from. */
@@ -37,8 +39,8 @@ const VIEWPORTS: Record<Viewport, BrowserContextOptions> = {
   },
 };
 
+// The demo user has no theme setting, so the apps follow the browser's colour scheme.
 const COMMON: BrowserContextOptions = {
-  colorScheme: "light",
   reducedMotion: "reduce",
   locale: "en-GB",
 };
@@ -156,13 +158,25 @@ export async function captureApps(apps: readonly string[], password: string): Pr
   try {
     const { storageState, userId } = await signIn(browser, password);
     const shotContext = makeShotContext(userId);
-    const contexts = {
-      desktop: await browser.newContext({ ...COMMON, ...VIEWPORTS.desktop, storageState }),
-      mobile: await browser.newContext({ ...COMMON, ...VIEWPORTS.mobile, storageState }),
+    // One context per viewport and theme, opened on first use, all sharing the session.
+    const contexts = new Map<string, BrowserContext>();
+    const contextFor = async (viewport: Viewport, theme: Theme) => {
+      const key = `${viewport}:${theme}`;
+      let context = contexts.get(key);
+      if (!context) {
+        context = await browser.newContext({
+          ...COMMON,
+          ...VIEWPORTS[viewport],
+          colorScheme: theme,
+          storageState,
+        });
+        contexts.set(key, context);
+      }
+      return context;
     };
 
     for (const app of apps) {
-      const shots = MANIFESTS[app] ?? [];
+      const shots = withDarkShot(MANIFESTS[app] ?? []);
       const names = fileNames(shots);
       const staged = await mkdtemp(path.join(tmpdir(), `screenshots-${app}-`));
       try {
@@ -170,7 +184,7 @@ export async function captureApps(apps: readonly string[], password: string): Pr
         for (const [index, shot] of shots.entries()) {
           const name = names[index] ?? `${shot.name}.png`;
           await captureShot(
-            contexts[shot.viewport],
+            await contextFor(shot.viewport, shot.theme ?? "light"),
             baseUrl,
             shot,
             shotContext,
