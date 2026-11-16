@@ -14,7 +14,7 @@ export async function ensureDemoAccount(password: string): Promise<string> {
   return withTransaction(async (tx) => {
     const now = new Date();
     const [existing] = await tx
-      .select({ id: user.id, emailVerified: user.emailVerified })
+      .select({ id: user.id, emailVerified: user.emailVerified, handle: user.handle })
       .from(user)
       .where(eq(user.email, DEMO_USER.email));
 
@@ -26,6 +26,13 @@ export async function ensureDemoAccount(password: string): Promise<string> {
           .update(user)
           .set({ emailVerified: true, updatedAt: now })
           .where(eq(user.id, userId));
+      }
+      // Exposer needs a handle: its home page sends a user without one to onboarding.
+      if (!existing.handle) {
+        const handle = await freeHandle(tx);
+        if (handle) {
+          await tx.update(user).set({ handle, updatedAt: now }).where(eq(user.id, userId));
+        }
       }
     } else {
       userId = crypto.randomUUID();

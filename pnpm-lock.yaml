@@ -1337,6 +1337,9 @@ importers:
 
   packages/demo:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.0.0
+        version: 3.1030.0
       '@jf/db':
         specifier: workspace:*
         version: link:../db
@@ -1349,6 +1352,9 @@ importers:
       fractional-indexing:
         specifier: ^3.2.0
         version: 3.4.0
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
     devDependencies:
       '@jf/config':
         specifier: workspace:*

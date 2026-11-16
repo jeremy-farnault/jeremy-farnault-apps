@@ -628,3 +628,47 @@ describe("scanner fixtures", () => {
     }
   });
 });
+
+describe("exposer fixtures", () => {
+  const exposer = buildDemoFixtures({ userId: USER_ID, today: TODAY }).exposer;
+
+  it("stores every photo under the user's demo prefix, which Exposer's image config allows", () => {
+    for (const photo of exposer.photos) {
+      expect(photo.storageKey).toMatch(new RegExp(`^exposer/${USER_ID}/demo/[a-z0-9-]+\\.jpg$`));
+    }
+    const keys = exposer.photos.map((p) => p.storageKey);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("gives each photo the size of the art it shows", () => {
+    for (const photo of exposer.photos) {
+      expect(photo.width).toBe(photo.art.width);
+      expect(photo.height).toBe(photo.art.height);
+    }
+  });
+
+  it("points photos and tags at items that exist, numbering photos from 0", () => {
+    const itemIds = new Set(exposer.items.map((i) => i.id));
+    const tagIds = new Set(exposer.tags.map((t) => t.id));
+    for (const photo of exposer.photos) expect(itemIds.has(photo.itemId)).toBe(true);
+    for (const link of exposer.itemTags) {
+      expect(itemIds.has(link.itemId)).toBe(true);
+      expect(tagIds.has(link.tagId)).toBe(true);
+    }
+    for (const item of exposer.items) {
+      const positions = exposer.photos.filter((p) => p.itemId === item.id).map((p) => p.position);
+      expect(positions.length, item.title ?? "").toBeGreaterThan(0);
+      expect(positions).toEqual(positions.map((_, i) => i));
+    }
+  });
+
+  it("publishes most collections and keeps one draft", () => {
+    expect(exposer.items.filter((i) => i.visibility === "draft")).toHaveLength(1);
+    expect(exposer.items.filter((i) => i.visibility === "public").length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("keeps image keys stable when today moves, so re-seeding reuses the uploads", () => {
+    const later = buildDemoFixtures({ userId: USER_ID, today: addDays(TODAY, 30) }).exposer;
+    expect(later.photos.map((p) => p.storageKey)).toEqual(exposer.photos.map((p) => p.storageKey));
+  });
+});

@@ -55,6 +55,12 @@ export const MANIFESTS: Record<string, Shot[]> = {
     },
     { name: "mobile", viewport: "mobile", path: "/" },
   ],
+  exposer: [
+    // The home page redirects to the user's portfolio at /<handle>. Photos load from S3.
+    { name: "portfolio", viewport: "desktop", path: "/", settleMs: 1000 },
+    { name: "settings", viewport: "desktop", path: "/settings" },
+    { name: "mobile", viewport: "mobile", path: "/", settleMs: 1000 },
+  ],
   financer: [
     { name: "spending", viewport: "desktop", path: "/?view=spending", settleMs: 1500 },
     { name: "assets", viewport: "desktop", path: "/?view=assets", settleMs: 1500 },

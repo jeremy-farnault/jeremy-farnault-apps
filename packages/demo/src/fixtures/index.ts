@@ -1,6 +1,7 @@
 import { type ClasserFixtures, buildClasserFixtures } from "./classer";
 import { type IsoDate, assertIsoDate } from "./dates";
 import { type DoserFixtures, buildDoserFixtures } from "./doser";
+import { type ExposerFixtures, buildExposerFixtures } from "./exposer";
 import { type FinancerFixtures, buildFinancerFixtures } from "./financer";
 import { type GainerFixtures, buildGainerFixtures } from "./gainer";
 import { type JournalerFixtures, buildJournalerFixtures } from "./journaler";
@@ -14,6 +15,7 @@ import { type UnifierFixtures, buildUnifierFixtures } from "./unifier";
 export interface DemoFixtures {
   classer: ClasserFixtures;
   doser: DoserFixtures;
+  exposer: ExposerFixtures;
   financer: FinancerFixtures;
   gainer: GainerFixtures;
   journaler: JournalerFixtures;
@@ -30,6 +32,7 @@ export type DemoApp = keyof DemoFixtures;
 export const DEMO_APPS = [
   "classer",
   "doser",
+  "exposer",
   "financer",
   "gainer",
   "journaler",
@@ -57,6 +60,7 @@ export function buildDemoFixtures({
   return {
     classer: buildClasserFixtures(input),
     doser: buildDoserFixtures(input),
+    exposer: buildExposerFixtures(input),
     financer: buildFinancerFixtures(input),
     gainer: buildGainerFixtures(input),
     journaler: buildJournalerFixtures(input),

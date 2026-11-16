@@ -8,6 +8,10 @@ import {
   doserSymptomLogEntries,
   doserSymptomLogs,
   doserSymptoms,
+  exposerItemTags,
+  exposerItems,
+  exposerPhotos,
+  exposerTags,
   financerAssetEntries,
   financerAssetSources,
   financerEntries,
@@ -46,6 +50,7 @@ import {
 import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { DemoApp, DemoFixtures } from "../fixtures";
+import { uploadDemoImages } from "../images/upload";
 import type { Tx } from "./types";
 
 type Reset<A extends DemoApp> = (
@@ -104,6 +109,21 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
       })),
       (c) => tx.insert(doserSymptomLogEntries).values(c)
     );
+  },
+  exposer: async (tx, userId, fixtures) => {
+    // Images first: the rows point at them. Already-uploaded keys are skipped.
+    const uploaded = await uploadDemoImages(
+      fixtures.photos.map((photo) => ({ key: photo.storageKey, art: photo.art }))
+    );
+    if (uploaded > 0) console.log(`    uploaded ${uploaded} demo image(s)`);
+
+    // Photos and item tags go with their items (cascade).
+    await tx.delete(exposerItems).where(eq(exposerItems.userId, userId));
+    await tx.delete(exposerTags).where(eq(exposerTags.userId, userId));
+    await tx.insert(exposerItems).values(fixtures.items);
+    await tx.insert(exposerPhotos).values(fixtures.photos.map(({ art: _, ...photo }) => photo));
+    await tx.insert(exposerTags).values(fixtures.tags);
+    await tx.insert(exposerItemTags).values(fixtures.itemTags);
   },
   financer: async (tx, userId, fixtures) => {
     // Entries before their sources; every table filtered on the demo user.
