@@ -3,10 +3,12 @@
  *
  * Descriptions are first-draft copy — edit freely.
  *
- * Screenshots are NOT listed here: drop image files (png/jpg/webp) into
+ * Screenshots are NOT listed here: image files (png/jpg/webp) in
  *   apps/indexer/public/screenshots/<appId>/
- * and they are picked up automatically, sorted by filename. Name them
- * with a numeric prefix to control order, e.g. 01-home.png, 02-detail.png.
+ * are picked up automatically, sorted by filename (01-home.png, 02-detail.png…).
+ * They're captured from the demo user rather than taken by hand:
+ *   pnpm seed:demo <appId> && pnpm screenshots <appId>
+ * which replaces the app's folder (see packages/demo).
  */
 
 export interface ShowcaseApp {
