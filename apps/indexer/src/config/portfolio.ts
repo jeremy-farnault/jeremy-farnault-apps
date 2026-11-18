@@ -57,11 +57,10 @@ export const portfolio: PortfolioEntry[] = [
     icon: EggIcon,
   },
   {
-    // First draft: check the wording.
     id: "manga-pipeline",
     name: "Manga Pipeline",
     description:
-      "Turns a series into e-reader-ready volumes. Nine steps from one terminal menu: split the chapters into volumes, find and pick a cover for each, then embed the metadata so the e-reader shows them properly.",
+      "Loose chapters don't make a library. This packs a manga series into proper volumes for an e-reader: it finds cover candidates online, throws out the broken ones, lets me pick the best, and embeds the metadata so every tome sorts and displays like a bought one.",
     stack: ["Python", "Playwright", "SerpAPI"],
     accentColor: "--purple-400",
     icon: BookOpenIcon,
