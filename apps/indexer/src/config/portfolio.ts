@@ -47,12 +47,11 @@ export const portfolio: PortfolioEntry[] = [
     icon: SwordIcon,
   },
   {
-    // First draft from very little: rewrite once the rebuild settles.
     id: "furyodachi",
     name: "Furyodachi",
     description:
-      "A Tamagotchi-style pet game for mobile. Look after a small creature that lives in your pocket. Currently being rebuilt.",
-    stack: ["Godot 4.5"],
+      "A Tamagotchi where the pet is a Japanese delinquent. He lives in real time, even with the game closed: send him to cram, cook or train, keep him fed and stylish, and deal with rivals, friends and the odd cop who show up at his door. Neglect him and it's game over. Being rebuilt.",
+    stack: ["Phaser 3", "TypeScript", "Vite"],
     accentColor: "--yellow-400",
     icon: EggIcon,
   },
