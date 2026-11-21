@@ -12,5 +12,6 @@ export * from "./exposer";
 export * from "./organiser";
 export * from "./unifier";
 export * from "./scanner";
+export * from "./furyo";
 export * from "./settings";
 export * from "./exchange-rates";

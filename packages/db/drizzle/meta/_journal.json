@@ -267,6 +267,13 @@
       "when": 1793886067954,
       "tag": "0037_drop_financer_exchange_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795277704306,
+      "tag": "0038_furyo_saves",
+      "breakpoints": true
     }
   ]
 }
