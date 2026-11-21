@@ -1,0 +1,22 @@
+{
+  "name": "@jf/summaries-migration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx src/cli.ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@jf/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.6",
+    "pg": "^8.13.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
