@@ -2,7 +2,6 @@ import {
   db,
   financerAssetEntries,
   financerAssetSources,
-  financerAssetSummaries,
   financerUserSettings,
   getExchangeRates,
 } from "@jf/db";
@@ -24,11 +23,10 @@ export interface CurrentAssetsData {
 
 /**
  * Assemble the user's asset values for a given `month` (YYYY-MM), mirroring the
- * Financer app's `getAssetsForMonth`: open months are served by
- * `financerAssetEntries` (joined to sources for name/currency), closed months by
- * `financerAssetSummaries`; rows are summed per (name, currency) in their own
- * currency. Also returns the user's home currency and the DB-stored exchange
- * rates so the caller can convert — no external rate refresh is performed.
+ * Financer app's `getAssetsForMonth`: `financerAssetEntries` joined to sources for
+ * name/currency, summed per (name, currency) in their own currency. Also returns
+ * the user's home currency and the DB-stored exchange rates so the caller can
+ * convert — no external rate refresh is performed.
  */
 export async function getCurrentAssets(userId: string, month: string): Promise<CurrentAssetsData> {
   const entryRows = await db
@@ -41,17 +39,8 @@ export async function getCurrentAssets(userId: string, month: string): Promise<C
     .innerJoin(financerAssetSources, eq(financerAssetSources.id, financerAssetEntries.sourceId))
     .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)));
 
-  const summaryRows = await db
-    .select({
-      name: financerAssetSummaries.name,
-      currency: financerAssetSummaries.currency,
-      value: financerAssetSummaries.value,
-    })
-    .from(financerAssetSummaries)
-    .where(and(eq(financerAssetSummaries.userId, userId), eq(financerAssetSummaries.month, month)));
-
   const grouped = new Map<string, AssetRow>();
-  for (const row of [...entryRows, ...summaryRows]) {
+  for (const row of entryRows) {
     const key = `${row.name}::${row.currency}`;
     const value = Number(row.value);
     const existing = grouped.get(key);

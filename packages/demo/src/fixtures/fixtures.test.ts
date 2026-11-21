@@ -157,12 +157,7 @@ describe("financer fixtures", () => {
   const expectedMonths = Array.from({ length: FINANCER_MONTHS }, (_, i) =>
     monthBefore(TODAY, FINANCER_MONTHS - 1 - i)
   );
-  const monthRows = [
-    ...financer.entries,
-    ...financer.summaries,
-    ...financer.incomeEntries,
-    ...financer.assetEntries,
-  ];
+  const monthRows = [...financer.entries, ...financer.incomeEntries, ...financer.assetEntries];
 
   it("covers the twelve months ending with today's month", () => {
     expect(expectedMonths.at(-1)).toBe("2026-11");
@@ -176,22 +171,32 @@ describe("financer fixtures", () => {
     expect(months(next)).toEqual([...months(financer).slice(1), "2026-12"]);
   });
 
-  it("keeps this month open and every past month closed", () => {
+  it("has one spending entry per category and currency in past months, and several this month", () => {
     const current = expectedMonths.at(-1);
-    expect(financer.entries.length).toBeGreaterThan(0);
-    expect(financer.entries.every((row) => row.month === current)).toBe(true);
-    expect(financer.summaries.some((row) => row.month === current)).toBe(false);
-    for (const month of expectedMonths.slice(0, -1)) {
-      expect(
-        financer.summaries.some((row) => row.month === month),
-        month
-      ).toBe(true);
+    const perGroup = new Map<string, number>();
+    for (const row of financer.entries) {
+      const key = `${row.month}:${row.category}:${row.currency}`;
+      perGroup.set(key, (perGroup.get(key) ?? 0) + 1);
+    }
+    for (const month of expectedMonths) {
+      const counts = [...perGroup].filter(([key]) => key.startsWith(`${month}:`)).map(([, n]) => n);
+      expect(counts.length, month).toBeGreaterThan(0);
+      if (month === current)
+        expect(
+          counts.some((n) => n > 1),
+          month
+        ).toBe(true);
+      else
+        expect(
+          counts.every((n) => n === 1),
+          month
+        ).toBe(true);
     }
   });
 
   it("only spends in categories that exist", () => {
     const names = new Set(financer.spendingCategories.map((category) => category.name));
-    for (const row of [...financer.entries, ...financer.summaries]) {
+    for (const row of financer.entries) {
       expect(names.has(row.category), row.category).toBe(true);
     }
   });
@@ -213,7 +218,6 @@ describe("financer fixtures", () => {
     for (const row of monthRows) expect(row.value, row.id).toMatch(/^\d+\.\d{2}$/);
     const currencies = [
       ...financer.entries,
-      ...financer.summaries,
       ...financer.incomeSources,
       ...financer.assetSources,
     ].map((row) => row.currency);

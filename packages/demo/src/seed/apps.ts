@@ -133,6 +133,7 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.delete(financerAssetSources).where(eq(financerAssetSources.userId, userId));
     await tx.delete(financerIncomeSources).where(eq(financerIncomeSources.userId, userId));
     await tx.delete(financerEntries).where(eq(financerEntries.userId, userId));
+    // Until the summaries tables are dropped (Combine Entries, ticket 04).
     await tx.delete(financerSummaries).where(eq(financerSummaries.userId, userId));
     await tx
       .delete(financerSpendingCategories)
@@ -142,7 +143,6 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.insert(financerUserSettings).values(fixtures.settings);
     await tx.insert(financerSpendingCategories).values(fixtures.spendingCategories);
     await insertInChunks(fixtures.entries, (c) => tx.insert(financerEntries).values(c));
-    await insertInChunks(fixtures.summaries, (c) => tx.insert(financerSummaries).values(c));
     await tx.insert(financerIncomeSources).values(fixtures.incomeSources);
     await tx.insert(financerAssetSources).values(fixtures.assetSources);
     await insertInChunks(fixtures.incomeEntries, (c) => tx.insert(financerIncomeEntries).values(c));

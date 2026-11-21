@@ -5,7 +5,6 @@ import type {
   financerIncomeEntries,
   financerIncomeSources,
   financerSpendingCategories,
-  financerSummaries,
   financerUserSettings,
 } from "@jf/db";
 
@@ -15,10 +14,11 @@ import { seededRandom, stableUuid } from "./determinism";
 export interface FinancerFixtures {
   settings: (typeof financerUserSettings.$inferInsert)[];
   spendingCategories: (typeof financerSpendingCategories.$inferInsert)[];
-  /** Open spending entries: only the current month, as if not closed yet. */
+  /**
+   * Spending entries: past months already combined (one per category and currency),
+   * this month as a handful of entries per category.
+   */
   entries: (typeof financerEntries.$inferInsert)[];
-  /** Closed spending months: one total per category and currency. */
-  summaries: (typeof financerSummaries.$inferInsert)[];
   incomeSources: (typeof financerIncomeSources.$inferInsert)[];
   incomeEntries: (typeof financerIncomeEntries.$inferInsert)[];
   assetSources: (typeof financerAssetSources.$inferInsert)[];
@@ -92,14 +92,13 @@ export function buildFinancerFixtures({
       color: category.color,
     })),
     entries: [],
-    summaries: [],
     incomeSources: [],
     incomeEntries: [],
     assetSources: [],
     assetEntries: [],
   };
 
-  // Spending: past months closed into one total per category; this month still open,
+  // Spending: past months as one entry per category (as Combine leaves them); this month
   // as a handful of entries per category.
   for (const month of months) {
     const calendarMonth = Number(month.slice(5));
@@ -112,7 +111,9 @@ export function buildFinancerFixtures({
       const value = inEuros ? total / 11 : total;
 
       if (month !== current) {
-        fixtures.summaries.push({
+        // Same id as the summary these months used to be, so a reseed after the
+        // summaries migration produces exactly the rows it made.
+        fixtures.entries.push({
           id: id(`summary:${month}:${category.name}`),
           userId,
           category: category.name,

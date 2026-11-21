@@ -2,9 +2,6 @@ import { AssetSourcesList } from "@/components/asset-sources-list";
 import { AssetsChart } from "@/components/assets-chart";
 import { AssetsCta } from "@/components/assets-cta";
 import { AssetsList } from "@/components/assets-list";
-import { CloseAssetMonthButton } from "@/components/close-asset-month-button";
-import { CloseIncomeMonthButton } from "@/components/close-income-month-button";
-import { CloseMonthButton } from "@/components/close-month-button";
 import { DetailChart, type DetailSeries } from "@/components/detail-chart";
 import { IncomeChart } from "@/components/income-chart";
 import { IncomeCta } from "@/components/income-cta";
@@ -42,11 +39,6 @@ import {
   getSpendingCategories,
   getSpendingEntriesForMonth,
   getSpendingForMonth,
-  hasAssetSummaries,
-  hasIncomeSummaries,
-  hasOpenAssetEntries,
-  hasOpenEntries,
-  hasOpenIncomeEntries,
 } from "@/lib/queries";
 import { auth } from "@jf/auth";
 import { getExchangeRates } from "@jf/db";
@@ -77,7 +69,7 @@ function convertAssetRows(
   homeCurrency: string
 ): AssetRow[] {
   const rateTo = rates[homeCurrency];
-  const merged = new Map<string, { sourceId?: string; total: number }>();
+  const merged = new Map<string, { sourceId: string; total: number }>();
   for (const row of data) {
     const rateFrom = rates[row.currency];
     const converted = rateFrom && rateTo ? row.total * (rateTo / rateFrom) : row.total;
@@ -85,15 +77,12 @@ function convertAssetRows(
     if (existing) {
       existing.total += converted;
     } else {
-      merged.set(row.name, {
-        ...(row.sourceId !== undefined ? { sourceId: row.sourceId } : {}),
-        total: converted,
-      });
+      merged.set(row.name, { sourceId: row.sourceId, total: converted });
     }
   }
   return Array.from(merged.entries()).map(([name, { sourceId, total }]) => ({
     name,
-    ...(sourceId !== undefined ? { sourceId } : {}),
+    sourceId,
     currency: homeCurrency,
     total,
   }));
@@ -105,7 +94,7 @@ function convertIncomeRows(
   homeCurrency: string
 ): IncomeRow[] {
   const rateTo = rates[homeCurrency];
-  const merged = new Map<string, { sourceId?: string; total: number }>();
+  const merged = new Map<string, { sourceId: string; total: number }>();
   for (const row of data) {
     const rateFrom = rates[row.currency];
     const converted = rateFrom && rateTo ? row.total * (rateTo / rateFrom) : row.total;
@@ -113,15 +102,12 @@ function convertIncomeRows(
     if (existing) {
       existing.total += converted;
     } else {
-      merged.set(row.name, {
-        ...(row.sourceId !== undefined ? { sourceId: row.sourceId } : {}),
-        total: converted,
-      });
+      merged.set(row.name, { sourceId: row.sourceId, total: converted });
     }
   }
   return Array.from(merged.entries()).map(([name, { sourceId, total }]) => ({
     name,
-    ...(sourceId !== undefined ? { sourceId } : {}),
+    sourceId,
     currency: homeCurrency,
     total,
   }));
@@ -166,34 +152,18 @@ export default async function FinancerPage({
   const session = await auth.api.getSession({ headers: await headers() });
   const userId = session?.user.id ?? "";
 
-  const [
-    spendingData,
-    openEntries,
-    spendingHomeCurrency,
-    spendingRates,
-    spendingEntries,
-    spendingCategories,
-  ] =
+  const [spendingData, spendingHomeCurrency, spendingRates, spendingEntries, spendingCategories] =
     view === "spending"
       ? await Promise.all([
           getSpendingForMonth(userId, month),
-          hasOpenEntries(userId, month),
           getHomeCurrency(userId),
           getExchangeRates(),
           getSpendingEntriesForMonth(userId, month),
           getSpendingCategories(userId),
         ])
-      : [[], false, "USD", {}, [], []];
+      : [[], "USD", {}, [], []];
 
-  const [
-    assetsData,
-    assetSources,
-    assetsHomeCurrency,
-    assetsRates,
-    assetEntries,
-    openAssetEntries,
-    closedAssetMonth,
-  ] =
+  const [assetsData, assetSources, assetsHomeCurrency, assetsRates, assetEntries] =
     view === "assets"
       ? await Promise.all([
           getAssetsForMonth(userId, month),
@@ -201,20 +171,10 @@ export default async function FinancerPage({
           getHomeCurrency(userId),
           getExchangeRates(),
           getAssetEntriesForMonth(userId, month),
-          hasOpenAssetEntries(userId, month),
-          hasAssetSummaries(userId, month),
         ])
-      : [[], [], "USD", {}, [], false, false];
+      : [[], [], "USD", {}, []];
 
-  const [
-    incomeData,
-    incomeSources,
-    incomeHomeCurrency,
-    incomeRates,
-    incomeEntries,
-    openIncomeEntries,
-    closedIncomeMonth,
-  ] =
+  const [incomeData, incomeSources, incomeHomeCurrency, incomeRates, incomeEntries] =
     view === "income"
       ? await Promise.all([
           getIncomeForMonth(userId, month),
@@ -222,10 +182,8 @@ export default async function FinancerPage({
           getHomeCurrency(userId),
           getExchangeRates(),
           getIncomeEntriesForMonth(userId, month),
-          hasOpenIncomeEntries(userId, month),
-          hasIncomeSummaries(userId, month),
         ])
-      : [[], [], "USD", {}, [], false, false];
+      : [[], [], "USD", {}, []];
 
   const [monthlyTotals, overviewAssetSources, overviewIncomeSources, overviewSpendingCategories] =
     view === "overview"
@@ -315,15 +273,12 @@ export default async function FinancerPage({
           />
           <SpendingCategoriesList categories={typedSpendingCategories} />
           <SpendingList
-            data={spendingData}
             homeCurrency={spendingHomeCurrency}
             rates={spendingRates}
-            isOpen={openEntries}
             entries={spendingEntries}
             categoryColors={categoryColors}
             customCategories={typedSpendingCategories}
           />
-          {openEntries && <CloseMonthButton month={month} spendingData={spendingData} />}
           <SpendingCta
             viewedMonth={month}
             homeCurrency={spendingHomeCurrency}
@@ -337,14 +292,8 @@ export default async function FinancerPage({
             data={convertAssetRows(assetsData, assetsRates, assetsHomeCurrency)}
             sources={assetSources}
           />
-          <AssetSourcesList
-            sources={assetSources}
-            month={month}
-            entries={assetEntries}
-            isClosed={!!closedAssetMonth}
-          />
+          <AssetSourcesList sources={assetSources} month={month} entries={assetEntries} />
           <AssetsList data={assetsData} homeCurrency={assetsHomeCurrency} rates={assetsRates} />
-          {openAssetEntries && <CloseAssetMonthButton month={month} assetsData={assetsData} />}
           <AssetsCta viewedMonth={month} homeCurrency={assetsHomeCurrency} sources={assetSources} />
         </>
       )}
@@ -354,14 +303,8 @@ export default async function FinancerPage({
             data={convertIncomeRows(incomeData, incomeRates, incomeHomeCurrency)}
             sources={incomeSources}
           />
-          <IncomeSourcesList
-            sources={incomeSources}
-            month={month}
-            entries={incomeEntries}
-            isClosed={!!closedIncomeMonth}
-          />
+          <IncomeSourcesList sources={incomeSources} month={month} entries={incomeEntries} />
           <IncomeList data={incomeData} homeCurrency={incomeHomeCurrency} rates={incomeRates} />
-          {openIncomeEntries && <CloseIncomeMonthButton month={month} incomeData={incomeData} />}
           <IncomeCta
             viewedMonth={month}
             homeCurrency={incomeHomeCurrency}

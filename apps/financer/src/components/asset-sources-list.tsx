@@ -26,10 +26,9 @@ interface AssetSourcesListProps {
   sources: AssetSourceRow[];
   month: string;
   entries: AssetEntryRow[];
-  isClosed: boolean;
 }
 
-export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSourcesListProps) {
+export function AssetSourcesList({ sources, month, entries }: AssetSourcesListProps) {
   const [editingSource, setEditingSource] = useState<AssetSourceRow | null>(null);
   const [deletingSource, setDeletingSource] = useState<AssetSourceRow | null>(null);
   const [loggingSource, setLoggingSource] = useState<AssetSourceRow | null>(null);
@@ -232,26 +231,24 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                       maximumFractionDigits: 2,
                     })}
                   </span>
-                  {!isClosed && (
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => openEditEntry(entry)}
-                        aria-label="Edit entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
-                      >
-                        <PencilSimpleIcon size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeletingEntryId(entry.id)}
-                        aria-label="Delete entry"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
-                      >
-                        <TrashIcon size={14} />
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditEntry(entry)}
+                      aria-label="Edit entry"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
+                    >
+                      <PencilSimpleIcon size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingEntryId(entry.id)}
+                      aria-label="Delete entry"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
+                    >
+                      <TrashIcon size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
               <div className="flex items-center gap-0.5">
@@ -271,15 +268,13 @@ export function AssetSourcesList({ sources, month, entries, isClosed }: AssetSou
                 >
                   <TrashIcon size={16} />
                 </button>
-                {!isClosed && (
-                  <button
-                    type="button"
-                    onClick={() => openLog(source)}
-                    className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--text-secondary) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
-                  >
-                    + Log
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => openLog(source)}
+                  className="ml-auto h-7 px-3 rounded-[8px] text-xs font-medium text-(--text-secondary) bg-(--surface-150) hover:bg-(--surface-200) transition-colors"
+                >
+                  + Log
+                </button>
               </div>
             </li>
           );

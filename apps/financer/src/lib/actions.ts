@@ -5,13 +5,10 @@ import {
   db,
   financerAssetEntries,
   financerAssetSources,
-  financerAssetSummaries,
   financerEntries,
   financerIncomeEntries,
   financerIncomeSources,
-  financerIncomeSummaries,
   financerSpendingCategories,
-  financerSummaries,
   financerUserSettings,
   withTransaction,
 } from "@jf/db";
@@ -131,12 +128,6 @@ export async function deleteSpendingCategory(id: string): Promise<void> {
     .where(and(eq(financerEntries.userId, userId), eq(financerEntries.category, category.name)))
     .limit(1);
   if (entryUsing) throw new Error("This category has transactions assigned to it");
-  const [summaryUsing] = await db
-    .select({ id: financerSummaries.id })
-    .from(financerSummaries)
-    .where(and(eq(financerSummaries.userId, userId), eq(financerSummaries.category, category.name)))
-    .limit(1);
-  if (summaryUsing) throw new Error("This category has transactions assigned to it");
   await db
     .delete(financerSpendingCategories)
     .where(
@@ -318,133 +309,5 @@ export async function setHomeCurrency(currency: string): Promise<void> {
       target: financerUserSettings.userId,
       set: { homeCurrency: currency, updatedAt: new Date() },
     });
-  revalidatePath("/", "layout");
-}
-
-export async function closeMonth(month: string): Promise<void> {
-  const userId = await getAuthUserId();
-
-  const entries = await db
-    .select({
-      category: financerEntries.category,
-      currency: financerEntries.currency,
-      value: financerEntries.value,
-    })
-    .from(financerEntries)
-    .where(and(eq(financerEntries.userId, userId), eq(financerEntries.month, month)));
-
-  if (entries.length === 0) throw new Error("No open entries for this month");
-
-  const totals = new Map<string, { currency: string; total: number }>();
-  for (const row of entries) {
-    const key = `${row.category}::${row.currency}`;
-    const existing = totals.get(key);
-    if (existing) {
-      existing.total += Number(row.value);
-    } else {
-      totals.set(key, { currency: row.currency, total: Number(row.value) });
-    }
-  }
-
-  await withTransaction(async (tx) => {
-    await tx.insert(financerSummaries).values(
-      Array.from(totals.entries()).map(([key, { currency, total }]) => {
-        const category = key.split("::")[0]!;
-        return { userId, category, currency, value: String(total), month };
-      })
-    );
-    await tx
-      .delete(financerEntries)
-      .where(and(eq(financerEntries.userId, userId), eq(financerEntries.month, month)));
-  });
-
-  revalidatePath("/", "layout");
-}
-
-export async function closeIncomeMonth(month: string): Promise<void> {
-  const userId = await getAuthUserId();
-
-  const entries = await db
-    .select({
-      name: financerIncomeSources.name,
-      currency: financerIncomeSources.currency,
-      value: financerIncomeEntries.value,
-    })
-    .from(financerIncomeEntries)
-    .innerJoin(financerIncomeSources, eq(financerIncomeEntries.sourceId, financerIncomeSources.id))
-    .where(and(eq(financerIncomeEntries.userId, userId), eq(financerIncomeEntries.month, month)));
-
-  if (entries.length === 0) throw new Error("No open entries for this month");
-
-  const totals = new Map<string, { name: string; currency: string; total: number }>();
-  for (const row of entries) {
-    const key = `${row.name}::${row.currency}`;
-    const existing = totals.get(key);
-    if (existing) {
-      existing.total += Number(row.value);
-    } else {
-      totals.set(key, { name: row.name, currency: row.currency, total: Number(row.value) });
-    }
-  }
-
-  await withTransaction(async (tx) => {
-    await tx.insert(financerIncomeSummaries).values(
-      Array.from(totals.values()).map(({ name, currency, total }) => ({
-        userId,
-        name,
-        currency,
-        value: String(total),
-        month,
-      }))
-    );
-    await tx
-      .delete(financerIncomeEntries)
-      .where(and(eq(financerIncomeEntries.userId, userId), eq(financerIncomeEntries.month, month)));
-  });
-
-  revalidatePath("/", "layout");
-}
-
-export async function closeAssetMonth(month: string): Promise<void> {
-  const userId = await getAuthUserId();
-
-  const entries = await db
-    .select({
-      name: financerAssetSources.name,
-      currency: financerAssetSources.currency,
-      value: financerAssetEntries.value,
-    })
-    .from(financerAssetEntries)
-    .innerJoin(financerAssetSources, eq(financerAssetEntries.sourceId, financerAssetSources.id))
-    .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)));
-
-  if (entries.length === 0) throw new Error("No open entries for this month");
-
-  const totals = new Map<string, { name: string; currency: string; total: number }>();
-  for (const row of entries) {
-    const key = `${row.name}::${row.currency}`;
-    const existing = totals.get(key);
-    if (existing) {
-      existing.total += Number(row.value);
-    } else {
-      totals.set(key, { name: row.name, currency: row.currency, total: Number(row.value) });
-    }
-  }
-
-  await withTransaction(async (tx) => {
-    await tx.insert(financerAssetSummaries).values(
-      Array.from(totals.values()).map(({ name, currency, total }) => ({
-        userId,
-        name,
-        currency,
-        value: String(total),
-        month,
-      }))
-    );
-    await tx
-      .delete(financerAssetEntries)
-      .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)));
-  });
-
   revalidatePath("/", "layout");
 }
