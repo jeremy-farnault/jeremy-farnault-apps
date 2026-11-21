@@ -5,6 +5,23 @@
 //
 // Deleted with the summaries tables (ticket 04).
 
+/**
+ * Financer's built-in spending categories: defined in its code, never stored in the
+ * categories table. A copy of `SPENDING_CATEGORIES` in Financer's constants; a test
+ * fails if the two differ.
+ */
+export const BUILT_IN_SPENDING_CATEGORIES = [
+  "Entertainment",
+  "Everyday",
+  "Groceries",
+  "Health",
+  "Housing",
+  "Presents & Hobbies",
+  "Restaurant",
+  "Transport",
+  "Other",
+] as const;
+
 export type SourceSummary = {
   id: string;
   userId: string;
@@ -171,19 +188,22 @@ export function planSourceSummaries(
 }
 
 /**
- * Spending summaries become entries as they are. A category name missing from the
- * user's list (renaming a category never updated old summaries) is created, once.
+ * Spending summaries become entries as they are. A category name that is neither
+ * built in (defined in Financer's code, never stored) nor in the user's own list
+ * (renaming a category never updated old summaries) is created, once.
  */
 export function planSpendingSummaries(
   summaries: SpendingSummary[],
-  categories: Category[]
+  categories: Category[],
+  builtInCategories: readonly string[]
 ): SpendingPlan {
   const known = new Set(categories.map((c) => key(c.userId, c.name)));
+  const builtIn = new Set(builtInCategories);
   const toCreate = new Map<string, CategoryToCreate>();
 
   for (const summary of summaries) {
     const k = key(summary.userId, summary.category);
-    if (known.has(k)) continue;
+    if (builtIn.has(summary.category) || known.has(k)) continue;
     const existing = toCreate.get(k);
     if (existing) existing.summaryCount++;
     else toCreate.set(k, { userId: summary.userId, name: summary.category, summaryCount: 1 });

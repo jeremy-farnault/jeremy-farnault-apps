@@ -2,7 +2,6 @@
   "extends": "@jf/config/tsconfig/base.json",
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "./src",
     "lib": ["ES2022"],
     "types": ["node"]
   },

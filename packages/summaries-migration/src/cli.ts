@@ -17,6 +17,7 @@ import { randomUUID } from "node:crypto";
 import { createInterface } from "node:readline/promises";
 import pg from "pg";
 import {
+  BUILT_IN_SPENDING_CATEGORIES,
   type SourcePlan,
   type SpendingPlan,
   planSourceSummaries,
@@ -78,7 +79,10 @@ async function pendingSpendingPlan(db: Db): Promise<{ plan: SpendingPlan; total:
     `select user_id as "userId", name from ${SPENDING.categories}`
   );
   const total = await countRows(db, SPENDING.summaries);
-  return { plan: planSpendingSummaries(summaries.rows, categories.rows), total };
+  return {
+    plan: planSpendingSummaries(summaries.rows, categories.rows, BUILT_IN_SPENDING_CATEGORIES),
+    total,
+  };
 }
 
 async function pendingSourcePlan(
@@ -226,7 +230,7 @@ async function dryRun(db: Db): Promise<boolean> {
       console.log(
         cats.length === 0
           ? "    categories to create: none"
-          : `    ⚠ categories to create (name no longer in the list): ${cats
+          : `    ⚠ categories to create (neither built in nor in the user's list): ${cats
               .map((c) => `"${c.name}" (${plural(c.summaryCount, "summary", "summaries")})`)
               .join(", ")}`
       );

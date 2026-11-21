@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { SPENDING_CATEGORIES } from "../../../apps/financer/src/lib/constants";
 import {
+  BUILT_IN_SPENDING_CATEGORIES,
   type Source,
   type SourceSummary,
   planSourceSummaries,
@@ -148,7 +150,8 @@ describe("planSpendingSummaries", () => {
         { id: "s1", userId: "me", category: "Groceries" },
         { id: "s2", userId: "me", category: "Transport" },
       ],
-      categories
+      categories,
+      []
     );
 
     expect(plan).toEqual({ summaryIds: ["s1", "s2"], categoriesToCreate: [] });
@@ -161,7 +164,8 @@ describe("planSpendingSummaries", () => {
         { id: "s2", userId: "me", category: "Food" },
         { id: "s3", userId: "me", category: "Groceries" },
       ],
-      categories
+      categories,
+      []
     );
 
     expect(plan.summaryIds).toEqual(["s1", "s2", "s3"]);
@@ -171,11 +175,35 @@ describe("planSpendingSummaries", () => {
   it("never counts another user's category as existing", () => {
     const plan = planSpendingSummaries(
       [{ id: "s1", userId: "someone-else", category: "Groceries" }],
-      categories
+      categories,
+      []
     );
 
     expect(plan.categoriesToCreate).toEqual([
       { userId: "someone-else", name: "Groceries", summaryCount: 1 },
     ]);
+  });
+
+  it("never creates a built-in category, even for a user with no categories of their own", () => {
+    const plan = planSpendingSummaries(
+      [
+        { id: "s1", userId: "new-user", category: "Housing" },
+        { id: "s2", userId: "new-user", category: "Presents & Hobbies" },
+        { id: "s3", userId: "new-user", category: "Old custom" },
+      ],
+      [],
+      ["Housing", "Presents & Hobbies", "Other"]
+    );
+
+    expect(plan.summaryIds).toEqual(["s1", "s2", "s3"]);
+    expect(plan.categoriesToCreate).toEqual([
+      { userId: "new-user", name: "Old custom", summaryCount: 1 },
+    ]);
+  });
+});
+
+describe("BUILT_IN_SPENDING_CATEGORIES", () => {
+  it("is exactly Financer's built-in list", () => {
+    expect([...BUILT_IN_SPENDING_CATEGORIES]).toEqual([...SPENDING_CATEGORIES]);
   });
 });
