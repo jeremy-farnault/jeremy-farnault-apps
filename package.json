@@ -26,7 +26,8 @@
     "test:e2e": "turbo run test:e2e",
     "format": "biome format --write .",
     "clean": "turbo run clean && rimraf node_modules",
-    "prepare": "husky"
+    "prepare": "husky",
+    "migrate:summaries": "pnpm --filter @jf/summaries-migration -s migrate"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
