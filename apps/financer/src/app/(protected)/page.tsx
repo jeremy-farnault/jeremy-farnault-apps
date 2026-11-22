@@ -2,6 +2,7 @@ import { AssetSourcesList } from "@/components/asset-sources-list";
 import { AssetsChart } from "@/components/assets-chart";
 import { AssetsCta } from "@/components/assets-cta";
 import { AssetsList } from "@/components/assets-list";
+import { CombineButton, type CombinePreview } from "@/components/combine-button";
 import { DetailChart, type DetailSeries } from "@/components/detail-chart";
 import { IncomeChart } from "@/components/income-chart";
 import { IncomeCta } from "@/components/income-cta";
@@ -15,6 +16,7 @@ import { SpendingChart } from "@/components/spending-chart";
 import { SpendingCta } from "@/components/spending-cta";
 import { SpendingList } from "@/components/spending-list";
 import { ViewToggle } from "@/components/view-toggle";
+import { planSourceCombine, planSpendingCombine } from "@/lib/combine";
 import {
   ASSET_SOURCE_COLORS,
   CATEGORY_COLORS,
@@ -23,10 +25,15 @@ import {
   SPENDING_CATEGORY_COLORS,
 } from "@/lib/constants";
 import {
+  type AssetEntryRow,
   type AssetRow,
+  type AssetSourceRow,
+  type IncomeEntryRow,
   type IncomeRow,
+  type IncomeSourceRow,
   type MonthlyTotals,
   type SpendingCategoryRow,
+  type SpendingEntryRow,
   type SpendingRow,
   getAssetEntriesForMonth,
   getAssetSources,
@@ -111,6 +118,36 @@ function convertIncomeRows(
     currency: homeCurrency,
     total,
   }));
+}
+
+// Combine previews: the groups the button would merge, from the grouping the actions use.
+// Entry values come from numeric(12, 2) columns, so toFixed(2) gives back their exact text.
+function spendingCombinePreview(entries: SpendingEntryRow[]): CombinePreview[] {
+  return planSpendingCombine(entries.map((e) => ({ ...e, value: e.value.toFixed(2) }))).map(
+    (g) => ({
+      key: `${g.category}::${g.currency}`,
+      label: g.category,
+      currency: g.currency,
+      count: g.ids.length,
+      total: Number(g.total),
+    })
+  );
+}
+
+function sourceCombinePreview(
+  entries: (AssetEntryRow | IncomeEntryRow)[],
+  sources: (AssetSourceRow | IncomeSourceRow)[]
+): CombinePreview[] {
+  return planSourceCombine(entries.map((e) => ({ ...e, value: e.value.toFixed(2) }))).map((g) => {
+    const source = sources.find((s) => s.id === g.sourceId);
+    return {
+      key: g.sourceId,
+      label: source?.name ?? "Unknown source",
+      currency: source?.currency ?? "",
+      count: g.ids.length,
+      total: Number(g.total),
+    };
+  });
 }
 
 function getCurrentMonth() {
@@ -279,6 +316,11 @@ export default async function FinancerPage({
             categoryColors={categoryColors}
             customCategories={typedSpendingCategories}
           />
+          <CombineButton
+            kind="spending"
+            month={month}
+            groups={spendingCombinePreview(spendingEntries)}
+          />
           <SpendingCta
             viewedMonth={month}
             homeCurrency={spendingHomeCurrency}
@@ -294,6 +336,11 @@ export default async function FinancerPage({
           />
           <AssetSourcesList sources={assetSources} month={month} entries={assetEntries} />
           <AssetsList data={assetsData} homeCurrency={assetsHomeCurrency} rates={assetsRates} />
+          <CombineButton
+            kind="assets"
+            month={month}
+            groups={sourceCombinePreview(assetEntries, assetSources)}
+          />
           <AssetsCta viewedMonth={month} homeCurrency={assetsHomeCurrency} sources={assetSources} />
         </>
       )}
@@ -305,6 +352,11 @@ export default async function FinancerPage({
           />
           <IncomeSourcesList sources={incomeSources} month={month} entries={incomeEntries} />
           <IncomeList data={incomeData} homeCurrency={incomeHomeCurrency} rates={incomeRates} />
+          <CombineButton
+            kind="income"
+            month={month}
+            groups={sourceCombinePreview(incomeEntries, incomeSources)}
+          />
           <IncomeCta
             viewedMonth={month}
             homeCurrency={incomeHomeCurrency}

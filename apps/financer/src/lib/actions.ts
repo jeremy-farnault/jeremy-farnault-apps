@@ -12,9 +12,16 @@ import {
   financerUserSettings,
   withTransaction,
 } from "@jf/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import {
+  planSourceCombine,
+  planSpendingCombine,
+  sameTotals,
+  sourceTotals,
+  spendingTotals,
+} from "./combine";
 
 async function getAuthUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -309,5 +316,133 @@ export async function setHomeCurrency(currency: string): Promise<void> {
       target: financerUserSettings.userId,
       set: { homeCurrency: currency, updatedAt: new Date() },
     });
+  revalidatePath("/", "layout");
+}
+
+// ─── Combine ──────────────────────────────────────────────────────────────────
+// Merge the viewed month's entries that belong together into one entry each, in one
+// transaction: insert the merged entries, delete the originals, then check that every
+// total is unchanged, or roll back. Nothing is locked: the month stays editable.
+
+const NOTHING_TO_COMBINE = "Nothing to combine this month";
+const TOTALS_CHANGED = "Combining would change a total, so nothing was saved";
+
+export async function combineSpendingMonth(month: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await withTransaction(async (tx) => {
+    const readMonth = () =>
+      tx
+        .select({
+          id: financerEntries.id,
+          category: financerEntries.category,
+          currency: financerEntries.currency,
+          value: financerEntries.value,
+        })
+        .from(financerEntries)
+        .where(and(eq(financerEntries.userId, userId), eq(financerEntries.month, month)))
+        .for("update");
+
+    const before = await readMonth();
+    const groups = planSpendingCombine(before);
+    if (groups.length === 0) throw new Error(NOTHING_TO_COMBINE);
+
+    await tx.insert(financerEntries).values(
+      groups.map((g) => ({
+        userId,
+        category: g.category,
+        currency: g.currency,
+        value: g.total,
+        month,
+      }))
+    );
+    await tx.delete(financerEntries).where(
+      and(
+        eq(financerEntries.userId, userId),
+        inArray(
+          financerEntries.id,
+          groups.flatMap((g) => g.ids)
+        )
+      )
+    );
+
+    const after = await readMonth();
+    if (!sameTotals(spendingTotals(before), spendingTotals(after))) throw new Error(TOTALS_CHANGED);
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function combineIncomeMonth(month: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await withTransaction(async (tx) => {
+    const readMonth = () =>
+      tx
+        .select({
+          id: financerIncomeEntries.id,
+          sourceId: financerIncomeEntries.sourceId,
+          value: financerIncomeEntries.value,
+        })
+        .from(financerIncomeEntries)
+        .where(
+          and(eq(financerIncomeEntries.userId, userId), eq(financerIncomeEntries.month, month))
+        )
+        .for("update");
+
+    const before = await readMonth();
+    const groups = planSourceCombine(before);
+    if (groups.length === 0) throw new Error(NOTHING_TO_COMBINE);
+
+    await tx
+      .insert(financerIncomeEntries)
+      .values(groups.map((g) => ({ userId, sourceId: g.sourceId, value: g.total, month })));
+    await tx.delete(financerIncomeEntries).where(
+      and(
+        eq(financerIncomeEntries.userId, userId),
+        inArray(
+          financerIncomeEntries.id,
+          groups.flatMap((g) => g.ids)
+        )
+      )
+    );
+
+    const after = await readMonth();
+    if (!sameTotals(sourceTotals(before), sourceTotals(after))) throw new Error(TOTALS_CHANGED);
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function combineAssetMonth(month: string): Promise<void> {
+  const userId = await getAuthUserId();
+  await withTransaction(async (tx) => {
+    const readMonth = () =>
+      tx
+        .select({
+          id: financerAssetEntries.id,
+          sourceId: financerAssetEntries.sourceId,
+          value: financerAssetEntries.value,
+        })
+        .from(financerAssetEntries)
+        .where(and(eq(financerAssetEntries.userId, userId), eq(financerAssetEntries.month, month)))
+        .for("update");
+
+    const before = await readMonth();
+    const groups = planSourceCombine(before);
+    if (groups.length === 0) throw new Error(NOTHING_TO_COMBINE);
+
+    await tx
+      .insert(financerAssetEntries)
+      .values(groups.map((g) => ({ userId, sourceId: g.sourceId, value: g.total, month })));
+    await tx.delete(financerAssetEntries).where(
+      and(
+        eq(financerAssetEntries.userId, userId),
+        inArray(
+          financerAssetEntries.id,
+          groups.flatMap((g) => g.ids)
+        )
+      )
+    );
+
+    const after = await readMonth();
+    if (!sameTotals(sourceTotals(before), sourceTotals(after))) throw new Error(TOTALS_CHANGED);
+  });
   revalidatePath("/", "layout");
 }
