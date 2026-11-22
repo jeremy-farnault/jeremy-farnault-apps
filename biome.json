@@ -16,7 +16,8 @@
       ".turbo",
       "playwright-report",
       "test-results",
-      "**/public/sw.js"
+      "**/public/sw.js",
+      "packages/furyo-logic/src/vendor"
     ]
   },
   "formatter": {
