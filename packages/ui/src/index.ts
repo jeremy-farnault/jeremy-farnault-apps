@@ -11,6 +11,7 @@ export * from "./components/button";
 export * from "./components/card";
 export * from "./components/divider";
 export * from "./components/floating-cta";
+export * from "./components/furyo-badge";
 export * from "./components/grid";
 export * from "./components/select";
 export * from "./components/skeleton";

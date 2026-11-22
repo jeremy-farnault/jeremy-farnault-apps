@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AppBackground } from "./app-background";
 import { AppSwitcher } from "./app-switcher";
+import { FuryoBadge } from "./furyo-badge";
 
 interface AppShellProps {
   appIcon: ReactNode;
@@ -59,6 +60,7 @@ export function AppShell({
       </header>
 
       {children}
+      <FuryoBadge />
     </div>
   );
 }
