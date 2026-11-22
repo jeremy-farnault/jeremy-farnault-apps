@@ -4,5 +4,5 @@
 // vendor.json. Never edit it here: change the game, then run `node scripts/export-logic.mjs`
 // from the furyodachi repo. A save from a newer game (a STATE_VERSION above vendor.json's)
 // reads as { status: "unknown" } until the copy is refreshed.
-export { badgeStatus, STATE_VERSION } from "./vendor/logic";
-export type { BadgeStatus } from "./vendor/logic";
+export { badgeStatus, createFuryo, STATE_VERSION } from "./vendor/logic";
+export type { BadgeStatus, FuryoState } from "./vendor/logic";

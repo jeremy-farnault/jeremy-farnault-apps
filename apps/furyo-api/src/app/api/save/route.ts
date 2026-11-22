@@ -1,43 +1,23 @@
-import { auth } from "@jf/auth";
 import { db } from "@jf/db";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { corsHeaders, isAllowedOrigin, preflightHeaders } from "@/lib/cors";
+import { isAllowedOrigin } from "@/lib/cors";
+import { preflight, withSession } from "@/lib/route";
 import { clearSave, loadSave, saveState } from "@/lib/saves";
 
 /** A furyo's state is a few KB; anything far bigger isn't one. */
 const MAX_BODY_BYTES = 256 * 1024;
 
 // The Furyodachi save API, called by the game (furyodachi.jeremyfarnault.com) with the shared
-// session cookie. GET loads the user's furyo ({ saved: { state, version } | null }), PUT
+// session cookie (CORS: the game's origin only). GET loads the user's furyo ({ saved: { state, version } | null }), PUT
 // { state, expectedVersion } saves it (409 on a stale version, nothing stored), DELETE clears it.
 
-type Handler = (request: NextRequest, userId: string) => Promise<Response>;
-
-/** CORS for the game's origin only, then the session: the user id never comes from the body. */
-function route(handler: Handler) {
-  return async (request: NextRequest): Promise<Response> => {
-    const origin = request.headers.get("origin");
-    // A browser always sends Origin on a cross-origin call; one from elsewhere gets no CORS headers.
-    const cors = isAllowedOrigin(origin) ? corsHeaders(origin) : {};
-    if (origin && !isAllowedOrigin(origin)) {
-      return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
-    }
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: cors });
-    const response = await handler(request, session.user.id);
-    for (const [key, value] of Object.entries(cors)) response.headers.set(key, value);
-    return response;
-  };
-}
-
-export const GET = route(async (_request, userId) => {
+export const GET = withSession(isAllowedOrigin, async (_request, userId) => {
   const saved = await loadSave(db, userId);
   return NextResponse.json({ saved }, { headers: { "Cache-Control": "no-store" } });
 });
 
-export const PUT = route(async (request, userId) => {
+export const PUT = withSession(isAllowedOrigin, async (request, userId) => {
   const text = await request.text();
   if (text.length > MAX_BODY_BYTES) {
     return NextResponse.json({ error: "Too large" }, { status: 413 });
@@ -50,16 +30,12 @@ export const PUT = route(async (request, userId) => {
   return NextResponse.json({ version: result.version });
 });
 
-export const DELETE = route(async (_request, userId) => {
+export const DELETE = withSession(isAllowedOrigin, async (_request, userId) => {
   await clearSave(db, userId);
   return new NextResponse(null, { status: 204 });
 });
 
-export async function OPTIONS(request: NextRequest): Promise<Response> {
-  const origin = request.headers.get("origin");
-  if (!isAllowedOrigin(origin)) return new NextResponse(null, { status: 403 });
-  return new NextResponse(null, { status: 204, headers: preflightHeaders(origin) });
-}
+export const OPTIONS = preflight(isAllowedOrigin, "GET, PUT, DELETE, OPTIONS");
 
 function parseSaveBody(text: string): { state: object; expectedVersion: number } | null {
   let body: unknown;

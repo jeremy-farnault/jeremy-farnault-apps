@@ -1,24 +1,12 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The routes run against an in-process Postgres (PGlite) with the real migration, so the
 // conditional update is tested as SQL, not as a fake.
-vi.mock("@jf/db", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@jf/db")>();
-  const { PGlite } = await import("@electric-sql/pglite");
-  const { drizzle } = await import("drizzle-orm/pglite");
-  const client = new PGlite();
-  const migration = readFileSync(
-    resolve(__dirname, "../../../../../../packages/db/drizzle/0038_furyo_saves.sql"),
-    "utf8"
-  ).replace(/--> statement-breakpoint/g, "");
-  await client.exec(`CREATE TABLE "user" ("id" text PRIMARY KEY NOT NULL);
-    INSERT INTO "user" VALUES ('user-1'), ('user-2');
-    ${migration}`);
-  return { ...actual, db: drizzle(client), testClient: client };
-});
+vi.mock("@jf/db", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@jf/db")>()),
+  ...(await (await import("@/test/pglite")).testDb()),
+}));
 
 vi.mock("@jf/auth", () => ({
   auth: { api: { getSession: vi.fn() } },

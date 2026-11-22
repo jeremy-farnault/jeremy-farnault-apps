@@ -15,6 +15,7 @@
   "dependencies": {
     "@jf/auth": "workspace:*",
     "@jf/db": "workspace:*",
+    "@jf/furyo-logic": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "next": "^15.2.0",
     "react": "^19.0.0",
