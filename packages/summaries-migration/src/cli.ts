@@ -1,5 +1,5 @@
 // One-off: move Financer's closed-month summaries back into entries (Combine Entries,
-// ticket 01). Deleted with the summaries tables (ticket 04).
+// ticket 01). Deleted with the summaries tables (Financer chore "Drop the summaries tables").
 //
 //   pnpm migrate:summaries dry-run   report only, writes nothing (default)
 //   pnpm migrate:summaries apply     one transaction per table, checked before commit

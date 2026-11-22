@@ -1,6 +1,6 @@
 # Summaries migration (one-off)
 
-Moves Financer's closed-month summaries (`financer_summaries`, `financer_income_summaries`, `financer_asset_summaries`) back into entries. Spec: *Combine Entries* in the documentation vault, tickets 01 and 02. **This package is deleted with the summaries tables (ticket 04).**
+Moves Financer's closed-month summaries (`financer_summaries`, `financer_income_summaries`, `financer_asset_summaries`) back into entries. Spec: *Combine Entries* in the documentation vault, tickets 01 and 02. **This package is deleted with the summaries tables: the Financer chore *Drop the summaries tables* in the vault.**
 
 It's a package of its own so the apps' dependencies don't change: it talks to Postgres with `pg` (node-postgres), which works with Neon's direct connection and with a plain local Postgres.
 

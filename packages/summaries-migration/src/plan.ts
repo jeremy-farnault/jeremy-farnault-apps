@@ -3,7 +3,7 @@
 // the script copies values, months, currencies and dates in SQL, so amounts never pass
 // through JavaScript numbers.
 //
-// Deleted with the summaries tables (ticket 04).
+// Deleted with the summaries tables (Financer chore "Drop the summaries tables").
 
 /**
  * Financer's built-in spending categories: defined in its code, never stored in the

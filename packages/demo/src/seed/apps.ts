@@ -133,7 +133,7 @@ export const RESETS: { [A in DemoApp]: Reset<A> } = {
     await tx.delete(financerAssetSources).where(eq(financerAssetSources.userId, userId));
     await tx.delete(financerIncomeSources).where(eq(financerIncomeSources.userId, userId));
     await tx.delete(financerEntries).where(eq(financerEntries.userId, userId));
-    // Until the summaries tables are dropped (Combine Entries, ticket 04).
+    // Until the summaries tables are dropped (the Financer chore "Drop the summaries tables").
     await tx.delete(financerSummaries).where(eq(financerSummaries.userId, userId));
     await tx
       .delete(financerSpendingCategories)
