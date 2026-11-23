@@ -17,7 +17,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "backfill:month-rates": "tsx scripts/backfill-month-rates.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
