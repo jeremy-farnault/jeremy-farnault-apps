@@ -16,7 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -27,6 +28,7 @@
     "@jf/config": "workspace:*",
     "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.30.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }

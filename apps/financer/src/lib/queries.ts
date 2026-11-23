@@ -7,7 +7,7 @@ import {
   financerIncomeSources,
   financerSpendingCategories,
   financerUserSettings,
-  getExchangeRates,
+  getMonthExchangeRates,
 } from "@jf/db";
 import { and, eq, inArray } from "drizzle-orm";
 
@@ -389,14 +389,16 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
       .where(
         and(eq(financerIncomeEntries.userId, userId), inArray(financerIncomeEntries.month, months))
       ),
-    getExchangeRates(),
+    getMonthExchangeRates(months),
     getHomeCurrency(userId),
   ]);
 
-  const rateTo = rates[homeCurrency];
-  const convert = (value: string | number, currency: string) => {
+  // Each month converts at its own month rates (the current month at the live rates).
+  const convert = (value: string | number, currency: string, month: string) => {
     const amount = Number(value);
-    const rateFrom = rates[currency];
+    const monthRates = rates[month] ?? {};
+    const rateFrom = monthRates[currency];
+    const rateTo = monthRates[homeCurrency];
     return rateFrom && rateTo ? amount * (rateTo / rateFrom) : amount;
   };
 
@@ -410,7 +412,7 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
   for (const row of entries) {
     const entry = result.get(row.month);
     if (entry) {
-      const converted = convert(row.value, row.currency);
+      const converted = convert(row.value, row.currency, row.month);
       entry.spending += converted;
       entry.spendingByCategory[row.category] =
         (entry.spendingByCategory[row.category] ?? 0) + converted;
@@ -420,14 +422,16 @@ export async function getMonthlyTotals(userId: string, months: string[]): Promis
   for (const row of assetRows) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.assets[row.name] = (entry.assets[row.name] ?? 0) + convert(row.value, row.currency);
+      entry.assets[row.name] =
+        (entry.assets[row.name] ?? 0) + convert(row.value, row.currency, row.month);
     }
   }
 
   for (const row of incomeRows) {
     const entry = result.get(row.month);
     if (entry) {
-      entry.income[row.name] = (entry.income[row.name] ?? 0) + convert(row.value, row.currency);
+      entry.income[row.name] =
+        (entry.income[row.name] ?? 0) + convert(row.value, row.currency, row.month);
     }
   }
 

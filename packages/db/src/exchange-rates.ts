@@ -1,6 +1,7 @@
 import { inArray, sql } from "drizzle-orm";
 
 import { db } from "./client";
+import { type Rates, resolveMonthRates } from "./month-rates";
 import { exchangeRates, monthExchangeRates } from "./schema/exchange-rates";
 
 export const SUPPORTED_CURRENCIES = ["USD", "EUR", "GBP", "SEK", "NZD", "JPY", "CAD"] as const;
@@ -50,6 +51,37 @@ export async function getExchangeRates(): Promise<Record<string, number>> {
 }
 
 /**
+ * The rates each of `months` (UTC `YYYY-MM`) converts at, as a month → rates map. The current
+ * month gets the live rates from `getExchangeRates`; a past month gets its month rates, with
+ * the live rate for any currency it has none for.
+ */
+export async function getMonthExchangeRates(months: string[]): Promise<Record<string, Rates>> {
+  const [live, stored] = await Promise.all([
+    getExchangeRates(),
+    months.length === 0
+      ? []
+      : db
+          .select({
+            currency: monthExchangeRates.currency,
+            month: monthExchangeRates.month,
+            rate: monthExchangeRates.rate,
+          })
+          .from(monthExchangeRates)
+          .where(inArray(monthExchangeRates.month, months)),
+  ]);
+  return resolveMonthRates({
+    live,
+    stored: stored.map((r) => ({ ...r, rate: Number(r.rate) })),
+    months,
+    currentMonth: currentUtcMonth(),
+  });
+}
+
+function currentUtcMonth(): string {
+  return new Date().toISOString().slice(0, 7);
+}
+
+/**
  * Saves freshly fetched rates as the current UTC month's month rates. The last refresh of a
  * month wins; once the month is over nothing writes to its rows again. A failure is logged
  * and swallowed: the live rates must still reach the caller (Scanner's daily check among them).
@@ -57,7 +89,7 @@ export async function getExchangeRates(): Promise<Record<string, number>> {
 async function captureMonthRates(
   fresh: { currency: string; rate: string; updatedAt: Date }[]
 ): Promise<void> {
-  const month = new Date().toISOString().slice(0, 7);
+  const month = currentUtcMonth();
   try {
     await db
       .insert(monthExchangeRates)
