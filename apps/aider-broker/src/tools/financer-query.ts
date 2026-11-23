@@ -3,7 +3,7 @@ import {
   financerAssetEntries,
   financerAssetSources,
   financerUserSettings,
-  getExchangeRates,
+  getMonthExchangeRates,
 } from "@jf/db";
 import { and, eq } from "drizzle-orm";
 
@@ -17,7 +17,8 @@ export interface CurrentAssetsData {
   // Per-source asset values for the month, in each source's own currency.
   rows: AssetRow[];
   homeCurrency: string;
-  // USD-based exchange-rate map (currency -> units per 1 USD), read from the DB.
+  // USD-based exchange-rate map (currency -> units per 1 USD) for the month: its month
+  // rates, or the live rates for the current month, as Financer converts it.
   rates: Record<string, number>;
 }
 
@@ -25,8 +26,8 @@ export interface CurrentAssetsData {
  * Assemble the user's asset values for a given `month` (YYYY-MM), mirroring the
  * Financer app's `getAssetsForMonth`: `financerAssetEntries` joined to sources for
  * name/currency, summed per (name, currency) in their own currency. Also returns
- * the user's home currency and the DB-stored exchange rates so the caller can
- * convert — no external rate refresh is performed.
+ * the user's home currency and the month's exchange rates (through the same shared
+ * reader as Financer, so both convert a month alike) so the caller can convert.
  */
 export async function getCurrentAssets(userId: string, month: string): Promise<CurrentAssetsData> {
   const entryRows = await db
@@ -56,7 +57,7 @@ export async function getCurrentAssets(userId: string, month: string): Promise<C
     .limit(1);
   const homeCurrency = settings?.homeCurrency ?? "USD";
 
-  const rates = await getExchangeRates();
+  const rates = (await getMonthExchangeRates([month]))[month] ?? {};
 
   return { rows, homeCurrency, rates };
 }
