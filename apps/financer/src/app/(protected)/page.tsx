@@ -48,7 +48,7 @@ import {
   getSpendingForMonth,
 } from "@/lib/queries";
 import { auth } from "@jf/auth";
-import { getExchangeRates } from "@jf/db";
+import { getMonthExchangeRates } from "@jf/db";
 import { headers } from "next/headers";
 
 function convertSpendingRows(
@@ -150,6 +150,13 @@ function sourceCombinePreview(
   });
 }
 
+// The rates the viewed month converts at: its month rates, or the live rates for the
+// current month.
+async function getRatesForMonth(month: string): Promise<Record<string, number>> {
+  const rates = await getMonthExchangeRates([month]);
+  return rates[month] ?? {};
+}
+
 function getCurrentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
@@ -194,7 +201,7 @@ export default async function FinancerPage({
       ? await Promise.all([
           getSpendingForMonth(userId, month),
           getHomeCurrency(userId),
-          getExchangeRates(),
+          getRatesForMonth(month),
           getSpendingEntriesForMonth(userId, month),
           getSpendingCategories(userId),
         ])
@@ -206,7 +213,7 @@ export default async function FinancerPage({
           getAssetsForMonth(userId, month),
           getAssetSources(userId),
           getHomeCurrency(userId),
-          getExchangeRates(),
+          getRatesForMonth(month),
           getAssetEntriesForMonth(userId, month),
         ])
       : [[], [], "USD", {}, []];
@@ -217,7 +224,7 @@ export default async function FinancerPage({
           getIncomeForMonth(userId, month),
           getIncomeSources(userId),
           getHomeCurrency(userId),
-          getExchangeRates(),
+          getRatesForMonth(month),
           getIncomeEntriesForMonth(userId, month),
         ])
       : [[], [], "USD", {}, []];
