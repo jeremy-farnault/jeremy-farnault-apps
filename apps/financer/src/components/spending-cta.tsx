@@ -3,6 +3,7 @@
 import { createSpendingCategory, createSpendingEntries } from "@/lib/actions";
 import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import type { SpendingCategoryRow } from "@/lib/queries";
+import { parseQuickEntry } from "@/lib/quick-entry";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
 import { MinusIcon, PlusCircleIcon, PlusIcon, ReceiptIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -25,10 +26,10 @@ function formatMonth(month: string): string {
 
 export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: SpendingCtaProps) {
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<SpendingLogRow[]>([
-    { value: "", category: "", currency: homeCurrency },
-  ]);
-  const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([undefined]);
+  // Rows come from the quick-entry line (or Add row): the modal opens with none.
+  const [rows, setRows] = useState<SpendingLogRow[]>([]);
+  const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([]);
+  const [quickLine, setQuickLine] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
@@ -63,13 +64,29 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
 
   function handleClose() {
     setOpen(false);
-    setRows([{ value: "", category: "", currency: homeCurrency }]);
-    setRowErrors([undefined]);
+    setRows([]);
+    setRowErrors([]);
+    setQuickLine("");
   }
 
   function addRow() {
     setRows((prev) => [...prev, { value: "", category: "", currency: homeCurrency }]);
     setRowErrors((prev) => [...prev, undefined]);
+  }
+
+  const quickEntry = parseQuickEntry(quickLine, allCategories);
+
+  // Enter on the quick-entry line adds its row at the bottom and clears the line, which keeps
+  // focus. A line that can't be read adds nothing and keeps its text, with the reason shown.
+  // Enter never reaches the modal, which would otherwise Save: saving stays on its button.
+  function handleQuickLineKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!quickEntry?.ok) return;
+    setRows((prev) => [...prev, { ...quickEntry.row, currency: homeCurrency }]);
+    setRowErrors((prev) => [...prev, undefined]);
+    setQuickLine("");
   }
 
   function removeRow(idx: number) {
@@ -171,6 +188,25 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
         content={
           <div className="flex flex-col gap-4">
             <p className="text-sm text-(--text-secondary)">For: {formatMonth(viewedMonth)}</p>
+            <div className="flex flex-col gap-1">
+              <TextInput
+                value={quickLine}
+                onChange={setQuickLine}
+                onKeyDown={handleQuickLineKeyDown}
+                placeholder="45 gr: an amount, then the start of a category"
+                autoFocus
+              />
+              <p
+                aria-live="polite"
+                className={`min-h-4 pl-1 text-xs ${quickEntry && !quickEntry.ok ? "text-red-500" : "text-(--text-secondary)"}`}
+              >
+                {quickEntry === null
+                  ? ""
+                  : quickEntry.ok
+                    ? `${quickEntry.row.value} → ${quickEntry.row.category}`
+                    : quickEntry.error}
+              </p>
+            </div>
             <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
               {rows.map((row, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rows are transient form entries with no stable ID
@@ -213,7 +249,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
                       type="button"
                       onClick={() => removeRow(idx)}
                       aria-label="Remove row"
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text) ${idx === 0 ? "invisible" : ""}`}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-200) hover:text-(--text)"
                     >
                       <MinusIcon size={16} />
                     </button>
