@@ -32,7 +32,13 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -42,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${bricolage.variable} ${geistMono.variable} font-sans antialiased bg-(--surface-200) flex flex-col items-center justify-start`}
       >
         {children}
+        {modal}
         <ThemedToaster
           position="top-right"
           toastOptions={{ classNames: { toast: "!left-auto !right-8 !w-fit" } }}

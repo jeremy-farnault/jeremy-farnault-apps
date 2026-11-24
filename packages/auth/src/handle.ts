@@ -13,6 +13,7 @@ export const HANDLE_PATTERN = /^[a-z0-9-]+$/;
 export const RESERVED_HANDLES: ReadonlySet<string> = new Set([
   "api",
   "settings",
+  "changelog",
   "onboarding",
   "login",
   "logout",

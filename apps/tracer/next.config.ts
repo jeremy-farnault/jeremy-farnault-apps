@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db"],
+  transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db", "@jf/changelog"],
   webpack: (config) => {
     config.externals.push({
       bufferutil: "commonjs bufferutil",

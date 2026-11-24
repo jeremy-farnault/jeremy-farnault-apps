@@ -137,12 +137,23 @@ export function PublicChangelogPage({
   );
 }
 
-/** The changelog's heading and list, for a page inside the app shell. */
-export function ChangelogContent({ months }: { months: readonly ChangelogListMonth[] }) {
+/**
+ * The changelog's heading and list, for a page inside the app shell. It scrolls on its own, so
+ * it also works in a fixed-height shell (`fullHeight`); `className` fits it to an app's own frame.
+ */
+export function ChangelogContent({
+  months,
+  className,
+}: {
+  months: readonly ChangelogListMonth[];
+  className?: string;
+}) {
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[640px] px-4 py-8">
-      <h1 className="text-2xl font-semibold text-(--text)">Changelog</h1>
-      <ChangelogList months={months} />
-    </main>
+    <div className={cn("flex w-full flex-1 min-h-0 justify-center overflow-y-auto", className)}>
+      <main className="flex flex-col gap-6 w-full max-w-[640px] px-4 py-8">
+        <h1 className="text-2xl font-semibold text-(--text)">Changelog</h1>
+        <ChangelogList months={months} />
+      </main>
+    </div>
   );
 }

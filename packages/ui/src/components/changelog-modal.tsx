@@ -2,25 +2,23 @@
 
 import { XIcon } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useRouter } from "next/navigation";
 import { cn } from "../lib/utils";
 import { ChangelogList, type ChangelogListMonth } from "./changelog";
-
-interface ChangelogModalProps {
-  months: readonly ChangelogListMonth[];
-  /** Called when the modal closes (Back, Escape, the close button, a click outside). Apps pass `router.back`. */
-  onClose: () => void;
-}
 
 /**
  * The changelog over the current page, for a link followed inside the app. Apps render it from
  * an intercepting route, so the URL is /changelog and a full load shows the page instead.
+ * Closing it (Back, Escape, the close button, a click outside) goes back to the page under it.
  */
-export function ChangelogModal({ months, onClose }: ChangelogModalProps) {
+export function ChangelogModal({ months }: { months: readonly ChangelogListMonth[] }) {
+  const router = useRouter();
+
   return (
     <Dialog.Root
       defaultOpen
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) router.back();
       }}
     >
       <Dialog.Portal>

@@ -17,6 +17,7 @@
     "@aws-sdk/client-s3": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.0.0",
     "@jf/auth": "workspace:*",
+    "@jf/changelog": "workspace:*",
     "@jf/db": "workspace:*",
     "@jf/demo": "workspace:*",
     "@jf/ui": "workspace:*",

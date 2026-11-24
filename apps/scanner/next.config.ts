@@ -8,7 +8,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db", "@jf/demo"],
+  transpilePackages: ["@jf/ui", "@jf/auth", "@jf/db", "@jf/changelog", "@jf/demo"],
   webpack: (config) => {
     config.externals.push({
       bufferutil: "commonjs bufferutil",

@@ -17,6 +17,7 @@
     "@aws-sdk/client-s3": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.0.0",
     "@jf/auth": "workspace:*",
+    "@jf/changelog": "workspace:*",
     "@jf/db": "workspace:*",
     "@jf/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.7",

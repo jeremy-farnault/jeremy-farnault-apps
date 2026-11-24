@@ -97,8 +97,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -117,6 +119,7 @@ export default function RootLayout({
           rightSlot={<HeaderAuth />}
         >
           {children}
+          {modal}
         </AppShell>
         <ServiceWorkerRegister />
         <ThemeSync sync={syncThemeCookie} />

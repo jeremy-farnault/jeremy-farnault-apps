@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@jf/auth": "workspace:*",
+    "@jf/changelog": "workspace:*",
     "@jf/db": "workspace:*",
     "@jf/ui": "workspace:*",
     "@mapbox/polyline": "^1.2.1",
