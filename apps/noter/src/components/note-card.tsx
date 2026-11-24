@@ -102,6 +102,7 @@ export function NoteCard({
           <div
             className="jf-rich-text note-card-body text-sm"
             style={{ color: textSoft }}
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: renderToHtml escapes text and attributes and emits only fixed tags (see @jf/ui rich-text)
             dangerouslySetInnerHTML={{ __html: renderToHtml(note.body) }}
           />
         )}

@@ -279,3 +279,37 @@ describe("normalizeHref", () => {
     expect(normalizeHref("   ")).toBeNull();
   });
 });
+
+describe("renderToHtml — unsafe input", () => {
+  const linked = (href: string) =>
+    renderToHtml(doc(para(text("x", { type: "link", attrs: { href } }))));
+
+  it("drops a link whose scheme isn't allowed, keeping its text", () => {
+    expect(linked("javascript:alert(1)")).toBe("<p>x</p>");
+    expect(linked("JavaScript:alert(1)")).toBe("<p>x</p>");
+    expect(linked("data:text/html,<script>alert(1)</script>")).toBe("<p>x</p>");
+    expect(linked("vbscript:msgbox(1)")).toBe("<p>x</p>");
+  });
+
+  it("drops a forbidden scheme hidden by spaces or control characters", () => {
+    expect(linked("java\tscript:alert(1)")).toBe("<p>x</p>");
+    expect(linked(" javascript:alert(1)")).toBe("<p>x</p>");
+    expect(linked("java\nscript:alert(1)")).toBe("<p>x</p>");
+  });
+
+  it("keeps links on allowed schemes, and scheme-less ones, as stored", () => {
+    expect(linked("mailto:me@example.com")).toBe('<p><a href="mailto:me@example.com">x</a></p>');
+    expect(linked("HTTPS://example.com")).toBe('<p><a href="HTTPS://example.com">x</a></p>');
+    expect(linked("/gallery/1")).toBe('<p><a href="/gallery/1">x</a></p>');
+  });
+
+  it("renders a heading level that isn't an integer from 1 to 6 as level 1", () => {
+    const heading = (level: unknown) =>
+      renderToHtml(doc({ type: "heading", attrs: { level }, content: [text("h")] }));
+    expect(heading("1><img src=x onerror=alert(1)")).toBe("<h1>h</h1>");
+    expect(heading(7)).toBe("<h1>h</h1>");
+    expect(heading(0)).toBe("<h1>h</h1>");
+    expect(heading(2.5)).toBe("<h1>h</h1>");
+    expect(heading(undefined)).toBe("<h1>h</h1>");
+  });
+});

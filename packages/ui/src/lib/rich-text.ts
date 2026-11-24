@@ -1,6 +1,8 @@
 // Dependency-free helpers for rich-text content stored as TipTap/ProseMirror JSON.
 // No live editor and no @tiptap/* imports, so this module is safe to use on servers and
-// unauthenticated pages (pair renderToHtml with an HTML sanitizer at the call site).
+// unauthenticated pages. renderToHtml's output is safe by construction: text and attributes
+// are escaped, tags come from a fixed list, links keep to the allowed schemes and heading
+// levels to 1–6. Public pages still pass it through an HTML sanitizer as a second line.
 
 type ProseMirrorMark = {
   type: string;
@@ -90,6 +92,24 @@ function paletteColor(value: unknown): string | null {
   return typeof value === "string" && PALETTE_COLOR.test(value) ? value : null;
 }
 
+/**
+ * Whether an href names a scheme outside ALLOWED_LINK_SCHEMES (`javascript:`, `data:`…).
+ * Browsers ignore control characters and spaces inside a scheme, so `java\tscript:` counts.
+ * A scheme-less href (a path, or a bare host) has no scheme to forbid.
+ */
+function hasForbiddenScheme(href: string): boolean {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: stripping them is the point.
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(href.replace(/[\u0000-\u0020]/g, ""))?.[1];
+  return scheme !== undefined && !ALLOWED_LINK_SCHEMES.includes(scheme.toLowerCase());
+}
+
+/** A heading level as an integer from 1 to 6; anything else renders as level 1. */
+function headingLevel(value: unknown): number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 6
+    ? value
+    : 1;
+}
+
 // Marks nest outward in array order: the first mark is innermost.
 function applyMark(html: string, mark: ProseMirrorMark): string {
   switch (mark.type) {
@@ -105,7 +125,7 @@ function applyMark(html: string, mark: ProseMirrorMark): string {
       return `<code>${html}</code>`;
     case "link": {
       const href = mark.attrs?.href;
-      if (typeof href !== "string" || !href) return html;
+      if (typeof href !== "string" || !href || hasForbiddenScheme(href)) return html;
       return `<a href="${escapeAttr(href)}">${html}</a>`;
     }
     case "highlight": {
@@ -140,7 +160,7 @@ function renderNodeToHtml(node: ProseMirrorNode): string {
     case "paragraph":
       return `<p>${inner}</p>`;
     case "heading": {
-      const level = (node.attrs?.level as number) ?? 1;
+      const level = headingLevel(node.attrs?.level);
       return `<h${level}>${inner}</h${level}>`;
     }
     case "bulletList":
