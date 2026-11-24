@@ -1,6 +1,6 @@
 "use client";
 
-import { createSpendingCategory, createSpendingEntry } from "@/lib/actions";
+import { createSpendingCategory, createSpendingEntries } from "@/lib/actions";
 import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import type { SpendingCategoryRow } from "@/lib/queries";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
@@ -111,16 +111,8 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
     const validRows = nonBlank.map(({ row }) => row);
     startTransition(async () => {
       try {
-        await Promise.all(
-          validRows.map((r) =>
-            createSpendingEntry({
-              category: r.category,
-              value: r.value,
-              month: viewedMonth,
-              currency: r.currency,
-            })
-          )
-        );
+        // One request for every row: all saved or none, so a retry after an error is safe.
+        await createSpendingEntries(viewedMonth, validRows);
         toast.success("Entries saved");
         handleClose();
       } catch (err) {

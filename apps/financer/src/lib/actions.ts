@@ -22,6 +22,7 @@ import {
   sourceTotals,
   spendingTotals,
 } from "./combine";
+import { CURRENCIES } from "./constants";
 
 async function getAuthUserId(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -29,24 +30,39 @@ async function getAuthUserId(): Promise<string> {
   return session.user.id;
 }
 
-export async function createSpendingEntry(data: {
-  category: string;
-  value: string;
-  month: string;
-  currency: string;
-}): Promise<void> {
-  if (!data.category.trim()) throw new Error("Category is required");
-  const numericValue = Number(data.value);
-  if (!numericValue || numericValue <= 0) throw new Error("Value must be a positive number");
+export type SpendingEntryInput = { category: string; value: string; currency: string };
+
+/**
+ * Saves the rows of one Log spending session as spending entries of `month`, all or none:
+ * every row is checked first, and they go in as a single insert, which Postgres applies as a
+ * whole or not at all. So a failed save stores nothing, and retrying it can't duplicate rows.
+ */
+export async function createSpendingEntries(
+  month: string,
+  rows: SpendingEntryInput[]
+): Promise<void> {
+  if (!/^\d{4}-\d{2}$/.test(month)) throw new Error("Invalid month");
+  if (rows.length === 0) return;
+  rows.forEach((row, i) => {
+    const line = rows.length > 1 ? ` (row ${i + 1})` : "";
+    if (!row.category.trim()) throw new Error(`Category is required${line}`);
+    const value = Number(row.value);
+    if (!value || value <= 0) throw new Error(`Value must be a positive number${line}`);
+    if (!(CURRENCIES as readonly string[]).includes(row.currency)) {
+      throw new Error(`Unsupported currency ${row.currency}${line}`);
+    }
+  });
 
   const userId = await getAuthUserId();
-  await db.insert(financerEntries).values({
-    userId,
-    category: data.category,
-    value: data.value,
-    month: data.month,
-    currency: data.currency,
-  });
+  await db.insert(financerEntries).values(
+    rows.map((row) => ({
+      userId,
+      category: row.category,
+      value: row.value,
+      currency: row.currency,
+      month,
+    }))
+  );
   revalidatePath("/", "layout");
 }
 
