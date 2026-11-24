@@ -44,11 +44,15 @@ jobs:
       - name: Raw colour check
         run: pnpm lint:colors
 
-      # TODO: fix and re-enable when lint/type-check/tests are clean
+      # The packages a change touches and their dependents, compared as in Build below.
+      - name: Type-check
+        run: pnpm turbo run type-check --affected
+        env:
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+      # TODO: fix and re-enable when lint/tests are clean
       # - name: Lint
       #   run: pnpm turbo run lint
-      # - name: Type-check
-      #   run: pnpm turbo run type-check
       # - name: Unit tests
       #   run: pnpm turbo run test
 
