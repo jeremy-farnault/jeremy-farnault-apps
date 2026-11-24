@@ -9,6 +9,7 @@ export * from "./components/app-shell";
 export * from "./components/app-switcher";
 export * from "./components/button";
 export * from "./components/card";
+export * from "./components/changelog";
 export * from "./components/divider";
 export * from "./components/floating-cta";
 export * from "./components/furyo-badge";
