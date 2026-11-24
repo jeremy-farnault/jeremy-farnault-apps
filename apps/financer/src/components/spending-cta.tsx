@@ -30,6 +30,8 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
   const [rows, setRows] = useState<SpendingLogRow[]>([]);
   const [rowErrors, setRowErrors] = useState<(string | undefined)[]>([]);
   const [quickLine, setQuickLine] = useState("");
+  // The currency of rows from the quick-entry line, unless a line names its own.
+  const [sessionCurrency, setSessionCurrency] = useState(homeCurrency);
   const [isPending, startTransition] = useTransition();
 
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
@@ -67,14 +69,19 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
     setRows([]);
     setRowErrors([]);
     setQuickLine("");
+    setSessionCurrency(homeCurrency);
   }
 
   function addRow() {
-    setRows((prev) => [...prev, { value: "", category: "", currency: homeCurrency }]);
+    setRows((prev) => [...prev, { value: "", category: "", currency: sessionCurrency }]);
     setRowErrors((prev) => [...prev, undefined]);
   }
 
-  const quickEntry = parseQuickEntry(quickLine, allCategories);
+  const quickEntry = parseQuickEntry(quickLine, {
+    categories: allCategories,
+    currencies: CURRENCIES,
+    sessionCurrency,
+  });
 
   // Enter on the quick-entry line adds its row at the bottom and clears the line, which keeps
   // focus. A line that can't be read adds nothing and keeps its text, with the reason shown.
@@ -84,7 +91,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
     e.preventDefault();
     e.stopPropagation();
     if (!quickEntry?.ok) return;
-    setRows((prev) => [...prev, { ...quickEntry.row, currency: homeCurrency }]);
+    setRows((prev) => [...prev, quickEntry.row]);
     setRowErrors((prev) => [...prev, undefined]);
     setQuickLine("");
   }
@@ -187,7 +194,22 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
         title="Log spending"
         content={
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-(--text-secondary)">For: {formatMonth(viewedMonth)}</p>
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-(--text-secondary)">For: {formatMonth(viewedMonth)}</p>
+              <div className="w-24 shrink-0">
+                <Select
+                  value={sessionCurrency}
+                  onValueChange={setSessionCurrency}
+                  placeholder="Currency"
+                >
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </div>
             <div className="flex flex-col gap-1">
               <TextInput
                 value={quickLine}
@@ -203,7 +225,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
                 {quickEntry === null
                   ? ""
                   : quickEntry.ok
-                    ? `${quickEntry.row.value} → ${quickEntry.row.category}`
+                    ? `${quickEntry.row.value} ${quickEntry.row.currency} → ${quickEntry.row.category}`
                     : quickEntry.error}
               </p>
             </div>
