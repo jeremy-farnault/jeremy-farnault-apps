@@ -36,6 +36,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
   const [quickLine, setQuickLine] = useState("");
   // The currency of rows from the quick-entry line, unless a line names its own.
   const [sessionCurrency, setSessionCurrency] = useState(homeCurrency);
+  const [discardOpen, setDiscardOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
@@ -68,6 +69,18 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
     setOpen(true);
   }
 
+  // Cancel and the close button: with rows in the modal, ask before throwing them away.
+  function requestClose() {
+    if (isPending) return;
+    if (rows.length > 0) setDiscardOpen(true);
+    else handleClose();
+  }
+
+  function handleDiscard() {
+    setDiscardOpen(false);
+    handleClose();
+  }
+
   function handleClose() {
     setOpen(false);
     setRows([]);
@@ -93,7 +106,14 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
   // What Save would write, per category and currency: to check against the banking app.
   const totals = categoryTotals(rows);
 
+  // Escape clears the line. The modal itself never closes on Escape (closeOnEscapeKeyDown is
+  // off), so a reflex press can't lose the rows.
   function handleQuickLineKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setQuickLine("");
+      return;
+    }
     if (e.key !== "Enter") return;
     e.preventDefault();
     e.stopPropagation();
@@ -196,7 +216,7 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
 
       <ActionModal
         isOpen={open}
-        onClose={handleClose}
+        onClose={requestClose}
         size="large"
         title="Log spending"
         content={
@@ -313,9 +333,20 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
           </div>
         }
         primaryButton={{ label: "Save", loading: isPending, onClick: handleSave }}
-        secondaryButton={{ label: "Cancel", onClick: handleClose }}
+        secondaryButton={{ label: "Cancel", onClick: requestClose }}
         closeOnBackdropClick={false}
-        closeOnEscapeKeyDown={!isPending}
+        closeOnEscapeKeyDown={false}
+      />
+
+      <ActionModal
+        isOpen={discardOpen}
+        onClose={() => setDiscardOpen(false)}
+        size="small"
+        title={`Discard ${rows.length} ${rows.length === 1 ? "row" : "rows"}?`}
+        paragraph="They haven't been saved."
+        // Keep is the primary button, the one Enter presses: a reflex Enter keeps the rows.
+        primaryButton={{ label: "Keep rows", onClick: () => setDiscardOpen(false) }}
+        secondaryButton={{ label: "Discard", onClick: handleDiscard }}
       />
     </>
   );
