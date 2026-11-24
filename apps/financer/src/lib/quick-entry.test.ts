@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseQuickEntry } from "./quick-entry";
+import { categoryTotals, parseQuickEntry } from "./quick-entry";
 
 const categoryNames = [
   "Entertainment",
@@ -156,5 +156,50 @@ describe("parseQuickEntry", () => {
       ok: false,
       error: "No category matches 'xyz'",
     });
+  });
+});
+
+describe("categoryTotals", () => {
+  it("adds up the rows of each category", () => {
+    expect(
+      categoryTotals([
+        { value: "45", category: "Groceries", currency: "SEK" },
+        { value: "300", category: "Clothing", currency: "SEK" },
+        { value: "120.50", category: "Groceries", currency: "SEK" },
+        { value: "80", category: "Groceries", currency: "SEK" },
+      ])
+    ).toEqual([
+      { category: "Clothing", currency: "SEK", total: 300 },
+      { category: "Groceries", currency: "SEK", total: 245.5 },
+    ]);
+  });
+
+  it("keeps currencies apart within a category", () => {
+    expect(
+      categoryTotals([
+        { value: "45", category: "Groceries", currency: "SEK" },
+        { value: "10", category: "Groceries", currency: "EUR" },
+        { value: "5", category: "Groceries", currency: "EUR" },
+      ])
+    ).toEqual([
+      { category: "Groceries", currency: "EUR", total: 15 },
+      { category: "Groceries", currency: "SEK", total: 45 },
+    ]);
+  });
+
+  it("leaves out rows that aren't complete", () => {
+    expect(
+      categoryTotals([
+        { value: "45", category: "Groceries", currency: "SEK" },
+        { value: "", category: "Groceries", currency: "SEK" },
+        { value: "30", category: "", currency: "SEK" },
+        { value: "abc", category: "Health", currency: "SEK" },
+        { value: "0", category: "Health", currency: "SEK" },
+      ])
+    ).toEqual([{ category: "Groceries", currency: "SEK", total: 45 }]);
+  });
+
+  it("is empty with no rows", () => {
+    expect(categoryTotals([])).toEqual([]);
   });
 });

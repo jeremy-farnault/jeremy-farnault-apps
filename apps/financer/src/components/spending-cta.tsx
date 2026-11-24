@@ -3,7 +3,7 @@
 import { createSpendingCategory, createSpendingEntries } from "@/lib/actions";
 import { CURRENCIES, SPENDING_CATEGORIES } from "@/lib/constants";
 import type { SpendingCategoryRow } from "@/lib/queries";
-import { parseQuickEntry } from "@/lib/quick-entry";
+import { categoryTotals, parseQuickEntry } from "@/lib/quick-entry";
 import { ActionModal, Select, SelectItem, TextInput } from "@jf/ui";
 import { MinusIcon, PlusCircleIcon, PlusIcon, ReceiptIcon } from "@phosphor-icons/react";
 import { useState, useTransition } from "react";
@@ -16,6 +16,10 @@ interface SpendingCtaProps {
 }
 
 type SpendingLogRow = { value: string; category: string; currency: string };
+
+function formatAmount(value: number): string {
+  return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 function formatMonth(month: string): string {
   return new Date(`${month}-01`).toLocaleDateString("en-US", {
@@ -86,6 +90,9 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
   // Enter on the quick-entry line adds its row at the bottom and clears the line, which keeps
   // focus. A line that can't be read adds nothing and keeps its text, with the reason shown.
   // Enter never reaches the modal, which would otherwise Save: saving stays on its button.
+  // What Save would write, per category and currency: to check against the banking app.
+  const totals = categoryTotals(rows);
+
   function handleQuickLineKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter") return;
     e.preventDefault();
@@ -280,6 +287,21 @@ export function SpendingCta({ viewedMonth, homeCurrency, customCategories }: Spe
                 </div>
               ))}
             </div>
+            {totals.length > 0 && (
+              <ul
+                aria-label="Totals per category"
+                className="flex flex-wrap gap-x-4 gap-y-1 border-t border-(--border) pt-3 text-sm"
+              >
+                {totals.map((t) => (
+                  <li key={`${t.category}-${t.currency}`}>
+                    <span className="text-(--text-secondary)">{t.category}</span>{" "}
+                    <span className="tabular-nums">
+                      {formatAmount(t.total)} {t.currency}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
             <button
               type="button"
               onClick={addRow}

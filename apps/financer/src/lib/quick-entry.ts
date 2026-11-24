@@ -72,3 +72,26 @@ export function matchCategory(prefix: string, categories: string[]): string | un
     })
     .sort((a, b) => a.localeCompare(b))[0];
 }
+
+/** One line of the running summary: everything typed so far for a category, in one currency. */
+export type CategoryTotal = { category: string; currency: string; total: number };
+
+/**
+ * The running totals under Log spending's rows: the sum per category and currency, sorted by
+ * category then currency. Rows that aren't complete yet (no category, or an amount that isn't
+ * a positive number) are left out, as Save would refuse them.
+ */
+export function categoryTotals(rows: QuickEntryRow[]): CategoryTotal[] {
+  const totals = new Map<string, CategoryTotal>();
+  for (const row of rows) {
+    const value = Number(row.value);
+    if (!row.category || !(value > 0)) continue;
+    const key = `${row.category}\u0000${row.currency}`;
+    const entry = totals.get(key) ?? { category: row.category, currency: row.currency, total: 0 };
+    entry.total += value;
+    totals.set(key, entry);
+  }
+  return [...totals.values()].sort(
+    (a, b) => a.category.localeCompare(b.category) || a.currency.localeCompare(b.currency)
+  );
+}
