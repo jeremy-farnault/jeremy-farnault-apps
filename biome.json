@@ -17,7 +17,8 @@
       "playwright-report",
       "test-results",
       "**/public/sw.js",
-      "packages/furyo-logic/src/vendor"
+      "packages/furyo-logic/src/vendor",
+      "src/vendor"
     ]
   },
   "formatter": {

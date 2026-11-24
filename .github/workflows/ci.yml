@@ -40,21 +40,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Raw greys don't follow dark mode. Runs on its own while the full lint below is off.
+      # Raw greys don't follow dark mode. Not part of Biome, so it runs on its own.
       - name: Raw colour check
         run: pnpm lint:colors
 
-      # The packages a change touches and their dependents, compared as in Build below.
+      # Lint, type-check and unit tests run on the packages a change touches and their
+      # dependents, compared as in Build below.
+      - name: Lint
+        run: pnpm turbo run lint --affected
+        env:
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+
       - name: Type-check
         run: pnpm turbo run type-check --affected
         env:
           TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
 
-      # TODO: fix and re-enable when lint/tests are clean
-      # - name: Lint
-      #   run: pnpm turbo run lint
-      # - name: Unit tests
-      #   run: pnpm turbo run test
+      - name: Unit tests
+        run: pnpm turbo run test --affected
+        env:
+          TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
 
       # Only the packages a change touches, and the apps that depend on them: compared with the
       # PR's base, or on main with the previous head. Two at a time: each Next.js build takes
