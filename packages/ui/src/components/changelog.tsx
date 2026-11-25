@@ -80,7 +80,7 @@ export function ChangelogList<E extends ChangelogListEntry>({
             {entries.map((entry) => (
               <li
                 key={entry.id}
-                className="flex flex-col gap-1.5 rounded-[18px] bg-(--surface-150) px-5 py-4"
+                className="flex flex-col gap-1.5 rounded-[18px] bg-(--surface-150) surface-blur px-5 py-4"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span
