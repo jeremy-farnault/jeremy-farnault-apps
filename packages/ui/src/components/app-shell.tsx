@@ -38,9 +38,9 @@ export function AppShell({
     <div
       // Outside the fixed frame, the bottom padding is the height of a floating button (bottom-8 +
       // h-14), so at the end of the page the footer scrolls clear of the floating buttons and
-      // the furyo badge.
+      // the furyo badge. In the fixed frame the footer is the last row instead (see below).
       className={`relative flex flex-col items-center justify-start w-full max-w-[1024px] ${
-        fullHeight ? "h-dvh overflow-hidden pb-16 md:pb-0" : "min-h-screen pb-24"
+        fullHeight ? "h-dvh overflow-hidden" : "min-h-screen pb-24"
       }`}
     >
       {background && <AppBackground src={background} />}
@@ -67,8 +67,10 @@ export function AppShell({
       </header>
 
       {children}
-      <div className="mt-auto w-full">
-        <AppFooter placement={footer} />
+      <div className="mt-auto w-full shrink-0">
+        {/* In the fixed frame the footer sits under the content, always visible: tighter, and
+            its icons kept left of the furyo badge (right-4, 46 px wide) rather than under it. */}
+        <AppFooter placement={footer} {...(fullHeight && { className: "py-3 pr-20" })} />
       </div>
       <FuryoBadge />
     </div>

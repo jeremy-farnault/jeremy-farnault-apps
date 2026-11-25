@@ -3,6 +3,15 @@ import type { ChangelogEntry } from "../types";
 /** Changes to shared code that every app got. */
 export const sharedEntries: ChangelogEntry[] = [
   {
+    id: "all-footer",
+    date: "2026-11-25",
+    kind: "new",
+    title: "A footer on every page",
+    description:
+      "Every app now ends with links to its changelog, to all the other apps, and to Jérémy's GitHub and LinkedIn.",
+    apps: "all",
+  },
+  {
     id: "all-changelog",
     date: "2026-11-25",
     kind: "new",

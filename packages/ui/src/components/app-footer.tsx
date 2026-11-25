@@ -2,6 +2,7 @@ import type { Icon } from "@phosphor-icons/react";
 import { GithubLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { GITHUB_URL, INDEXER_URL, LINKEDIN_URL } from "../config/links";
+import { cn } from "../lib/utils";
 
 /**
  * Where the footer sits, which decides the links it shows:
@@ -13,9 +14,18 @@ export type AppFooterPlacement = "app" | "changelog" | "indexer";
 
 const textLink = "text-(--text-muted) hover:text-(--text) transition-colors";
 
-export function AppFooter({ placement }: { placement: AppFooterPlacement }) {
+export function AppFooter({
+  placement,
+  className,
+}: {
+  placement: AppFooterPlacement;
+  // Fits the footer to a frame, like the shell's fixed-height mode.
+  className?: string;
+}) {
   return (
-    <footer className="flex w-full items-center justify-between gap-4 px-4 py-6 text-sm">
+    <footer
+      className={cn("flex w-full items-center justify-between gap-4 px-4 py-6 text-sm", className)}
+    >
       <nav aria-label="Footer" className="flex items-center gap-2">
         {placement === "app" && (
           // A client-side link, so the app's intercepting route opens the changelog modal.
