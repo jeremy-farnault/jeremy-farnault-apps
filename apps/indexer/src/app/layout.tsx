@@ -115,6 +115,7 @@ export default function RootLayout({
           appName="Indexer"
           background="/background.svg"
           rightSlot={<HeaderAuth />}
+          footer="indexer"
         >
           <ThemeSync sync={syncThemeCookie} />
           {children}

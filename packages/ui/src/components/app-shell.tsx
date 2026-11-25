@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { AppBackground } from "./app-background";
-import { AppFooter } from "./app-footer";
+import { AppFooter, type AppFooterPlacement } from "./app-footer";
 import { AppSwitcher } from "./app-switcher";
 import { FuryoBadge } from "./furyo-badge";
 
@@ -18,6 +18,8 @@ interface AppShellProps {
   fullHeight?: boolean;
   // URL of the app's background scene, usually "/background.svg" in its public folder.
   background?: string;
+  // Where the footer sits, which decides its links. Indexer passes "indexer"; apps keep "app".
+  footer?: AppFooterPlacement;
 }
 
 export function AppShell({
@@ -30,6 +32,7 @@ export function AppShell({
   titleHref,
   fullHeight = false,
   background,
+  footer = "app",
 }: AppShellProps) {
   return (
     <div
@@ -65,7 +68,7 @@ export function AppShell({
 
       {children}
       <div className="mt-auto w-full">
-        <AppFooter placement="app" />
+        <AppFooter placement={footer} />
       </div>
       <FuryoBadge />
     </div>

@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { AppBackground } from "./app-background";
-
-import { INDEXER_URL } from "../config/links";
+import { AppFooter } from "./app-footer";
 
 // The shapes `@jf/changelog` returns, restated here so `@jf/ui` doesn't depend on it
 // (`@jf/changelog` checks its app ids against `@jf/ui`'s registry, so the other way round
@@ -117,7 +116,7 @@ interface PublicChangelogPageProps {
 
 /**
  * The changelog for someone who isn't logged in: the app's name in its accent colour, the
- * entries and a link to the Indexer portfolio. No app shell, so nothing here reads the session.
+ * entries and the footer (without its Changelog link). No app shell, so nothing here reads the session.
  */
 export function PublicChangelogPage({
   appName,
@@ -135,14 +134,7 @@ export function PublicChangelogPage({
         </div>
       </header>
       <ChangelogContent months={months} />
-      <footer className="w-full max-w-[640px] px-4 pb-12">
-        <a
-          href={INDEXER_URL}
-          className="text-sm font-semibold text-(--text) underline underline-offset-4 hover:opacity-80"
-        >
-          See all the apps on Indexer
-        </a>
-      </footer>
+      <AppFooter placement="changelog" />
     </div>
   );
 }
