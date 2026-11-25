@@ -8,7 +8,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@jf/ui", "@jf/auth"],
+  transpilePackages: ["@jf/ui", "@jf/auth", "@jf/changelog"],
 };
 
 export default withSerwist(nextConfig);

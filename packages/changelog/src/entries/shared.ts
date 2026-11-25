@@ -3,6 +3,15 @@ import type { ChangelogEntry } from "../types";
 /** Changes to shared code that every app got. */
 export const sharedEntries: ChangelogEntry[] = [
   {
+    id: "all-changelog",
+    date: "2026-11-25",
+    kind: "new",
+    title: "What's new, in every app",
+    description:
+      "Each app has a changelog of what's changed, and Indexer gathers them all in one place.",
+    apps: "all",
+  },
+  {
     id: "all-furyo-badge",
     date: "2026-11-22",
     kind: "new",

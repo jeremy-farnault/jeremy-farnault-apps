@@ -27,3 +27,14 @@ export function appChangelog(
 ): ChangelogMonth[] {
   return byMonth(entries.filter((e) => e.apps === "all" || e.apps.includes(appId)));
 }
+
+/**
+ * The combined changelog, for Indexer: every entry once ("all" ones included), newest first,
+ * grouped by month. With `appId`, only the entries naming that app, plus the "all" ones.
+ */
+export function combinedChangelog(
+  appId?: ChangelogAppId,
+  entries: readonly ChangelogEntry[] = allEntries
+): ChangelogMonth[] {
+  return appId === undefined ? byMonth(entries) : appChangelog(appId, entries);
+}

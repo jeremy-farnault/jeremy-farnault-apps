@@ -1,6 +1,6 @@
 export { reviewedThrough } from "./checkpoint";
 export { allEntries } from "./entries";
-export { appChangelog } from "./queries";
+export { appChangelog, combinedChangelog } from "./queries";
 export {
   CHANGELOG_APP_IDS,
   CHANGELOG_KINDS,

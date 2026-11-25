@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appChangelog } from "./queries";
+import { appChangelog, combinedChangelog } from "./queries";
 import type { ChangelogEntry } from "./types";
 
 function entry(
@@ -47,5 +47,32 @@ describe("appChangelog", () => {
 
   it("returns no months for an app with no entries", () => {
     expect(appChangelog("tracer", [entry("own", "2026-11-03")])).toEqual([]);
+  });
+});
+
+describe("combinedChangelog", () => {
+  const entries = [
+    entry("noter-one", "2026-11-03", ["noter"]),
+    entry("shared", "2026-11-02", "all"),
+    entry("financer-one", "2026-10-20", ["financer"]),
+    entry("both", "2026-11-04", ["noter", "financer"]),
+  ];
+
+  it("lists every entry exactly once, 'all' and multi-app ones included", () => {
+    expect(ids(combinedChangelog(undefined, entries))).toEqual([
+      ["2026-11", ["both", "noter-one", "shared"]],
+      ["2026-10", ["financer-one"]],
+    ]);
+  });
+
+  it("filtered to one app, keeps the entries naming it and the 'all' ones", () => {
+    expect(ids(combinedChangelog("financer", entries))).toEqual([
+      ["2026-11", ["both", "shared"]],
+      ["2026-10", ["financer-one"]],
+    ]);
+  });
+
+  it("filtered to an app with no entries of its own, keeps only the 'all' ones", () => {
+    expect(ids(combinedChangelog("tracer", entries))).toEqual([["2026-11", ["shared"]]]);
   });
 });

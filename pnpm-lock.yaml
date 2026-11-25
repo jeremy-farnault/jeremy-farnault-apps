@@ -632,6 +632,9 @@ importers:
       '@jf/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@jf/changelog':
+        specifier: workspace:*
+        version: link:../../packages/changelog
       '@jf/ui':
         specifier: workspace:*
         version: link:../../packages/ui

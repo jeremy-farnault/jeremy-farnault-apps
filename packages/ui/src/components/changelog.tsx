@@ -9,7 +9,7 @@ const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:301
 // would be a cycle). TypeScript matches them structurally.
 type ChangelogKind = "new" | "improved" | "fixed";
 
-interface ChangelogListEntry {
+export interface ChangelogListEntry {
   id: string;
   date: string;
   kind: ChangelogKind;
@@ -17,9 +17,9 @@ interface ChangelogListEntry {
   description: string;
 }
 
-export interface ChangelogListMonth {
+export interface ChangelogListMonth<E extends ChangelogListEntry = ChangelogListEntry> {
   month: string;
-  entries: readonly ChangelogListEntry[];
+  entries: readonly E[];
 }
 
 const KIND_LABEL: Record<ChangelogKind, string> = {
@@ -54,8 +54,17 @@ function formatDay(date: string): string {
   return dayFormat.format(new Date(`${date}T00:00:00Z`));
 }
 
-/** An app's changelog: months newest first, each with its entries. */
-export function ChangelogList({ months }: { months: readonly ChangelogListMonth[] }) {
+interface ChangelogListProps<E extends ChangelogListEntry> {
+  months: readonly ChangelogListMonth<E>[];
+  /** Extra chips beside an entry's kind and date, e.g. which app it belongs to (Indexer). */
+  renderTags?: (entry: E) => ReactNode;
+}
+
+/** A changelog: months newest first, each with its entries. */
+export function ChangelogList<E extends ChangelogListEntry>({
+  months,
+  renderTags,
+}: ChangelogListProps<E>) {
   if (months.length === 0) {
     return <p className="text-sm text-(--text-muted)">Nothing here yet.</p>;
   }
@@ -85,6 +94,7 @@ export function ChangelogList({ months }: { months: readonly ChangelogListMonth[
                   <time dateTime={entry.date} className="text-xs text-(--text-subtle)">
                     {formatDay(entry.date)}
                   </time>
+                  {renderTags?.(entry)}
                 </div>
                 <h3 className="text-base font-semibold text-(--text)">{entry.title}</h3>
                 <p className="text-sm text-(--text-secondary)">{entry.description}</p>
