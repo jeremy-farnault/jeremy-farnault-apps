@@ -8,7 +8,7 @@ import { cn } from "../lib/utils";
 import { HomeCurrencySelect, type HomeCurrencySetting } from "./home-currency-select";
 import { ThemeToggle } from "./theme-toggle";
 
-const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:3014";
+import { INDEXER_URL } from "../config/links";
 
 interface UserMenuProps {
   email: string;

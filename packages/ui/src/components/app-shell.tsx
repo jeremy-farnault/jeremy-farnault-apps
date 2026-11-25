@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AppBackground } from "./app-background";
+import { AppFooter } from "./app-footer";
 import { AppSwitcher } from "./app-switcher";
 import { FuryoBadge } from "./furyo-badge";
 
@@ -32,8 +33,11 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div
-      className={`relative flex flex-col items-center justify-start w-full max-w-[1024px] pb-16 md:pb-0 ${
-        fullHeight ? "h-dvh overflow-hidden" : "min-h-screen"
+      // Outside the fixed frame, the bottom padding is the height of a floating button (bottom-8 +
+      // h-14), so at the end of the page the footer scrolls clear of the floating buttons and
+      // the furyo badge.
+      className={`relative flex flex-col items-center justify-start w-full max-w-[1024px] ${
+        fullHeight ? "h-dvh overflow-hidden pb-16 md:pb-0" : "min-h-screen pb-24"
       }`}
     >
       {background && <AppBackground src={background} />}
@@ -60,6 +64,9 @@ export function AppShell({
       </header>
 
       {children}
+      <div className="mt-auto w-full">
+        <AppFooter placement="app" />
+      </div>
       <FuryoBadge />
     </div>
   );

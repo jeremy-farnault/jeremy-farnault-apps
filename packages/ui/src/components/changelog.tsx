@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { AppBackground } from "./app-background";
 
-const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:3014";
+import { INDEXER_URL } from "../config/links";
 
 // The shapes `@jf/changelog` returns, restated here so `@jf/ui` doesn't depend on it
 // (`@jf/changelog` checks its app ids against `@jf/ui`'s registry, so the other way round

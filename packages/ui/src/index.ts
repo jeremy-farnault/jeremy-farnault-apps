@@ -5,6 +5,7 @@ export * from "./components/time-input";
 export * from "./components/checkbox";
 export * from "./components/date-picker";
 export * from "./components/app-background";
+export * from "./components/app-footer";
 export * from "./components/app-shell";
 export * from "./components/app-switcher";
 export * from "./components/button";
