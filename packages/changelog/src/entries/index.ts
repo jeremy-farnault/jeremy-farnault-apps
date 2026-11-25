@@ -5,6 +5,7 @@ import { doserEntries } from "./doser";
 import { exposerEntries } from "./exposer";
 import { financerEntries } from "./financer";
 import { gainerEntries } from "./gainer";
+import { indexerEntries } from "./indexer";
 import { journalerEntries } from "./journaler";
 import { noterEntries } from "./noter";
 import { organiserEntries } from "./organiser";
@@ -24,6 +25,7 @@ export const allEntries: readonly ChangelogEntry[] = [
   ...exposerEntries,
   ...financerEntries,
   ...gainerEntries,
+  ...indexerEntries,
   ...journalerEntries,
   ...noterEntries,
   ...organiserEntries,
