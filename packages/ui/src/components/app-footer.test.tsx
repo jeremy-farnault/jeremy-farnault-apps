@@ -13,8 +13,8 @@ function linksIn(placement: AppFooterPlacement) {
 }
 
 describe("AppFooter", () => {
-  it("shows every link in an app", () => {
-    expect(linksIn("app")).toEqual(["Changelog", "All apps", "GitHub", "LinkedIn"]);
+  it("shows only GitHub and LinkedIn in an app: the account menu has the rest", () => {
+    expect(linksIn("app")).toEqual(["GitHub", "LinkedIn"]);
   });
 
   it("hides the Changelog link on the changelog page", () => {
@@ -25,16 +25,13 @@ describe("AppFooter", () => {
     expect(linksIn("indexer")).toEqual(["Changelog", "GitHub", "LinkedIn"]);
   });
 
-  it.each<AppFooterPlacement>(["app", "indexer"])(
-    "links Changelog to /changelog (%s)",
-    (placement) => {
-      render(<AppFooter placement={placement} />);
-      expect(link("Changelog")?.getAttribute("href")).toBe("/changelog");
-    }
-  );
+  it("links Changelog to the combined changelog on Indexer", () => {
+    render(<AppFooter placement="indexer" />);
+    expect(link("Changelog")?.getAttribute("href")).toBe("/changelog");
+  });
 
   it("links All apps to Indexer, in the same tab", () => {
-    render(<AppFooter placement="app" />);
+    render(<AppFooter placement="changelog" />);
     const allApps = link("All apps");
     expect(allApps?.getAttribute("href")).toBe(INDEXER_URL);
     expect(allApps?.getAttribute("target")).toBeNull();

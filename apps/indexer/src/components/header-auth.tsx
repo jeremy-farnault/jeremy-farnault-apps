@@ -30,6 +30,7 @@ export function HeaderAuth() {
         onThemeChange={setTheme}
         loadHomeCurrency={getHomeCurrencySetting}
         onHomeCurrencyChange={setHomeCurrency}
+        plainChangelogLink
       />
     );
   }

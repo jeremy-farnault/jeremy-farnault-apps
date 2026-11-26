@@ -1,7 +1,8 @@
 "use client";
 
-import { GearSixIcon, InfinityIcon } from "@phosphor-icons/react";
+import { ClockCounterClockwiseIcon, GearSixIcon, InfinityIcon } from "@phosphor-icons/react";
 import * as Popover from "@radix-ui/react-popover";
+import Link from "next/link";
 import { useState } from "react";
 import type { Theme } from "../lib/theme";
 import { cn } from "../lib/utils";
@@ -27,6 +28,12 @@ interface UserMenuProps {
    */
   loadHomeCurrency?: () => Promise<HomeCurrencySetting | null>;
   onHomeCurrencyChange?: (currency: string) => Promise<void>;
+  /**
+   * Makes the Changelog row a plain link instead of a client-side one. Indexer needs it: its
+   * `@modal/(.)[appId]` route would catch a client-side `/changelog`. In an app, the client-side
+   * link lets the app's intercepting route open the changelog modal.
+   */
+  plainChangelogLink?: boolean;
 }
 
 export function UserMenu({
@@ -38,6 +45,7 @@ export function UserMenu({
   onThemeChange,
   loadHomeCurrency,
   onHomeCurrencyChange,
+  plainChangelogLink = false,
 }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const letter = name?.[0] ?? email.split("@")[0]?.[0] ?? "?";
@@ -112,8 +120,33 @@ export function UserMenu({
             )}
           >
             <InfinityIcon size={18} weight="bold" />
-            Indexer
+            All apps
           </a>
+          {plainChangelogLink ? (
+            <a
+              href="/changelog"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--text)",
+                "hover:bg-(--surface-150)"
+              )}
+            >
+              <ClockCounterClockwiseIcon size={18} weight="bold" />
+              Changelog
+            </a>
+          ) : (
+            <Link
+              href="/changelog"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-[14px] px-4 py-2.5 text-left text-sm text-(--text)",
+                "hover:bg-(--surface-150)"
+              )}
+            >
+              <ClockCounterClockwiseIcon size={18} weight="bold" />
+              Changelog
+            </Link>
+          )}
           <button
             onClick={() => {
               setOpen(false);
