@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { AppBackground } from "./app-background";
-import { AppFooter, type AppFooterPlacement, ProfileLinks } from "./app-footer";
+import { AppFooter, type AppFooterPlacement } from "./app-footer";
 import { AppSwitcher } from "./app-switcher";
 import { FuryoBadge } from "./furyo-badge";
 
@@ -36,11 +36,10 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div
-      // A scrolling page needs no bottom padding: the footer's own height (the floating-button
-      // zone) keeps its end clear of the floating buttons and the furyo badge. The fixed frame
-      // keeps a band on phones, so its content stays clear of the badge.
+      // No bottom padding: the footer's own height keeps the content clear of the floating
+      // buttons and the furyo badge, at the end of a page or at the bottom of the fixed frame.
       className={`relative flex flex-col items-center justify-start w-full max-w-[1024px] ${
-        fullHeight ? "h-dvh overflow-hidden pb-16 md:pb-0" : "min-h-screen"
+        fullHeight ? "h-dvh overflow-hidden" : "min-h-screen"
       }`}
     >
       {background && <AppBackground src={background} />}
@@ -67,17 +66,12 @@ export function AppShell({
       </header>
 
       {children}
-      {fullHeight ? (
-        // A footer at the end of the page would never show in the fixed frame, so the profile
-        // links are pinned to its bottom-left corner, mirroring the furyo badge: side by side in
-        // the phone band, stacked on wider screens to fit a narrow rail (Aider's collapsed
-        // conversation list). The apps keep their content clear of that corner.
-        <ProfileLinks className="absolute bottom-5 left-4 z-[4500] flex gap-4 md:bottom-4 md:left-3 md:flex-col" />
-      ) : (
-        <div className="mt-auto w-full shrink-0">
-          <AppFooter placement={footer} />
-        </div>
-      )}
+      <div className="mt-auto w-full shrink-0">
+        {/* The same footer in every app. A scrolling page ends with the floating-button zone; the
+            fixed frame (Aider, Organiser) has no floating buttons, so its footer is the last row,
+            the furyo badge's height, and the content above it stays clear of the badge. */}
+        <AppFooter placement={footer} {...(fullHeight && { className: "h-16" })} />
+      </div>
       <FuryoBadge />
     </div>
   );
