@@ -1,7 +1,6 @@
 import type { Icon } from "@phosphor-icons/react";
 import { GithubLogoIcon, LinkedinLogoIcon } from "@phosphor-icons/react/dist/ssr";
 import { GITHUB_URL, INDEXER_URL, LINKEDIN_URL } from "../config/links";
-import { cn } from "../lib/utils";
 
 /**
  * Where the footer sits, which decides the links it shows:
@@ -20,16 +19,9 @@ const textLink = "text-(--text-muted) hover:text-(--text) transition-colors";
  * row centred in it, so at the end of a page the row sits level with the floating buttons and
  * the buttons never cover the content.
  */
-export function AppFooter({
-  placement,
-  className,
-}: {
-  placement: AppFooterPlacement;
-  // Fits the footer to a frame, like the shell's fixed-height mode.
-  className?: string;
-}) {
+export function AppFooter({ placement }: { placement: AppFooterPlacement }) {
   return (
-    <footer className={cn("flex h-30 w-full items-center gap-6 px-4 text-sm", className)}>
+    <footer className="flex h-30 w-full items-center gap-6 px-4 text-sm">
       {placement !== "app" && (
         <nav aria-label="Footer" className="flex items-center gap-2">
           {placement === "indexer" && (
@@ -45,11 +37,21 @@ export function AppFooter({
           )}
         </nav>
       )}
-      <div className="flex items-center gap-4">
-        <ProfileLink href={GITHUB_URL} label="GitHub" icon={GithubLogoIcon} />
-        <ProfileLink href={LINKEDIN_URL} label="LinkedIn" icon={LinkedinLogoIcon} />
-      </div>
+      <ProfileLinks className="flex items-center gap-4" />
     </footer>
+  );
+}
+
+/**
+ * GitHub and LinkedIn on their own. The footer uses them, and the shell's fixed frame pins them
+ * to its bottom-left corner, where a footer at the end of the page would never show.
+ */
+export function ProfileLinks({ className }: { className?: string }) {
+  return (
+    <div className={className}>
+      <ProfileLink href={GITHUB_URL} label="GitHub" icon={GithubLogoIcon} />
+      <ProfileLink href={LINKEDIN_URL} label="LinkedIn" icon={LinkedinLogoIcon} />
+    </div>
   );
 }
 function ProfileLink({

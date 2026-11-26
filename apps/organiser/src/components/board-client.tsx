@@ -564,10 +564,12 @@ export function BoardClient({
         />
 
         <div className="relative flex min-h-0 w-full flex-1">
+          {/* md:pb-20: the columns end clear of the profile links the shell pins to the
+              bottom-left corner. */}
           <div
             ref={scrollRef}
             onScroll={updateScrollFades}
-            className="flex h-full w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 pt-3 sm:snap-none"
+            className="flex h-full w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 pt-3 sm:snap-none md:pb-20"
           >
             <SortableContext
               items={orderedColumns.map((c) => c.id)}

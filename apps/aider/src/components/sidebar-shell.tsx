@@ -25,7 +25,9 @@ function ConversationList() {
         </Link>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 flex flex-col gap-0.5">
+      {/* md:pb-20: the last rows scroll clear of the profile links the shell pins to the
+          bottom-left corner. */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-2 pb-2 md:pb-20 flex flex-col gap-0.5">
         {conversations.length === 0 ? (
           <p className="px-3 py-2 text-sm text-(--text-subtle)">No conversations yet</p>
         ) : (
